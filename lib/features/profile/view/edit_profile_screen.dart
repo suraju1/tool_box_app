@@ -345,7 +345,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         boxShadow: context.isDarkMode
             ? []
             : [
-                BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)
+                BoxShadow(
+                    color: greyColorWithOpacity0_4,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4))
               ],
       ),
       child: Column(

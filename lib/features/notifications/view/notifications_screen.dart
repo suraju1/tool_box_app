@@ -162,7 +162,7 @@ class NotificationsScreen extends StatelessWidget {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(10),
-        child: Divider(height: 1, color: context.dividerColor),
+        child: Divider(height: 1, color: greyColor.withOpacity(0.4)),
       ),
     );
   }
@@ -200,7 +200,7 @@ class NotificationsScreen extends StatelessWidget {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: greyColor.withOpacity(0.3),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),

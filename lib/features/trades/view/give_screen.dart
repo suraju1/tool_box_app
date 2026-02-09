@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
-import 'package:tool_bocs/core/widgets/floating_action_button.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
-import 'package:flutter/rendering.dart';
 import 'package:tool_bocs/util/font_family.dart'; // Import for ScrollDirection
 
 class GiveScreen extends StatefulWidget {
@@ -22,7 +19,7 @@ class GiveScreen extends StatefulWidget {
 
 class _GiveScreenState extends State<GiveScreen> {
   late ScrollController _scrollController;
-  bool _isHeaderVisible = true;
+  final bool _isHeaderVisible = true;
 
   @override
   void initState() {
@@ -162,7 +159,7 @@ class _GiveScreenState extends State<GiveScreen> {
                       color: context.surfaceColor,
                       boxShadow: [
                         BoxShadow(
-                          color: context.dividerColor.withOpacity(0.5),
+                          color: greyColorWithOpacity0_4,
                           offset: const Offset(0, -2),
                           blurRadius: 4,
                         ),
@@ -370,7 +367,7 @@ class _GiveScreenState extends State<GiveScreen> {
           border: Border.all(color: context.dividerColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: greyColorWithOpacity0_4,
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

@@ -52,7 +52,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     ? []
                     : [
                         BoxShadow(
-                          color: Colors.grey.shade200,
+                          color: greyColorWithOpacity0_4,
                           blurRadius: 5,
                           offset: const Offset(0, 2),
                         ),
@@ -80,7 +80,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     ? []
                     : [
                         BoxShadow(
-                          color: Colors.grey.shade200,
+                          color: greyColorWithOpacity0_4,
                           blurRadius: 5,
                           offset: const Offset(0, 2),
                         ),
@@ -102,18 +102,19 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
             //return section
             Container(
               margin: EdgeInsets.symmetric(vertical: 8.h),
-              padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
+              padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 12.w),
               decoration: BoxDecoration(
-                color: context.surfaceColor,
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: context.dividerColor),
+                color: appColor.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12.r),
+                border:
+                    Border.all(color: appColor.withOpacity(0.2), width: 1.5),
                 boxShadow: context.isDarkMode
                     ? []
                     : [
                         BoxShadow(
-                          color: Colors.grey.shade200,
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
+                          color: appColor.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
                       ],
               ),
@@ -140,7 +141,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     ? []
                     : [
                         BoxShadow(
-                          color: Colors.grey.shade200,
+                          color: greyColorWithOpacity0_4,
                           blurRadius: 5,
                           offset: const Offset(0, 2),
                         ),
@@ -340,6 +341,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     onChanged: (val) {
                       setState(() {
                         _isHomemade = val ?? false;
+                        if (_isHomemade) _isStoreBought = false;
                       });
                     },
                   ),
@@ -367,6 +369,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     onChanged: (val) {
                       setState(() {
                         _isStoreBought = val ?? false;
+                        if (_isStoreBought) _isHomemade = false;
                       });
                     },
                   ),
@@ -508,6 +511,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     onChanged: (val) {
                       setState(() {
                         _isReturnHomemade = val ?? false;
+                        if (_isReturnHomemade) _isReturnStoreBought = false;
                       });
                     },
                   ),
@@ -535,6 +539,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     onChanged: (val) {
                       setState(() {
                         _isReturnStoreBought = val ?? false;
+                        if (_isReturnStoreBought) _isReturnHomemade = false;
                       });
                     },
                   ),
@@ -601,7 +606,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
             // border: Border.all(color: Colors.grey.shade100),
             boxShadow: [
               BoxShadow(
-                color: context.dividerColor.withOpacity(0.5),
+                color: greyColorWithOpacity0_4,
                 blurRadius: 10,
                 offset: Offset(0, 2),
               ),
@@ -631,7 +636,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Notify Partners Only',
+                        Text('Notify Saved Users Only',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 13.sp)),
                         SizedBox(height: 4.h),

@@ -79,9 +79,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: greyColorWithOpacity0_4,
                   blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  offset: const Offset(0, 5),
                 ),
               ],
       ),

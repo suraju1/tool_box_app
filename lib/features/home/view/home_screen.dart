@@ -7,6 +7,8 @@ import 'package:tool_bocs/features/notifications/view/notifications_screen.dart'
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/controller/location_controller.dart';
+import 'package:tool_bocs/features/location/view/location_selection_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -99,22 +101,53 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.location_on_outlined,
-                      color: Colors.white, size: 20.sp),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Pune, Wakad',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
+              Icon(Icons.location_on_outlined,
+                  color: Colors.white, size: 20.sp),
+              SizedBox(width: 8.w),
+              Consumer<LocationController>(
+                builder: (context, locationController, child) {
+                  return Expanded(
+                    child: InkWell(
+                      onTap: () => LocationSelectionSheet.show(context),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              locationController.address ?? 'NA',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14.sp,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                            ),
+                          ),
+                          Container(
+                            //width: 20.w,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.symmetric(horizontal: 2.w),
+                            margin: EdgeInsets.only(right: 25.w),
+                            // decoration: BoxDecoration(
+                            //   color: Colors.transparent,
+                            //   border: Border.all(color: Colors.white),
+                            //   borderRadius: BorderRadius.circular(6),
+                            // ),
+                            child: Icon(
+                              Icons.keyboard_arrow_down,
+                              color: Colors.white,
+                              size: 26.sp,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-              Spacer(),
+              // Spacer handles pushing remaining items to the right if any
+              // or just rely on Expanded taking available space
               /*
               // chat icon
               InkWell(
@@ -341,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: greyColor.withOpacity(0.4),
                     blurRadius: 10.r,
                     offset: Offset(0, 5.h),
                   ),

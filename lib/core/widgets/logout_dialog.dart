@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
@@ -29,36 +32,18 @@ class LogoutDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Align(
-          //   alignment: Alignment.topRight,
-          //   child: IconButton(
-          //     onPressed: () => Navigator.pop(context),
-          //     icon: Icon(Icons.close, size: 25.sp),
-          //     padding: EdgeInsets.zero,
-          //     constraints: const BoxConstraints(),
-          //   ),
-          // ),
-          // /SizedBox(height: 10.h),
           Container(
             height: 100.r,
             width: 100.r,
             decoration: BoxDecoration(
-              //shape: BoxShape.circle,
               borderRadius: BorderRadius.circular(50.r),
               border: Border.all(color: defoultColor, width: 2.w),
             ),
             child: Icon(Icons.logout, size: 60.r, color: defoultColor),
           ),
-          // SvgPicture.asset(
-          //   'assets/icons/logout1.svg',
-          //   height: 100.r,
-          //   width: 100.r,
-          //   color: defoultColor,
-          // ),
-
           SizedBox(height: 10.h),
           Text(
-            'Are you sure you want to logout ?',
+            'Are you sure you want to logout?',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15.sp,
@@ -97,9 +82,22 @@ class LogoutDialog extends StatelessWidget {
               SizedBox(width: 15.w),
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    // Implement Logout Logic
+                  onTap: () async {
+                    // Close dialog
                     Navigator.pop(context);
+
+                    // Call logout from AuthController
+                    final authController = context.read<AuthController>();
+                    await authController.logout();
+
+                    // Navigate to login screen and clear navigation stack
+                    if (context.mounted) {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.login,
+                        (route) => false,
+                      );
+                    }
                   },
                   child: Container(
                     height: 45.h,

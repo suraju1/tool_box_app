@@ -112,7 +112,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
         height: 5.h,
         margin: EdgeInsets.symmetric(horizontal: 2.w),
         decoration: BoxDecoration(
-          color: isActive ? defoultColor : context.dividerColor,
+          color: isActive ? defoultColor : greyColorWithOpacity0_4,
           borderRadius: BorderRadius.circular(8.r),
         ),
       ),
@@ -441,7 +441,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
+                    color: greyColorWithOpacity0_4,
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -469,7 +469,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: greyColorWithOpacity0_4,
                   offset: const Offset(0, -4),
                   blurRadius: 10,
                 ),

@@ -4,7 +4,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
-import 'package:tool_bocs/core/widgets/floating_action_button.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -118,7 +117,7 @@ class TakeScreen extends StatelessWidget {
                       color: context.surfaceColor,
                       boxShadow: [
                         BoxShadow(
-                          color: context.dividerColor.withOpacity(0.5),
+                          color: greyColorWithOpacity0_4,
                           offset: const Offset(0, -2),
                           blurRadius: 4,
                         ),
@@ -317,7 +316,7 @@ class TakeScreen extends StatelessWidget {
           border: Border.all(color: context.dividerColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: greyColorWithOpacity0_4,
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

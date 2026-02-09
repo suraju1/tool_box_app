@@ -134,7 +134,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
         height: 5.h,
         margin: EdgeInsets.symmetric(horizontal: 2.w),
         decoration: BoxDecoration(
-          color: isActive ? defoultColor : context.dividerColor,
+          color: isActive ? defoultColor : greyColorWithOpacity0_4,
           borderRadius: BorderRadius.circular(8.r),
         ),
       ),
@@ -152,7 +152,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.grey.shade100,
+                  color: greyColorWithOpacity0_4,
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -177,10 +177,10 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'RECIPIENT',
+                              'TAKER',
                               style: TextStyle(
                                 color: defoultColor,
-                                fontSize: 10.sp,
+                                fontSize: 12.sp,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -200,7 +200,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      'Rohan’s Request',
+                      'Rohan’s Taking',
                       style: TextStyle(
                         color: greyColor,
                         fontSize: 12.sp,
@@ -459,11 +459,19 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
         SizedBox(height: 16.h),
         Row(
           children: [
-            _buildCheckbox(context, 'Homemade', _isHomemade,
-                (val) => setState(() => _isHomemade = val!)),
+            _buildCheckbox(context, 'Homemade', _isHomemade, (val) {
+              setState(() {
+                _isHomemade = val!;
+                if (_isHomemade) _isStoreBought = false;
+              });
+            }),
             SizedBox(width: 20.w),
-            _buildCheckbox(context, 'Store bought', _isStoreBought,
-                (val) => setState(() => _isStoreBought = val!)),
+            _buildCheckbox(context, 'Store bought', _isStoreBought, (val) {
+              setState(() {
+                _isStoreBought = val!;
+                if (_isStoreBought) _isHomemade = false;
+              });
+            }),
           ],
         ),
       ],
@@ -635,7 +643,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: greyColorWithOpacity0_4,
                   offset: const Offset(0, -4),
                   blurRadius: 10,
                 ),

@@ -49,7 +49,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                           ? []
                           : [
                               BoxShadow(
-                                color: Colors.grey.shade200,
+                                color: greyColorWithOpacity0_4,
                                 blurRadius: 5,
                                 offset: const Offset(0, 2),
                               ),
@@ -117,7 +117,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
         height: 5.h,
         margin: EdgeInsets.symmetric(horizontal: 2.w),
         decoration: BoxDecoration(
-          color: isActive ? defoultColor : context.dividerColor,
+          color: isActive ? defoultColor : greyColorWithOpacity0_4,
           borderRadius: BorderRadius.circular(8.r),
         ),
       ),
@@ -246,6 +246,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                     onChanged: (val) {
                       setState(() {
                         _isReturnHomemade = val ?? false;
+                        if (_isReturnHomemade) _isReturnStoreBought = false;
                       });
                     },
                   ),
@@ -273,6 +274,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                     onChanged: (val) {
                       setState(() {
                         _isReturnStoreBought = val ?? false;
+                        if (_isReturnStoreBought) _isReturnHomemade = false;
                       });
                     },
                   ),
@@ -468,7 +470,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: greyColorWithOpacity0_4,
                   offset: const Offset(0, -4),
                   blurRadius: 10,
                 ),

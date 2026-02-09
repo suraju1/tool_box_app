@@ -12,6 +12,7 @@ class HelpSupportScreen extends StatefulWidget {
 
 class _HelpSupportScreenState extends State<HelpSupportScreen> {
   final TextEditingController _feedbackController = TextEditingController();
+  bool _showFeedbackField = false;
 
   @override
   void dispose() {
@@ -105,7 +106,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: greyColorWithOpacity0_4,
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -192,73 +193,99 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           ),
         ),
         SizedBox(height: 25.h),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: appColor,
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
+        if (!_showFeedbackField)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _showFeedbackField = true;
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appColor,
+                padding: EdgeInsets.symmetric(vertical: 14.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                elevation: 0,
               ),
-              elevation: 0,
-            ),
-            child: Text(
-              'Add Feedback',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: 25.h),
-        TextField(
-          controller: _feedbackController,
-          maxLines: 5,
-          decoration: InputDecoration(
-            hintText: 'Share Your Feedback',
-            hintStyle: TextStyle(
-                color:
-                    context.isDarkMode ? Colors.white30 : Colors.grey.shade400,
-                fontSize: 13.sp),
-            filled: true,
-            fillColor: context.surfaceColor,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: context.dividerColor),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: context.dividerColor),
-            ),
-          ),
-        ),
-        SizedBox(height: 20.h),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: appColor,
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              'Submit',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
+              child: Text(
+                'Add Feedback',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
-        ),
+        if (_showFeedbackField) ...[
+          SizedBox(height: 25.h),
+
+          // show below text field when user click on add feedback button
+          TextField(
+            controller: _feedbackController,
+            maxLines: 5,
+            decoration: InputDecoration(
+              hintText: 'Share Your Feedback',
+              hintStyle: TextStyle(
+                  color: context.isDarkMode
+                      ? Colors.white30
+                      : Colors.grey.shade400,
+                  fontSize: 13.sp),
+              filled: true,
+              fillColor: context.surfaceColor,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                borderSide: BorderSide(color: context.dividerColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                borderSide: BorderSide(color: context.dividerColor),
+              ),
+            ),
+          ),
+          SizedBox(height: 20.h),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                // Submit logic here
+                if (_feedbackController.text.isNotEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Feedback submitted successfully')),
+                  );
+                  setState(() {
+                    _showFeedbackField = false;
+                    _feedbackController.clear();
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter some feedback')),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appColor,
+                padding: EdgeInsets.symmetric(vertical: 14.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                'Submit',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

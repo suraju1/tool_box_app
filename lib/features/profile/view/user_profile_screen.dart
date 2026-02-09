@@ -724,7 +724,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           borderRadius: BorderRadius.circular(8.r),
           boxShadow: [
             BoxShadow(
-              color: context.dividerColor.withOpacity(0.2),
+              color: greyColorWithOpacity0_4,
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),

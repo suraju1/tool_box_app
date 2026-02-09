@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/splash/controller/splash_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
@@ -45,8 +47,11 @@ class _SplashScreenState extends State<SplashScreen>
     );
     _animationController.forward();
 
-    //select the screen to navigate
-    splashController.decideNavigation(context);
+    // Navigate after getting AuthController from context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authController = context.read<AuthController>();
+      splashController.decideNavigation(context, authController);
+    });
   }
 
   @override

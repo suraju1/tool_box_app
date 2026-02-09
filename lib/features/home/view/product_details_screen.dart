@@ -310,7 +310,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: greyColor.withOpacity(0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

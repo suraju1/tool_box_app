@@ -66,19 +66,29 @@ class _DummyChatScreenState extends State<DummyChatScreen> {
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       appBar: _buildAppBar(),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              itemCount: _messages.length,
-              itemBuilder: (_, i) {
-                final msg = _messages[i];
-                return _buildMessageBubble(msg);
-              },
-            ),
+          Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.fromLTRB(16.w, 55.h, 16.w, 20.h),
+                  itemCount: _messages.length,
+                  itemBuilder: (_, i) {
+                    final msg = _messages[i];
+                    return _buildMessageBubble(msg);
+                  },
+                ),
+              ),
+              _buildInput(),
+            ],
           ),
-          _buildInput(),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildTradeStatusBanner(),
+          ),
         ],
       ),
     );
@@ -97,16 +107,96 @@ class _DummyChatScreenState extends State<DummyChatScreen> {
         ),
       ),
       actions: [
-        IconButton(
-          padding: EdgeInsets.only(right: 16.w),
-          icon: const Icon(Icons.more_vert),
-          color: context.textColor,
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => const UserReviewDialog(),
-            );
-          },
+        Row(
+          children: [
+            // SizedBox(width: 10.w),
+            IconButton(
+              padding: EdgeInsets.only(right: 16.w),
+              icon: const Icon(Icons.info_outline),
+              color: context.textColor,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
+                      // title: Text(
+                      //   '',
+                      //   style: TextStyle(
+                      //     color: context.textColor,
+                      //     fontWeight: FontWeight.bold,
+                      //     fontSize: 16.sp,
+                      //     fontFamily: FontFamily.openSans,
+                      //   ),
+                      // ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '• This Chat stays on for next 48 hours.',
+                            style: TextStyle(
+                              color: context.textColor,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            '• Do Not cheat, Negative remarks stays on your profile forever.',
+                            style: TextStyle(
+                              color: context.textColor,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            '• Good Luck, Happy Innovation!.',
+                            style: TextStyle(
+                              color: context.textColor,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        InkWell(
+                          onTap: () => Navigator.pop(context),
+                          child: Text(
+                            'OK',
+                            style: TextStyle(
+                              color: appColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.sp,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+            //SizedBox(width: 8.w),
+            IconButton(
+              padding: EdgeInsets.only(right: 16.w),
+              icon: const Icon(Icons.more_vert),
+              color: context.textColor,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const UserReviewDialog(),
+                );
+              },
+            ),
+          ],
         ),
       ],
       centerTitle: true,
@@ -166,6 +256,56 @@ class _DummyChatScreenState extends State<DummyChatScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTradeStatusBanner() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: context.isDarkMode ? Colors.white10 : const Color(0xFFF1F6FF),
+        border: Border(
+          bottom: BorderSide(color: context.dividerColor, width: 0.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.swap_horiz, color: appColor, size: 20.sp),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: context.textColor,
+                  fontFamily: FontFamily.openSans,
+                  fontWeight: FontWeight.w500,
+                ),
+                children: [
+                  const TextSpan(text: "You chose "),
+                  TextSpan(
+                    text: "Giving Rs 50 to David ",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: appColor,
+                    ),
+                  ),
+                  const TextSpan(text: "and "),
+                  TextSpan(
+                    text: "Taking C-pin charger ",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: appColor,
+                    ),
+                  ),
+                  const TextSpan(text: "in return"),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

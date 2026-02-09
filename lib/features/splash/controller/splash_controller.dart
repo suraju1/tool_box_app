@@ -1,27 +1,63 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/core/api/api_client.dart';
+import 'package:tool_bocs/core/services/storage_service.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
+import 'package:provider/provider.dart';
 
 class SplashController extends ChangeNotifier {
-  // Call this from Splash Screen
-  Future<void> decideNavigation(BuildContext context) async {
-    await Future.delayed(const Duration(seconds: 2)); // splash delay
+  /// Decide navigation based on authentication state
+  Future<void> decideNavigation(
+    BuildContext context,
+    AuthController authController,
+  ) async {
+    // Show splash for minimum 2 seconds
+    await Future.delayed(const Duration(seconds: 2));
 
-    // User logged in → check profile
-    final bool isProfileCompleted = await _isProfileCompleted('userId');
+    // Check if user is logged in
+    final isLoggedIn = await StorageService.isLoggedIn();
 
-    //if profile is completed then navigate to bottom navigation bar else navigate to login
-    if (isProfileCompleted) {
-      Navigator.pushReplacementNamed(context, AppRoutes.bottomNavBar);
+    if (isLoggedIn) {
+      // Load saved auth data
+      await authController.loadAuthData();
+
+      // Check if auth data was loaded successfully
+      if (authController.isAuthenticated) {
+        // Set token in API client for future requests
+        final token = await StorageService.getAuthToken();
+        if (token != null) {
+          ApiClient().setAuthToken(token);
+        }
+
+        // Sync location data if available in user profile
+        final user = authController.currentUser;
+        if (user != null) {
+          context.read<LocationController>().updateFromUserData(
+                lat: user.latitude,
+                lng: user.longitude,
+                address: user.location,
+              );
+        }
+
+        // Check if profile is complete
+        if (user != null && user.isProfileComplete == 1) {
+          // Profile complete → Navigate to home
+          Navigator.pushReplacementNamed(context, AppRoutes.bottomNavBar);
+        } else {
+          // Profile incomplete → Navigate to complete profile (could be signup or profile edit)
+          // For now, navigate to home anyway since profile is completed during signup
+          Navigator.pushReplacementNamed(context, AppRoutes.bottomNavBar);
+        }
+      } else {
+        // Auth data couldn't be loaded → Navigate to onboarding
+        Navigator.pushReplacementNamed(context, AppRoutes.onBoarding);
+      }
     } else {
+      // User not logged in → Navigate to onboarding
       Navigator.pushReplacementNamed(context, AppRoutes.onBoarding);
     }
-  }
-
-  // Mock profile completion check
-  Future<bool> _isProfileCompleted(String userId) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return false; // assume completed for now/ or login  before
   }
 }

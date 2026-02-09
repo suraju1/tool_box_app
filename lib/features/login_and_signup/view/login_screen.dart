@@ -1,14 +1,102 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/login_and_signup/model/auth_request_models.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  /// Validate phone number
+  bool _validatePhone() {
+    final phone = _phoneController.text.trim();
+    if (phone.isEmpty) {
+      ToastService.showErrorToast(context, 'Please enter your phone number');
+      return false;
+    }
+    if (phone.length != 10) {
+      ToastService.showErrorToast(context, 'Phone number must be 10 digits');
+      return false;
+    }
+    return true;
+  }
+
+  /// Handle login/get OTP
+  Future<void> _handleGetOtp() async {
+    // Validate phone
+    if (!_validatePhone()) {
+      return;
+    }
+
+    // Clear previous errors
+    context.read<AuthController>().clearError();
+
+    // Create login request
+    final request = LoginRequest(phoneNumber: _phoneController.text.trim());
+
+    // Call login API
+    final authController = context.read<AuthController>();
+    final isRegistered = await authController.loginUser(request);
+
+    if (!mounted) return;
+
+    if (authController.errorMessage != null) {
+      // Show error
+      ToastService.showErrorToast(context, authController.errorMessage!);
+      return;
+    }
+
+    if (isRegistered) {
+      // Show success message from backend
+      final message = authController.successMessage ?? 'OTP sent successfully';
+      ToastService.showSuccessToast(context, message);
+
+      // Wait a moment for toast to be visible, then navigate
+      await Future.delayed(Duration(milliseconds: 500));
+
+      if (!mounted) return;
+
+      // User is registered, navigate to OTP screen
+      Navigator.pushNamed(
+        context,
+        AppRoutes.otp,
+        arguments: _phoneController.text.trim(),
+      );
+    } else {
+      // User is not registered, show message and navigate to signup
+      ToastService.showErrorToast(context, 'Phone number not registered');
+
+      // Wait a moment for toast to be visible, then navigate
+      await Future.delayed(Duration(milliseconds: 500));
+
+      if (!mounted) return;
+
+      // Navigate to signup screen with phone number
+      Navigator.pushNamed(
+        context,
+        AppRoutes.signUp,
+        arguments: _phoneController.text.trim(),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,30 +171,18 @@ class LoginScreen extends StatelessWidget {
                       SizedBox(width: 2.w),
                       Expanded(
                         child: TextField(
+                          controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           style: TextStyle(
                               fontSize: 16.sp, color: context.textColor),
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(
-                              10,
-                            ), // max 10 digits
-                            // remove leading zeros to prevent invalid phone numbers an also remove leading 91
+                            LengthLimitingTextInputFormatter(10),
                             FilteringTextInputFormatter.deny(RegExp(r'^0+')),
                             FilteringTextInputFormatter.deny(RegExp(r'^91')),
                           ],
                           decoration: InputDecoration(
                             border: InputBorder.none,
-                            // enabledBorder: OutlineInputBorder(
-                            //   borderSide: BorderSide(
-                            //     color: defoultColor,
-                            //   ),
-                            // ),
-                            // focusedBorder: OutlineInputBorder(
-                            //   borderSide: BorderSide(
-                            //     color: defoultColor,
-                            //   ),
-                            // ),
                             contentPadding:
                                 EdgeInsets.symmetric(vertical: 16.h),
                             hintText: 'Phone Number',
@@ -116,7 +192,6 @@ class LoginScreen extends StatelessWidget {
                               color: context.subTextColor,
                             ),
                           ),
-                          controller: _phoneController,
                         ),
                       ),
                     ],
@@ -126,41 +201,46 @@ class LoginScreen extends StatelessWidget {
                 SizedBox(height: 75.h),
 
                 // Get OTP button
-                SizedBox(
-                  width: double.infinity,
-                  height: 52.h,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.otp,
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: defoultColor,
-                        borderRadius: BorderRadius.circular(8.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            offset: const Offset(0, 2),
-                            blurRadius: 4,
+                Consumer<AuthController>(
+                  builder: (context, authController, child) {
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 52.h,
+                      child: ElevatedButton(
+                        onPressed:
+                            authController.isLoading ? null : _handleGetOtp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: defoultColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Get OTP',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: whiteColor,
-                            fontFamily: FontFamily.openSans,
-                          ),
+                          elevation: 4,
+                          shadowColor: defoultColor.withOpacity(0.5),
+                          disabledBackgroundColor:
+                              defoultColor.withOpacity(0.6),
                         ),
+                        child: authController.isLoading
+                            ? SizedBox(
+                                height: 20.h,
+                                width: 20.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              )
+                            : Text(
+                                'Get OTP',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                              ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
 
                 SizedBox(height: 30.h),

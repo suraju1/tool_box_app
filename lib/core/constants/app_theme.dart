@@ -26,7 +26,7 @@ class AppTheme {
       ),
     ),
     dividerTheme: DividerThemeData(
-      color: Colors.grey.shade100,
+      color: Colors.grey.shade300,
       thickness: 1,
     ),
   );

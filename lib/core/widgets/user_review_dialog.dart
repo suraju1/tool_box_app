@@ -15,11 +15,11 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
   final TextEditingController _reviewController = TextEditingController();
 
   final List<Map<String, String>> _feedbackOptions = [
-    {'emoji': '😊', 'label': 'Very friendly'},
-    {'emoji': '👍', 'label': 'Good communication'},
-    {'emoji': '⏱️', 'label': 'On time & smooth'},
-    {'emoji': '😐', 'label': 'Average experience'},
-    {'emoji': '👎', 'label': 'Very bad experience'},
+    {'emoji': '😊', 'label': 'Friendly'},
+    {'emoji': '👍', 'label': 'Professional'},
+    {'emoji': '⏱️', 'label': 'Smooth'},
+    {'emoji': '😐', 'label': 'Average'},
+    {'emoji': '👎', 'label': 'Unpleasant'},
   ];
 
   @override
@@ -55,7 +55,7 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
               ),
               SizedBox(height: 10.h),
               Text(
-                'How was your experience\nwith this person?',
+                'Mark This Person?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18.sp,
@@ -76,7 +76,7 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Quick Feedback',
+                      'Riya was',
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,

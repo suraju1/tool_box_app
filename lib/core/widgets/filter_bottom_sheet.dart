@@ -76,7 +76,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 color: context.surfaceColor,
                 boxShadow: [
                   BoxShadow(
-                    color: context.dividerColor.withOpacity(0.5),
+                    color: context.dividerColor.withOpacity(1),
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),
@@ -159,7 +159,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                           border: Border.all(
                               color: isSelected
                                   ? defoultColor
-                                  : context.dividerColor),
+                                  : greyColor.withOpacity(0.4)),
                         ),
                         child: isSelected
                             ? Icon(Icons.check,
@@ -203,7 +203,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 max: 50,
                 padding: EdgeInsets.zero,
                 activeColor: defoultColor,
-                inactiveColor: context.dividerColor,
+                inactiveColor: greyColor.withOpacity(0.4),
                 onChanged: (val) => setState(() => distance = val),
               ),
             ),
@@ -249,7 +249,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   color: isSelected ? defoultColor : context.surfaceColor,
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                      color: isSelected ? defoultColor : context.dividerColor),
+                      color: isSelected
+                          ? defoultColor
+                          : greyColor.withOpacity(0.4)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -308,7 +310,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             color: isSelected ? defoultColor : context.surfaceColor,
             borderRadius: BorderRadius.circular(22.r),
             border: Border.all(
-                color: isSelected ? defoultColor : context.dividerColor),
+                color: isSelected ? defoultColor : greyColor.withOpacity(0.4)),
           ),
           alignment: Alignment.center,
           child: Text(
@@ -346,7 +348,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       color: isSelected ? defoultColor : context.surfaceColor,
                       borderRadius: BorderRadius.circular(4.r),
                       border: Border.all(
-                        color: isSelected ? defoultColor : context.dividerColor,
+                        color: isSelected ? defoultColor : greyColor,
                       ),
                     ),
                     child: isSelected

@@ -15,10 +15,11 @@ class TradeCompletionScreen extends StatelessWidget {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            // padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height: 10.h),
                 _buildStepper(context),
                 SizedBox(height: 10.h),
                 _buildHandshakeBanner(),
@@ -62,24 +63,25 @@ class TradeCompletionScreen extends StatelessWidget {
   Widget _buildStepper(BuildContext context) {
     return Container(
       color: context.scaffoldBg,
-      padding: EdgeInsets.symmetric(vertical: 10.h),
+      padding: EdgeInsets.only(bottom: 10.h, left: 2.w, right: 2.w),
       child: Row(
         children: [
-          _buildStepSegment(context, isActive: true),
-          _buildStepSegment(context, isActive: true),
-          _buildStepSegment(context, isActive: true),
+          _buildStepSegment(isActive: true),
+          _buildStepSegment(isActive: true),
+          _buildStepSegment(isActive: true),
+          _buildStepSegment(isActive: true),
         ],
       ),
     );
   }
 
-  Widget _buildStepSegment(BuildContext context, {required bool isActive}) {
+  Widget _buildStepSegment({required bool isActive}) {
     return Expanded(
       child: Container(
         height: 5.h,
         margin: EdgeInsets.symmetric(horizontal: 2.w),
         decoration: BoxDecoration(
-          color: isActive ? defoultColor : context.dividerColor,
+          color: isActive ? defoultColor : greyColorWithOpacity0_4,
           borderRadius: BorderRadius.circular(8.r),
         ),
       ),
@@ -90,6 +92,7 @@ class TradeCompletionScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 220.h,
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25.r),
       ),
@@ -106,7 +109,7 @@ class TradeCompletionScreen extends StatelessWidget {
 
   Widget _buildTradeSummary(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: RichText(
         text: TextSpan(
           style: TextStyle(
@@ -142,6 +145,7 @@ class TradeCompletionScreen extends StatelessWidget {
       },
       child: Container(
         padding: EdgeInsets.all(16.w),
+        margin: EdgeInsets.symmetric(horizontal: 16.w),
         decoration: BoxDecoration(
           color: context.surfaceColor,
           borderRadius: BorderRadius.circular(16.r),
@@ -149,7 +153,7 @@ class TradeCompletionScreen extends StatelessWidget {
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: greyColorWithOpacity0_4,
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -209,7 +213,7 @@ class TradeCompletionScreen extends StatelessWidget {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: greyColorWithOpacity0_4,
                   offset: const Offset(0, -4),
                   blurRadius: 10,
                 ),

@@ -13,6 +13,7 @@ Color lightGrey = const Color.fromARGB(255, 218, 218, 218);
 Color blackColor = const Color.fromARGB(255, 17, 19, 17);
 Color whiteColor = Colors.white;
 Color greyColor = Colors.grey;
+Color greyColorWithOpacity0_4 = Colors.grey.withOpacity(0.4);
 Color greenColor = Colors.green;
 Color amberColor = Colors.amber;
 Color themeColor = const Color.fromARGB(255, 30, 97, 204);
@@ -31,8 +32,6 @@ class GradientColors {
     begin: Alignment.bottomCenter,
     end: Alignment.topCenter,
   );
-
- 
 
   static const Gradient lightGradient = LinearGradient(
     colors: [Color(0xffdaedfd), Color(0xffdaedfd)],
@@ -63,7 +62,7 @@ extension ThemeColors on BuildContext {
   Color get subTextColor => isDarkMode ? Colors.white70 : Colors.grey.shade600;
   Color get dividerColor =>
       theme.dividerTheme.color ??
-      (isDarkMode ? Colors.white10 : greyColor.withOpacity(0.5));
+      (isDarkMode ? Colors.white10 : greyColor.withOpacity(0.4));
 
   Color get shimmerBaseColor =>
       isDarkMode ? Colors.grey.shade900 : Colors.grey.shade300;
