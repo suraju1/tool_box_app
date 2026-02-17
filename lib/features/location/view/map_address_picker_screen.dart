@@ -386,7 +386,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   }
 
   Widget _buildSwitchOption() {
-    return Container(
+    return SizedBox(
       height: 80.h,
       width: double.infinity,
       child: Column(
