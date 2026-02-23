@@ -1,31 +1,34 @@
 //create a model class for onboarding screen
 
 class OnBoardingModel {
-  final String image;
-  final String heading;
-  final String subtext;
+  final int? id;
+  final String title;
+  final String description;
+  final String imageUrl;
+  final int? screenOrder;
 
   OnBoardingModel({
-    required this.image,
-    required this.heading,
-    required this.subtext,
+    this.id,
+    required this.title,
+    required this.description,
+    required this.imageUrl,
+    this.screenOrder,
   });
 
-  static List<OnBoardingModel> onBoardingList = [
-    OnBoardingModel(
-      image: "assets/onBoarding1.png",
-      heading: "Sell What You Don’t Need",
-      subtext: "Turn your unused items into instant cash with just a few taps.",
-    ),
-    OnBoardingModel(
-      image: "assets/onBoarding2.png",
-      heading: "Buy Quality. Pay Less.",
-      subtext: "Discover verified listings near you at the best prices.",
-    ),
-    OnBoardingModel(
-      image: "assets/onBoarding3.png",
-      heading: "Buy & Sell Locally, Safely",
-      subtext: "Chat directly, meet nearby, and deal with confidence.",
-    ),
-  ];
+  factory OnBoardingModel.fromJson(Map<String, dynamic> json) {
+    return OnBoardingModel(
+      id: json['id'],
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      imageUrl: json['image_url'] ?? '',
+      screenOrder: json['screen_order'] is int
+          ? json['screen_order']
+          : int.tryParse(json['screen_order'].toString()),
+    );
+  }
+
+  // Getters for backward compatibility with the existing UI
+  String get heading => title;
+  String get subtext => description;
+  String get image => imageUrl;
 }

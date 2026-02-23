@@ -8,7 +8,6 @@ class AppRoutes {
   static const otp = '/otp';
   static const home = '/home';
   static const chat = '/chat';
-  static const dummyChat = '/dummyChat';
   static const createGivePost = '/createGivePost';
   static const notifications = '/notifications';
   static const editProfile = '/editProfile';
@@ -26,4 +25,7 @@ class AppRoutes {
   static const privacyPolicy = '/privacyPolicy';
   static const themeChange = '/themeChange';
   static const noInternet = '/noInternet';
+  static const mySubscription = '/mySubscription';
+  static const subscriptionHistory = '/subscriptionHistory';
+  static const choosePlan = '/choosePlan';
 }

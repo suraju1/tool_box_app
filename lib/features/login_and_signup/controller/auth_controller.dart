@@ -7,6 +7,9 @@ import 'package:tool_bocs/features/login_and_signup/model/auth_request_models.da
 import 'package:tool_bocs/features/login_and_signup/model/auth_response_models.dart';
 import 'package:tool_bocs/features/login_and_signup/model/user_model.dart';
 import 'package:tool_bocs/features/login_and_signup/services/auth_service.dart';
+import 'package:tool_bocs/core/services/chat_listener.dart';
+import 'package:tool_bocs/core/services/firebase_notification_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// Controller for authentication state management
 class AuthController extends ChangeNotifier {
@@ -45,10 +48,9 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Register a new user
-  /// Returns true if registration initiated successfully (OTP sent)
-  /// Returns false if phone number already registered
-  Future<bool> registerUser(RegisterRequest request) async {
+  /// Complete user profile
+  /// Returns true if profile completion successful
+  Future<bool> completeProfile(RegisterRequest request) async {
     _isRegistering = true;
     _isLoading = true;
     _errorMessage = null;
@@ -56,26 +58,37 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _authService.register(request);
+      final response = await _authService.completeProfile(request);
 
       if (response.success && response.data != null) {
         // Save success message
         _successMessage = response.message;
 
-        // Check if phone is already registered
-        if (response.data!.isRegistered) {
-          // Phone already registered, should go to OTP screen
-          _isRegistering = false;
-          _isLoading = false;
-          notifyListeners();
-          return true; // Proceed to OTP
-        } else {
-          // Registration successful, OTP sent
-          _isRegistering = false;
-          _isLoading = false;
-          notifyListeners();
-          return true; // Proceed to OTP
+        // Save user data and token
+        _currentUser = response.data!.user;
+        _authToken = response.data!.token;
+
+        // Persist to storage
+        await _saveAuthData(response.data!);
+
+        // Set auth token in API client
+        _apiClient.setAuthToken(_authToken!);
+
+        // Start Chat Listener
+        try {
+          await FirebaseAuth.instance.signInAnonymously();
+          debugPrint("Signed in to Firebase Anonymously");
+        } catch (e) {
+          debugPrint("Firebase Auth Failed: $e");
         }
+
+        ChatListener().startListening();
+        FirebaseNotificationService().saveTokenToFirestore();
+
+        _isRegistering = false;
+        _isLoading = false;
+        notifyListeners();
+        return true;
       } else {
         _errorMessage = response.message;
         _isRegistering = false;
@@ -99,8 +112,7 @@ class AuthController extends ChangeNotifier {
   }
 
   /// Login with phone number
-  /// Returns true if user is registered (proceed to OTP)
-  /// Returns false if user is not registered (proceed to signup)
+  /// Returns true if OTP sent successfully
   Future<bool> loginUser(LoginRequest request) async {
     _isLoggingIn = true;
     _isLoading = true;
@@ -111,18 +123,15 @@ class AuthController extends ChangeNotifier {
       final response = await _authService.login(request);
 
       if (response.success && response.data != null) {
-        final isRegistered = response.data!.isRegistered;
+        _successMessage = response.message;
 
-        if (isRegistered) {
-          _successMessage = response.message;
-        } else if (response.message.isNotEmpty) {
-          _errorMessage = response.message;
-        }
+        // We can access otpCode here if needed for debugging/auto-fill
+        // print('OTP: ${response.data!.otpCode}');
 
         _isLoggingIn = false;
         _isLoading = false;
         notifyListeners();
-        return isRegistered;
+        return true;
       } else {
         _errorMessage = response.message;
         _isLoggingIn = false;
@@ -168,8 +177,20 @@ class AuthController extends ChangeNotifier {
         // Persist to storage
         await _saveAuthData(response.data!);
 
-        // Set auth token in API client for future requests
+        // Set auth token in API client
         _apiClient.setAuthToken(_authToken!);
+
+        // Start Chat Listener only if profile is complete (meaning fully logged in)
+        if (response.data!.isProfileComplete) {
+          try {
+            await FirebaseAuth.instance.signInAnonymously();
+            debugPrint("Signed in to Firebase Anonymously");
+          } catch (e) {
+            debugPrint("Firebase Auth Failed: $e");
+          }
+          ChatListener().startListening();
+          FirebaseNotificationService().saveTokenToFirestore();
+        }
 
         _isVerifyingOtp = false;
         _isLoading = false;
@@ -213,6 +234,17 @@ class AuthController extends ChangeNotifier {
       _authToken = token;
       _currentUser = UserModel.fromJson(jsonDecode(userDataJson));
       _apiClient.setAuthToken(token);
+
+      // Start Chat Listener
+      try {
+        await FirebaseAuth.instance.signInAnonymously();
+        debugPrint("Signed in to Firebase Anonymously");
+      } catch (e) {
+        debugPrint("Firebase Auth Failed: $e");
+      }
+      ChatListener().startListening();
+      FirebaseNotificationService().saveTokenToFirestore();
+
       notifyListeners();
     }
   }

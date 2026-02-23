@@ -12,6 +12,9 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/features/splash/controller/on_bording_controller.dart';
 import 'package:tool_bocs/firebase_options.dart';
 import 'package:tool_bocs/util/connectivity_service.dart';
+import 'package:tool_bocs/core/services/notification_service.dart';
+import 'package:tool_bocs/core/services/firebase_notification_service.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 
 import 'app.dart';
 
@@ -27,11 +30,16 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    debugPrint(
+        "FIREBASE INIT SUCCESS. Project ID: ${Firebase.app().options.projectId}");
   } catch (e) {
     debugPrint("Firebase initialization failed: $e");
     debugPrint(
         "Please ensure you have added google-services.json (Android) or GoogleService-Info.plist (iOS)");
   }
+
+  await NotificationService().init();
+  await FirebaseNotificationService().init();
 
   runApp(
     ScreenUtilInit(
@@ -50,6 +58,8 @@ void main() async {
               create: (_) => AuthController()), // Auth controller
           ChangeNotifierProvider(
               create: (_) => LocationController()), // Location controller
+          ChangeNotifierProvider(
+              create: (_) => TradeController()), // Trade controller
         ],
         child: const ToolBocsApp(),
       ),

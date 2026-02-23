@@ -9,7 +9,8 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 
 class MapAddressPickerScreen extends StatefulWidget {
-  const MapAddressPickerScreen({super.key});
+  final bool isPickOnly;
+  const MapAddressPickerScreen({super.key, this.isPickOnly = false});
 
   @override
   State<MapAddressPickerScreen> createState() => _MapAddressPickerScreenState();
@@ -310,7 +311,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           width: double.infinity,
           height: 50.h,
           child: ElevatedButton(
-            onPressed: () => setState(() => _showFullForm = true),
+            onPressed: widget.isPickOnly
+                ? _onConfirmLocation
+                : () => setState(() => _showFullForm = true),
             style: ElevatedButton.styleFrom(
               backgroundColor: defoultColor,
               shape: RoundedRectangleBorder(
@@ -319,37 +322,53 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Add more address details',
+                Text(
+                    widget.isPickOnly
+                        ? 'Confirm Location'
+                        : 'Add more address details',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold)),
-                SizedBox(width: 8.w),
-                Icon(Icons.keyboard_arrow_right, color: Colors.white),
+                if (!widget.isPickOnly) ...[
+                  SizedBox(width: 8.w),
+                  Icon(Icons.keyboard_arrow_right, color: Colors.white),
+                ]
               ],
             ),
           ),
         ),
-        SizedBox(height: 15.h),
-        Center(
-          child: InkWell(
-            onTap: () {
-              // Handle unknown location
-            },
-            child: Text(
-              'I don\'t know the exact location on map',
-              style: TextStyle(
-                color: defoultColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14.sp,
-                decoration: TextDecoration.underline,
+        if (!widget.isPickOnly) ...[
+          SizedBox(height: 15.h),
+          Center(
+            child: InkWell(
+              onTap: () {
+                // Handle unknown location
+              },
+              child: Text(
+                'I don\'t know the exact location on map',
+                style: TextStyle(
+                  color: defoultColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.sp,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
           ),
-        ),
+        ],
         SizedBox(height: 10.h),
       ],
     );
+  }
+
+  void _onConfirmLocation() {
+    context.read<LocationController>().setLocation(
+          _lastMapPosition.latitude,
+          _lastMapPosition.longitude,
+          _currentAddress,
+        );
+    Navigator.pop(context);
   }
 
   Widget _buildDetailedAddressForm() {

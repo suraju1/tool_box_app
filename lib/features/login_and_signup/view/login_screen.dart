@@ -25,15 +25,24 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  String? _phoneError;
+
   /// Validate phone number
   bool _validatePhone() {
+    setState(() {
+      _phoneError = null;
+    });
     final phone = _phoneController.text.trim();
     if (phone.isEmpty) {
-      ToastService.showErrorToast(context, 'Please enter your phone number');
+      setState(() {
+        _phoneError = 'Please enter your phone number';
+      });
       return false;
     }
     if (phone.length != 10) {
-      ToastService.showErrorToast(context, 'Phone number must be 10 digits');
+      setState(() {
+        _phoneError = 'Phone number must be 10 digits';
+      });
       return false;
     }
     return true;
@@ -54,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Call login API
     final authController = context.read<AuthController>();
-    final isRegistered = await authController.loginUser(request);
+    final success = await authController.loginUser(request);
 
     if (!mounted) return;
 
@@ -64,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (isRegistered) {
+    if (success) {
       // Show success message from backend
       final message = authController.successMessage ?? 'OTP sent successfully';
       ToastService.showSuccessToast(context, message);
@@ -74,25 +83,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      // User is registered, navigate to OTP screen
+      // Navigate to OTP screen
       Navigator.pushNamed(
         context,
         AppRoutes.otp,
-        arguments: _phoneController.text.trim(),
-      );
-    } else {
-      // User is not registered, show message and navigate to signup
-      ToastService.showErrorToast(context, 'Phone number not registered');
-
-      // Wait a moment for toast to be visible, then navigate
-      await Future.delayed(Duration(milliseconds: 500));
-
-      if (!mounted) return;
-
-      // Navigate to signup screen with phone number
-      Navigator.pushNamed(
-        context,
-        AppRoutes.signUp,
         arguments: _phoneController.text.trim(),
       );
     }
@@ -146,56 +140,86 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 30.h),
 
                 // Phone input
-                Container(
-                  height: 56.h,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(color: greyColor.withOpacity(0.5)),
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 16.w),
-                      Text(
-                        '+91',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: context.subTextColor,
-                          fontFamily: FontFamily.openSans,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 56.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: _phoneError != null
+                              ? Colors.red
+                              : greyColor.withOpacity(0.5),
                         ),
                       ),
-                      SizedBox(width: 8.w),
-                      VerticalDivider(
-                        thickness: 1.w,
-                        color: greyColor.withOpacity(0.5),
-                      ),
-                      SizedBox(width: 2.w),
-                      Expanded(
-                        child: TextField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          style: TextStyle(
-                              fontSize: 16.sp, color: context.textColor),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(10),
-                            FilteringTextInputFormatter.deny(RegExp(r'^0+')),
-                            FilteringTextInputFormatter.deny(RegExp(r'^91')),
-                          ],
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            contentPadding:
-                                EdgeInsets.symmetric(vertical: 16.h),
-                            hintText: 'Phone Number',
-                            hintStyle: TextStyle(
-                              fontSize: 14.sp,
-                              fontFamily: FontFamily.openSans,
+                      child: Row(
+                        children: [
+                          SizedBox(width: 16.w),
+                          Text(
+                            '+91',
+                            style: TextStyle(
+                              fontSize: 16.sp,
                               color: context.subTextColor,
+                              fontFamily: FontFamily.openSans,
                             ),
+                          ),
+                          SizedBox(width: 8.w),
+                          VerticalDivider(
+                            thickness: 1.w,
+                            color: _phoneError != null
+                                ? Colors.red
+                                : greyColor.withOpacity(0.5),
+                          ),
+                          SizedBox(width: 2.w),
+                          Expanded(
+                            child: TextField(
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
+                              style: TextStyle(
+                                  fontSize: 16.sp, color: context.textColor),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(10),
+                              ],
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: 16.h),
+                                hintText: 'Phone Number',
+                                hintStyle: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontFamily: FontFamily.openSans,
+                                  color: context.subTextColor,
+                                ),
+                              ),
+                              onChanged: (value) {
+                                if (_phoneError != null) {
+                                  setState(() {
+                                    _phoneError = null;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_phoneError != null) ...[
+                      SizedBox(height: 6.h),
+                      Padding(
+                        padding: EdgeInsets.only(left: 4.w),
+                        child: Text(
+                          _phoneError!,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.red,
+                            fontFamily: FontFamily.openSans,
                           ),
                         ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
 
                 SizedBox(height: 75.h),
@@ -246,33 +270,33 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 30.h),
 
                 // Signup
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'or ',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: context.subTextColor,
-                        fontFamily: FontFamily.openSans,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, AppRoutes.signUp);
-                      },
-                      child: Text(
-                        'Signup',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: defoultColor,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: FontFamily.openSans,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     Text(
+                //       'or ',
+                //       style: TextStyle(
+                //         fontSize: 14.sp,
+                //         color: context.subTextColor,
+                //         fontFamily: FontFamily.openSans,
+                //       ),
+                //     ),
+                //     GestureDetector(
+                //       onTap: () {
+                //         Navigator.pushNamed(context, AppRoutes.signUp);
+                //       },
+                //       child: Text(
+                //         'Signup',
+                //         style: TextStyle(
+                //           fontSize: 14.sp,
+                //           color: defoultColor,
+                //           fontWeight: FontWeight.w500,
+                //           fontFamily: FontFamily.openSans,
+                //         ),
+                //       ),
+                //     ),
+                //   ],
+                // ),
               ],
             ),
           ),

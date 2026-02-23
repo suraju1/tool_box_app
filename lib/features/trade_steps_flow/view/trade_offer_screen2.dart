@@ -35,7 +35,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
               children: [
                 _buildStepper(),
                 Padding(
-                  padding: EdgeInsets.all(16.w),
+                  padding: EdgeInsets.all(10.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -116,7 +116,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
   Widget _buildStepper() {
     return Container(
       color: context.scaffoldBg,
-      padding: EdgeInsets.only(bottom: 10.h, left: 2.w, right: 2.w),
+      padding: EdgeInsets.only(bottom: 10.h, left: 10.w, right: 10.w),
       child: Row(
         children: [
           _buildStepSegment(isActive: true),
@@ -636,7 +636,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
 
   Widget _buildBottomAction() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: context.surfaceColor,
         boxShadow: context.isDarkMode

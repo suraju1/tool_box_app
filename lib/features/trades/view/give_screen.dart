@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart'; // Import for ScrollDirection
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/core/controller/location_controller.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
 
 class GiveScreen extends StatefulWidget {
   const GiveScreen({super.key});
@@ -26,6 +28,29 @@ class _GiveScreenState extends State<GiveScreen> {
     super.initState();
     _scrollController = ScrollController();
     // _scrollController.addListener(_scrollListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final locationController = context.read<LocationController>();
+      final tradeController = context.read<TradeController>();
+
+      // Reset filters when navigating to this screen
+      tradeController.resetFilters();
+
+      // Sync user-selected location (loaded from Hive in LocationController)
+      tradeController.setLocation(
+        locationController.latitude,
+        locationController.longitude,
+      );
+
+      tradeController.fetchGivePosts();
+    });
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      context.read<TradeController>().loadMoreGivePosts();
+    }
   }
 
   // void _scrollListener() {
@@ -55,11 +80,12 @@ class _GiveScreenState extends State<GiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final shimmer = context.watch<ShimmerController>();
+    // final shimmer = context.watch<ShimmerController>(); // Use TradeController loading state
+    final tradeController = context.watch<TradeController>();
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: shimmer.isLoading
+      body: tradeController.isGiveLoading
           ? _buildShimmer(context)
           : Stack(
               children: [
@@ -82,60 +108,89 @@ class _GiveScreenState extends State<GiveScreen> {
                     // ),
 
                     Expanded(
-                      child: ListView(
-                        controller: _scrollController,
-                        padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 100.h),
-                        children: [
-                          _buildResultHeader(context),
-                          _buildProductCard(
-                            context,
-                            title: 'IPhone 12 (128GB)',
-                            owner: 'RIYA',
-                            category: 'Food Giver',
-                            distance: '2.5 km away',
-                            rating: '4.8',
-                            actionLabel: 'Take',
-                            description:
-                                'Well-maintained phone, smooth performance, no major scratches.',
-                          ),
-                          SizedBox(height: 16.h),
-                          _buildProductCard(
-                            context,
-                            title: 'IPhone 12 (128GB)',
-                            owner: 'RIYA',
-                            category: 'Food Giver',
-                            distance: '2.5 km away',
-                            rating: '4.8',
-                            actionLabel: 'Take',
-                            description:
-                                'Well-maintained phone, smooth performance, no major scratches.',
-                          ),
-                          SizedBox(height: 16.h),
-                          _buildProductCard(
-                            context,
-                            title: 'IPhone 12 (128GB)',
-                            owner: 'RIYA',
-                            category: 'Food Giver',
-                            distance: '2.5 km away',
-                            rating: '4.8',
-                            actionLabel: 'Take',
-                            description:
-                                'Well-maintained phone, smooth performance, no major scratches.',
-                          ),
-                          SizedBox(height: 16.h),
-                          _buildProductCard(
-                            context,
-                            title: 'IPhone 12 (128GB)',
-                            owner: 'RIYA',
-                            category: 'Food Giver',
-                            distance: '2.5 km away',
-                            rating: '4.8',
-                            actionLabel: 'Take',
-                            description:
-                                'Well-maintained phone, smooth performance, no major scratches.',
-                          ),
-                          SizedBox(height: 16.h),
-                        ],
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          await context
+                              .read<TradeController>()
+                              .fetchGivePosts();
+                        },
+                        child: tradeController.givePosts.isEmpty &&
+                                !tradeController.isGiveLoading
+                            ? ListView(
+                                children: [
+                                  SizedBox(height: 100.h),
+                                  Center(
+                                    child: Column(
+                                      children: [
+                                        Icon(Icons.search_off,
+                                            size: 64.sp, color: Colors.grey),
+                                        SizedBox(height: 16.h),
+                                        Text(
+                                          'No posts found matching your filters',
+                                          style: TextStyle(
+                                            color: context.subTextColor,
+                                            fontSize: 16.sp,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : ListView.builder(
+                                controller: _scrollController,
+                                padding:
+                                    EdgeInsets.fromLTRB(10.w, 8.h, 10.w, 100.h),
+                                itemCount: tradeController.givePosts.length +
+                                    1 +
+                                    (tradeController.isGiveLoadMoreRunning
+                                        ? 1
+                                        : 0), // +1 for header, +1 for loader
+                                itemBuilder: (context, index) {
+                                  if (index == 0) {
+                                    return _buildResultHeader(context,
+                                        tradeController.givePosts.length);
+                                  }
+
+                                  if (index ==
+                                      tradeController.givePosts.length + 1) {
+                                    return Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(16.0),
+                                        child: CircularProgressIndicator(
+                                            color: defoultColor),
+                                      ),
+                                    );
+                                  }
+
+                                  final post =
+                                      tradeController.givePosts[index - 1];
+                                  return Padding(
+                                    padding: EdgeInsets.only(bottom: 8.h),
+                                    child: _buildProductCard(
+                                      context,
+                                      id: post.id,
+                                      title: post.itemName,
+                                      owner: post.userName.isNotEmpty
+                                          ? post.userName
+                                          : 'User ${post.userId}',
+                                      category: post.itemCategory,
+                                      distance: post.distanceKm != null
+                                          ? '${post.distanceKm!.toStringAsFixed(1)} km away'
+                                          : '- km away',
+                                      rating: '4.5', // Placeholder
+                                      actionLabel: post.postType == 'give'
+                                          ? 'Take'
+                                          : 'Give', // Inverse action logic
+                                      description: post.itemNote,
+                                      imagePath: post.itemImages.isNotEmpty
+                                          ? post.itemImages.first
+                                          : null,
+                                      postType: post.postType,
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
                     ),
                   ],
@@ -186,7 +241,9 @@ class _GiveScreenState extends State<GiveScreen> {
                                 context,
                                 AppRoutes.createGivePost,
                                 arguments: "Create Give Post",
-                              );
+                              ).then((_) {
+                                // Refresh logic handled by controller's optimistic update
+                              });
                             },
                             child: Padding(
                               padding: EdgeInsets.symmetric(
@@ -240,13 +297,13 @@ class _GiveScreenState extends State<GiveScreen> {
     );
   }
 
-  Widget _buildResultHeader(BuildContext context) {
+  Widget _buildResultHeader(BuildContext context, int count) {
     return Container(
       padding: EdgeInsets.only(bottom: 10.h),
       child: Row(
         children: [
           Text(
-            'IPhone 12 (128GB)',
+            'Nearby Giveaways',
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -255,7 +312,7 @@ class _GiveScreenState extends State<GiveScreen> {
           ),
           const Spacer(),
           Text(
-            '(Showing 27 Results)',
+            '(Showing $count Results)',
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -269,7 +326,8 @@ class _GiveScreenState extends State<GiveScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 60.h, 20.w, 15.h),
+      padding: EdgeInsets.fromLTRB(
+          10.w, MediaQuery.of(context).padding.top + 8.h, 10.w, 8.h),
       color: context.scaffoldBg,
       child: Column(
         children: [
@@ -285,39 +343,26 @@ class _GiveScreenState extends State<GiveScreen> {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: TextField(
+                    textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 12.h),
                       hintText: 'Search any Product..',
                       hintStyle: TextStyle(
                           color: context.subTextColor, fontSize: 14.sp),
                       prefixIcon: Icon(Icons.search,
                           color: context.subTextColor, size: 20.sp),
                       border: InputBorder.none,
-                      // contentPadding: EdgeInsets.symmetric(vertical: 10.h),
                     ),
                   ),
                 ),
               ),
-              // SizedBox(width: 12.w),
-              // GestureDetector(
-              //   onTap: () {
-              //     Navigator.pushNamed(context, AppRoutes.createGivePost);
-              //   },
-              //   child: Container(
-              //     width: 45.h,
-              //     height: 45.h,
-              //     decoration: BoxDecoration(
-              //       color: defoultColor,
-              //       shape: BoxShape.circle,
-              //     ),
-              //     child: Icon(Icons.add, color: Colors.white, size: 28.sp),
-              //   ),
-              // ),
               InkWell(
                 onTap: () => showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
-                  builder: (context) => const FilterBottomSheet(),
+                  builder: (context) =>
+                      const FilterBottomSheet(initialPostType: 'give'),
                 ),
                 child: _buildFilterButton(context),
               ),
@@ -347,6 +392,7 @@ class _GiveScreenState extends State<GiveScreen> {
 
   Widget _buildProductCard(
     BuildContext context, {
+    required int id,
     required String title,
     required String owner,
     required String category,
@@ -354,10 +400,12 @@ class _GiveScreenState extends State<GiveScreen> {
     required String rating,
     required String actionLabel,
     String? description,
+    String? imagePath,
+    String? postType,
   }) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, AppRoutes.productDetails);
+        Navigator.pushNamed(context, AppRoutes.productDetails, arguments: id);
       },
       child: Container(
         padding: EdgeInsets.all(10.w),
@@ -388,7 +436,14 @@ class _GiveScreenState extends State<GiveScreen> {
                 //   fit: BoxFit.cover,
                 // ),
               ),
-              child: Image.asset('assets/iphone.png', fit: BoxFit.cover),
+              child: imagePath != null
+                  ? Image.network(
+                      '${ApiConstants.baseUrl2}$imagePath',
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          Image.asset('assets/iphone.png', fit: BoxFit.cover),
+                    )
+                  : Image.asset('assets/iphone.png', fit: BoxFit.cover),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -398,15 +453,20 @@ class _GiveScreenState extends State<GiveScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "$owner's Taking",
-                        style: TextStyle(
-                          fontSize: 9.sp,
-                          color: context.subTextColor,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: FontFamily.openSans,
+                      Expanded(
+                        child: Text(
+                          "$owner's ${postType == 'give' ? 'Giving' : 'Taking'}",
+                          style: TextStyle(
+                            fontSize: 9.sp,
+                            color: context.subTextColor,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      SizedBox(width: 8.w),
                       Row(
                         children: [
                           Icon(Icons.location_on_outlined,
@@ -456,31 +516,35 @@ class _GiveScreenState extends State<GiveScreen> {
                     children: [
                       Icon(Icons.person, color: defoultColor, size: 16.sp),
                       SizedBox(width: 4.w),
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "$owner ",
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: context.textColor,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: FontFamily.openSans,
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "$owner ",
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: context.textColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: FontFamily.openSans,
+                                ),
                               ),
-                            ),
-                            WidgetSpan(
-                              child: SizedBox(width: 4.w),
-                            ),
-                            TextSpan(
-                              text: "\u2022 $category",
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                color: context.textColor,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: FontFamily.openSans,
+                              WidgetSpan(
+                                child: SizedBox(width: 4.w),
                               ),
-                            ),
-                          ],
+                              TextSpan(
+                                text: "\u2022 $category",
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  color: context.textColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                              ),
+                            ],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -507,20 +571,31 @@ class _GiveScreenState extends State<GiveScreen> {
                     ],
                   ),
                   SizedBox(height: 3.h),
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: defoultColor,
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      actionLabel,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.sp,
+                  InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.productDetails,
+                        arguments: id,
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 34.w,
+                        vertical: 7.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: themeColor,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        actionLabel,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12.sp,
+                        ),
                       ),
                     ),
                   ),
@@ -537,7 +612,7 @@ class _GiveScreenState extends State<GiveScreen> {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.fromLTRB(20.w, 80.h, 20.w, 15.h),
+          padding: EdgeInsets.fromLTRB(10.w, 80.h, 10.w, 8.h),
           color: context.scaffoldBg,
           child: Row(
             children: [
@@ -549,10 +624,10 @@ class _GiveScreenState extends State<GiveScreen> {
         ),
         Expanded(
           child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
             itemCount: 4,
             itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.only(bottom: 16.h),
+              padding: EdgeInsets.only(bottom: 8.h),
               child: Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(

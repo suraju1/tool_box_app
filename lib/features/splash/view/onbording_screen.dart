@@ -1,8 +1,12 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/features/splash/controller/on_bording_controller.dart';
+import 'package:tool_bocs/features/splash/model/on_bording_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
@@ -26,7 +30,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       const Duration(seconds: 0),
       () => Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => BoardingPage()),
+        MaterialPageRoute(builder: (context) => const BoardingPage()),
       ),
     );
   }
@@ -64,220 +68,264 @@ class BoardingPage extends StatefulWidget {
 }
 
 class _BoardingScreenState extends State<BoardingPage> {
-  // creating all the widget before making our home screeen
-  OnBoardingController controller = OnBoardingController();
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: 0);
 
-    _currentPage = 0;
-
-    _slides = [
-      Slide(
-          controller.onBoardingList[0].image,
-          controller.onBoardingList[0].heading,
-          controller.onBoardingList[0].subtext),
-      Slide(
-          controller.onBoardingList[1].image,
-          controller.onBoardingList[1].heading,
-          controller.onBoardingList[1].subtext),
-      Slide(
-          controller.onBoardingList[2].image,
-          controller.onBoardingList[2].heading,
-          controller.onBoardingList[2].subtext),
-    ];
-    _pageController = PageController(initialPage: _currentPage);
-    super.initState();
+    // Fetch data when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OnBoardingController>().fetchOnboardingData();
+    });
   }
 
-  int _currentPage = 0;
-  List<Slide> _slides = [];
-  PageController _pageController = PageController();
-
-  // the list which contain the build slides
-  List<Widget> _buildSlides() {
-    return _slides.map(_buildSlide).toList();
-  }
-
-  Widget _buildSlide(Slide slide) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: context.scaffoldBg,
-      body: Column(
-        children: <Widget>[
-          // ignore: sized_box_for_whitespace
-          Container(
-            height: 0.70.sh, //imagee size
-            width: 1.sw,
-            alignment: Alignment.center,
-            margin: EdgeInsets.only(top: 0.1.sh),
-            padding: EdgeInsets.all(10.w),
-
-            // decoration: BoxDecoration(
-            //   image: DecorationImage(
-            //       image: AssetImage(slide.image), fit: BoxFit.cover),
-            // ),
-            //child: Image.asset("assets/logo.png", fit: BoxFit.cover),
-            child: Image.asset(slide.image, fit: BoxFit.cover),
-          ),
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   // handling the on page changed
   void _handlingOnPageChanged(int page) {
-    setState(() => _currentPage = page);
+    context.read<OnBoardingController>().setCurrentPage(page);
   }
 
   // building page indicator
-  Widget _buildPageIndicator() {
+  Widget _buildPageIndicator(int count, int currentPage) {
     Row row = Row(mainAxisAlignment: MainAxisAlignment.center, children: []);
-    for (int i = 0; i < _slides.length; i++) {
-      row.children.add(_buildPageIndicatorItem(i));
-      if (i != _slides.length - 1)
-        // ignore: curly_braces_in_flow_control_structures
+    for (int i = 0; i < count; i++) {
+      row.children.add(_buildPageIndicatorItem(i, currentPage));
+      if (i != count - 1) {
         row.children.add(SizedBox(width: 12.w));
+      }
     }
     return row;
   }
 
-  Widget _buildPageIndicatorItem(int index) {
+  Widget _buildPageIndicatorItem(int index, int currentPage) {
     return Container(
-      width: index == _currentPage ? 10.w : 6.w,
-      height: index == _currentPage ? 10.w : 6.w,
+      width: index == currentPage ? 10.w : 6.w,
+      height: index == currentPage ? 10.w : 6.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: index == _currentPage
+        color: index == currentPage
             ? GradientColors.defoultColor
             : GradientColors.defoultColor.withOpacity(0.5),
       ),
     );
   }
 
-  sliderText() {
+  Widget sliderText(OnBoardingModel slide) {
     return Column(
       children: [
-        SizedBox(height: 0.05.sh),
-        SizedBox(
-          width: 0.70.sw,
-          child: Text(
-            controller.onBoardingList[_currentPage].heading,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontFamily: FontFamily.openSans,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
+        if (slide.title.isNotEmpty) ...[
+          SizedBox(height: 0.05.sh),
+          SizedBox(
+            width: 0.70.sw,
+            child: Text(
+              slide.title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontFamily: FontFamily.openSans,
+                fontWeight: FontWeight.w700,
+                color: context.textColor,
+              ),
+              //heding Text
             ),
-            //heding Text
           ),
-        ),
-        SizedBox(height: 0.02.sh),
-        SizedBox(
-          width: 0.70.sw,
-          child: Text(
-            controller.onBoardingList[_currentPage].subtext,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: context.subTextColor,
-              fontFamily: FontFamily.openSans,
+        ],
+        if (slide.description.isNotEmpty) ...[
+          SizedBox(height: 0.02.sh),
+          SizedBox(
+            width: 0.70.sw,
+            child: Text(
+              slide.description,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: context.subTextColor,
+                fontFamily: FontFamily.openSans,
+              ),
+              //subtext
             ),
-            //subtext
           ),
-        ),
+        ],
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: GradientColors.defoultColor,
-      body: Stack(
-        children: <Widget>[
-          PageView(
-            controller: _pageController,
-            onPageChanged: _handlingOnPageChanged,
-            physics: const BouncingScrollPhysics(),
-            children: _buildSlides(),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              height: 0.35.sh,
-              width: 1.sw,
-              margin: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25.r),
-              ),
-              child: Column(
-                children: <Widget>[
-                  //slider text content
-                  sliderText(),
-                  Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, AppRoutes.login);
-                          // StorageService.save("isBack", true);
-                          // Get.toNamed(Routes.loginScreen);
-                          // save("isBack", true);
-                        },
-                        child: Text(
-                          "Skip",
-                          style: TextStyle(
-                            fontFamily: FontFamily.openSans,
-                            fontSize: 17.sp,
-                            color: defoultColor.withOpacity(0.5),
-                          ),
-                        ),
-                      ),
-                      //indicator set screen
-                      _buildPageIndicator(),
-                      TextButton(
-                        onPressed: () {
-                          _currentPage == controller.onBoardingList.length - 1
-                              ? Navigator.pushNamed(context, AppRoutes.login)
-                              : _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeIn,
-                                );
-                        },
-                        child: Text(
-                          "Next",
-                          style: TextStyle(
-                            fontFamily: FontFamily.openSans,
-                            fontSize: 17.sp,
-                            color: defoultColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+    return Consumer<OnBoardingController>(
+      builder: (context, controller, child) {
+        if (controller.isLoading) {
+          return Scaffold(
+            backgroundColor: context.scaffoldBg,
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-                  SizedBox(height: 30.h),
+        if (controller.errorMessage != null &&
+            controller.onBoardingList.isEmpty) {
+          return Scaffold(
+            backgroundColor: context.scaffoldBg,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(controller.errorMessage!, textAlign: TextAlign.center),
+                  SizedBox(height: 20.h),
+                  ElevatedButton(
+                    onPressed: () => controller.fetchOnboardingData(),
+                    child: const Text("Retry"),
+                  ),
                 ],
               ),
             ),
+          );
+        }
+
+        final onboardingList = controller.onBoardingList;
+
+        if (onboardingList.isEmpty) {
+          // If data is empty after loading, we can show a message or just proceed to login
+          // Let's show a retry if no error message is set, but the list is empty.
+          return Scaffold(
+            backgroundColor: context.scaffoldBg,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("No onboarding content available.",
+                      textAlign: TextAlign.center),
+                  SizedBox(height: 20.h),
+                  ElevatedButton(
+                    onPressed: () => controller.fetchOnboardingData(),
+                    child: const Text("Retry"),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        Navigator.pushNamed(context, AppRoutes.login),
+                    child: const Text("Skip to Login"),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Scaffold(
+          resizeToAvoidBottomInset: false,
+          backgroundColor: GradientColors.defoultColor,
+          body: Stack(
+            children: <Widget>[
+              PageView.builder(
+                itemCount: onboardingList.length,
+                controller: _pageController,
+                onPageChanged: _handlingOnPageChanged,
+                physics: const BouncingScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final slide = onboardingList[index];
+                  return Scaffold(
+                    resizeToAvoidBottomInset: false,
+                    backgroundColor: context.scaffoldBg,
+                    body: Column(
+                      children: <Widget>[
+                        Container(
+                          height: 0.70.sh,
+                          width: 1.sw,
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(top: 0.1.sh),
+                          padding: EdgeInsets.all(10.w),
+                          child: slide.imageUrl.startsWith('assets/')
+                              ? Image.asset(slide.imageUrl, fit: BoxFit.cover)
+                              : CachedNetworkImage(
+                                  imageUrl: slide.imageUrl.startsWith('/')
+                                      ? ApiConstants.baseUrl2 +
+                                          slide.imageUrl.substring(1)
+                                      : ApiConstants.baseUrl2 + slide.imageUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const Center(
+                                      child: CircularProgressIndicator()),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: 0.35.sh,
+                  width: 1.sw,
+                  margin: EdgeInsets.all(10.w),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25.r),
+                    color: context.scaffoldBg,
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      if (onboardingList.isNotEmpty)
+                        sliderText(onboardingList[controller.currentPage]),
+                      const Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, AppRoutes.login);
+                            },
+                            child: Text(
+                              "Skip",
+                              style: TextStyle(
+                                fontFamily: FontFamily.openSans,
+                                fontSize: 17.sp,
+                                color: defoultColor.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
+                          _buildPageIndicator(
+                              onboardingList.length, controller.currentPage),
+                          TextButton(
+                            onPressed: () {
+                              controller.currentPage ==
+                                      onboardingList.length - 1
+                                  ? Navigator.pushNamed(
+                                      context, AppRoutes.login)
+                                  : _pageController.nextPage(
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      curve: Curves.easeIn,
+                                    );
+                            },
+                            child: Text(
+                              "Next",
+                              style: TextStyle(
+                                fontFamily: FontFamily.openSans,
+                                fontSize: 17.sp,
+                                color: defoultColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 30.h),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
-}
-
-class Slide {
-  String image;
-  String heading;
-  String subtext;
-
-  Slide(this.image, this.heading, this.subtext);
 }

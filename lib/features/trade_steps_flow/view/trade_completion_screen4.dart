@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
+import 'package:tool_bocs/features/chat/view/chat_screen.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 
 class TradeCompletionScreen extends StatelessWidget {
-  const TradeCompletionScreen({super.key});
+  TradeCompletionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +18,7 @@ class TradeCompletionScreen extends StatelessWidget {
       body: Stack(
         children: [
           SingleChildScrollView(
-            // padding: EdgeInsets.symmetric(horizontal: 16.w),
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -63,7 +66,7 @@ class TradeCompletionScreen extends StatelessWidget {
   Widget _buildStepper(BuildContext context) {
     return Container(
       color: context.scaffoldBg,
-      padding: EdgeInsets.only(bottom: 10.h, left: 2.w, right: 2.w),
+      padding: EdgeInsets.only(bottom: 10.h, left: 10.w, right: 10.w),
       child: Row(
         children: [
           _buildStepSegment(isActive: true),
@@ -92,7 +95,7 @@ class TradeCompletionScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 220.h,
-      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      margin: EdgeInsets.symmetric(horizontal: 10.w),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25.r),
       ),
@@ -108,8 +111,13 @@ class TradeCompletionScreen extends StatelessWidget {
   }
 
   Widget _buildTradeSummary(BuildContext context) {
+    final tradeController = context.watch<TradeController>();
+    final post = tradeController.selectedPost;
+    final otherUserId = post?.userId.toString() ?? 'Unknown';
+    final otherUserName = 'User $otherUserId';
+
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
       child: RichText(
         text: TextSpan(
           style: TextStyle(
@@ -119,8 +127,8 @@ class TradeCompletionScreen extends StatelessWidget {
             height: 1.5,
           ),
           children: [
-            const TextSpan(
-              text: 'Rohan ',
+            TextSpan(
+              text: '$otherUserName ',
               style: TextStyle(
                   fontWeight: FontWeight.w800, color: Color(0xFF1E61CC)),
             ),
@@ -139,13 +147,32 @@ class TradeCompletionScreen extends StatelessWidget {
   }
 
   Widget _buildChatTicketCard(BuildContext context) {
+    final tradeController = context.watch<TradeController>();
+    final post = tradeController.selectedPost;
+    final otherUserId = post?.userId.toString() ?? 'Unknown';
+    final otherUserName = post?.userName ?? 'Unknown User';
+
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, AppRoutes.dummyChat);
+        if (post != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                otherUserId: otherUserId,
+                otherUserName: otherUserName,
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No trade selected')),
+          );
+        }
       },
       child: Container(
         padding: EdgeInsets.all(16.w),
-        margin: EdgeInsets.symmetric(horizontal: 16.w),
+        margin: EdgeInsets.symmetric(horizontal: 10.w),
         decoration: BoxDecoration(
           color: context.surfaceColor,
           borderRadius: BorderRadius.circular(16.r),
@@ -178,7 +205,7 @@ class TradeCompletionScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Chat with Rohan',
+                    'Chat with $otherUserName',
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -206,7 +233,7 @@ class TradeCompletionScreen extends StatelessWidget {
 
   Widget _buildBottomAction(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: context.surfaceColor,
         boxShadow: context.isDarkMode

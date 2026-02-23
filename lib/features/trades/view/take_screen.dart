@@ -2,199 +2,252 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/controller/shimmer_controller.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
-class TakeScreen extends StatelessWidget {
+class TakeScreen extends StatefulWidget {
   const TakeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final shimmer = context.watch<ShimmerController>();
+  State<TakeScreen> createState() => _TakeScreenState();
+}
 
+class _TakeScreenState extends State<TakeScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final locationController = context.read<LocationController>();
+      final tradeController = context.read<TradeController>();
+
+      // Reset filters when navigating to this screen
+      tradeController.resetFilters();
+
+      // Sync user-selected location (loaded from Hive in LocationController)
+      tradeController.setLocation(
+        locationController.latitude,
+        locationController.longitude,
+      );
+
+      tradeController.fetchTakePosts();
+    });
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      context.read<TradeController>().loadMoreTakePosts();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // We can use a Selector or Consumer. Consumer is fine here.
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: shimmer.isLoading
-          ? _buildShimmer(context)
-          : Stack(
-              children: [
-                Column(
-                  children: [
-                    _buildHeader(context),
-                    Divider(
-                      color: context.dividerColor,
-                      height: 0.h,
-                      thickness: 0.5,
-                    ),
-                    //SizedBox(height: 16.h),
-                    // InkWell(
-                    //   onTap: () => showModalBottomSheet(
-                    //     context: context,
-                    //     isScrollControlled: true,
-                    //     backgroundColor: Colors.transparent,
-                    //     builder: (context) => const FilterBottomSheet(),
-                    //   ),
-                    //   child: _buildFilterButton(context),
-                    // ),
-                    Expanded(
-                      child: ListView(
-                        padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 100.h),
-                        children: [
-                          _buildResultHeader(context),
-                          _buildProductCard(
-                            context,
-                            title: 'IPhone 12 (128GB)',
-                            owner: 'RIYA',
-                            category: 'Food Giver',
-                            distance: '2.5 km away',
-                            rating: '4.8',
-                            actionLabel: 'Take',
-                            description:
-                                'Well-maintained phone, smooth performance, no major scratches.',
-                          ),
-                          SizedBox(height: 16.h),
-                          _buildProductCard(
-                            context,
-                            title: 'IPhone 12 (128GB)',
-                            owner: 'RIYA',
-                            category: 'Food Giver',
-                            distance: '2.5 km away',
-                            rating: '4.8',
-                            actionLabel: 'Take',
-                            description:
-                                'Well-maintained phone, smooth performance, no major scratches.',
-                          ),
-                          SizedBox(height: 16.h),
-                          _buildProductCard(
-                            context,
-                            title: 'IPhone 12 (128GB)',
-                            owner: 'RIYA',
-                            category: 'Food Giver',
-                            distance: '2.5 km away',
-                            rating: '4.8',
-                            actionLabel: 'Take',
-                            description:
-                                'Well-maintained phone, smooth performance, no major scratches.',
-                          ),
-                          SizedBox(height: 16.h),
-                          _buildProductCard(
-                            context,
-                            title: 'IPhone 12 (128GB)',
-                            owner: 'RIYA',
-                            category: 'Food Giver',
-                            distance: '2.5 km away',
-                            rating: '4.8',
-                            actionLabel: 'Take',
-                            description:
-                                'Well-maintained phone, smooth performance, no major scratches.',
-                          ),
-                          SizedBox(height: 16.h),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                // Create Give Post Button section
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 80.h,
-                    width: double.infinity,
-                    padding: EdgeInsets.only(
-                      bottom: 15.h,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30.r),
-                        topRight: Radius.circular(30.r),
-                      ),
-                      color: context.surfaceColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: greyColorWithOpacity0_4,
-                          offset: const Offset(0, -2),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 16.h),
-                        // createFloatingActionButton(
-                        //   context: context,
-                        //   label: 'Create Give Post',
-                        // ),
-                        Container(
-                          width: 180.w,
-                          height: 45.h,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.r),
-                            color: defoultColor,
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.createGivePost,
-                                arguments: "Create Take Post",
-                              );
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 8.w, vertical: 6.h),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.add,
-                                      color: whiteColor, size: 28.sp),
-                                  Text(
-                                    "Make a New Post",
-                                    // " Create Take Post",
-                                    style: TextStyle(
-                                      color: whiteColor,
-                                      fontSize: 14.sp,
-                                      fontFamily: FontFamily.openSans,
-                                      fontWeight: FontWeight.w800,
-                                    ),
+      body: Consumer<TradeController>(
+        builder: (context, controller, child) {
+          // Initial loading state (only when list is empty)
+          if (controller.isTakeLoading && controller.takePosts.isEmpty) {
+            return _buildShimmer(context);
+          }
+
+          // Error state
+          if (controller.errorMessage != null && controller.takePosts.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(controller.errorMessage!),
+                  ElevatedButton(
+                    onPressed: () => controller.fetchTakePosts(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  _buildHeader(context),
+                  Divider(
+                    color: context.dividerColor,
+                    height: 0.h,
+                    thickness: 0.5,
+                  ),
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        await controller.fetchTakePosts(refresh: true);
+                      },
+                      child: controller.takePosts.isEmpty &&
+                              !controller.isTakeLoading
+                          ? ListView(
+                              children: [
+                                SizedBox(height: 100.h),
+                                Center(
+                                  child: Column(
+                                    children: [
+                                      Icon(Icons.search_off,
+                                          size: 64.sp, color: Colors.grey),
+                                      SizedBox(height: 16.h),
+                                      Text(
+                                        'No posts found matching your filters',
+                                        style: TextStyle(
+                                          color: context.subTextColor,
+                                          fontSize: 16.sp,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
+                            )
+                          : ListView.separated(
+                              controller: _scrollController,
+                              padding:
+                                  EdgeInsets.fromLTRB(10.w, 8.h, 10.w, 100.h),
+                              itemCount: controller.takePosts.length +
+                                  (controller.isTakeLoadMoreRunning ? 1 : 0),
+                              separatorBuilder: (context, index) =>
+                                  SizedBox(height: 8.h),
+                              itemBuilder: (context, index) {
+                                if (index == controller.takePosts.length) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                                // Optional: Add header showing results count if it's the first item
+                                if (index == 0) {
+                                  return Column(
+                                    children: [
+                                      _buildResultHeader(
+                                        context,
+                                        controller.takePosts.length,
+                                      ),
+                                      _buildProductCard(
+                                        context,
+                                        controller.takePosts[index],
+                                      ),
+                                    ],
+                                  );
+                                }
+
+                                return _buildProductCard(
+                                  context,
+                                  controller.takePosts[index],
+                                );
+                              },
                             ),
-                          ),
-                        )
-                        // Text(
-                        //   '(Initiate Trade)',
-                        //   style: TextStyle(
-                        //     color: defoultColor,
-                        //     fontSize: 12.sp,
-                        //     fontWeight: FontWeight.w600,
-                        //   ),
-                        // ),
-                      ],
                     ),
                   ),
+                ],
+              ),
+              // Create Post Button section
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 80.h,
+                  width: double.infinity,
+                  padding: EdgeInsets.only(bottom: 15.h),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30.r),
+                      topRight: Radius.circular(30.r),
+                    ),
+                    color: context.surfaceColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: greyColorWithOpacity0_4,
+                        offset: const Offset(0, -2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 16.h),
+                      Container(
+                        width: 180.w,
+                        height: 45.h,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.r),
+                          color: defoultColor,
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.createGivePost,
+                              arguments: "Create Take Post",
+                            ).then((_) {
+                              // Refresh logic handled by controller's optimistic update
+                            });
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 6.h,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add, color: whiteColor, size: 28.sp),
+                                Text(
+                                  "Make a New Post",
+                                  style: TextStyle(
+                                    color: whiteColor,
+                                    fontSize: 14.sp,
+                                    fontFamily: FontFamily.openSans,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-      // floatingActionButton: createFloatingActionButton(
-      //     context: context, label: 'Create Take Post'),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildResultHeader(BuildContext context) {
+  Widget _buildResultHeader(BuildContext context, int count) {
     return Container(
       padding: EdgeInsets.only(bottom: 10.h),
       child: Row(
         children: [
           Text(
-            'IPhone 12 (128GB)',
+            'Available Items', // Generic title since filtered by "Take"
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -203,7 +256,7 @@ class TakeScreen extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            '(Showing 27 Results)',
+            '(Showing $count Results)',
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -217,7 +270,8 @@ class TakeScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 60.h, 20.w, 15.h),
+      padding: EdgeInsets.fromLTRB(
+          10.w, MediaQuery.of(context).padding.top + 8.h, 10.w, 8.h),
       color: context.scaffoldBg,
       child: Column(
         children: [
@@ -233,14 +287,20 @@ class TakeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: TextField(
+                    textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 12.h),
                       hintText: 'Search any Product..',
                       hintStyle: TextStyle(
-                          color: context.subTextColor, fontSize: 14.sp),
-                      prefixIcon: Icon(Icons.search,
-                          color: context.subTextColor, size: 20.sp),
+                        color: context.subTextColor,
+                        fontSize: 14.sp,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: context.subTextColor,
+                        size: 20.sp,
+                      ),
                       border: InputBorder.none,
-                      // contentPadding: EdgeInsets.symmetric(vertical: 10.h),
                     ),
                   ),
                 ),
@@ -250,26 +310,11 @@ class TakeScreen extends StatelessWidget {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
-                  builder: (context) => const FilterBottomSheet(),
+                  builder: (context) =>
+                      const FilterBottomSheet(initialPostType: 'take'),
                 ),
                 child: _buildFilterButton(context),
               ),
-              // SizedBox(width: 12.w),
-              // InkWell(
-              //   onTap: () {
-              //     // take post navigation
-              //     Navigator.pushNamed(context, AppRoutes.createGivePost);
-              //   },
-              //   child: Container(
-              //     width: 45.h,
-              //     height: 45.h,
-              //     decoration: BoxDecoration(
-              //       color: defoultColor,
-              //       shape: BoxShape.circle,
-              //     ),
-              //     child: Icon(Icons.add, color: Colors.white, size: 28.sp),
-              //   ),
-              // ),
             ],
           ),
         ],
@@ -294,19 +339,18 @@ class TakeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(
-    BuildContext context, {
-    required String title,
-    required String owner,
-    required String category,
-    required String distance,
-    required String rating,
-    required String actionLabel,
-    String? description,
-  }) {
+  Widget _buildProductCard(BuildContext context, PostModel post) {
+    final imagePath = post.itemImages.isNotEmpty ? post.itemImages.first : '';
+    final imageUrl =
+        imagePath.isNotEmpty ? '${ApiConstants.baseUrl2}$imagePath' : '';
+
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, AppRoutes.productDetails);
+        Navigator.pushNamed(
+          context,
+          AppRoutes.productDetails,
+          arguments: post.id,
+        );
       },
       child: Container(
         padding: EdgeInsets.all(10.w),
@@ -331,13 +375,15 @@ class TakeScreen extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.r),
-
-                // image: const DecorationImage(
-                //   image: AssetImage('assets/iphone.png'),
-                //   fit: BoxFit.cover,
-                // ),
               ),
-              child: Image.asset('assets/iphone.png', fit: BoxFit.cover),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Image.asset('assets/iphone.png', fit: BoxFit.cover),
+                    )
+                  : Image.asset('assets/iphone.png', fit: BoxFit.cover),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -347,22 +393,32 @@ class TakeScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "$owner's Taking",
-                        style: TextStyle(
-                          fontSize: 9.sp,
-                          color: context.subTextColor,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: FontFamily.openSans,
+                      Expanded(
+                        child: Text(
+                          "${post.userName}'s Taking",
+                          style: TextStyle(
+                            fontSize: 9.sp,
+                            color: context.subTextColor,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      SizedBox(width: 8.w),
                       Row(
                         children: [
-                          Icon(Icons.location_on_outlined,
-                              size: 12.sp, color: greyColor),
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 12.sp,
+                            color: greyColor,
+                          ),
                           SizedBox(width: 2.w),
                           Text(
-                            distance,
+                            post.distanceKm != null
+                                ? '${post.distanceKm!.toStringAsFixed(1)} km away'
+                                : '- km away',
                             style: TextStyle(
                               fontSize: 9.sp,
                               color: context.subTextColor,
@@ -376,7 +432,7 @@ class TakeScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    title,
+                    post.itemName,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -386,10 +442,10 @@ class TakeScreen extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (description != null) ...[
+                  if (post.itemNote.isNotEmpty) ...[
                     SizedBox(height: 2.h),
                     Text(
-                      description,
+                      post.itemNote,
                       style: TextStyle(
                         fontSize: 10.sp,
                         color: context.subTextColor,
@@ -405,31 +461,33 @@ class TakeScreen extends StatelessWidget {
                     children: [
                       Icon(Icons.person, color: defoultColor, size: 16.sp),
                       SizedBox(width: 4.w),
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "$owner ",
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: context.textColor,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: FontFamily.openSans,
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "${post.userName} ",
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: context.textColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: FontFamily.openSans,
+                                ),
                               ),
-                            ),
-                            WidgetSpan(
-                              child: SizedBox(width: 4.w),
-                            ),
-                            TextSpan(
-                              text: "\u2022 $category",
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                color: context.textColor,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: FontFamily.openSans,
+                              WidgetSpan(child: SizedBox(width: 4.w)),
+                              TextSpan(
+                                text: "\u2022 ${post.itemCategory}",
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  color: context.textColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: FontFamily.openSans,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -438,7 +496,7 @@ class TakeScreen extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        rating,
+                        '4.8', // Placeholder rating
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
@@ -449,27 +507,44 @@ class TakeScreen extends StatelessWidget {
                       SizedBox(width: 4.w),
                       Row(
                         children: List.generate(5, (index) {
-                          return Icon(Icons.star,
-                              color: Colors.amber, size: 16.sp);
+                          return Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                            size: 16.sp,
+                          );
                         }),
                       ),
                     ],
                   ),
                   SizedBox(height: 3.h),
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: defoultColor,
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      actionLabel,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.sp,
+                  InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.productDetails,
+                        arguments: post.id,
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 34.w,
+                        vertical: 7.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: themeColor,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        post.postType.toLowerCase() == 'give' ||
+                                post.postType.toLowerCase() == 'giving'
+                            ? 'Take'
+                            : 'Give', // Action Label
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12.sp,
+                        ),
                       ),
                     ),
                   ),
@@ -486,11 +561,13 @@ class TakeScreen extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.fromLTRB(20.w, 80.h, 20.w, 15.h),
+          padding: EdgeInsets.fromLTRB(10.w, 80.h, 10.w, 8.h),
           color: context.scaffoldBg,
           child: Row(
             children: [
-              Expanded(child: ShimmerBox(height: 45.h, width: double.infinity)),
+              Expanded(
+                child: ShimmerBox(height: 45.h, width: double.infinity),
+              ),
               SizedBox(width: 12.w),
               ShimmerBox(height: 45.h, width: 45.h, radius: 8.r),
             ],
@@ -498,10 +575,10 @@ class TakeScreen extends StatelessWidget {
         ),
         Expanded(
           child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
             itemCount: 4,
             itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.only(bottom: 16.h),
+              padding: EdgeInsets.only(bottom: 8.h),
               child: Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
@@ -534,9 +611,10 @@ class TakeScreen extends StatelessWidget {
                           ShimmerBox(height: 15.h, width: 80.w),
                           SizedBox(height: 12.h),
                           ShimmerBox(
-                              height: 30.h,
-                              width: double.infinity,
-                              radius: 4.r),
+                            height: 30.h,
+                            width: double.infinity,
+                            radius: 4.r,
+                          ),
                         ],
                       ),
                     ),

@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
-  final List<String>? images;
-  const ProductDetailsScreen({super.key, this.images});
+  final int postId;
+  const ProductDetailsScreen({super.key, required this.postId});
 
   @override
   State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
@@ -18,25 +21,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   int _currentImageIndex = 0;
   final PageController _pageController = PageController();
   Timer? _autoPlayTimer;
-  late final List<String> _imageList;
 
   @override
   void initState() {
     super.initState();
-    _imageList = widget.images ??
-        [
-          'assets/iphone.png',
-          'assets/iphone.png',
-          'assets/iphone.png',
-          'assets/iphone.png'
-        ];
-    _startAutoPlay();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TradeController>().fetchPostDetails(widget.postId);
+    });
   }
 
-  void _startAutoPlay() {
+  void _startAutoPlay(int imageCount) {
+    _autoPlayTimer?.cancel(); // Cancel existing timer if any
+    if (imageCount <= 1) return;
+
     _autoPlayTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_imageList.length > 1 && _pageController.hasClients) {
-        int nextIndex = (_currentImageIndex + 1) % _imageList.length;
+      if (_pageController.hasClients) {
+        int nextIndex = (_currentImageIndex + 1) % imageCount;
         _pageController.animateToPage(
           nextIndex,
           duration: const Duration(milliseconds: 800),
@@ -62,18 +62,25 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new,
-              color: context.textColor, size: 20.sp),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: context.textColor,
+            size: 20.sp,
+          ),
         ),
         centerTitle: true,
-        title: Text(
-          'IPhone 12 (128GB)',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            fontFamily: FontFamily.openSans,
-            color: context.textColor,
-          ),
+        title: Consumer<TradeController>(
+          builder: (context, controller, child) {
+            return Text(
+              controller.selectedPost?.itemName ?? 'Product Details',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
+                fontFamily: FontFamily.openSans,
+                color: context.textColor,
+              ),
+            );
+          },
         ),
         actions: [
           //report and block
@@ -83,9 +90,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               // Handle selection
             },
             offset: const Offset(0, 55),
-            shape: PopupMenuArrowShape(
-              borderRadius: 10.r,
-            ),
+            shape: PopupMenuArrowShape(borderRadius: 10.r),
             color: context.surfaceColor,
             elevation: 4,
             itemBuilder: (context) => [
@@ -138,81 +143,299 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           child: Divider(height: 1, color: context.dividerColor),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 20.h),
-            _buildOwnerProfile(),
-            SizedBox(height: 20.h),
-            _buildImageCarousel(),
-            Padding(
-              padding: EdgeInsets.all(20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: Consumer<TradeController>(
+        builder: (context, controller, child) {
+          if (controller.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (controller.errorMessage != null) {
+            return Center(child: Text(controller.errorMessage!));
+          }
+
+          final post = controller.selectedPost;
+          if (post == null) {
+            return const Center(child: Text('Post not found'));
+          }
+
+          // Start autoplay if not started and multiple images
+          if (_autoPlayTimer == null && post.itemImages.length > 1) {
+            _startAutoPlay(post.itemImages.length);
+          }
+
+          final List<String> images =
+              post.itemImages.isNotEmpty ? post.itemImages : [];
+
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 10.h),
+                _buildOwnerProfile(post),
+                SizedBox(height: 10.h),
+                if (images.isNotEmpty)
+                  _buildImageCarousel(images)
+                else
+                  Container(
+                    height: 320.h,
+                    width: double.infinity,
+                    color: Colors.grey[200],
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 50.sp,
+                      color: Colors.grey,
+                    ),
+                  ),
+                Padding(
+                  padding: EdgeInsets.all(10.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [_buildCategoryTag(post.itemCategory)],
+                      ),
+                      SizedBox(height: 15.h),
+                      Text(
+                        'Description',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: FontFamily.openSans,
+                          color: context.textColor,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            post.itemNote.isNotEmpty
+                                ? post.itemNote
+                                : 'No description provided.',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: context.subTextColor,
+                              height: 1.6,
+                              fontFamily: FontFamily.openSans,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 15.h),
+                          _buildLocationDisplay(post.pickupArea),
+                        ],
+                      ),
+                      SizedBox(height: 10.h),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(10.w),
+                        decoration: BoxDecoration(
+                          color: context.surfaceColor,
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(color: context.dividerColor),
+                          boxShadow: context.isDarkMode
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDetailRow(
+                              'Item Condition',
+                              post.itemCondition,
+                              Icons.info_outline,
+                            ),
+                            SizedBox(height: 8.h),
+                            _buildDetailRow(
+                              'Trade Type',
+                              post.tradeType,
+                              Icons.swap_horiz_rounded,
+                            ),
+                            SizedBox(height: 8.h),
+                            _buildDetailRow(
+                              'Return Type',
+                              post.returnType,
+                              Icons.keyboard_return_rounded,
+                            ),
+                            if (post.returnType == 'Price') ...[
+                              SizedBox(height: 8.h),
+                              _buildDetailRow(
+                                'Price Range',
+                                '\$${post.priceMin} - \$${post.priceMax}',
+                                Icons.monetization_on_outlined,
+                                true,
+                              ),
+                            ] else if (post.returnType == 'Item') ...[
+                              SizedBox(height: 20.h),
+                              Text(
+                                'Return Item Details',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: FontFamily.openSans,
+                                  color: context.textColor,
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              if (post.returnItemImages.isNotEmpty) ...[
+                                SizedBox(
+                                  height: 100.h,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: post.returnItemImages.length,
+                                    separatorBuilder: (_, __) =>
+                                        SizedBox(width: 8.w),
+                                    itemBuilder: (context, index) {
+                                      return ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                          8.r,
+                                        ),
+                                        child: Image.network(
+                                          '${ApiConstants.baseUrl2}${post.returnItemImages[index]}',
+                                          height: 100.h,
+                                          width: 100.h,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Container(
+                                            height: 100.h,
+                                            width: 100.h,
+                                            color: Colors.grey[200],
+                                            child: Icon(
+                                              Icons.image_not_supported,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                SizedBox(height: 15.h),
+                              ],
+                              if (post.returnItemName != null)
+                                _buildDetailRow(
+                                  'Item Name',
+                                  post.returnItemName!,
+                                ),
+                              if (post.returnItemCategory != null) ...[
+                                SizedBox(height: 8.h),
+                                _buildDetailRow(
+                                  'Category',
+                                  post.returnItemCategory!,
+                                ),
+                              ],
+                              if (post.returnItemCondition != null) ...[
+                                SizedBox(height: 8.h),
+                                _buildDetailRow(
+                                  'Condition',
+                                  post.returnItemCondition!,
+                                ),
+                              ],
+                              if (post.returnItemDescription != null &&
+                                  post.returnItemDescription!.isNotEmpty) ...[
+                                SizedBox(height: 8.h),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Description',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: context.subTextColor,
+                                        fontFamily: FontFamily.openSans,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      post.returnItemDescription!,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: context.textColor,
+                                        fontFamily: FontFamily.openSans,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      bottomNavigationBar: Consumer<TradeController>(
+        builder: (context, controller, child) {
+          final post = controller.selectedPost;
+          if (post == null) return const SizedBox.shrink();
+
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
+            decoration: BoxDecoration(
+              color: context.surfaceColor,
+              border: Border(top: BorderSide(color: context.dividerColor)),
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.tradeStep1);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appColor,
+                minimumSize: Size(double.infinity, 50.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                elevation: 0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildCategoryTag('Electronics'),
-                  SizedBox(height: 15.h),
+                  Icon(
+                    (post.postType.toLowerCase() == 'take' ||
+                            post.postType.toLowerCase() == 'taking')
+                        ? Icons.arrow_upward_rounded
+                        : Icons.arrow_downward_rounded,
+                    color: Colors.white,
+                    size: 20.sp,
+                  ),
+                  SizedBox(width: 8.w),
                   Text(
-                    'Description',
+                    (post.postType.toLowerCase() == 'take' ||
+                            post.postType.toLowerCase() == 'taking')
+                        ? 'Give It'
+                        : 'Take It',
                     style: TextStyle(
+                      color: Colors.white,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       fontFamily: FontFamily.openSans,
-                      color: context.textColor,
                     ),
                   ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    'This iPhone 12 is in excellent condition, barely used, with no scratches or dents. It comes with 128GB storage, perfect for all your apps and media. Battery health is at 95%. Includes original box and charging cable. Selling because I upgraded to a newer model. Ready for a new home!',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: context.subTextColor,
-                      height: 1.6,
-                      fontFamily: FontFamily.openSans,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(height: 30.h),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          border: Border(top: BorderSide(color: context.dividerColor)),
-        ),
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.tradeStep1);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: appColor,
-            minimumSize: Size(double.infinity, 50.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            elevation: 0,
-          ),
-          child: Text(
-            'Take It',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildImageCarousel() {
+  Widget _buildImageCarousel(List<String> images) {
     return Column(
       children: [
         Container(
@@ -228,36 +451,42 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     _currentImageIndex = index;
                   });
                 },
-                itemCount: _imageList.length,
+                itemCount: images.length,
                 itemBuilder: (context, index) {
+                  final imagePath = images[index];
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(20.r),
-                    child: Image.asset(
-                      _imageList[index],
+                    child: Image.network(
+                      '${ApiConstants.baseUrl2}$imagePath',
                       fit: BoxFit.cover,
                       width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                        'assets/iphone.png',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
                     ),
                   );
                 },
               ),
-              if (_imageList.length > 1)
+              if (images.length > 1)
                 Positioned(
-                  bottom: 20.h,
+                  bottom: 12.h,
                   left: 0,
                   right: 0,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(_imageList.length, (index) {
+                    children: List.generate(images.length, (index) {
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        width: _currentImageIndex == index ? 8.w : 6.w,
-                        height: _currentImageIndex == index ? 8.w : 6.w,
-                        margin: EdgeInsets.symmetric(horizontal: 4.w),
+                        width: _currentImageIndex == index ? 24.w : 8.w,
+                        height: 6.h,
+                        margin: EdgeInsets.symmetric(horizontal: 3.w),
                         decoration: BoxDecoration(
                           color: _currentImageIndex == index
                               ? Colors.white
-                              : Colors.white.withOpacity(0.5),
-                          shape: BoxShape.circle,
+                              : Colors.white.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(10.r),
                         ),
                       );
                     }),
@@ -272,7 +501,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   Widget _buildCategoryTag(String label) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: appColor,
         borderRadius: BorderRadius.circular(30.r),
@@ -289,14 +518,84 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildOwnerProfile() {
+  Widget _buildLocationDisplay(String location) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.location_on_rounded, color: appColor, size: 18.sp),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              location,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: context.textColor,
+                fontFamily: FontFamily.openSans,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value,
+      [IconData? icon, bool isPrice = false]) {
+    return Row(
+      crossAxisAlignment:
+          isPrice ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+      children: [
+        if (icon != null) ...[
+          Container(
+            padding: EdgeInsets.all(8.r),
+            decoration: BoxDecoration(
+              color: appColor.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(icon, color: appColor, size: 18.sp),
+          ),
+          SizedBox(width: 12.w),
+        ],
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: context.subTextColor.withOpacity(0.8),
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          textAlign: TextAlign.end,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w700,
+            color: context.textColor,
+            fontFamily: FontFamily.openSans,
+            height: 1.2,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.visible,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOwnerProfile(post) {
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => UserProfileScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => UserProfileScreen()),
         );
       },
       child: Container(
@@ -304,27 +603,45 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: context.dividerColor),
-          boxShadow: context.isDarkMode
-              ? []
-              : [
-                  BoxShadow(
-                    color: greyColor.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(30.r),
-              child: Image.asset(
-                'assets/profile2.png',
-                width: 56.r,
-                height: 56.r,
-                fit: BoxFit.cover,
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: appColor.withOpacity(0.2), width: 2),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28.r),
+                child: post.userImage != null && post.userImage!.isNotEmpty
+                    ? Image.network(
+                        '${ApiConstants.baseUrl2}${post.userImage}',
+                        width: 56.r,
+                        height: 56.r,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Image.asset(
+                          'assets/profile2.png',
+                          width: 56.r,
+                          height: 56.r,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Image.asset(
+                        'assets/profile2.png',
+                        width: 56.r,
+                        height: 56.r,
+                        fit: BoxFit.cover,
+                      ),
               ),
             ),
             SizedBox(width: 15.w),
@@ -333,62 +650,91 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Riya',
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: FontFamily.openSans,
-                          color: context.textColor,
+                      Expanded(
+                        child: Text(
+                          post.userName.isNotEmpty
+                              ? post.userName
+                              : 'User id-${post.userId}',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: FontFamily.openSans,
+                            color: context.textColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      SizedBox(width: 8.w),
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
+                          horizontal: 10.w,
                           vertical: 4.h,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE8E1FF),
-                          borderRadius: BorderRadius.circular(10.r),
+                          color: (post.postType.toLowerCase() == 'take' ||
+                                  post.postType.toLowerCase() == 'taking')
+                              ? const Color(0xFFFFE8E8)
+                              : const Color(0xFFE8F5E9),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: Text(
-                          'Giving',
+                          (post.postType.toLowerCase() == 'take' ||
+                                  post.postType.toLowerCase() == 'taking')
+                              ? 'Taking'
+                              : 'Giving',
                           style: TextStyle(
-                            color: const Color(0xFF6B4EE0),
+                            color: (post.postType.toLowerCase() == 'take' ||
+                                    post.postType.toLowerCase() == 'taking')
+                                ? const Color(0xFFD32F2F)
+                                : const Color(0xFF2E7D32),
                             fontSize: 10.sp,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w800,
+                            textBaseline: TextBaseline.alphabetic,
                             fontFamily: FontFamily.openSans,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 6.h),
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber, size: 16.sp),
-                      SizedBox(width: 4.w),
-                      Text(
-                        '4.8',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: FontFamily.openSans,
-                          color: context.textColor,
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.star_rounded,
+                                color: Colors.amber, size: 14.sp),
+                            SizedBox(width: 2.w),
+                            Text(
+                              post.userRating?.toString() ?? '4.8',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w700,
+                                color: context.textColor,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(width: 4.w),
+                      SizedBox(width: 8.w),
                       Text(
-                        '(Person rating)',
+                        'Verified User',
                         style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: FontFamily.openSans,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
                           color: context.subTextColor,
                         ),
                       ),
+                      SizedBox(width: 4.w),
+                      Icon(Icons.verified, color: Colors.blue, size: 14.sp),
                     ],
                   ),
                 ],

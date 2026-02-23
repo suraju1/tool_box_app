@@ -25,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _locationController = TextEditingController();
 
   // Form state
+  // Form state
   String _gender = 'Male';
   bool _agreeToTerms = false;
   DateTime? _selectedDate;
@@ -114,6 +115,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
+  // Validate DOB
+  String? _validateDOB(String? value) {
+    if (_selectedDate == null) {
+      return 'Date of Birth is required';
+    }
+    return null;
+  }
+
   /// Validate location
   String? _validateLocation(String? value) {
     if (value == null || value.isEmpty) {
@@ -145,17 +154,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Format date as YYYY-MM-DD
-    final formattedDate =
-        '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}';
-
     // Get location from LocationController
     final locationController = context.read<LocationController>();
     final latitude = locationController.latitude ?? 0.0;
     final longitude = locationController.longitude ?? 0.0;
 
+    // Get AuthController
+    final authController = context.read<AuthController>();
+
+    // Get user ID from AuthController
+    final currentUser = authController.currentUser;
+    if (currentUser == null) {
+      ToastService.showErrorToast(
+          context, 'User session invalid. Please login again.');
+      return;
+    }
+
+    // Format date as YYYY-MM-DD
+    final formattedDate =
+        '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}';
+
     // Create registration request
     final request = RegisterRequest(
+      userId: currentUser.id,
       phoneNumber: _phoneController.text.trim(),
       fullName: _nameController.text.trim(),
       email: _emailController.text.trim(),
@@ -168,15 +189,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
 
     // Call registration API
-    final authController = context.read<AuthController>();
-    final success = await authController.registerUser(request);
+    final success = await authController.completeProfile(request);
 
     if (!mounted) return;
 
     if (success) {
       // Show success message from backend
       final message =
-          authController.successMessage ?? 'Registration successful';
+          authController.successMessage ?? 'Profile completed successfully';
       ToastService.showSuccessToast(context, message);
 
       // Wait a moment for toast to be visible, then navigate
@@ -184,11 +204,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (!mounted) return;
 
-      // Navigate to OTP screen
-      Navigator.pushNamed(
+      // Navigate to Home
+      Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.otp,
-        arguments: _phoneController.text.trim(),
+        AppRoutes.bottomNavBar,
+        (route) => false,
       );
     } else {
       // Show error
@@ -253,6 +273,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   keyboardType: TextInputType.phone,
                   maxLength: 10,
                   validator: _validatePhone,
+                  readOnly: true,
                 ),
                 SizedBox(height: 15.h),
                 _buildTextField(
@@ -270,6 +291,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   icon: Icons.calendar_today_outlined,
                   controller: _dobController,
                   readOnly: true,
+                  validator: _validateDOB,
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
                       context: context,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/view/bottom_navbar_screen.dart';
 import 'package:tool_bocs/features/chat/view/chat_screen.dart';
-import 'package:tool_bocs/features/chat/view/dummy_chat_screen.dart';
 import 'package:tool_bocs/features/home/view/home_screen.dart';
 import 'package:tool_bocs/features/login_and_signup/view/login_screen.dart';
 import 'package:tool_bocs/features/login_and_signup/view/otp_screen.dart';
@@ -26,6 +25,9 @@ import 'package:tool_bocs/features/profile/view/terms_conditions_screen.dart';
 import 'package:tool_bocs/features/profile/view/privacy_policy_screen.dart';
 import 'package:tool_bocs/features/profile/view/theme_change_screen.dart';
 import 'package:tool_bocs/features/network_connectivity/view/no_internet_screen.dart';
+import 'package:tool_bocs/features/subscription/view/my_subscription_status_screen.dart';
+import 'package:tool_bocs/features/subscription/view/my_subscriptions_list_screen.dart';
+import 'package:tool_bocs/features/subscription/view/choose_plan_screen.dart';
 
 import 'app_routes.dart';
 
@@ -38,10 +40,17 @@ class AppPages {
     AppRoutes.otp: (_) => const OtpScreen(),
     AppRoutes.home: (_) => const HomeScreen(),
     AppRoutes.chat: (_) => const ChatScreen(),
-    AppRoutes.dummyChat: (_) => const DummyChatScreen(),
     AppRoutes.createGivePost: (_) => const CreateGivePostScreen(),
     AppRoutes.signUp: (_) => const SignUpScreen(),
-    AppRoutes.productDetails: (_) => const ProductDetailsScreen(),
+    AppRoutes.productDetails: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is int) {
+        return ProductDetailsScreen(postId: args);
+      }
+      return const Scaffold(
+        body: Center(child: Text('Error: No Post ID provided')),
+      );
+    },
     AppRoutes.notifications: (_) => const NotificationsScreen(),
     AppRoutes.editProfile: (_) => const EditProfileScreen(),
     AppRoutes.tradeHistory: (_) => const TradeHistoryScreen(),
@@ -51,12 +60,15 @@ class AppPages {
     AppRoutes.tradeStart: (_) => const TradeStartScreen(),
     AppRoutes.tradeOffer: (_) => const TradeOfferScreen(),
     AppRoutes.tradeStep1: (_) => const TradeReturnSearchScreen(),
-    AppRoutes.tradeCompletion: (_) => const TradeCompletionScreen(),
+    AppRoutes.tradeCompletion: (_) => TradeCompletionScreen(),
     AppRoutes.tradeSuccess: (_) => const TradeSuccessScreen(),
     AppRoutes.tradeDetails: (_) => const TradeDetailsScreen(),
     AppRoutes.termsConditions: (_) => const TermsConditionsScreen(),
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
     AppRoutes.themeChange: (_) => const ThemeChangeScreen(),
     AppRoutes.noInternet: (_) => const NoInternetScreen(),
+    AppRoutes.mySubscription: (_) => const MySubscriptionStatusScreen(),
+    AppRoutes.subscriptionHistory: (_) => const MySubscriptionsListScreen(),
+    AppRoutes.choosePlan: (_) => const ChoosePlanScreen(),
   };
 }

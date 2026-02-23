@@ -1,30 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
 class FilterBottomSheet extends StatefulWidget {
-  const FilterBottomSheet({super.key});
+  final String? initialPostType;
+  const FilterBottomSheet({super.key, this.initialPostType});
 
   @override
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
-  final List<String> categories = [
-    'Mobiles',
-    'Electronics',
-    'Furniture',
-    'Home',
-    'Fashion',
-    'Books',
-    'Sports',
-    'Others'
-  ];
-  final List<String> selectedCategories = ['Electronics'];
-  double distance = 5.0;
-  String selectedRating = '4 & above';
-  String returnType = 'Price';
+  // final List<String> categories = [
+  //   'Mobiles',
+  //   'Electronics',
+  //   'Furniture',
+  //   'Home',
+  //   'Fashion',
+  //   'Books',
+  //   'Sports',
+  //   'Others'
+  // ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = context.read<TradeController>();
+      controller.fetchCategories();
+      setState(() {
+        distance = controller.distanceKm;
+        selectedCategories = List.from(controller.selectedCategories);
+        selectedRating = controller.selectedRating;
+        returnType = controller.selectedReturnType;
+        selectedSort = controller.selectedSort;
+
+        if (widget.initialPostType != null) {
+          selectedPostType = widget.initialPostType!;
+        } else {
+          selectedPostType = controller.selectedPostType;
+        }
+      });
+    });
+  }
+
+  List<String> selectedCategories = [];
+  double distance = 10.0;
+  String selectedRating = 'All';
+  String returnType = 'All';
   String selectedSort = 'Nearest First';
 
   @override
@@ -39,16 +65,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         children: [
           SingleChildScrollView(
             padding: EdgeInsets.only(
-                bottom: 90.h, left: 20.w, right: 20.w, top: 12.h),
+              bottom: 90.h,
+              left: 20.w,
+              right: 20.w,
+              top: 12.h,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(),
-                Divider(
-                  color: context.dividerColor,
-                  thickness: 1,
-                ),
+                Divider(color: context.dividerColor, thickness: 1),
                 _buildCategorySection(),
                 SizedBox(height: 12.h),
                 _buildDistanceSection(),
@@ -56,8 +83,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 _buildRatingSection(),
                 SizedBox(height: 12.h),
                 _buildReturnTypeSection(),
-                SizedBox(height: 12.h),
-                _buildSortBySection(),
                 SizedBox(height: 25.h),
                 // _buildActionButtons(),
                 // SizedBox(height: 20.h),
@@ -123,31 +148,44 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       children: [
         Text('Category', style: _sectionTitleStyle()),
         SizedBox(height: 10.h),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            mainAxisExtent: 35.h,
-          ),
-          itemCount: categories.length,
-          itemBuilder: (context, index) {
-            String category = categories[index];
-            bool isSelected = selectedCategories.contains(category);
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  if (isSelected) {
-                    selectedCategories.remove(category);
-                  } else {
-                    selectedCategories.add(category);
-                  }
-                });
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+        Consumer<TradeController>(
+          builder: (context, tradeController, child) {
+            if (tradeController.isLoading &&
+                tradeController.categories.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (tradeController.categories.isEmpty) {
+              return Text(
+                'No categories available',
+                style: TextStyle(color: context.subTextColor),
+              );
+            }
+
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisExtent: 40.h,
+                crossAxisSpacing: 12.w,
+                mainAxisSpacing: 0.5.h,
+              ),
+              itemCount: tradeController.categories.length,
+              itemBuilder: (context, index) {
+                final category = tradeController.categories[index];
+                bool isSelected = selectedCategories.contains(category.name);
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        selectedCategories.remove(category.name);
+                      } else {
+                        selectedCategories.add(category.name);
+                      }
+                    });
+                  },
+                  child: Row(
                     children: [
                       Container(
                         width: 20.w,
@@ -157,29 +195,36 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               isSelected ? defoultColor : context.surfaceColor,
                           borderRadius: BorderRadius.circular(4.r),
                           border: Border.all(
-                              color: isSelected
-                                  ? defoultColor
-                                  : greyColor.withOpacity(0.4)),
+                            color: isSelected
+                                ? defoultColor
+                                : greyColor.withOpacity(0.4),
+                          ),
                         ),
                         child: isSelected
-                            ? Icon(Icons.check,
-                                size: 14.sp, color: Colors.white)
+                            ? Icon(
+                                Icons.check,
+                                size: 14.sp,
+                                color: Colors.white,
+                              )
                             : null,
                       ),
-                      SizedBox(width: 6.w),
-                      Text(
-                        category,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: context.subTextColor,
-                          fontFamily: FontFamily.openSans,
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          category.name,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            color: context.subTextColor,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      SizedBox(width: 3.2.w),
                     ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         ),
@@ -198,13 +243,21 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             SizedBox(width: 10.w),
             Expanded(
               child: Slider(
+                padding: EdgeInsets.zero,
                 value: distance,
                 min: 0,
                 max: 50,
-                padding: EdgeInsets.zero,
                 activeColor: defoultColor,
-                inactiveColor: greyColor.withOpacity(0.4),
-                onChanged: (val) => setState(() => distance = val),
+                inactiveColor: Colors.grey.shade200,
+                thumbColor: defoultColor,
+                onChanged: (val) {
+                  setState(() => distance = val);
+                  context.read<TradeController>().setDistance(
+                        val,
+                        triggerFetch: true,
+                        fetchType: selectedPostType,
+                      );
+                },
               ),
             ),
             SizedBox(width: 15.w),
@@ -249,19 +302,20 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   color: isSelected ? defoultColor : context.surfaceColor,
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                      color: isSelected
-                          ? defoultColor
-                          : greyColor.withOpacity(0.4)),
+                    color:
+                        isSelected ? defoultColor : greyColor.withOpacity(0.4),
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (!isAll) ...[
-                      Icon(Icons.star,
-                          color: isSelected
-                              ? Colors.yellow
-                              : Colors.yellow.shade700,
-                          size: 16.sp),
+                      Icon(
+                        Icons.star,
+                        color:
+                            isSelected ? Colors.yellow : Colors.yellow.shade700,
+                        size: 16.sp,
+                      ),
                       SizedBox(width: 5.w),
                     ],
                     Text(
@@ -310,7 +364,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             color: isSelected ? defoultColor : context.surfaceColor,
             borderRadius: BorderRadius.circular(22.r),
             border: Border.all(
-                color: isSelected ? defoultColor : greyColor.withOpacity(0.4)),
+              color: isSelected ? defoultColor : greyColor.withOpacity(0.4),
+            ),
           ),
           alignment: Alignment.center,
           child: Text(
@@ -326,71 +381,47 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     );
   }
 
-  Widget _buildSortBySection() {
-    final sortOptions = ['Newest First', 'Nearest First', 'Highest Rated'];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Sort By', style: _sectionTitleStyle()),
-        SizedBox(height: 10.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: sortOptions.map((option) {
-            bool isSelected = selectedSort == option;
-            return GestureDetector(
-              onTap: () => setState(() => selectedSort = option),
-              child: Row(
-                children: [
-                  Container(
-                    width: 20.w,
-                    height: 20.w,
-                    decoration: BoxDecoration(
-                      color: isSelected ? defoultColor : context.surfaceColor,
-                      borderRadius: BorderRadius.circular(4.r),
-                      border: Border.all(
-                        color: isSelected ? defoultColor : greyColor,
-                      ),
-                    ),
-                    child: isSelected
-                        ? Icon(Icons.check, size: 14.sp, color: Colors.white)
-                        : null,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    option,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: context.subTextColor,
-                      fontFamily: FontFamily.openSans,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
   Widget _buildActionButtons() {
     return Row(
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              final controller = context.read<TradeController>();
+
+              // Apply all filters to controller
+              controller.setDistance(distance);
+              controller.updateFilters(
+                categories: selectedCategories,
+                rating: selectedRating,
+                returnType: returnType,
+                sort: selectedSort,
+                postType: selectedPostType,
+              );
+
+              if (selectedPostType == 'give') {
+                controller.fetchGivePosts(refresh: true);
+              } else if (selectedPostType == 'take') {
+                controller.fetchTakePosts(refresh: true);
+              } else {
+                controller.fetchHomePosts(refresh: true);
+              }
+              Navigator.pop(context);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: defoultColor,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r)),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
               padding: EdgeInsets.symmetric(vertical: 8.h),
             ),
             child: Text(
               'Apply',
               style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white),
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -398,13 +429,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         Expanded(
           child: ElevatedButton(
             onPressed: () {
+              context.read<TradeController>().resetFilters();
               setState(() {
                 selectedCategories.clear();
-                selectedCategories.add('Electronics');
-                distance = 5.0;
-                selectedRating = '4 & above';
-                returnType = 'Price';
+                distance = 10.0;
+                selectedRating = 'All';
+                returnType = 'All';
                 selectedSort = 'Nearest First';
+                selectedPostType = widget.initialPostType ?? 'all';
               });
             },
             style: ElevatedButton.styleFrom(
@@ -413,7 +445,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               foregroundColor: context.subTextColor,
               elevation: 0,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r)),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
               padding: EdgeInsets.symmetric(vertical: 8.h),
             ),
             child: Text(
@@ -425,6 +458,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ],
     );
   }
+
+  String selectedPostType = 'all'; // Default
 
   TextStyle _sectionTitleStyle() {
     return TextStyle(

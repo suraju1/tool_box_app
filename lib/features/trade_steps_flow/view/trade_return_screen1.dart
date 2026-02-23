@@ -34,7 +34,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
           _buildStepper(),
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(24.w),
+              padding: EdgeInsets.all(10.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -99,7 +99,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
   Widget _buildStepper() {
     return Container(
       color: context.scaffoldBg,
-      padding: EdgeInsets.only(bottom: 10.h, left: 2.w, right: 2.w),
+      padding: EdgeInsets.only(bottom: 10.h, left: 10.w, right: 10.w),
       child: Row(
         children: [
           _buildStepSegment(isActive: true),
@@ -463,7 +463,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
 
   Widget _buildBottomAction() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: context.surfaceColor,
         boxShadow: context.isDarkMode

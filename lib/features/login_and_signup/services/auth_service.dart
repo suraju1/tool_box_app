@@ -8,25 +8,25 @@ import 'package:tool_bocs/features/login_and_signup/model/auth_response_models.d
 class AuthService {
   final ApiClient _apiClient = ApiClient();
 
-  /// Register a new user
-  /// Returns RegistrationCheckResponse indicating if phone is already registered
-  Future<ApiResponse<RegistrationCheckResponse>> register(
+  /// Complete user profile
+  /// Returns AuthResponse with user data and JWT token
+  Future<ApiResponse<AuthResponse>> completeProfile(
     RegisterRequest request,
   ) async {
     final response = await _apiClient.post(
-      ApiConstants.register,
+      ApiConstants.completeProfile,
       data: request.toJson(),
     );
 
     return ApiResponse.fromJson(
       response.data,
-      (data) => RegistrationCheckResponse.fromJson(data),
+      (data) => AuthResponse.fromJson(data),
     );
   }
 
   /// Login with phone number
-  /// Returns RegistrationCheckResponse indicating if phone is registered
-  Future<ApiResponse<RegistrationCheckResponse>> login(
+  /// Returns LoginResponse with OTP details
+  Future<ApiResponse<LoginResponse>> login(
     LoginRequest request,
   ) async {
     final response = await _apiClient.post(
@@ -36,7 +36,7 @@ class AuthService {
 
     return ApiResponse.fromJson(
       response.data,
-      (data) => RegistrationCheckResponse.fromJson(data),
+      (data) => LoginResponse.fromJson(data),
     );
   }
 
