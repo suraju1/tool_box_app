@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/view/bottom_navbar_screen.dart';
 import 'package:tool_bocs/features/chat/view/chat_screen.dart';
-import 'package:tool_bocs/features/chat/view/dummy_chat_screen.dart';
 import 'package:tool_bocs/features/home/view/home_screen.dart';
 import 'package:tool_bocs/features/login_and_signup/view/login_screen.dart';
 import 'package:tool_bocs/features/login_and_signup/view/otp_screen.dart';
@@ -38,10 +37,17 @@ class AppPages {
     AppRoutes.otp: (_) => const OtpScreen(),
     AppRoutes.home: (_) => const HomeScreen(),
     AppRoutes.chat: (_) => const ChatScreen(),
-    AppRoutes.dummyChat: (_) => const DummyChatScreen(),
     AppRoutes.createGivePost: (_) => const CreateGivePostScreen(),
     AppRoutes.signUp: (_) => const SignUpScreen(),
-    AppRoutes.productDetails: (_) => const ProductDetailsScreen(),
+    AppRoutes.productDetails: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is int) {
+        return ProductDetailsScreen(postId: args);
+      }
+      return const Scaffold(
+        body: Center(child: Text('Error: No Post ID provided')),
+      );
+    },
     AppRoutes.notifications: (_) => const NotificationsScreen(),
     AppRoutes.editProfile: (_) => const EditProfileScreen(),
     AppRoutes.tradeHistory: (_) => const TradeHistoryScreen(),

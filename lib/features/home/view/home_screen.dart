@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/controller/shimmer_controller.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/features/location/view/location_selection_sheet.dart';
 import 'package:tool_bocs/features/notifications/view/notifications_screen.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
-import 'package:tool_bocs/core/controller/location_controller.dart';
-import 'package:tool_bocs/features/location/view/location_selection_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,10 +21,35 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   double distance = 5.0;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TradeController>().fetchHomePosts();
+    });
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      context.read<TradeController>().loadMoreHomePosts();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final shimmer = context.watch<ShimmerController>();
+    // Keeping ShimmerController for now if it's used globally, but TradeController has its own loading state.
+    // We can use TradeController's loading state for the list part.
+    // final shimmer = context.watch<ShimmerController>();
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
@@ -30,9 +57,33 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildHeader(context),
           Expanded(
-            child: shimmer.isLoading
-                ? _buildShimmer(context)
-                : Column(
+            child: Consumer<TradeController>(
+              builder: (context, controller, child) {
+                if (controller.isHomeLoading && controller.homePosts.isEmpty) {
+                  return _buildShimmer(context);
+                }
+
+                if (controller.errorMessage != null &&
+                    controller.homePosts.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(controller.errorMessage!),
+                        ElevatedButton(
+                          onPressed: () => controller.fetchHomePosts(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await controller.fetchHomePosts(refresh: true);
+                  },
+                  child: Column(
                     children: [
                       _buildDistanceSection(context),
                       Divider(
@@ -41,43 +92,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 1.h,
                       ),
                       Expanded(
-                        child: ListView(
+                        child: ListView.separated(
+                          controller: _scrollController,
                           padding: EdgeInsets.all(16.w),
-                          children: [
-                            _buildProductCard(
+                          itemCount: controller.homePosts.length +
+                              (controller.isHomeLoadMoreRunning ? 1 : 0),
+                          separatorBuilder: (context, index) =>
+                              SizedBox(height: 12.h),
+                          itemBuilder: (context, index) {
+                            if (index == controller.homePosts.length) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            return _buildProductCard(
                               context,
-                              title: 'iPhone 12 (128GB)',
-                              owner: 'RIYA',
-                              category: 'Food Giver',
-                              distance: '2.5 km away',
-                              rating: '4.8',
-                              actionLabel: 'Take',
-                            ),
-                            SizedBox(height: 12.h),
-                            _buildProductCard(
-                              context,
-                              title: 'iPhone 12 (128GB)',
-                              owner: 'RIYA',
-                              category: 'Food Giver',
-                              distance: '2.5 km away',
-                              rating: '4.8',
-                              actionLabel: 'Take',
-                            ),
-                            SizedBox(height: 12.h),
-                            _buildProductCard(
-                              context,
-                              title: 'iPhone 12 (128GB)',
-                              owner: 'RIYA',
-                              category: 'Food Giver',
-                              distance: '2.5 km away',
-                              rating: '4.8',
-                              actionLabel: 'Take',
-                            ),
-                          ],
+                              controller.homePosts[index],
+                            );
+                          },
                         ),
                       ),
                     ],
                   ),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -101,8 +140,11 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(Icons.location_on_outlined,
-                  color: Colors.white, size: 20.sp),
+              Icon(
+                Icons.location_on_outlined,
+                color: Colors.white,
+                size: 20.sp,
+              ),
               SizedBox(width: 8.w),
               Consumer<LocationController>(
                 builder: (context, locationController, child) {
@@ -129,11 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             alignment: Alignment.center,
                             padding: EdgeInsets.symmetric(horizontal: 2.w),
                             margin: EdgeInsets.only(right: 25.w),
-                            // decoration: BoxDecoration(
-                            //   color: Colors.transparent,
-                            //   border: Border.all(color: Colors.white),
-                            //   borderRadius: BorderRadius.circular(6),
-                            // ),
                             child: Icon(
                               Icons.keyboard_arrow_down,
                               color: Colors.white,
@@ -146,62 +183,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 },
               ),
-              // Spacer handles pushing remaining items to the right if any
-              // or just rely on Expanded taking available space
-              /*
-              // chat icon
               InkWell(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ChatListScreen(),
+                      builder: (context) => const NotificationsScreen(),
                     ),
                   );
                 },
                 child: Stack(
                   children: [
-                    Icon(Icons.chat_outlined, color: Colors.white, size: 28.sp),
-                    Positioned(
-                      right: 0.w,
-                      top: 0.h,
-                      child: Container(
-                        width: 15.w,
-                        height: 15.h,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.all(2.w),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(15.r),
-                        ),
-                        child: Text(
-                          '1',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8.sp,
-                            fontWeight: FontWeight.w900,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              SizedBox(width: 20.w),
-              */
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const NotificationsScreen()),
-                  );
-                },
-                child: Stack(
-                  children: [
-                    Icon(Icons.notifications_none_outlined,
-                        color: Colors.white, size: 28.sp),
+                    Icon(
+                      Icons.notifications_none_outlined,
+                      color: Colors.white,
+                      size: 28.sp,
+                    ),
                     Positioned(
                       right: 0.w,
                       top: 2.h,
@@ -224,72 +221,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
             ],
           ),
           SizedBox(height: 6.h),
-          /*
-          SizedBox(height: 18.h),
-         
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  // height: 45.h,
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, color: Colors.grey, size: 20.sp),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Search any Product..',
-                            hintStyle:
-                                TextStyle(color: Colors.grey, fontSize: 14.sp),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8.h,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 12.w),
-                child: InkWell(
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => const FilterBottomSheet(),
-                    );
-                  },
-                  child: Container(
-                    height: 47.h,
-                    width: 47.h,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Icon(Icons.tune, color: themeColor, size: 24.sp),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          */
         ],
       ),
     );
@@ -301,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(8.r),
+        // borderRadius: BorderRadius.circular(8.r), // Removed radius to match flat look if desired in list
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,9 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(width: 10.w),
               Text(
                 '${distance.round()} km',
-                style: TextStyle(
-                  color: context.textColor,
-                ),
+                style: TextStyle(color: context.textColor),
               ),
             ],
           ),
@@ -349,20 +285,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductCard(
-    BuildContext context, {
-    required String title,
-    required String owner,
-    required String category,
-    required String distance,
-    required String rating,
-    required String actionLabel,
-  }) {
+  Widget _buildProductCard(BuildContext context, PostModel post) {
+    final imagePath = post.itemImages.isNotEmpty ? post.itemImages.first : '';
+    final imageUrl =
+        imagePath.isNotEmpty ? '${ApiConstants.baseUrl2}$imagePath' : '';
+
+    // Determine action label based on post type
+    // If it's a "give_away" (give), the user can "Take" it.
+    // If it's a "taking" (take) request, the user can "Give" it.
+    final isTake = post.postType.toLowerCase() == 'take' ||
+        post.postType.toLowerCase() == 'taking';
+    final actionLabel = isTake ? 'Give' : 'Take';
+
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
           context,
           AppRoutes.productDetails,
+          arguments: post.id,
         );
       },
       child: Container(
@@ -392,11 +332,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "$owner's Taking",
+                        "${post.userName}'s ${isTake ? 'Taking' : 'Giving'}",
                         style: TextStyle(color: Colors.grey, fontSize: 11.sp),
                       ),
                       Text(
-                        title,
+                        post.itemName,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16.sp,
@@ -407,11 +347,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Row(
                     children: [
-                      Icon(Icons.location_on_outlined,
-                          color: Colors.grey, size: 14.sp),
+                      Icon(
+                        Icons.location_on_outlined,
+                        color: Colors.grey,
+                        size: 14.sp,
+                      ),
                       SizedBox(width: 4.w),
                       Text(
-                        distance,
+                        '2.5 km away', // Placeholder distance
                         style: TextStyle(color: Colors.grey, fontSize: 11.sp),
                       ),
                     ],
@@ -422,15 +365,17 @@ class _HomeScreenState extends State<HomeScreen> {
             AspectRatio(
               aspectRatio: 14 / 9,
               child: Container(
-                color: Colors.blue.withValues(alpha: 0.1),
-                child: Image.asset(
-                  "assets/iphone.png",
-                  // child: Image.network(
-                  //   'https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-12-blue-select-2020?wid=940&hei=1112&fmt=png-alpha&.v=1604343704000',
-                  fit: BoxFit.fill,
-                  errorBuilder: (context, error, stackTrace) =>
-                      Icon(Icons.image, size: 50.sp, color: Colors.grey),
-                ),
+                color: Colors.blue.withOpacity(
+                  0.1,
+                ), // Fixed withValues to withOpacity for compatibility if needed, or keeping withValues if on new Flutter
+                child: imageUrl.isNotEmpty
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.fill,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Icon(Icons.image, size: 50.sp, color: Colors.grey),
+                      )
+                    : Icon(Icons.image, size: 50.sp, color: Colors.grey),
               ),
             ),
             Padding(
@@ -438,55 +383,67 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.person, color: themeColor, size: 16.sp),
-                          SizedBox(width: 4.w),
-                          Text(
-                            "$owner  •  $category",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12.sp,
-                                color: context.textColor),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 4.h),
-                      Row(
-                        children: [
-                          Text(
-                            "$rating ",
-                            style: TextStyle(
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.person, color: themeColor, size: 16.sp),
+                            SizedBox(width: 4.w),
+                            Expanded(
+                              child: Text(
+                                "${post.userName}  •  ${post.itemCategory}",
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12.sp,
+                                  color: context.textColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4.h),
+                        Row(
+                          children: [
+                            Text(
+                              "${post.userRating ?? 4.8} ", // Real rating or fallback
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12.sp,
-                                color: context.textColor),
-                          ),
-                          SizedBox(width: 4.w),
-                          ...List.generate(
-                            5,
-                            (index) => Icon(
-                              Icons.star,
-                              color: amberColor,
-                              size: 13.sp,
+                                color: context.textColor,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            "(Person rating)",
-                            style:
-                                TextStyle(color: Colors.grey, fontSize: 11.sp),
-                          ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(width: 4.w),
+                            ...List.generate(
+                              5,
+                              (index) => Icon(
+                                Icons.star,
+                                color: amberColor,
+                                size: 13.sp,
+                              ),
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              "(Person rating)",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   InkWell(
                     onTap: () {
-                      // Navigator.pushNamed(context, AppRoutes.chat);
-                      Navigator.pushNamed(context, AppRoutes.dummyChat);
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.productDetails,
+                        arguments: post.id,
+                      );
                     },
                     child: Container(
                       alignment: Alignment.center,
@@ -494,8 +451,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: themeColor,
                         borderRadius: BorderRadius.circular(6.r),
                       ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 34.w, vertical: 7.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 34.w,
+                        vertical: 7.h,
+                      ),
                       child: Text(
                         actionLabel,
                         style: TextStyle(
@@ -529,7 +488,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 children: [
                   Expanded(
-                      child: ShimmerBox(height: 20.h, width: double.infinity)),
+                    child: ShimmerBox(height: 20.h, width: double.infinity),
+                  ),
                   SizedBox(width: 10.w),
                   ShimmerBox(height: 18.h, width: 40.w),
                 ],
@@ -539,11 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-        Divider(
-          color: context.dividerColor,
-          thickness: 1.h,
-          height: 1.h,
-        ),
+        Divider(color: context.dividerColor, thickness: 1.h, height: 1.h),
         // Product Card Shimmers
         Expanded(
           child: ListView.builder(
@@ -580,9 +536,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     AspectRatio(
                       aspectRatio: 14 / 9,
                       child: ShimmerBox(
-                          height: double.infinity,
-                          width: double.infinity,
-                          radius: 0),
+                        height: double.infinity,
+                        width: double.infinity,
+                        radius: 0,
+                      ),
                     ),
                     Padding(
                       padding: EdgeInsets.all(12.w),

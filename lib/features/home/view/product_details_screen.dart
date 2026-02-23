@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
-  final List<String>? images;
-  const ProductDetailsScreen({super.key, this.images});
+  final int postId;
+  const ProductDetailsScreen({super.key, required this.postId});
 
   @override
   State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
@@ -18,25 +21,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   int _currentImageIndex = 0;
   final PageController _pageController = PageController();
   Timer? _autoPlayTimer;
-  late final List<String> _imageList;
 
   @override
   void initState() {
     super.initState();
-    _imageList = widget.images ??
-        [
-          'assets/iphone.png',
-          'assets/iphone.png',
-          'assets/iphone.png',
-          'assets/iphone.png'
-        ];
-    _startAutoPlay();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TradeController>().fetchPostDetails(widget.postId);
+    });
   }
 
-  void _startAutoPlay() {
+  void _startAutoPlay(int imageCount) {
+    _autoPlayTimer?.cancel(); // Cancel existing timer if any
+    if (imageCount <= 1) return;
+
     _autoPlayTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_imageList.length > 1 && _pageController.hasClients) {
-        int nextIndex = (_currentImageIndex + 1) % _imageList.length;
+      if (_pageController.hasClients) {
+        int nextIndex = (_currentImageIndex + 1) % imageCount;
         _pageController.animateToPage(
           nextIndex,
           duration: const Duration(milliseconds: 800),
@@ -62,18 +62,25 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new,
-              color: context.textColor, size: 20.sp),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: context.textColor,
+            size: 20.sp,
+          ),
         ),
         centerTitle: true,
-        title: Text(
-          'IPhone 12 (128GB)',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            fontFamily: FontFamily.openSans,
-            color: context.textColor,
-          ),
+        title: Consumer<TradeController>(
+          builder: (context, controller, child) {
+            return Text(
+              controller.selectedPost?.itemName ?? 'Product Details',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
+                fontFamily: FontFamily.openSans,
+                color: context.textColor,
+              ),
+            );
+          },
         ),
         actions: [
           //report and block
@@ -83,9 +90,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               // Handle selection
             },
             offset: const Offset(0, 55),
-            shape: PopupMenuArrowShape(
-              borderRadius: 10.r,
-            ),
+            shape: PopupMenuArrowShape(borderRadius: 10.r),
             color: context.surfaceColor,
             elevation: 4,
             itemBuilder: (context) => [
@@ -138,81 +143,269 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           child: Divider(height: 1, color: context.dividerColor),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 20.h),
-            _buildOwnerProfile(),
-            SizedBox(height: 20.h),
-            _buildImageCarousel(),
-            Padding(
-              padding: EdgeInsets.all(20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildCategoryTag('Electronics'),
-                  SizedBox(height: 15.h),
-                  Text(
-                    'Description',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: FontFamily.openSans,
-                      color: context.textColor,
+      body: Consumer<TradeController>(
+        builder: (context, controller, child) {
+          if (controller.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (controller.errorMessage != null) {
+            return Center(child: Text(controller.errorMessage!));
+          }
+
+          final post = controller.selectedPost;
+          if (post == null) {
+            return const Center(child: Text('Post not found'));
+          }
+
+          // Start autoplay if not started and multiple images
+          if (_autoPlayTimer == null && post.itemImages.length > 1) {
+            _startAutoPlay(post.itemImages.length);
+          }
+
+          final List<String> images =
+              post.itemImages.isNotEmpty ? post.itemImages : [];
+
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 20.h),
+                _buildOwnerProfile(post),
+                SizedBox(height: 20.h),
+                if (images.isNotEmpty)
+                  _buildImageCarousel(images)
+                else
+                  Container(
+                    height: 320.h,
+                    width: double.infinity,
+                    color: Colors.grey[200],
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 50.sp,
+                      color: Colors.grey,
                     ),
                   ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    'This iPhone 12 is in excellent condition, barely used, with no scratches or dents. It comes with 128GB storage, perfect for all your apps and media. Battery health is at 95%. Includes original box and charging cable. Selling because I upgraded to a newer model. Ready for a new home!',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: context.subTextColor,
-                      height: 1.6,
-                      fontFamily: FontFamily.openSans,
-                      fontWeight: FontWeight.w500,
-                    ),
+                Padding(
+                  padding: EdgeInsets.all(20.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [_buildCategoryTag(post.itemCategory)],
+                      ),
+                      SizedBox(height: 15.h),
+                      Text(
+                        'Description',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: FontFamily.openSans,
+                          color: context.textColor,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        post.itemNote.isNotEmpty
+                            ? post.itemNote
+                            : 'No description provided.',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: context.subTextColor,
+                          height: 1.6,
+                          fontFamily: FontFamily.openSans,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: context.surfaceColor,
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(color: context.dividerColor),
+                          boxShadow: context.isDarkMode
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDetailRow(
+                              'Item Condition',
+                              post.itemCondition,
+                            ),
+                            SizedBox(height: 10.h),
+                            _buildDetailRow('Trade Type', post.tradeType),
+                            SizedBox(height: 10.h),
+                            _buildDetailRow('Return Type', post.returnType),
+                            SizedBox(height: 10.h),
+                            _buildDetailRow('Location', post.pickupArea),
+                            if (post.returnType == 'Price') ...[
+                              SizedBox(height: 10.h),
+                              _buildDetailRow(
+                                'Price Range',
+                                '\$${post.priceMin} - \$${post.priceMax}',
+                              ),
+                            ] else if (post.returnType == 'Item') ...[
+                              SizedBox(height: 20.h),
+                              Text(
+                                'Return Item Details',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: FontFamily.openSans,
+                                  color: context.textColor,
+                                ),
+                              ),
+                              SizedBox(height: 12.h),
+                              if (post.returnItemImages.isNotEmpty) ...[
+                                SizedBox(
+                                  height: 100.h,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: post.returnItemImages.length,
+                                    separatorBuilder: (_, __) =>
+                                        SizedBox(width: 8.w),
+                                    itemBuilder: (context, index) {
+                                      return ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                          8.r,
+                                        ),
+                                        child: Image.network(
+                                          '${ApiConstants.baseUrl2}${post.returnItemImages[index]}',
+                                          height: 100.h,
+                                          width: 100.h,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Container(
+                                            height: 100.h,
+                                            width: 100.h,
+                                            color: Colors.grey[200],
+                                            child: Icon(
+                                              Icons.image_not_supported,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                SizedBox(height: 15.h),
+                              ],
+                              if (post.returnItemName != null)
+                                _buildDetailRow(
+                                  'Item Name',
+                                  post.returnItemName!,
+                                ),
+                              if (post.returnItemCategory != null) ...[
+                                SizedBox(height: 8.h),
+                                _buildDetailRow(
+                                  'Category',
+                                  post.returnItemCategory!,
+                                ),
+                              ],
+                              if (post.returnItemCondition != null) ...[
+                                SizedBox(height: 8.h),
+                                _buildDetailRow(
+                                  'Condition',
+                                  post.returnItemCondition!,
+                                ),
+                              ],
+                              if (post.returnItemDescription != null &&
+                                  post.returnItemDescription!.isNotEmpty) ...[
+                                SizedBox(height: 8.h),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Description',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: context.subTextColor,
+                                        fontFamily: FontFamily.openSans,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      post.returnItemDescription!,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: context.textColor,
+                                        fontFamily: FontFamily.openSans,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 30.h),
+                    ],
                   ),
-                  SizedBox(height: 30.h),
-                ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      bottomNavigationBar: Consumer<TradeController>(
+        builder: (context, controller, child) {
+          final post = controller.selectedPost;
+          if (post == null) return const SizedBox.shrink();
+
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+            decoration: BoxDecoration(
+              color: context.surfaceColor,
+              border: Border(top: BorderSide(color: context.dividerColor)),
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.tradeStep1);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appColor,
+                minimumSize: Size(double.infinity, 50.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                (post.postType.toLowerCase() == 'take' ||
+                        post.postType.toLowerCase() == 'taking')
+                    ? 'Give It'
+                    : 'Take It',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: FontFamily.openSans,
+                ),
               ),
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          border: Border(top: BorderSide(color: context.dividerColor)),
-        ),
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.tradeStep1);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: appColor,
-            minimumSize: Size(double.infinity, 50.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            elevation: 0,
-          ),
-          child: Text(
-            'Take It',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildImageCarousel() {
+  Widget _buildImageCarousel(List<String> images) {
     return Column(
       children: [
         Container(
@@ -228,26 +421,32 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     _currentImageIndex = index;
                   });
                 },
-                itemCount: _imageList.length,
+                itemCount: images.length,
                 itemBuilder: (context, index) {
+                  final imagePath = images[index];
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(20.r),
-                    child: Image.asset(
-                      _imageList[index],
+                    child: Image.network(
+                      '${ApiConstants.baseUrl2}$imagePath',
                       fit: BoxFit.cover,
                       width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                        'assets/iphone.png',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
                     ),
                   );
                 },
               ),
-              if (_imageList.length > 1)
+              if (images.length > 1)
                 Positioned(
                   bottom: 20.h,
                   left: 0,
                   right: 0,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(_imageList.length, (index) {
+                    children: List.generate(images.length, (index) {
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         width: _currentImageIndex == index ? 8.w : 6.w,
@@ -289,14 +488,38 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildOwnerProfile() {
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: context.subTextColor,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w700,
+            color: context.textColor,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOwnerProfile(post) {
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => UserProfileScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => UserProfileScreen()),
         );
       },
       child: Container(
@@ -320,12 +543,25 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(30.r),
-              child: Image.asset(
-                'assets/profile2.png',
-                width: 56.r,
-                height: 56.r,
-                fit: BoxFit.cover,
-              ),
+              child: post.userImage != null && post.userImage!.isNotEmpty
+                  ? Image.network(
+                      '${ApiConstants.baseUrl2}${post.userImage}',
+                      width: 56.r,
+                      height: 56.r,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                        'assets/profile2.png',
+                        width: 56.r,
+                        height: 56.r,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Image.asset(
+                      'assets/profile2.png',
+                      width: 56.r,
+                      height: 56.r,
+                      fit: BoxFit.cover,
+                    ),
             ),
             SizedBox(width: 15.w),
             Expanded(
@@ -335,7 +571,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   Row(
                     children: [
                       Text(
-                        'Riya',
+                        post.userName.isNotEmpty
+                            ? post.userName
+                            : 'User id-${post.userId}',
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w700,
@@ -354,7 +592,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           borderRadius: BorderRadius.circular(10.r),
                         ),
                         child: Text(
-                          'Giving',
+                          (post.postType.toLowerCase() == 'take' ||
+                                  post.postType.toLowerCase() == 'taking')
+                              ? 'Taking'
+                              : 'Giving',
                           style: TextStyle(
                             color: const Color(0xFF6B4EE0),
                             fontSize: 10.sp,
@@ -371,7 +612,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       Icon(Icons.star, color: Colors.amber, size: 16.sp),
                       SizedBox(width: 4.w),
                       Text(
-                        '4.8',
+                        post.userRating?.toString() ?? '4.8',
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w700,

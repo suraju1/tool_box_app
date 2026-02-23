@@ -137,12 +137,22 @@ class _OtpScreenState extends State<OtpScreen> {
 
       if (!mounted) return;
 
-      // Navigate to home screen
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.bottomNavBar,
-        (route) => false,
-      );
+      // Check if profile is complete
+      if (user != null && user.isProfileComplete == 1) {
+        // Navigate to home screen
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.bottomNavBar,
+          (route) => false,
+        );
+      } else {
+        // Navigate to complete profile screen (SignUp)
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.signUp,
+          arguments: _phoneNumber,
+        );
+      }
     } else {
       // Show error
       final error = authController.errorMessage;
@@ -233,12 +243,14 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
               SizedBox(height: 48.h),
               // 6 OTP input fields
+              // 6 OTP input fields
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(6, (index) {
                   return Container(
                     width: 50.w,
                     height: 60.h,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: _controllers[index].text.isNotEmpty
@@ -247,30 +259,73 @@ class _OtpScreenState extends State<OtpScreen> {
                       ),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
-                    child: TextField(
-                      controller: _controllers[index],
-                      focusNode: _focusNodes[index],
-                      onChanged: (value) {
-                        if (value.isNotEmpty && index < 5) {
-                          _focusNodes[index + 1].requestFocus();
-                        } else if (value.isEmpty && index > 0) {
-                          _focusNodes[index - 1].requestFocus();
+                    child: KeyboardListener(
+                      focusNode:
+                          FocusNode(), // Dummy node to receive events bubbling up
+                      onKeyEvent: (event) {
+                        if (event is KeyDownEvent &&
+                            event.logicalKey == LogicalKeyboardKey.backspace) {
+                          if (_controllers[index].text.isEmpty && index > 0) {
+                            // Move focus to previous field and clear it to allow easy re-typing
+                            _focusNodes[index - 1].requestFocus();
+                            // Optional: Clear previous field when backspacing into it?
+                            // Usually "Move to prev" is enough, user can backspace again to clear.
+                            // But usually users expect backspace to delete the prev char immediately
+                            // if the current was empty? Let's stick to just moving focus.
+                            // Actually, let's select the text in previous so typing replaces it?
+                            // No, standard is just move focus.
+                          }
                         }
-                        setState(() {});
                       },
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(1),
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w700,
-                        color: defoultColor,
-                      ),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
+                      child: TextField(
+                        controller: _controllers[index],
+                        focusNode: _focusNodes[index],
+                        onChanged: (value) {
+                          if (value.length == 1 && index < 5) {
+                            _focusNodes[index + 1].requestFocus();
+                          } else if (value.isEmpty && index > 0) {
+                            // Handled by KeyboardListener mostly, but fallback for 1->0 transition
+                            _focusNodes[index - 1].requestFocus();
+                          } else if (value.length > 1) {
+                            // Handle paste
+                            String code = value;
+                            // Reset current controller to first digit or empty (we will loop)
+                            _controllers[index].text = "";
+
+                            // Distribute
+                            for (int i = 0; i < code.length; i++) {
+                              if (index + i < 6) {
+                                _controllers[index + i].text = code[i];
+                              }
+                            }
+
+                            // Move focus to last filled
+                            int nextIndex = index + code.length;
+                            if (nextIndex >= 6) nextIndex = 5;
+                            _focusNodes[nextIndex].requestFocus();
+                            setState(() {});
+                          }
+                          setState(() {});
+                        },
+                        textAlign: TextAlign.center,
+                        textAlignVertical: TextAlignVertical.center,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          // Removed LengthLimitingTextInputFormatter to allow paste
+                        ],
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w700,
+                          color: defoultColor,
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          // Make entire box tappable/centered
+                          contentPadding: EdgeInsets.zero,
+                          isDense: true,
+                          counterText: '',
+                        ),
                       ),
                     ),
                   );

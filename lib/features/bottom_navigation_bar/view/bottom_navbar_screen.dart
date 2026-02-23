@@ -9,6 +9,7 @@ import 'package:tool_bocs/features/trades/view/give_screen.dart';
 import 'package:tool_bocs/features/trades/view/take_screen.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/features/chat/view/chat_list_screen.dart';
+import 'package:tool_bocs/features/chat/controller/chat_service.dart';
 import '../controller/bottom_navbar_controller.dart';
 
 class BottomNavBarScreen extends StatelessWidget {
@@ -66,14 +67,92 @@ class BottomNavBarScreen extends StatelessWidget {
             label: 'Give',
           ),
           BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/icons/chat.svg',
-              colorFilter: ColorFilter.mode(greyColor, BlendMode.srcIn),
-            ), // Icon(Icons.chat_outlined),
-            activeIcon: SvgPicture.asset(
-              'assets/icons/chat.svg',
-              colorFilter: ColorFilter.mode(defoultColor, BlendMode.srcIn),
-            ), // Icon(Icons.chat),
+            icon: StreamBuilder<int>(
+              stream: ChatService().getTotalUnreadCount(),
+              builder: (context, snapshot) {
+                int count = snapshot.data ?? 0;
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/icons/chat.svg',
+                      colorFilter: ColorFilter.mode(greyColor, BlendMode.srcIn),
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: -5,
+                        top: -5,
+                        child: Container(
+                          padding: EdgeInsets.all(4.r),
+                          decoration: BoxDecoration(
+                            color: defoultColor, // Blue badge as requested
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: 16.r,
+                            minHeight: 16.r,
+                          ),
+                          child: Center(
+                            child: Text(
+                              count > 99 ? '99+' : count.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+            activeIcon: StreamBuilder<int>(
+              stream: ChatService().getTotalUnreadCount(),
+              builder: (context, snapshot) {
+                int count = snapshot.data ?? 0;
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/icons/chat.svg',
+                      colorFilter:
+                          ColorFilter.mode(defoultColor, BlendMode.srcIn),
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: -5,
+                        top: -5,
+                        child: Container(
+                          padding: EdgeInsets.all(4.r),
+                          decoration: BoxDecoration(
+                            color: defoultColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: 16.r,
+                            minHeight: 16.r,
+                          ),
+                          child: Center(
+                            child: Text(
+                              count > 99 ? '99+' : count.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
             label: 'Chat',
           ),
           BottomNavigationBarItem(

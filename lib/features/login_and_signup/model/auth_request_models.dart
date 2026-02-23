@@ -1,5 +1,6 @@
 /// Request model for user registration
 class RegisterRequest {
+  final int userId;
   final String phoneNumber;
   final String fullName;
   final String email;
@@ -11,6 +12,7 @@ class RegisterRequest {
   final bool termsAccepted;
 
   RegisterRequest({
+    required this.userId,
     required this.phoneNumber,
     required this.fullName,
     required this.email,
@@ -25,6 +27,7 @@ class RegisterRequest {
   /// Convert to JSON for API request
   Map<String, dynamic> toJson() {
     return {
+      'user_id': userId,
       'phone_number': phoneNumber,
       'full_name': fullName,
       'email': email,
