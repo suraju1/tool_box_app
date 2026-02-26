@@ -392,7 +392,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             ),
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.tradeStep1);
+                // not required for now directly offer screen
+                // Navigator.pushNamed(context, AppRoutes.tradeStep1);
+                Navigator.pushNamed(context, AppRoutes.tradeOffer);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: appColor,

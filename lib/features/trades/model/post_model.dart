@@ -32,7 +32,6 @@ class PostModel {
   final String userName;
   final String? userImage;
   final double? userRating;
-<<<<<<< HEAD
   final double? distanceKm;
   final int? responseCount;
 
