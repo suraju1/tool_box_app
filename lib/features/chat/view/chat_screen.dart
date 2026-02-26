@@ -165,6 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       }
 
                       return ListView.builder(
+                        reverse: true,
                         padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 20.h),
                         itemCount: docs.length,
                         // Reverse if you want latest at bottom and ListView is reversed.
@@ -505,7 +506,6 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       child: Row(
         children: [
-
           //no need to show attachment icon
           // IconButton(
           //   icon: Icon(Icons.attach_file, color: appColor, size: 28),
