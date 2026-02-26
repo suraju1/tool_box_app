@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
-import 'package:tool_bocs/core/widgets/logout_dialog.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/core/widgets/user_review_dialog.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -18,6 +17,8 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
+  bool _isUserSaved = false;
+
   @override
   Widget build(BuildContext context) {
     final shimmer = context.watch<ShimmerController>();
@@ -605,11 +606,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Widget _saveUserButton(BuildContext context) {
-    bool isSaved = false;
     return GestureDetector(
       onTap: () {
         setState(() {
-          isSaved = !isSaved;
+          _isUserSaved = !_isUserSaved;
         });
       },
       child: Container(
@@ -626,13 +626,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isSaved ? Icons.bookmark : Icons.bookmark_border,
+              _isUserSaved ? Icons.bookmark : Icons.bookmark_border,
               size: 25.sp,
               color: whiteColor,
             ),
             SizedBox(width: 8.w),
             Text(
-              isSaved ? 'Saved' : 'Save User',
+              _isUserSaved ? 'Saved' : 'Save User',
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
@@ -643,66 +643,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ],
         ),
       ),
-    );
-  }
-
-// commented
-  Widget _buildSettingsList(BuildContext context) {
-    return Container(
-      alignment: Alignment.centerLeft,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: context.dividerColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _buildSettingsItem(context, Icons.settings_outlined, 'Settings'),
-          Divider(height: 1, color: greyColor.withOpacity(0.4), thickness: 1),
-          _buildSettingsItem(context, Icons.wb_sunny_outlined, 'Theme'),
-          Divider(height: 1, color: greyColor.withOpacity(0.4), thickness: 1),
-          _buildSettingsItem(
-              context, Icons.visibility_outlined, 'Visibility options'),
-          Divider(height: 1, color: greyColor.withOpacity(0.4), thickness: 1),
-          _buildSettingsItem(context, Icons.person_outline, 'Account Centre'),
-          Divider(height: 1, color: greyColor.withOpacity(0.4), thickness: 1),
-          _buildSettingsItem(
-              context, Icons.messenger_outline, 'Report a Problem'),
-          Divider(height: 1, color: greyColor.withOpacity(0.4), thickness: 1),
-          _buildSettingsItem(context, Icons.logout, 'Logout', isLogout: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingsItem(BuildContext context, IconData icon, String label,
-      {bool isLogout = false}) {
-    return ListTile(
-      leading: Icon(icon, color: isLogout ? Colors.red : context.textColor),
-      title: Text(label,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            fontFamily: FontFamily.openSans,
-            color: isLogout ? Colors.red : context.textColor,
-          )),
-      trailing: isLogout
-          ? null
-          : Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: context.textColor,
-            ),
-      onTap: () {
-        if (isLogout) {
-          showDialog(
-            context: context,
-            builder: (context) => const LogoutDialog(),
-          );
-        }
-      },
     );
   }
 

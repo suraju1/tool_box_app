@@ -24,7 +24,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'Passionate about sustainability and community. I love to give books and take plants! Always open to new experiences.');
 
   bool _profileVisibility = true;
-  final bool _showRatings = true;
   bool _showTradeHistory = false;
 
   @override

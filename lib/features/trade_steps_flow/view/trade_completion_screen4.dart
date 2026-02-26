@@ -114,7 +114,7 @@ class TradeCompletionScreen extends StatelessWidget {
     final tradeController = context.watch<TradeController>();
     final post = tradeController.selectedPost;
     final otherUserId = post?.userId.toString() ?? 'Unknown';
-    final otherUserName = 'User $otherUserId';
+    final otherUserName = post?.userName ?? 'User $otherUserId';
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w),

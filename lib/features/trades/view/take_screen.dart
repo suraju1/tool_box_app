@@ -58,17 +58,14 @@ class _TakeScreenState extends State<TakeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // We can use a Selector or Consumer. Consumer is fine here.
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       body: Consumer<TradeController>(
         builder: (context, controller, child) {
-          // Initial loading state (only when list is empty)
           if (controller.isTakeLoading && controller.takePosts.isEmpty) {
             return _buildShimmer(context);
           }
 
-          // Error state
           if (controller.errorMessage != null && controller.takePosts.isEmpty) {
             return Center(
               child: Column(
@@ -137,7 +134,6 @@ class _TakeScreenState extends State<TakeScreen> {
                                   );
                                 }
 
-                                // Optional: Add header showing results count if it's the first item
                                 if (index == 0) {
                                   return Column(
                                     children: [
@@ -163,7 +159,6 @@ class _TakeScreenState extends State<TakeScreen> {
                   ),
                 ],
               ),
-              // Create Post Button section
               Positioned(
                 bottom: 0,
                 left: 0,

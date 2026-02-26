@@ -60,7 +60,6 @@ class FirebaseNotificationService {
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         debugPrint('A new onMessageOpenedApp event was published!');
         // Navigation logic is handled in NotificationService.init() via onDidReceiveNotificationResponse
-        // But we might need to handle it here if the app was effectively "woken up" from background to specific screen
       });
 
       // 5. Get and Save Token

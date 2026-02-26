@@ -21,13 +21,11 @@ class GiveScreen extends StatefulWidget {
 
 class _GiveScreenState extends State<GiveScreen> {
   late ScrollController _scrollController;
-  final bool _isHeaderVisible = true;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    // _scrollController.addListener(_scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final locationController = context.read<LocationController>();
       final tradeController = context.read<TradeController>();
@@ -53,39 +51,19 @@ class _GiveScreenState extends State<GiveScreen> {
     }
   }
 
-  // void _scrollListener() {
-  //   if (_scrollController.position.userScrollDirection ==
-  //       ScrollDirection.reverse) {
-  //     if (_isHeaderVisible) {
-  //       setState(() {
-  //         _isHeaderVisible = false;
-  //       });
-  //     }
-  //   } else if (_scrollController.position.userScrollDirection ==
-  //       ScrollDirection.forward) {
-  //     if (!_isHeaderVisible) {
-  //       setState(() {
-  //         _isHeaderVisible = true;
-  //       });
-  //     }
-  //   }
-  // }
-
   @override
   void dispose() {
-    // _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // final shimmer = context.watch<ShimmerController>(); // Use TradeController loading state
     final tradeController = context.watch<TradeController>();
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: tradeController.isGiveLoading
+      body: tradeController.isGiveLoading && tradeController.givePosts.isEmpty
           ? _buildShimmer(context)
           : Stack(
               children: [
@@ -97,22 +75,12 @@ class _GiveScreenState extends State<GiveScreen> {
                       height: 0.h,
                       thickness: 0.5,
                     ),
-                    // InkWell(
-                    //   onTap: () => showModalBottomSheet(
-                    //     context: context,
-                    //     isScrollControlled: true,
-                    //     backgroundColor: Colors.transparent,
-                    //     builder: (context) => const FilterBottomSheet(),
-                    //   ),
-                    //   child: _buildFilterButton(context),
-                    // ),
-
                     Expanded(
                       child: RefreshIndicator(
                         onRefresh: () async {
                           await context
                               .read<TradeController>()
-                              .fetchGivePosts();
+                              .fetchGivePosts(refresh: true);
                         },
                         child: tradeController.givePosts.isEmpty &&
                                 !tradeController.isGiveLoading
@@ -145,7 +113,7 @@ class _GiveScreenState extends State<GiveScreen> {
                                     1 +
                                     (tradeController.isGiveLoadMoreRunning
                                         ? 1
-                                        : 0), // +1 for header, +1 for loader
+                                        : 0),
                                 itemBuilder: (context, index) {
                                   if (index == 0) {
                                     return _buildResultHeader(context,
@@ -178,10 +146,11 @@ class _GiveScreenState extends State<GiveScreen> {
                                       distance: post.distanceKm != null
                                           ? '${post.distanceKm!.toStringAsFixed(1)} km away'
                                           : '- km away',
-                                      rating: '4.5', // Placeholder
-                                      actionLabel: post.postType == 'give'
-                                          ? 'Take'
-                                          : 'Give', // Inverse action logic
+                                      rating: '4.5',
+                                      actionLabel:
+                                          post.postType.toLowerCase() == 'give'
+                                              ? 'Take'
+                                              : 'Give',
                                       description: post.itemNote,
                                       imagePath: post.itemImages.isNotEmpty
                                           ? post.itemImages.first
@@ -195,7 +164,6 @@ class _GiveScreenState extends State<GiveScreen> {
                     ),
                   ],
                 ),
-                // Create Give Post Button section
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -203,9 +171,7 @@ class _GiveScreenState extends State<GiveScreen> {
                   child: Container(
                     height: 80.h,
                     width: double.infinity,
-                    padding: EdgeInsets.only(
-                      bottom: 15.h,
-                    ),
+                    padding: EdgeInsets.only(bottom: 15.h),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30.r),
@@ -224,10 +190,6 @@ class _GiveScreenState extends State<GiveScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(height: 16.h),
-                        // createFloatingActionButton(
-                        //   context: context,
-                        //   label: 'Create Give Post',
-                        // ),
                         Container(
                           width: 180.w,
                           height: 45.h,
@@ -255,7 +217,6 @@ class _GiveScreenState extends State<GiveScreen> {
                                       color: whiteColor, size: 28.sp),
                                   Text(
                                     "Make a New Post",
-                                    // " Create Take Post",
                                     style: TextStyle(
                                       color: whiteColor,
                                       fontSize: 14.sp,
@@ -268,32 +229,12 @@ class _GiveScreenState extends State<GiveScreen> {
                             ),
                           ),
                         )
-                        // Text(
-                        //   '(Initiate Trade)',
-                        //   style: TextStyle(
-                        //     color: defoultColor,
-                        //     fontSize: 12.sp,
-                        //     fontWeight: FontWeight.w600,
-                        //   ),
-                        // ),
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor: defoultColor,
-      //   onPressed: () {
-      //     Navigator.pushNamed(context, AppRoutes.createGivePost);
-      //   },
-      //   child: Icon(Icons.add, color: whiteColor, size: 28.sp),
-      // ),
-      // floatingActionButton: createFloatingActionButton(
-      //   context: context,
-      //   label: 'Create Give Post',
-      // ),
     );
   }
 
@@ -430,11 +371,6 @@ class _GiveScreenState extends State<GiveScreen> {
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.r),
-
-                // image: const DecorationImage(
-                //   image: AssetImage('assets/iphone.png'),
-                //   fit: BoxFit.cover,
-                // ),
               ),
               child: imagePath != null
                   ? Image.network(
@@ -455,7 +391,7 @@ class _GiveScreenState extends State<GiveScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          "$owner's ${postType == 'give' ? 'Giving' : 'Taking'}",
+                          "$owner's ${postType?.toLowerCase() == 'give' ? 'Giving' : 'Taking'}",
                           style: TextStyle(
                             fontSize: 9.sp,
                             color: context.subTextColor,

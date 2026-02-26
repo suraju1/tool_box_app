@@ -127,11 +127,12 @@ class ApiClient {
         return ApiException('SSL certificate verification failed');
 
       case DioExceptionType.unknown:
-      default:
         if (error.message?.contains('SocketException') ?? false) {
           return NetworkException();
         }
         return UnknownException(error.message ?? 'Unknown error occurred');
+      default:
+        return ApiException(error.message ?? 'An unexpected error occurred');
     }
   }
 

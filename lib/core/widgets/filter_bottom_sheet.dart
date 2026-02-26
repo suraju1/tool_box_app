@@ -14,17 +14,6 @@ class FilterBottomSheet extends StatefulWidget {
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
-  // final List<String> categories = [
-  //   'Mobiles',
-  //   'Electronics',
-  //   'Furniture',
-  //   'Home',
-  //   'Fashion',
-  //   'Books',
-  //   'Sports',
-  //   'Others'
-  // ];
-
   @override
   void initState() {
     super.initState();
@@ -51,6 +40,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   double distance = 10.0;
   String selectedRating = 'All';
   String returnType = 'All';
+  String selectedPostType = 'all';
   String selectedSort = 'Nearest First';
 
   @override
@@ -78,6 +68,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 Divider(color: context.dividerColor, thickness: 1),
                 _buildCategorySection(),
                 SizedBox(height: 12.h),
+                // _buildPostTypeSection(),
+                // SizedBox(height: 12.h),
                 _buildDistanceSection(),
                 SizedBox(height: 12.h),
                 _buildRatingSection(),
@@ -302,20 +294,19 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   color: isSelected ? defoultColor : context.surfaceColor,
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                    color:
-                        isSelected ? defoultColor : greyColor.withOpacity(0.4),
-                  ),
+                      color: isSelected
+                          ? defoultColor
+                          : greyColor.withOpacity(0.4)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (!isAll) ...[
-                      Icon(
-                        Icons.star,
-                        color:
-                            isSelected ? Colors.yellow : Colors.yellow.shade700,
-                        size: 16.sp,
-                      ),
+                      Icon(Icons.star,
+                          color: isSelected
+                              ? Colors.yellow
+                              : Colors.yellow.shade700,
+                          size: 16.sp),
                       SizedBox(width: 5.w),
                     ],
                     Text(
@@ -386,28 +377,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: () {
-              final controller = context.read<TradeController>();
-
-              // Apply all filters to controller
-              controller.setDistance(distance);
-              controller.updateFilters(
-                categories: selectedCategories,
-                rating: selectedRating,
-                returnType: returnType,
-                sort: selectedSort,
-                postType: selectedPostType,
-              );
-
-              if (selectedPostType == 'give') {
-                controller.fetchGivePosts(refresh: true);
-              } else if (selectedPostType == 'take') {
-                controller.fetchTakePosts(refresh: true);
-              } else {
-                controller.fetchHomePosts(refresh: true);
-              }
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: defoultColor,
               shape: RoundedRectangleBorder(
@@ -436,7 +406,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 selectedRating = 'All';
                 returnType = 'All';
                 selectedSort = 'Nearest First';
-                selectedPostType = widget.initialPostType ?? 'all';
               });
             },
             style: ElevatedButton.styleFrom(
@@ -458,8 +427,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ],
     );
   }
-
-  String selectedPostType = 'all'; // Default
 
   TextStyle _sectionTitleStyle() {
     return TextStyle(
