@@ -8,7 +8,7 @@ import 'package:tool_bocs/features/chat/view/chat_screen.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 
 class TradeCompletionScreen extends StatelessWidget {
-  TradeCompletionScreen({super.key});
+  const TradeCompletionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

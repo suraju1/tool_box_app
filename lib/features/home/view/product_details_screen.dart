@@ -8,6 +8,7 @@ import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final int postId;
@@ -379,10 +380,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           );
         },
       ),
-      bottomNavigationBar: Consumer<TradeController>(
-        builder: (context, controller, child) {
-          final post = controller.selectedPost;
+      bottomNavigationBar: Consumer2<TradeController, AuthController>(
+        builder: (context, tradeController, authController, child) {
+          final post = tradeController.selectedPost;
           if (post == null) return const SizedBox.shrink();
+
+          // Hide the button if the current user is the owner of the post
+          if (authController.currentUser?.id == post.userId) {
+            return const SizedBox.shrink();
+          }
 
           return Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
@@ -392,7 +398,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             ),
             child: ElevatedButton(
               onPressed: () {
-                // not required for now directly offer screen
+                // not required for now directly offer screen(becaue we consider first step as create post)
                 // Navigator.pushNamed(context, AppRoutes.tradeStep1);
                 Navigator.pushNamed(context, AppRoutes.tradeOffer);
               },

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -23,9 +25,13 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tradeController = context.watch<TradeController>();
+    final post = tradeController.selectedPost;
+
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      appBar: _buildAppBar(context),
+      appBar:
+          _buildAppBar(context, post?.itemName ?? 'NA', post?.userName ?? '-'),
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -39,7 +45,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildRecipientCard(),
+                      _buildRecipientCard(post),
                       SizedBox(height: 24.h),
                       Text(
                         'Take ( What you want in Return? )',
@@ -53,8 +59,8 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       SizedBox(height: 16.h),
                       _buildReturnOption(
                         type: ReturnType.rohanGiving,
-                        title: "Take what Rohan’s giving",
-                        child: _buildItemPreviewCard(),
+                        title: "Take what ${post?.userName ?? '-'}’s giving",
+                        child: _buildItemPreviewCard(post),
                       ),
                       SizedBox(height: 12.h),
                       _buildReturnOption(
@@ -92,7 +98,8 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  PreferredSizeWidget _buildAppBar(
+      BuildContext context, String itemName, String userName) {
     return AppBar(
       backgroundColor: context.scaffoldBg,
       elevation: 0,
@@ -102,7 +109,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       ),
       centerTitle: true,
       title: Text(
-        'Give Icecream to Rohan',
+        'Give $itemName to $userName',
         style: TextStyle(
           color: context.textColor,
           fontSize: 18.sp,
@@ -141,7 +148,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
     );
   }
 
-  Widget _buildRecipientCard() {
+  Widget _buildRecipientCard(dynamic post) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -161,9 +168,6 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /*
-          
-          */
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -186,7 +190,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                             ),
                             SizedBox(height: 4.h),
                             Text(
-                              'Rohan Sharma',
+                              post?.userName ?? '-',
                               style: TextStyle(
                                 fontSize: 20.sp,
                                 fontWeight: FontWeight.w800,
@@ -200,7 +204,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      'Rohan’s Taking',
+                      '${post?.userName ?? '-'}’s Taking',
                       style: TextStyle(
                         color: greyColor,
                         fontSize: 12.sp,
@@ -209,7 +213,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      '1L Vanilla Ice Cream',
+                      post?.itemName ?? 'NA',
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w800,
@@ -218,11 +222,11 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       ),
                     ),
                     SizedBox(height: 16.h),
-                    _buildIconLabel(
-                        context, Icons.swap_horiz, 'Take Type : ', 'Permanent'),
+                    _buildIconLabel(context, Icons.swap_horiz, 'Take Type : ',
+                        post?.tradeType ?? 'Permanent'),
                     SizedBox(height: 4.h),
                     _buildIconLabel(context, Icons.category_outlined,
-                        'Category : ', 'Other'),
+                        'Category : ', post?.itemCategory ?? 'Other'),
                   ],
                 ),
               ),
@@ -235,8 +239,12 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                     margin: EdgeInsets.only(left: 6.w),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12.r),
-                      image: const DecorationImage(
-                        image: AssetImage('assets/iphone.png'), // Placeholder
+                      image: DecorationImage(
+                        image: (post?.itemImages != null &&
+                                post!.itemImages.isNotEmpty)
+                            ? NetworkImage(post.itemImages.first)
+                                as ImageProvider
+                            : const AssetImage('assets/iphone.png'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -251,7 +259,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                             color: context.subTextColor, size: 18.sp),
                         SizedBox(width: 4.w),
                         Text(
-                          '0.4 miles away',
+                          '${post?.distanceKm?.toStringAsFixed(1) ?? '0.4'} km away',
                           style: TextStyle(
                             color: context.subTextColor,
                             fontSize: 12.sp,
@@ -382,7 +390,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
     );
   }
 
-  Widget _buildItemPreviewCard() {
+  Widget _buildItemPreviewCard(dynamic post) {
     return Container(
       margin: EdgeInsets.only(top: 16.h),
       padding: EdgeInsets.all(12.w),
@@ -398,8 +406,13 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             height: 50.h,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.r),
-              image: const DecorationImage(
-                image: AssetImage('assets/iphone.png'), // Placeholder
+              image: DecorationImage(
+                image: (post?.returnItemImages != null &&
+                        post!.returnItemImages.isNotEmpty)
+                    ? NetworkImage(post.returnItemImages.first) as ImageProvider
+                    : (post?.itemImages != null && post!.itemImages.isNotEmpty)
+                        ? NetworkImage(post.itemImages.first) as ImageProvider
+                        : const AssetImage('assets/iphone.png'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -410,7 +423,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Organic Apples (2kg)',
+                  post?.returnItemName ?? 'Organic Apples (2kg)',
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -418,7 +431,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                   ),
                 ),
                 Text(
-                  'Food',
+                  post?.returnItemCategory ?? 'Food',
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: context.subTextColor,
