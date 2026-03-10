@@ -3,142 +3,360 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/chat/view/chat_screen.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 
-class NotificationsScreen extends StatelessWidget {
-  const NotificationsScreen({super.key});
+class NotificationsScreen extends StatefulWidget {
+  final int? postId;
+  const NotificationsScreen({super.key, this.postId});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final tradeController = context.read<TradeController>();
+      if (widget.postId != null) {
+        tradeController.fetchPostResponses(widget.postId!);
+      } else {
+        tradeController.fetchAllPostResponses();
+        tradeController.fetchSentResponses();
+      }
+    });
+  }
+
+  void _onResponseTap(TradeResponseModel response) async {
+    final tradeController = context.read<TradeController>();
+
+    // Show loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      // Set selected response
+      tradeController.setSelectedResponse(response);
+
+      // Always fetch full post details to ensure all fields (like userId) are present
+      await tradeController.fetchPostDetails(response.postId);
+
+      // Final check if post details were actually loaded
+      if (tradeController.selectedPost == null) {
+        throw 'Failed to load post details. Please try again.';
+      }
+
+      if (mounted) Navigator.pop(context); // Close loading overlay
+
+      // Navigation logic based on status and role
+      if (mounted) {
+        if (response.status == 'pending') {
+          Navigator.pushNamed(context, AppRoutes.tradeStart);
+        } else if (response.status == 'rejected') {
+          // You can show a specific rejection details screen or just show the offer details
+          // For now, let's keep it on tradeStart or a dedicated details view if available
+          Navigator.pushNamed(context, AppRoutes.tradeStart);
+        } else if (response.status == 'accepted' ||
+            response.status == 'meeting_set' ||
+            response.status == 'paid' ||
+            response.status == 'completed') {
+          final authController = context.read<AuthController>();
+          final isOwner =
+              authController.currentUser?.id == response.posterUserId;
+
+          if (isOwner) {
+            if (response.paymentStatus == 'paid' ||
+                response.status == 'paid' ||
+                response.status == 'completed') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    otherUserId: response.responderId.toString(),
+                    otherUserName: response.responderName,
+                    tradeResponse: response,
+                  ),
+                ),
+              );
+            } else {
+              ToastService.showErrorToast(
+                context,
+                'Waiting for partner response',
+              );
+            }
+          } else {
+            Navigator.pushNamed(context, AppRoutes.tradeCompletion);
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading overlay
+        ToastService.showErrorToast(context, e.toString());
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final shimmer = context.watch<ShimmerController>();
+    if (widget.postId != null) {
+      return _buildSinglePostResponsesView(context);
+    }
 
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: context.scaffoldBg,
+        appBar: _buildAppBar(context),
+        body: TabBarView(
+          children: [
+            _buildResponsesListView(context, isIncoming: true),
+            _buildResponsesListView(context, isIncoming: false),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSinglePostResponsesView(BuildContext context) {
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       appBar: _buildAppBar(context),
-      body: shimmer.isLoading
-          ? _buildShimmer(context)
-          : SingleChildScrollView(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: _buildResponsesListView(context, isIncoming: true),
+    );
+  }
+
+  Widget _buildResponsesListView(BuildContext context,
+      {required bool isIncoming}) {
+    final shimmer = context.watch<ShimmerController>();
+    final tradeController = context.watch<TradeController>();
+    final allResponses = isIncoming
+        ? tradeController.postResponses
+        : tradeController.sentResponses;
+
+    if (shimmer.isLoading || tradeController.isLoading) {
+      return _buildShimmer(context);
+    }
+
+    // Filter into Active and History
+    final activeResponses = allResponses.where((r) {
+      return r.status == 'pending' || r.status == 'meeting_set';
+    }).toList();
+
+    final historyResponses = allResponses.where((r) {
+      return r.status == 'completed' ||
+          r.status == 'accepted' ||
+          r.status == 'rejected' ||
+          r.status == 'paid';
+    }).toList();
+
+    // Sort History by date (newest first)
+    historyResponses.sort((a, b) {
+      try {
+        DateTime dateA = DateTime.parse(a.createdAt);
+        DateTime dateB = DateTime.parse(b.createdAt);
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return 0;
+      }
+    });
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(vertical: 20.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            context,
+            widget.postId != null
+                ? 'Responses for ${tradeController.responsesPost?.itemName ?? 'Post'} (${activeResponses.length})'
+                : isIncoming
+                    ? 'Incoming Offers (${activeResponses.length})'
+                    : 'Sent Offers (${activeResponses.length})',
+          ),
+          if (activeResponses.isEmpty)
+            Center(
+              child: Padding(
+                padding: EdgeInsets.all(40.w),
+                child: Text(
+                  'No active offers yet',
+                  style: TextStyle(color: context.subTextColor),
+                ),
+              ),
+            )
+          else
+            ...activeResponses.map((response) =>
+                _buildResponseCard(context, response, isIncoming)),
+          if (historyResponses.isNotEmpty) ...[
+            SizedBox(height: 20.h),
+            _buildSuggestionsSection(context, historyResponses, isIncoming),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResponseCard(
+      BuildContext context, TradeResponseModel response, bool isIncoming) {
+    List<TextSpan> messageSpans = [];
+    String subText = '';
+    String actionLabel = '';
+    Color actionColor = appColor;
+
+    if (response.responseType == 'price' || response.responseType == 'Price') {
+      messageSpans = [
+        TextSpan(
+            text: response.responderName,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        const TextSpan(text: ' offered '),
+        const TextSpan(
+            text: 'Price', style: TextStyle(fontWeight: FontWeight.bold)),
+      ];
+      subText =
+          'Price: ₹${response.priceRangeStart} - ₹${response.priceRangeEnd}';
+    } else {
+      messageSpans = [
+        TextSpan(
+            text: response.responderName,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        const TextSpan(text: ' offered '),
+        TextSpan(
+            text: response.itemName ?? 'an item',
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+      ];
+      subText =
+          'Category: ${response.itemCategory} | Condition: ${response.itemCondition}';
+    }
+
+    // If it's a global response, show which post it's for
+    if (widget.postId == null && response.postItemName != null) {
+      if (isIncoming) {
+        messageSpans = [
+          TextSpan(
+              text: response.responderName,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          const TextSpan(text: ' on your '),
+          TextSpan(
+              text: response.postItemName!,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+        ];
+      } else {
+        messageSpans = [
+          const TextSpan(text: 'Your offer on '),
+          TextSpan(
+              text: response.postItemName!,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+        ];
+      }
+    }
+
+    if (response.status == 'pending') {
+      actionLabel = isIncoming ? 'Review' : 'Waiting';
+      actionColor = appColor;
+    } else if (response.status == 'accepted') {
+      actionLabel = 'Continue';
+      actionColor = Colors.green;
+    } else if (response.status == 'rejected') {
+      actionLabel = 'Rejected';
+      actionColor = Colors.red;
+    } else {
+      actionLabel = 'Details';
+      actionColor = Colors.blue;
+    }
+
+    if (!isIncoming && response.posterName != null) {
+      messageSpans = [
+        const TextSpan(text: 'Your offer to '),
+        TextSpan(
+            text: response.posterName!,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        const TextSpan(text: ' on '),
+        TextSpan(
+            text: response.postItemName ?? 'item',
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+      ];
+    }
+
+    // Use response item image if available, else post image
+    final responseImagePath =
+        response.itemImages.isNotEmpty ? response.itemImages.first : '';
+    final postImagePath =
+        response.postItemImages.isNotEmpty ? response.postItemImages.first : '';
+    final imageToUse =
+        responseImagePath.isNotEmpty ? responseImagePath : postImagePath;
+
+    final imageUrl =
+        imageToUse.isNotEmpty ? '${ApiConstants.baseUrl2}$imageToUse' : '';
+
+    return _buildNotificationCard(
+      context,
+      imageUrl: imageUrl,
+      distance: 'Unknown',
+      message: messageSpans,
+      subMessage: [
+        TextSpan(text: subText),
+      ],
+      actions: [
+        _buildActionButton(actionLabel, actionColor, Colors.white,
+            () => _onResponseTap(response)),
+      ],
+      onTap: () => _onResponseTap(response),
+    );
+  }
+
+  Widget _buildSuggestionsSection(
+      BuildContext context, List<TradeResponseModel> history, bool isIncoming) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'History',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: FontFamily.openSans,
+                  color: context.textColor,
+                ),
+              ),
+              Row(
                 children: [
-                  _buildSectionHeader(context, 'Matches'),
-                  _buildNotificationCard(
-                    context,
-                    imagePath: 'assets/food1.png',
-                    distance: '75m',
-                    message: [
-                      const TextSpan(text: 'Gayatri is taking your '),
-                      const TextSpan(
-                        text: 'paneer',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                    subMessage: [
-                      const TextSpan(text: 'Giving you '),
-                      const TextSpan(
-                        text: 'palak paneer',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const TextSpan(text: ' in return'),
-                    ],
-                    actions: [
-                      _buildActionButton('Chat', appColor, Colors.white),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 15.w),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Suggestions',
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: FontFamily.openSans,
-                            color: context.textColor,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.filter_list_outlined,
-                                size: 18.sp, color: context.textColor),
-                            SizedBox(width: 4.w),
-                            Text(
-                              'Filter',
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w600,
-                                color: context.textColor,
-                                fontFamily: FontFamily.openSans,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                  Icon(Icons.history, size: 18.sp, color: context.textColor),
+                  SizedBox(width: 4.w),
+                  Text(
+                    'Recent',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: context.textColor,
+                      fontFamily: FontFamily.openSans,
                     ),
-                  ),
-                  SizedBox(height: 12.h),
-                  _buildNotificationCard(
-                    context,
-                    imagePath: 'assets/mobile1.png',
-                    distance: '75m',
-                    message: [
-                      const TextSpan(text: 'Riya is giving '),
-                      const TextSpan(
-                        text: 'Samsung S10 Ultra',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                    subMessage: [
-                      TextSpan(
-                        text: '(Permanent - Mobile - Like new)',
-                        style: TextStyle(
-                          color: context.subTextColor,
-                          fontSize: 11.sp,
-                        ),
-                      ),
-                    ],
-                    actions: [
-                      _buildActionButton('Take', appColor, Colors.white),
-                      SizedBox(width: 8.w),
-                      _buildActionButton(
-                          'Ignore', Colors.blue.withOpacity(0.1), appColor),
-                    ],
-                  ),
-                  _buildNotificationCard(
-                    context,
-                    imagePath: 'assets/veg1.png',
-                    distance: '75m',
-                    message: [
-                      const TextSpan(text: 'Suyash is taking '),
-                      const TextSpan(
-                        text: 'Bhaji',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                    subMessage: [
-                      TextSpan(
-                        text: 'Giving Grocery in return',
-                        style: TextStyle(
-                          color: context.subTextColor,
-                          fontSize: 11.sp,
-                        ),
-                      ),
-                    ],
-                    actions: [
-                      _buildActionButton('Give', appColor, Colors.white),
-                      SizedBox(width: 8.w),
-                      _buildActionButton(
-                          'Ignore', Colors.blue.withOpacity(0.1), appColor),
-                    ],
                   ),
                 ],
               ),
-            ),
+            ],
+          ),
+        ),
+        SizedBox(height: 12.h),
+        ...history.map(
+            (response) => _buildResponseCard(context, response, isIncoming)),
+      ],
     );
   }
 
@@ -152,7 +370,7 @@ class NotificationsScreen extends StatelessWidget {
       ),
       centerTitle: true,
       title: Text(
-        'Notifications',
+        'Match Offers',
         style: TextStyle(
           color: context.textColor,
           fontSize: 18.sp,
@@ -160,10 +378,26 @@ class NotificationsScreen extends StatelessWidget {
           fontFamily: FontFamily.openSans,
         ),
       ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(10),
-        child: Divider(height: 1, color: greyColor.withOpacity(0.4)),
-      ),
+      bottom: widget.postId == null
+          ? TabBar(
+              dividerColor: Colors.transparent,
+              indicatorColor: appColor,
+              labelColor: appColor,
+              unselectedLabelColor: context.subTextColor,
+              labelStyle: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                fontFamily: FontFamily.openSans,
+              ),
+              tabs: const [
+                Tab(text: 'My Items'),
+                Tab(text: 'My Offers'),
+              ],
+            )
+          : PreferredSize(
+              preferredSize: const Size.fromHeight(10),
+              child: Divider(height: 1, color: greyColor.withOpacity(0.4)),
+            ),
     );
   }
 
@@ -184,124 +418,146 @@ class NotificationsScreen extends StatelessWidget {
 
   Widget _buildNotificationCard(
     BuildContext context, {
-    required String imagePath,
+    String? imagePath,
+    String? imageUrl,
     required String distance,
     required List<TextSpan> message,
     required List<TextSpan> subMessage,
     required List<Widget> actions,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 6.h),
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: context.isDarkMode
-            ? []
-            : [
-                BoxShadow(
-                  color: greyColor.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12.r),
-                child: Image.asset(
-                  imagePath,
-                  width: 85.w,
-                  height: 75.w,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 85.w,
-                    height: 75.w,
-                    color: context.isDarkMode
-                        ? Colors.white10
-                        : Colors.grey.shade200,
-                    child: Icon(Icons.image,
-                        color: context.isDarkMode
-                            ? Colors.white24
-                            : Colors.grey.shade400),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 6.h),
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: context.isDarkMode
+              ? []
+              : [
+                  BoxShadow(
+                    color: greyColor.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
-                ),
-              ),
-              Positioned(
-                top: 6.h,
-                left: 6.w,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
-                  decoration: BoxDecoration(
-                    color: blackColor.withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                  child: Text(
-                    distance,
-                    style: TextStyle(
-                      color: whiteColor,
-                      fontSize: 8.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+                ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: context.textColor,
-                      fontFamily: FontFamily.openSans,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12.r),
+                  child: imageUrl != null && imageUrl.isNotEmpty
+                      ? Image.network(
+                          imageUrl,
+                          width: 85.w,
+                          height: 75.w,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              _buildImageErrorPlaceholder(context),
+                        )
+                      : imagePath != null
+                          ? Image.asset(
+                              imagePath,
+                              width: 85.w,
+                              height: 75.w,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  _buildImageErrorPlaceholder(context),
+                            )
+                          : _buildImageErrorPlaceholder(context),
+                ),
+                Positioned(
+                  top: 6.h,
+                  left: 6.w,
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                    decoration: BoxDecoration(
+                      color: blackColor.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(4.r),
                     ),
-                    children: message,
+                    child: Text(
+                      distance,
+                      style: TextStyle(
+                        color: whiteColor,
+                        fontSize: 8.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
-                SizedBox(height: 2.h),
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: context.subTextColor,
-                      fontFamily: FontFamily.openSans,
-                    ),
-                    children: subMessage,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Row(children: actions),
               ],
             ),
-          ),
-        ],
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: context.textColor,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                      children: message,
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: context.subTextColor,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                      children: subMessage,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(children: actions),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildActionButton(String label, Color bgColor, Color textColor) {
+  Widget _buildImageErrorPlaceholder(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(6.r),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w600,
-          fontFamily: FontFamily.openSans,
+      width: 85.w,
+      height: 75.w,
+      color: context.isDarkMode ? Colors.white10 : Colors.grey.shade200,
+      child: Icon(Icons.image,
+          color: context.isDarkMode ? Colors.white24 : Colors.grey.shade400),
+    );
+  }
+
+  Widget _buildActionButton(
+      String label, Color bgColor, Color textColor, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(6.r),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+            fontFamily: FontFamily.openSans,
+          ),
         ),
       ),
     );

@@ -11,6 +11,8 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
 import 'package:tool_bocs/features/login_and_signup/model/user_model.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'dart:convert';
 
 class ChatListScreen extends StatefulWidget {
@@ -176,16 +178,131 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 }
                               }
 
+                              final tradeDetails =
+                                  data['tradeDetails'] as Map<String, dynamic>?;
+                              TradeResponseModel? tradeResponse;
+                              if (tradeDetails != null &&
+                                  data['tradeId'] != null) {
+                                tradeResponse = TradeResponseModel(
+                                  id: data['tradeId'],
+                                  postId: tradeDetails['postId'] ?? 0,
+                                  responderId: tradeDetails['responderId'] ?? 0,
+                                  posterUserId:
+                                      tradeDetails['posterUserId'] ?? 0,
+                                  responderName:
+                                      tradeDetails['responderName'] ?? '',
+                                  responseType:
+                                      tradeDetails['responseType'] ?? 'item',
+                                  priceRangeStart:
+                                      tradeDetails['priceRangeStart']
+                                          ?.toDouble(),
+                                  priceRangeEnd:
+                                      tradeDetails['priceRangeEnd']?.toDouble(),
+                                  itemName: tradeDetails['itemName'],
+                                  postItemName: tradeDetails['postItemName'],
+                                  posterName: tradeDetails['posterName'],
+                                  createdAt:
+                                      '', // Not stored in details but required by model
+                                  status:
+                                      'accepted', // Assume accepted if they are chatting
+                                  posterMobile: tradeDetails['posterMobile'],
+                                  responderMobile:
+                                      tradeDetails['responderMobile'],
+                                  postType: tradeDetails['postType'],
+                                );
+                              }
+
+                              Widget? subtitleWidget;
+                              if (tradeResponse != null) {
+                                final isOwner = context
+                                        .read<AuthController>()
+                                        .currentUser
+                                        ?.id ==
+                                    tradeResponse.posterUserId;
+                                final isGivePost =
+                                    tradeResponse.postType?.toLowerCase() ==
+                                            'give' ||
+                                        tradeResponse.postType?.toLowerCase() ==
+                                            'giving';
+
+                                final myItem = isOwner
+                                    ? (isGivePost
+                                        ? tradeResponse.postItemName
+                                        : (tradeResponse.itemName ?? 'Price'))
+                                    : (isGivePost
+                                        ? (tradeResponse.itemName ?? 'Price')
+                                        : tradeResponse.postItemName);
+                                final theirItem = isOwner
+                                    ? (isGivePost
+                                        ? (tradeResponse.itemName ?? 'Price')
+                                        : tradeResponse.postItemName)
+                                    : (isGivePost
+                                        ? tradeResponse.postItemName
+                                        : (tradeResponse.itemName ?? 'Price'));
+
+                                subtitleWidget = Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          const TextSpan(text: "Trade: "),
+                                          TextSpan(
+                                            text: myItem,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          const TextSpan(text: " for "),
+                                          TextSpan(
+                                            text: theirItem,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        color: context.subTextColor,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      text,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: context.subTextColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                subtitleWidget = Text(
+                                  text,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: context.subTextColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                );
+                              }
+
                               return _buildChatItem(
                                 context,
                                 docs[index].id, // Pass chatRoomId
                                 displayName,
-                                text,
+                                subtitleWidget,
                                 timeString,
                                 unreadCountStr,
                                 false, // Online status not implemented
                                 'assets/profile1.png', // Placeholder image
                                 otherUserId: otherUserId,
+                                tradeResponse: tradeResponse,
                               );
                             },
                           );
@@ -286,12 +403,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
     BuildContext context,
     String chatRoomId,
     String name,
-    String message,
+    Widget messageWidget,
     String time,
     String unreadCount,
     bool isOnline,
     String imagePath, {
     required String otherUserId,
+    TradeResponseModel? tradeResponse,
   }) {
     return GestureDetector(
       onTap: () {
@@ -302,6 +420,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               chatRoomId: chatRoomId,
               otherUserId: otherUserId,
               otherUserName: name,
+              tradeResponse: tradeResponse,
             ),
           ),
         );
@@ -358,17 +477,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          message,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: context.subTextColor,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                        ),
+                        child: messageWidget,
                       ),
                       if (unreadCount.isNotEmpty && unreadCount != '0')
                         Container(

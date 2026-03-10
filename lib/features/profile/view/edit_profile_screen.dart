@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
@@ -11,23 +16,74 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  final TextEditingController _nameController =
-      TextEditingController(text: 'John Doe');
-  final TextEditingController _locationController =
-      TextEditingController(text: 'Pune, Maharashtra');
-  final TextEditingController _emailController =
-      TextEditingController(text: 'john.doe@example.com');
-  final TextEditingController _mobileController =
-      TextEditingController(text: '+91 9876987678');
-  final TextEditingController _bioController = TextEditingController(
-      text:
-          'Passionate about sustainability and community. I love to give books and take plants! Always open to new experiences.');
+  late final TextEditingController _nameController;
+  late final TextEditingController _locationController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _mobileController;
+  late final TextEditingController _bioController;
 
   bool _profileVisibility = true;
   bool _showTradeHistory = false;
+  File? _selectedImage;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = context.read<ProfileController>().userProfile?.userDetails;
+    _nameController = TextEditingController(text: profile?.fullName ?? '');
+    _locationController = TextEditingController(text: profile?.location ?? '');
+    _emailController = TextEditingController(text: profile?.email ?? '');
+    _mobileController = TextEditingController(text: profile?.phoneNumber ?? '');
+    _bioController = TextEditingController(text: profile?.bio ?? '');
+    _profileVisibility = profile?.profileVisibility == 1;
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  void _showImageSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Camera'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<ProfileController>();
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       appBar: _buildAppBar(context),
@@ -50,8 +106,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     helperText: 'Used for notifications and account recovery'),
                 _buildTextField('Mobile Number', _mobileController,
                     icon: Icons.phone_android_outlined,
-                    helperText: 'Changing number requires OTP verification',
-                    readOnly: true),
+                    helperText: 'Verified mobile number',
+                    readOnly: false),
                 SizedBox(height: 10.h),
                 _buildSectionTitle('Bio'),
                 SizedBox(height: 10.h),
@@ -115,7 +171,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ],
             ),
           ),
-          _buildSaveButton(),
+          _buildSaveButton(controller),
         ],
       ),
     );
@@ -154,26 +210,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 70.r,
-                backgroundImage: const AssetImage('assets/profile1.png'),
+                backgroundImage: _selectedImage != null
+                    ? FileImage(_selectedImage!) as ImageProvider
+                    : (context
+                                    .read<ProfileController>()
+                                    .userProfile
+                                    ?.userDetails
+                                    .image !=
+                                null
+                            ? NetworkImage(context
+                                .read<ProfileController>()
+                                .userProfile!
+                                .userDetails
+                                .image!)
+                            : const AssetImage('assets/profile1.png'))
+                        as ImageProvider,
               ),
               Positioned(
                 bottom: 2,
                 right: 2,
-                child: Container(
-                  padding: EdgeInsets.all(8.w),
-                  decoration: BoxDecoration(
-                    color: context.surfaceColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                          color: context.isDarkMode
-                              ? Colors.black54
-                              : Colors.black12,
-                          blurRadius: 4)
-                    ],
+                child: GestureDetector(
+                  onTap: _showImageSourceSheet,
+                  child: Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      color: context.surfaceColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                            color: context.isDarkMode
+                                ? Colors.black54
+                                : Colors.black12,
+                            blurRadius: 4)
+                      ],
+                    ),
+                    child: Icon(Icons.camera_alt,
+                        color: defoultColor, size: 24.sp),
                   ),
-                  child:
-                      Icon(Icons.camera_alt, color: defoultColor, size: 24.sp),
                 ),
               ),
             ],
@@ -396,30 +469,64 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(ProfileController controller) {
     return Positioned(
       bottom: 20.h,
       left: 20.w,
       right: 20.w,
-      child: ElevatedButton(
-        onPressed: () => Navigator.pop(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: defoultColor,
-          minimumSize: Size(double.infinity, 55.h),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-          elevation: 0,
-          shadowColor: defoultColor,
-        ),
-        child: Text(
-          'Save Changes',
-          style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              color: whiteColor,
-              fontFamily: FontFamily.openSans),
-        ),
-      ),
+      child: controller.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ElevatedButton(
+              onPressed: () async {
+                final response = await controller.updateProfile(
+                  fullName: _nameController.text.isNotEmpty
+                      ? _nameController.text
+                      : null,
+                  location: _locationController.text.isNotEmpty
+                      ? _locationController.text
+                      : null,
+                  email: _emailController.text.isNotEmpty
+                      ? _emailController.text
+                      : null,
+                  mobile: _mobileController.text.isNotEmpty
+                      ? _mobileController.text
+                      : null,
+                  bio: _bioController.text.isNotEmpty
+                      ? _bioController.text
+                      : null,
+                  profileVisibility: _profileVisibility ? 1 : 0,
+                  profileImage: _selectedImage,
+                );
+
+                if (context.mounted) {
+                  if (response.success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(response.message)));
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content:
+                            Text(controller.errorMessage ?? 'Update failed')));
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: defoultColor,
+                minimumSize: Size(double.infinity, 55.h),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r)),
+                elevation: 0,
+                shadowColor: defoultColor,
+              ),
+              child: Text(
+                'Save Changes',
+                style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: whiteColor,
+                    fontFamily: FontFamily.openSans),
+              ),
+            ),
     );
   }
 }

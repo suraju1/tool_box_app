@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
@@ -21,6 +22,7 @@ class TakeScreen extends StatefulWidget {
 
 class _TakeScreenState extends State<TakeScreen> {
   final ScrollController _scrollController = ScrollController();
+  late TextEditingController _searchController;
 
   @override
   void initState() {
@@ -40,12 +42,14 @@ class _TakeScreenState extends State<TakeScreen> {
 
       tradeController.fetchTakePosts();
     });
+    _searchController = TextEditingController();
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -62,6 +66,17 @@ class _TakeScreenState extends State<TakeScreen> {
       backgroundColor: context.scaffoldBg,
       body: Consumer<TradeController>(
         builder: (context, controller, child) {
+          // Proactively sync location from LocationController if it exists but is missing in TradeController
+          final locationController = context.read<LocationController>();
+          if (locationController.hasLocation && !controller.hasLocation) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              controller.setLocation(
+                locationController.latitude,
+                locationController.longitude,
+              );
+            });
+          }
+
           if (controller.isTakeLoading && controller.takePosts.isEmpty) {
             return _buildShimmer(context);
           }
@@ -242,7 +257,7 @@ class _TakeScreenState extends State<TakeScreen> {
       child: Row(
         children: [
           Text(
-            'Available Items', // Generic title since filtered by "Take"
+            'Nearby Items',
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -282,6 +297,12 @@ class _TakeScreenState extends State<TakeScreen> {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      context
+                          .read<TradeController>()
+                          .setSearchQuery(value, type: 'take');
+                    },
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 12.h),
@@ -372,10 +393,11 @@ class _TakeScreenState extends State<TakeScreen> {
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: imageUrl.isNotEmpty
-                  ? Image.network(
-                      imageUrl,
+                  ? AppCachedImage(
+                      imageUrl: imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
+                      radius: 12.r,
+                      errorWidget:
                           Image.asset('assets/iphone.png', fit: BoxFit.cover),
                     )
                   : Image.asset('assets/iphone.png', fit: BoxFit.cover),
@@ -432,7 +454,7 @@ class _TakeScreenState extends State<TakeScreen> {
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       fontFamily: FontFamily.openSans,
-                      color: context.textColor,
+                      color: defoultColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

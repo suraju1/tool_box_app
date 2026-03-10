@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/features/location/view/location_selection_sheet.dart';
@@ -67,6 +68,17 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: Consumer<TradeController>(
               builder: (context, controller, child) {
+                // Proactively sync location from LocationController if it exists but is missing in TradeSontroller
+                final locationController = context.read<LocationController>();
+                if (locationController.hasLocation && !controller.hasLocation) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    controller.setLocation(
+                      locationController.latitude,
+                      locationController.longitude,
+                    );
+                  });
+                }
+
                 if (controller.isHomeLoading && controller.homePosts.isEmpty) {
                   return _buildShimmer(context);
                 }
@@ -353,8 +365,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 5.h),
               Text(
-                'Show items near you',
-                style: TextStyle(fontSize: 10.sp, color: greyColor),
+                controller.hasLocation
+                    ? 'Show items near you'
+                    : 'Set your location to enable distance filtering',
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  color: controller.hasLocation ? greyColor : Colors.orange,
+                  fontWeight: controller.hasLocation
+                      ? FontWeight.normal
+                      : FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -421,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16.sp,
-                            color: context.textColor,
+                            color: defoultColor,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -456,10 +476,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   0.1,
                 ), // Fixed withValues to withOpacity for compatibility if needed, or keeping withValues if on new Flutter
                 child: imageUrl.isNotEmpty
-                    ? Image.network(
-                        imageUrl,
+                    ? AppCachedImage(
+                        imageUrl: imageUrl,
                         fit: BoxFit.fill,
-                        errorBuilder: (context, error, stackTrace) =>
+                        radius: 0,
+                        errorWidget:
                             Icon(Icons.image, size: 50.sp, color: Colors.grey),
                       )
                     : Icon(Icons.image, size: 50.sp, color: Colors.grey),

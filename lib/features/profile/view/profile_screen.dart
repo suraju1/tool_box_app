@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/controller/shimmer_controller.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/core/widgets/logout_dialog.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/features/profile/view/setting_screen.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -20,38 +24,76 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final currentUserId = context.read<AuthController>().currentUser?.id;
+      if (currentUserId != null) {
+        context.read<ProfileController>().getUserProfile(currentUserId);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final shimmer = context.watch<ShimmerController>();
+    final profileController = context.watch<ProfileController>();
+    final profile = profileController.userProfile;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: shimmer.isLoading
+      body: profileController.isLoading
           ? _buildShimmer(context)
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildHeader(context),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 15.h),
-                        _buildBioSection(),
-                        SizedBox(height: 15.h),
-                        _buildReviewsSection(),
-                        SizedBox(height: 15.h),
-                        _buildTradeHistoryStats(context),
-                        SizedBox(height: 15.h),
-                        _buildSettingsList(context),
-                        //SizedBox(height: 15.h),
-                        // _logoutButton(context),
-                        SizedBox(height: 40.h),
-                      ],
-                    ),
+          : profile == null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        profileController.errorMessage ??
+                            'User profile not found',
+                        style: TextStyle(color: context.textColor),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          final currentUserId =
+                              context.read<AuthController>().currentUser?.id;
+                          if (currentUserId != null) {
+                            context
+                                .read<ProfileController>()
+                                .getUserProfile(currentUserId);
+                          }
+                        },
+                        child: Text('Retry'),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                )
+              : SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildHeader(context, profile),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Column(
+                          children: [
+                            SizedBox(height: 15.h),
+                            _buildBioSection(profile),
+                            SizedBox(height: 15.h),
+                            _buildReviewsSection(profile),
+                            SizedBox(height: 15.h),
+                            _buildTradeHistoryStats(context, profile),
+                            SizedBox(height: 15.h),
+                            _buildSettingsList(context),
+                            //SizedBox(height: 15.h),
+                            // _logoutButton(context),
+                            SizedBox(height: 40.h),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
     );
   }
 
@@ -251,7 +293,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, UserProfileModel profile) {
+    final user = profile.userDetails;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -266,13 +309,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // IconButton(
-              //   onPressed: () {},
-              //   icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              // ),
-
+              if (Navigator.of(context).canPop())
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.arrow_back_ios,
+                      color: Colors.white, size: 20.sp),
+                ),
               Text(
                 'Profile',
                 style: TextStyle(
@@ -282,6 +325,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontFamily: FontFamily.openSans,
                 ),
               ),
+              const Spacer(),
               IconButton(
                 onPressed: () {
                   Navigator.push(
@@ -292,29 +336,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   );
                 },
                 icon: Icon(Icons.menu, color: Colors.white, size: 28.sp),
-                //icon: Icon(Icons.menu, color: Colors.white, size: 28.sp),
-                // icon: Icon(Icons.more_vert, color: Colors.white, size: 28.sp),
               ),
-
-              // TextButton.icon(
-              //   onPressed: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //           builder: (context) => const EditProfileScreen()),
-              //     );
-              //   },
-              //   icon: const Icon(Icons.edit, color: Colors.white, size: 22),
-              //   label: Text(
-              //     'Edit',
-              //     style: TextStyle(
-              //       color: Colors.white,
-              //       fontSize: 15.sp,
-              //       fontWeight: FontWeight.w600,
-              //       fontFamily: FontFamily.openSans,
-              //     ),
-              //   ),
-              // ),
             ],
           ),
           SizedBox(height: 20.h),
@@ -322,9 +344,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 48.r,
-                    backgroundImage: const AssetImage('assets/profile1.png'),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(48.r),
+                      child: user.image != null && user.image!.isNotEmpty
+                          ? AppCachedImage(
+                              imageUrl: '${ApiConstants.baseUrl2}${user.image}',
+                              width: 96.r,
+                              height: 96.r,
+                              fit: BoxFit.cover,
+                              radius: 48.r,
+                              errorWidget: Image.asset(
+                                'assets/profile1.png',
+                                width: 96.r,
+                                height: 96.r,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Image.asset(
+                              'assets/profile1.png',
+                              width: 96.r,
+                              height: 96.r,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
                   ),
                   Positioned(
                     bottom: 2.h,
@@ -347,7 +394,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'John Doe',
+                      user.fullName,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22.sp,
@@ -356,7 +403,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     Text(
-                      'Pune, Maharashtra',
+                      user.location ?? 'No location provided',
                       style: TextStyle(
                         color: whiteColor.withOpacity(0.8),
                         fontSize: 14.sp,
@@ -410,7 +457,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildBioSection() {
+  Widget _buildBioSection(UserProfileModel profile) {
+    if (profile.userDetails.bio == null || profile.userDetails.bio!.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -433,7 +483,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SizedBox(height: 4.h),
           Text(
-            'Entrepreneur | Passionate about sustainable living | Love connecting with people for meaningful exchanges. Always looking for unique items to give and take.',
+            profile.userDetails.bio!,
             textAlign: TextAlign.justify,
             style: TextStyle(
               color: greyColor,
@@ -448,7 +498,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildReviewsSection() {
+  Widget _buildReviewsSection(UserProfileModel profile) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -467,6 +517,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
+                  color: context.textColor,
                 ),
               ),
               Row(
@@ -474,7 +525,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Icon(Icons.star, color: Colors.amber, size: 16.sp),
                   SizedBox(width: 4.w),
                   Text(
-                    '4.8 (12 Reviews)',
+                    '${profile.userDetails.averageRating} (${profile.userDetails.totalReviews} Reviews)',
                     style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
@@ -485,38 +536,84 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
           SizedBox(height: 20.h),
-          _buildReviewItem(),
-          const Divider(),
-          _buildReviewItem(),
-          const Divider(),
-          _buildReviewItem(),
-          SizedBox(height: 5.h),
-          TextButton(
-            onPressed: () {},
-            child: Text(
-              'Reviews & Ratings',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 14.sp,
-                fontFamily: FontFamily.openSans,
-                color: defoultColor,
+          if (profile.reviews.isEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: Text(
+                'No reviews yet',
+                style: TextStyle(color: greyColor, fontSize: 13.sp),
               ),
+            )
+          else ...[
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount:
+                  profile.reviews.length > 3 ? 3 : profile.reviews.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (context, index) =>
+                  _buildReviewItem(profile.reviews[index]),
             ),
-          ),
+            if (profile.reviews.length > 3) ...[
+              SizedBox(height: 5.h),
+              TextButton(
+                onPressed: () {
+                  // TODO: Navigate to full reviews screen if needed
+                },
+                child: Text(
+                  'View All Reviews',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14.sp,
+                    fontFamily: FontFamily.openSans,
+                    color: defoultColor,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildReviewItem() {
+  Widget _buildReviewItem(Review review) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 25.r,
-            backgroundImage: const AssetImage('assets/profile1.png'),
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border:
+                  Border.all(color: defoultColor.withOpacity(0.1), width: 1),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25.r),
+              child: review.reviewerImage != null &&
+                      review.reviewerImage!.isNotEmpty
+                  ? AppCachedImage(
+                      imageUrl:
+                          '${ApiConstants.baseUrl2}${review.reviewerImage}',
+                      width: 50.r,
+                      height: 50.r,
+                      fit: BoxFit.cover,
+                      radius: 25.r,
+                      errorWidget: Image.asset(
+                        'assets/profile1.png',
+                        width: 50.r,
+                        height: 50.r,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Image.asset(
+                      'assets/profile1.png',
+                      width: 50.r,
+                      height: 50.r,
+                      fit: BoxFit.cover,
+                    ),
+            ),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -524,7 +621,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Rajesh Kumar',
+                  review.reviewerName,
                   style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
@@ -532,15 +629,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 Row(
                   children: List.generate(
-                      5,
-                      (index) =>
-                          Icon(Icons.star, color: Colors.amber, size: 14.sp)),
+                    5,
+                    (index) {
+                      final ratingValue = review.rating is int
+                          ? review.rating
+                          : int.tryParse(review.rating.toString()) ?? 0;
+                      return Icon(
+                        index < ratingValue ? Icons.star : Icons.star_border,
+                        color: index < ratingValue ? Colors.amber : greyColor,
+                        size: 14.sp,
+                      );
+                    },
+                  ),
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  'Excellent service! The item was exactly as described and the handover was smooth.',
-                  style: TextStyle(fontSize: 12.sp, color: greyColor),
-                ),
+                if (review.comment != null)
+                  Text(
+                    review.comment!,
+                    style: TextStyle(fontSize: 12.sp, color: greyColor),
+                  ),
                 SizedBox(height: 4.h),
                 Row(
                   children: [
@@ -559,7 +665,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTradeHistoryStats(BuildContext context) {
+  Widget _buildTradeHistoryStats(
+      BuildContext context, UserProfileModel profile) {
+    final stats = profile.tradeStats;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -587,57 +695,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Expanded(
                 child: _buildStatCard(
-                    'Total Gives', '35', Colors.red, Icons.card_giftcard),
+                    'Total Gives',
+                    stats.totalGives.toString(),
+                    Colors.red,
+                    Icons.card_giftcard),
               ),
               SizedBox(width: 16.w),
               Expanded(
                 child: _buildStatCard(
-                    'Total Takes', '28', Colors.orange, Icons.redeem_outlined),
+                    'Total Takes',
+                    stats.totalTakes.toString(),
+                    Colors.orange,
+                    Icons.redeem_outlined),
               ),
               SizedBox(width: 16.w),
               Expanded(
                 child: _buildStatCard(
-                    'Total Trades', '63', Colors.orange, Icons.handshake),
+                    'Total Trades',
+                    stats.totalTrades.toString(),
+                    Colors.orange,
+                    Icons.handshake),
               ),
             ],
           ),
-          // SizedBox(height: 16.h),
-          // Container(
-          //   padding: EdgeInsets.all(16.w),
-          //   decoration: BoxDecoration(
-          //     color: greyColor.withOpacity(0.1),
-          //     border: Border.all(color: greyColor.withOpacity(0.2)),
-          //     borderRadius: BorderRadius.circular(10.r),
-          //   ),
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.center,
-          //     children: [
-          //       Column(
-          //         children: [
-          //           Icon(Icons.handshake_outlined,
-          //               color: defoultColor, size: 28.sp),
-          //           SizedBox(height: 4.h),
-          //           Text(
-          //             '63',
-          //             style: TextStyle(
-          //                 fontSize: 24.sp,
-          //                 fontWeight: FontWeight.bold,
-          //                 color: defoultColor),
-          //           ),
-          //           Text(
-          //             'Total Trades',
-          //             style: TextStyle(
-          //               fontSize: 12.sp,
-          //               color: blackColor,
-          //               fontWeight: FontWeight.w500,
-          //               fontFamily: FontFamily.openSans,
-          //             ),
-          //           ),
-          //         ],
-          //       ),
-          //     ],
-          //   ),
-          // ),
           SizedBox(height: 20.h),
           InkWell(
             onTap: () {

@@ -14,11 +14,11 @@ class TradeReturnSearchScreen extends StatefulWidget {
 
 class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
   bool isPriceTab = true;
-  RangeValues priceRange = const RangeValues(10, 100);
+  RangeValues priceRange = const RangeValues(10, 50000);
   bool isNegotiable = false;
 
   bool _isPriceSelected = true;
-  RangeValues _priceRange = const RangeValues(10, 100);
+  RangeValues _priceRange = const RangeValues(10, 50000);
   bool _isNegotiable = false;
   String _returnSelectedCondition = 'New';
   bool _isReturnHomemade = false;
@@ -161,7 +161,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Desired Price Range : \$${_priceRange.start.toInt()} - \$${_priceRange.end.toInt()}',
+                  'Desired Price Range : ₹${_priceRange.start.toInt()} - ₹${_priceRange.end.toInt()}',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13.sp,
@@ -171,7 +171,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                 RangeSlider(
                   values: _priceRange,
                   min: 0,
-                  max: 500,
+                  max: 200000,
                   padding: EdgeInsets.zero,
                   activeColor: defoultColor,
                   inactiveColor: context.dividerColor,

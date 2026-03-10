@@ -4,12 +4,18 @@ import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/core/widgets/user_review_dialog.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
 class UserProfileScreen extends StatefulWidget {
+  final String? userId;
+
   const UserProfileScreen({
     super.key,
+    this.userId,
   });
 
   @override
@@ -20,39 +26,67 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isUserSaved = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      int? targetUserId;
+      if (widget.userId != null) {
+        targetUserId = int.tryParse(widget.userId!);
+      } else {
+        // Fallback to current user
+        targetUserId = context.read<AuthController>().currentUser?.id;
+      }
+
+      if (targetUserId != null) {
+        context.read<ProfileController>().getUserProfile(targetUserId);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final shimmer = context.watch<ShimmerController>();
+    final profileController = context.watch<ProfileController>();
+    final userProfile = profileController.userProfile;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: shimmer.isLoading
+      body: (shimmer.isLoading || profileController.isLoading)
           ? _buildShimmer(context)
-          : SingleChildScrollView(
-              child: Column(children: [
-                _buildHeader(context),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 15.h),
-                      _buildBioSection(),
-                      SizedBox(height: 15.h),
-                      //rate this person now button
-                      _buildRateThisPersonButton(context),
-
-                      SizedBox(height: 15.h),
-                      _buildReviewsSection(),
-                      SizedBox(height: 15.h),
-                      _buildTradeHistoryStats(context),
-                      SizedBox(height: 20.h),
-                      // _buildSettingsList(context),
-                      _saveUserButton(context),
-                      SizedBox(height: 40.h),
-                    ],
+          : userProfile == null
+              ? Center(
+                  child: Text(
+                    profileController.errorMessage ?? 'User profile not found',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: context.textColor),
                   ),
+                )
+              : SingleChildScrollView(
+                  child: Column(children: [
+                    _buildHeader(context, userProfile),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Column(
+                        children: [
+                          SizedBox(height: 15.h),
+                          _buildBioSection(userProfile),
+                          SizedBox(height: 15.h),
+                          //rate this person now button
+                          _buildRateThisPersonButton(context, userProfile),
+
+                          SizedBox(height: 15.h),
+                          _buildReviewsSection(userProfile),
+                          SizedBox(height: 15.h),
+                          _buildTradeHistoryStats(context, userProfile),
+                          SizedBox(height: 20.h),
+                          // _buildSettingsList(context),
+                          _saveUserButton(context),
+                          SizedBox(height: 40.h),
+                        ],
+                      ),
+                    ),
+                  ]),
                 ),
-              ]),
-            ),
     );
   }
 
@@ -247,7 +281,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, UserProfileModel profile) {
+    final details = profile.userDetails;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -257,7 +292,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           bottomRight: Radius.circular(30.r),
         ),
       ),
-      padding: EdgeInsets.fromLTRB(20.w, 50.h, 20.w, 40.h),
+      padding: EdgeInsets.fromLTRB(20.w, 30.h, 20.w, 40.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -343,11 +378,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               SizedBox(height: 20.h),
               CircleAvatar(
                 radius: 48.r,
-                backgroundImage: const AssetImage('assets/profile2.png'),
+                backgroundColor: Colors.white24,
+                backgroundImage: details.image != null
+                    ? NetworkImage(details.image!)
+                    : const AssetImage('assets/profile2.png') as ImageProvider,
               ),
               SizedBox(height: 10.h),
               Text(
-                'Riya',
+                details.fullName,
                 style: TextStyle(
                   color: whiteColor,
                   fontSize: 22.sp,
@@ -355,15 +393,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   fontFamily: FontFamily.openSans,
                 ),
               ),
-              Text(
-                'Pune, Maharashtra',
-                style: TextStyle(
-                  color: whiteColor.withOpacity(0.8),
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: FontFamily.openSans,
+              if (details.location != null)
+                Text(
+                  details.location!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: whiteColor.withOpacity(0.8),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: FontFamily.openSans,
+                  ),
                 ),
-              ),
             ],
           ),
         ],
@@ -371,7 +411,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildBioSection() {
+  Widget _buildBioSection(UserProfileModel profile) {
+    final bio = profile.userDetails.bio;
+    if (bio == null || bio.isEmpty) return const SizedBox.shrink();
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -394,7 +436,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ),
           SizedBox(height: 4.h),
           Text(
-            'Entrepreneur | Passionate about sustainable living | Love connecting with people for meaningful exchanges. Always looking for unique items to give and take.',
+            bio,
             textAlign: TextAlign.justify,
             style: TextStyle(
               color: context.subTextColor,
@@ -409,7 +451,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildReviewsSection() {
+  Widget _buildReviewsSection(UserProfileModel profile) {
+    final reviews = profile.reviews;
+    final averageRating = profile.userDetails.averageRating;
+    final totalReviews = profile.userDetails.totalReviews;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -436,7 +482,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   Icon(Icons.star, color: Colors.amber, size: 16.sp),
                   SizedBox(width: 4.w),
                   Text(
-                    '4.8 (12 Reviews)',
+                    '$averageRating ($totalReviews Reviews)',
                     style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
@@ -447,30 +493,45 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ],
           ),
           SizedBox(height: 20.h),
-          _buildReviewItem(),
-          Divider(color: context.dividerColor),
-          _buildReviewItem(),
-          Divider(color: context.dividerColor),
-          _buildReviewItem(),
-          SizedBox(height: 5.h),
-          TextButton(
-            onPressed: () {},
-            child: Text(
-              'Reviews & Ratings',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 14.sp,
-                fontFamily: FontFamily.openSans,
-                color: defoultColor,
+          if (reviews.isEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: Text(
+                'No reviews yet',
+                style: TextStyle(
+                  color: context.subTextColor,
+                  fontSize: 14.sp,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+            )
+          else
+            ...reviews.take(3).map((review) => Column(
+                  children: [
+                    _buildReviewItem(review),
+                    if (review != reviews.take(3).last)
+                      Divider(color: context.dividerColor),
+                  ],
+                )),
+          if (reviews.length > 3)
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                'View All Reviews',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14.sp,
+                  fontFamily: FontFamily.openSans,
+                  color: defoultColor,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildReviewItem() {
+  Widget _buildReviewItem(Review review) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Row(
@@ -478,7 +539,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         children: [
           CircleAvatar(
             radius: 25.r,
-            backgroundImage: const AssetImage('assets/profile1.png'),
+            backgroundColor: Colors.white24,
+            backgroundImage: review.reviewerImage != null
+                ? NetworkImage(review.reviewerImage!)
+                : const AssetImage('assets/profile1.png') as ImageProvider,
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -486,34 +550,53 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Rajesh Kumar',
+                  review.reviewerName,
                   style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
                       color: context.textColor),
                 ),
                 Row(
-                  children: List.generate(
-                      5,
-                      (index) =>
-                          Icon(Icons.star, color: Colors.amber, size: 14.sp)),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  'Excellent service! The item was exactly as described and the handover was smooth.',
-                  style:
-                      TextStyle(fontSize: 12.sp, color: context.subTextColor),
-                ),
-                SizedBox(height: 4.h),
-                Row(
                   children: [
-                    Icon(Icons.thumb_up_outlined,
-                        size: 14.sp, color: context.subTextColor),
-                    SizedBox(width: 12.w),
-                    Icon(Icons.thumb_down_outlined,
-                        size: 14.sp, color: context.subTextColor),
+                    Row(
+                      children: List.generate(
+                          5,
+                          (index) => Icon(
+                                Icons.star,
+                                color: index < (review.rating as num).toInt()
+                                    ? Colors.amber
+                                    : Colors.grey.withOpacity(0.3),
+                                size: 14.sp,
+                              )),
+                    ),
+                    if (review.feedbackLabel != null) ...[
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: defoultColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Text(
+                          review.feedbackLabel!,
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: defoultColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
+                SizedBox(height: 4.h),
+                if (review.comment != null && review.comment!.isNotEmpty)
+                  Text(
+                    review.comment!,
+                    style:
+                        TextStyle(fontSize: 12.sp, color: context.subTextColor),
+                  ),
               ],
             ),
           ),
@@ -522,7 +605,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildTradeHistoryStats(BuildContext context) {
+  Widget _buildTradeHistoryStats(
+      BuildContext context, UserProfileModel profile) {
+    final stats = profile.tradeStats;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -550,17 +635,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             children: [
               Expanded(
                 child: _buildStatCard(
-                    'Total Gives', '35', Colors.red, Icons.card_giftcard),
+                    'Total Gives',
+                    stats.totalGives.toString(),
+                    Colors.red,
+                    Icons.card_giftcard),
               ),
-              SizedBox(width: 16.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: _buildStatCard(
-                    'Total Takes', '28', Colors.orange, Icons.redeem_outlined),
+                    'Total Takes',
+                    stats.totalTakes.toString(),
+                    Colors.orange,
+                    Icons.redeem_outlined),
               ),
-              SizedBox(width: 16.w),
+              SizedBox(width: 12.w),
               Expanded(
-                child: _buildStatCard(
-                    'Total Trades', '63', Colors.orange, Icons.handshake),
+                child: _buildStatCard('Total Trades',
+                    stats.totalTrades.toString(), Colors.blue, Icons.handshake),
               ),
             ],
           ),
@@ -646,12 +737,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  _buildRateThisPersonButton(BuildContext context) {
+  _buildRateThisPersonButton(BuildContext context, UserProfileModel profile) {
     return InkWell(
       onTap: () {
         showDialog(
           context: context,
-          builder: (context) => const UserReviewDialog(),
+          builder: (context) => UserReviewDialog(
+            userId: profile.userDetails.id,
+            userName: profile.userDetails.fullName,
+          ),
         );
       },
       child: Container(

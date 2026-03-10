@@ -1,9 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:tool_bocs/core/api/api_client.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/features/trades/model/category_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/features/trades/model/post_request_model.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_request_model.dart';
 import 'package:tool_bocs/core/api/api_response.dart';
+import 'package:tool_bocs/features/trades/model/trade_completion_model.dart';
 
 class TradeService {
   final ApiClient _apiClient = ApiClient();
@@ -30,7 +34,7 @@ class TradeService {
             success: false, message: 'Server error: ${response.statusCode}');
       }
     } catch (e) {
-      return ApiResponse(success: false, message: 'An error occurred: $e');
+      return ApiResponse(success: false, message: e.toString());
     }
   }
 
@@ -40,6 +44,9 @@ class TradeService {
       final response = await _apiClient.post(
         ApiConstants.createGiveTakePost,
         data: formData,
+        options: Options(
+          contentType: 'multipart/form-data; boundary=${formData.boundary}',
+        ),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -59,7 +66,7 @@ class TradeService {
             success: false, message: 'Server error: ${response.statusCode}');
       }
     } catch (e) {
-      return ApiResponse(success: false, message: 'An error occurred: $e');
+      return ApiResponse(success: false, message: e.toString());
     }
   }
 
@@ -70,6 +77,7 @@ class TradeService {
     double? latitude,
     double? longitude,
     double? distanceKm,
+    String? search,
   }) async {
     try {
       final response = await _apiClient.post(
@@ -82,6 +90,7 @@ class TradeService {
           if (longitude != null) "longitude": longitude,
           if (distanceKm != null)
             "distance_km": double.parse(distanceKm.toStringAsFixed(2)),
+          if (search != null && search.isNotEmpty) "search": search,
         },
       );
 
@@ -104,7 +113,7 @@ class TradeService {
             success: false, message: 'Server error: ${response.statusCode}');
       }
     } catch (e) {
-      return ApiResponse(success: false, message: 'An error occurred: $e');
+      return ApiResponse(success: false, message: e.toString());
     }
   }
 
@@ -136,7 +145,218 @@ class TradeService {
         );
       }
     } catch (e) {
-      return ApiResponse(success: false, message: 'An error occurred: $e');
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  // --- 4-Step Trade Flow Methods ---
+
+  Future<ApiResponse<dynamic>> respondToPost(
+      TradeResponseRequestModel request) async {
+    try {
+      final formData = await request.toFormData();
+      final response = await _apiClient.post(
+        ApiConstants.respondToPost
+            .replaceAll('{{postid}}', request.giveawayId.toString()),
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data; boundary=${formData.boundary}',
+        ),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Response submitted',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> getPostResponses(int postId) async {
+    try {
+      final response = await _apiClient.get(
+        ApiConstants.getPostResponses
+            .replaceAll('{{postid}}', postId.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true) {
+          final List<dynamic> list = data['data'] ?? [];
+          final responses =
+              list.map((e) => TradeResponseModel.fromJson(e)).toList();
+
+          PostModel? giveaway;
+          if (data['giveaway'] != null) {
+            try {
+              giveaway = PostModel.fromJson(data['giveaway']);
+            } catch (e) {
+              print('Error parsing giveaway metadata: $e');
+            }
+          }
+
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'Responses fetched',
+            data: {
+              'responses': responses,
+              'giveaway': giveaway,
+            },
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch responses',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<List<TradeResponseModel>>> getMyPostResponses() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.getMyPostResponses);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true) {
+          final List<TradeResponseModel> responses = (data['data'] as List)
+              .map((e) => TradeResponseModel.fromJson(e))
+              .toList();
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'All responses fetched',
+            data: responses,
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch responses',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<List<TradeResponseModel>>> getMySentResponses() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.getMyResponses);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true) {
+          final List<TradeResponseModel> responses = (data['data'] as List)
+              .map((e) => TradeResponseModel.fromJson(e))
+              .toList();
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'Sent offers fetched successfully',
+            data: responses,
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch sent offers',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> updateResponseStatus({
+    required int responseId,
+    required String status,
+    String? meetingType,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.updateResponseStatus,
+        data: {
+          'response_id': responseId,
+          'status': status,
+          if (meetingType != null) 'meeting_type': meetingType,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Status updated',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<TradeCompletionModel>> processTradePayment(
+      int responseId) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.completeTrade.replaceAll('{{id}}', responseId.toString()),
+        data: {'amount': 5},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'Payment processed',
+            data: TradeCompletionModel.fromJson(data['data']),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to process payment',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
     }
   }
 }

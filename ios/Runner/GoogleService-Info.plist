@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyA1ozTqjXjvhfV_v8U7q_JAvjaw43GOtFc</string>
+	<string>AIzaSyAyigqnR42F1zhvBQNbyjxdtbT9Cr1Sd6U</string>
 	<key>GCM_SENDER_ID</key>
-	<string>976442876332</string>
+	<string>996029238718</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.toolBocs</string>
+	<string>com.example.toolucs</string>
 	<key>PROJECT_ID</key>
-	<string>toolbocs-7617a</string>
+	<string>tool-bocs-prod-v3</string>
 	<key>STORAGE_BUCKET</key>
-	<string>toolbocs-7617a.firebasestorage.app</string>
+	<string>tool-bocs-prod-v3.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:976442876332:ios:ad3b91cf6e2d193f7f5a09</string>
+	<string>1:996029238718:ios:c18a1088471078b38bbdef</string>
 </dict>
 </plist>

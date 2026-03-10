@@ -11,6 +11,7 @@ import 'package:tool_bocs/util/font_family.dart'; // Import for ScrollDirection
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 
 class GiveScreen extends StatefulWidget {
   const GiveScreen({super.key});
@@ -21,11 +22,13 @@ class GiveScreen extends StatefulWidget {
 
 class _GiveScreenState extends State<GiveScreen> {
   late ScrollController _scrollController;
+  late TextEditingController _searchController;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _searchController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final locationController = context.read<LocationController>();
       final tradeController = context.read<TradeController>();
@@ -54,6 +57,7 @@ class _GiveScreenState extends State<GiveScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -63,178 +67,194 @@ class _GiveScreenState extends State<GiveScreen> {
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: tradeController.isGiveLoading && tradeController.givePosts.isEmpty
-          ? _buildShimmer(context)
-          : Stack(
-              children: [
-                Column(
-                  children: [
-                    _buildHeader(context),
-                    Divider(
-                      color: context.dividerColor,
-                      height: 0.h,
-                      thickness: 0.5,
-                    ),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () async {
-                          await context
-                              .read<TradeController>()
-                              .fetchGivePosts(refresh: true);
-                        },
-                        child: tradeController.givePosts.isEmpty &&
-                                !tradeController.isGiveLoading
-                            ? ListView(
-                                children: [
-                                  SizedBox(height: 100.h),
-                                  Center(
-                                    child: Column(
-                                      children: [
-                                        Icon(Icons.search_off,
-                                            size: 64.sp, color: Colors.grey),
-                                        SizedBox(height: 16.h),
-                                        Text(
-                                          'No posts found matching your filters',
-                                          style: TextStyle(
-                                            color: context.subTextColor,
-                                            fontSize: 16.sp,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : ListView.builder(
-                                controller: _scrollController,
-                                padding:
-                                    EdgeInsets.fromLTRB(10.w, 8.h, 10.w, 100.h),
-                                itemCount: tradeController.givePosts.length +
-                                    1 +
-                                    (tradeController.isGiveLoadMoreRunning
-                                        ? 1
-                                        : 0),
-                                itemBuilder: (context, index) {
-                                  if (index == 0) {
-                                    return _buildResultHeader(context,
-                                        tradeController.givePosts.length);
-                                  }
+      body: Builder(builder: (context) {
+        // Proactively sync location from LocationController if it exists but is missing in TradeController
+        final locationController = context.read<LocationController>();
+        final controller = context.read<TradeController>();
+        if (locationController.hasLocation && !controller.hasLocation) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            controller.setLocation(
+              locationController.latitude,
+              locationController.longitude,
+            );
+          });
+        }
 
-                                  if (index ==
-                                      tradeController.givePosts.length + 1) {
-                                    return Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(16.0),
-                                        child: CircularProgressIndicator(
-                                            color: defoultColor),
+        return tradeController.isGiveLoading &&
+                tradeController.givePosts.isEmpty
+            ? _buildShimmer(context)
+            : Stack(
+                children: [
+                  Column(
+                    children: [
+                      _buildHeader(context),
+                      Divider(
+                        color: context.dividerColor,
+                        height: 0.h,
+                        thickness: 0.5,
+                      ),
+                      Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            await context
+                                .read<TradeController>()
+                                .fetchGivePosts(refresh: true);
+                          },
+                          child: tradeController.givePosts.isEmpty &&
+                                  !tradeController.isGiveLoading
+                              ? ListView(
+                                  children: [
+                                    SizedBox(height: 100.h),
+                                    Center(
+                                      child: Column(
+                                        children: [
+                                          Icon(Icons.search_off,
+                                              size: 64.sp, color: Colors.grey),
+                                          SizedBox(height: 16.h),
+                                          Text(
+                                            'No posts found matching your filters',
+                                            style: TextStyle(
+                                              color: context.subTextColor,
+                                              fontSize: 16.sp,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : ListView.builder(
+                                  controller: _scrollController,
+                                  padding: EdgeInsets.fromLTRB(
+                                      10.w, 8.h, 10.w, 100.h),
+                                  itemCount: tradeController.givePosts.length +
+                                      1 +
+                                      (tradeController.isGiveLoadMoreRunning
+                                          ? 1
+                                          : 0),
+                                  itemBuilder: (context, index) {
+                                    if (index == 0) {
+                                      return _buildResultHeader(context,
+                                          tradeController.givePosts.length);
+                                    }
+
+                                    if (index ==
+                                        tradeController.givePosts.length + 1) {
+                                      return Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(16.0),
+                                          child: CircularProgressIndicator(
+                                              color: defoultColor),
+                                        ),
+                                      );
+                                    }
+
+                                    final post =
+                                        tradeController.givePosts[index - 1];
+                                    return Padding(
+                                      padding: EdgeInsets.only(bottom: 8.h),
+                                      child: _buildProductCard(
+                                        context,
+                                        id: post.id,
+                                        title: post.itemName,
+                                        owner: post.userName.isNotEmpty
+                                            ? post.userName
+                                            : 'User ${post.userId}',
+                                        category: post.itemCategory,
+                                        distance: post.distanceKm != null
+                                            ? '${post.distanceKm!.toStringAsFixed(1)} km away'
+                                            : '- km away',
+                                        rating: '4.5',
+                                        actionLabel:
+                                            post.postType.toLowerCase() ==
+                                                    'give'
+                                                ? 'Take'
+                                                : 'Give',
+                                        description: post.itemNote,
+                                        imagePath: post.itemImages.isNotEmpty
+                                            ? post.itemImages.first
+                                            : null,
+                                        postType: post.postType,
                                       ),
                                     );
-                                  }
-
-                                  final post =
-                                      tradeController.givePosts[index - 1];
-                                  return Padding(
-                                    padding: EdgeInsets.only(bottom: 8.h),
-                                    child: _buildProductCard(
-                                      context,
-                                      id: post.id,
-                                      title: post.itemName,
-                                      owner: post.userName.isNotEmpty
-                                          ? post.userName
-                                          : 'User ${post.userId}',
-                                      category: post.itemCategory,
-                                      distance: post.distanceKm != null
-                                          ? '${post.distanceKm!.toStringAsFixed(1)} km away'
-                                          : '- km away',
-                                      rating: '4.5',
-                                      actionLabel:
-                                          post.postType.toLowerCase() == 'give'
-                                              ? 'Take'
-                                              : 'Give',
-                                      description: post.itemNote,
-                                      imagePath: post.itemImages.isNotEmpty
-                                          ? post.itemImages.first
-                                          : null,
-                                      postType: post.postType,
-                                    ),
-                                  );
-                                },
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 80.h,
-                    width: double.infinity,
-                    padding: EdgeInsets.only(bottom: 15.h),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30.r),
-                        topRight: Radius.circular(30.r),
-                      ),
-                      color: context.surfaceColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: greyColorWithOpacity0_4,
-                          offset: const Offset(0, -2),
-                          blurRadius: 4,
+                                  },
+                                ),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 16.h),
-                        Container(
-                          width: 180.w,
-                          height: 45.h,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.r),
-                            color: defoultColor,
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 80.h,
+                      width: double.infinity,
+                      padding: EdgeInsets.only(bottom: 15.h),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30.r),
+                          topRight: Radius.circular(30.r),
+                        ),
+                        color: context.surfaceColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: greyColorWithOpacity0_4,
+                            offset: const Offset(0, -2),
+                            blurRadius: 4,
                           ),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.createGivePost,
-                                arguments: "Create Give Post",
-                              ).then((_) {
-                                // Refresh logic handled by controller's optimistic update
-                              });
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 8.w, vertical: 6.h),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.add,
-                                      color: whiteColor, size: 28.sp),
-                                  Text(
-                                    "Make a New Post",
-                                    style: TextStyle(
-                                      color: whiteColor,
-                                      fontSize: 14.sp,
-                                      fontFamily: FontFamily.openSans,
-                                      fontWeight: FontWeight.w800,
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(height: 16.h),
+                          Container(
+                            width: 180.w,
+                            height: 45.h,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12.r),
+                              color: defoultColor,
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.createGivePost,
+                                  arguments: "Create Give Post",
+                                ).then((_) {
+                                  // Refresh logic handled by controller's optimistic update
+                                });
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 8.w, vertical: 6.h),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.add,
+                                        color: whiteColor, size: 28.sp),
+                                    Text(
+                                      "Make a New Post",
+                                      style: TextStyle(
+                                        color: whiteColor,
+                                        fontSize: 14.sp,
+                                        fontFamily: FontFamily.openSans,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                      ],
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+      }),
     );
   }
 
@@ -244,7 +264,7 @@ class _GiveScreenState extends State<GiveScreen> {
       child: Row(
         children: [
           Text(
-            'Nearby Giveaways',
+            'Nearby Items',
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -284,6 +304,12 @@ class _GiveScreenState extends State<GiveScreen> {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      context
+                          .read<TradeController>()
+                          .setSearchQuery(value, type: 'give');
+                    },
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 12.h),
@@ -373,10 +399,11 @@ class _GiveScreenState extends State<GiveScreen> {
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: imagePath != null
-                  ? Image.network(
-                      '${ApiConstants.baseUrl2}$imagePath',
+                  ? AppCachedImage(
+                      imageUrl: '${ApiConstants.baseUrl2}$imagePath',
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      radius: 12.r,
+                      errorWidget:
                           Image.asset('assets/iphone.png', fit: BoxFit.cover),
                     )
                   : Image.asset('assets/iphone.png', fit: BoxFit.cover),
@@ -428,7 +455,7 @@ class _GiveScreenState extends State<GiveScreen> {
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       fontFamily: FontFamily.openSans,
-                      color: context.textColor,
+                      color: defoultColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

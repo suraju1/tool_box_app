@@ -1,4 +1,4 @@
-package com.example.tool_bocs
+package com.example.toolucs
 
 import io.flutter.embedding.android.FlutterActivity
 

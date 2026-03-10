@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/chat/view/chat_screen.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
-import 'package:tool_bocs/routes/app_routes.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 
 class TradeStartScreen extends StatefulWidget {
   const TradeStartScreen({super.key});
@@ -18,6 +25,19 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tradeController = context.watch<TradeController>();
+    final authController = context.watch<AuthController>();
+    final response = tradeController.selectedResponse;
+    final post = tradeController.selectedPost;
+    final isOwner = authController.currentUser?.id == response?.posterUserId;
+
+    if (response == null) {
+      return Scaffold(
+        appBar: _buildAppBar(context),
+        body: const Center(child: Text('No response selected')),
+      );
+    }
+
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       appBar: _buildAppBar(context),
@@ -33,38 +53,64 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTradeBegunCard(),
+                      _buildTradeBegunCard(response, post, isOwner),
                       SizedBox(height: 24.h),
-                      Text(
-                        'Meeting Preferences',
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w800,
-                          fontFamily: FontFamily.openSans,
-                          color: context.textColor,
+                      if (response.status == 'pending') ...[
+                        Text(
+                          'Meeting Preferences',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w800,
+                            fontFamily: FontFamily.openSans,
+                            color: context.textColor,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        'Accept the offer and choose a handover location',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: context.subTextColor,
-                          fontWeight: FontWeight.w500,
+                        SizedBox(height: 4.h),
+                        Text(
+                          'Accept the offer and choose a handover location',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: context.subTextColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 20.h),
-                      _buildAcceptRejectSection(),
+                        SizedBox(height: 20.h),
+                      ],
+                      if (response.status == 'pending' && isOwner)
+                        _buildAcceptRejectSection(response),
+                      if (response.status == 'rejected' &&
+                          response.rejectedReason != null) ...[
+                        SizedBox(height: 12.h),
+                        Text(
+                          'Reason for rejection:',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.red,
+                          ),
+                        ),
+                        Text(
+                          response.rejectedReason!,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            color: context.subTextColor,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: _buildBottomAction(),
-          ),
+          if ((response.status == 'pending' && isOwner) ||
+              (response.status == 'accepted' ||
+                  response.status == 'meeting_set' ||
+                  response.status == 'paid'))
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: _buildBottomAction(tradeController),
+            ),
         ],
       ),
     );
@@ -119,7 +165,49 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
     );
   }
 
-  Widget _buildTradeBegunCard() {
+  Widget _buildTradeBegunCard(
+      TradeResponseModel response, dynamic post, bool isOwner) {
+    bool isGivePost = post?.postType == 'give';
+    String offeringText = '';
+
+    if (isGivePost) {
+      String offeringType = response.responseType;
+      double? ps = response.priceRangeStart;
+      double? pe = response.priceRangeEnd;
+      String? itm = response.itemName;
+
+      if (offeringType == 'existing' && post != null) {
+        if (post.returnType.toLowerCase() == 'price') {
+          offeringType = 'price';
+          ps = ps ?? post.priceMin;
+          pe = pe ?? post.priceMax;
+        } else if (post.returnType.toLowerCase() == 'free') {
+          offeringType = 'free';
+        } else {
+          offeringType = 'item';
+          itm = itm ?? post.returnItemName;
+        }
+      }
+
+      if (isGivePost) {
+        if (offeringType == 'price') {
+          offeringText = 'Paying ₹${ps?.toInt()} - ₹${pe?.toInt()}';
+        } else if (offeringType == 'item') {
+          offeringText = 'Offering you ${itm ?? 'an item'}';
+        } else {
+          offeringText = 'Asking for free';
+        }
+      } else {
+        if (offeringType == 'price') {
+          offeringText = 'Asking for ₹${ps?.toInt()} - ₹${pe?.toInt()}';
+        } else if (offeringType == 'item') {
+          offeringText = 'Asking for ${itm ?? 'an item'}';
+        } else {
+          offeringText = 'Offering for free';
+        }
+      }
+    }
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -132,105 +220,238 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                response.status == 'rejected'
+                    ? 'Offer Rejected'
+                    : response.status == 'accepted' || response.status == 'paid'
+                        ? 'Trade Accepted'
+                        : 'Trade Initiated',
+                style: TextStyle(
+                  color:
+                      response.status == 'rejected' ? Colors.red : defoultColor,
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w900,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+              _buildStatusBadge(response.status),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'The Trade has Begun !',
-                      style: TextStyle(
-                        color: defoultColor,
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: FontFamily.openSans,
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: context.subTextColor,
+                          fontSize: 16.sp,
+                          fontFamily: FontFamily.openSans,
+                        ),
+                        children: [
+                          TextSpan(
+                            text:
+                                isOwner ? '${response.responderName} ' : 'You ',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: context.textColor,
+                                fontSize: 15.sp),
+                          ),
+                          TextSpan(
+                              text: isOwner
+                                  ? 'responded to your post :\n'
+                                  : 'responded to ${response.posterName ?? 'the owner'}\'s post :\n',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                              )),
+                          if (isGivePost) ...[
+                            TextSpan(text: offeringText),
+                            const TextSpan(text: ' -\nTaking '),
+                            TextSpan(
+                              text: post?.itemName ?? 'your product',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: context.textColor),
+                            ),
+                            const TextSpan(text: ' in return'),
+                          ] else ...[
+                            const TextSpan(text: 'Providing '),
+                            TextSpan(
+                              text: post?.itemName ?? 'the product',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: context.textColor),
+                            ),
+                            const TextSpan(text: ' -\n'),
+                            TextSpan(text: offeringText),
+                            const TextSpan(text: ' in return'),
+                          ],
+                        ],
                       ),
                     ),
-                    SizedBox(height: 8.h),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                style: TextStyle(
-                                  color: context.subTextColor,
-                                  fontSize: 16.sp,
-                                  fontFamily: FontFamily.openSans,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: 'Riya ',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        color: context.textColor),
-                                  ),
-                                  const TextSpan(text: 'responded :\n'),
-                                  const TextSpan(
-                                      text: 'Giving you Icecream -\nTaking '),
-                                  TextSpan(
-                                    text: 'Money ',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        color: context.textColor),
-                                  ),
-                                  const TextSpan(text: 'in return'),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 20.h),
-                            GestureDetector(
-                              onTap: () => setState(
-                                  () => _showMoreDetails = !_showMoreDetails),
-                              child: Text(
-                                _showMoreDetails
-                                    ? 'Less Details'
-                                    : 'More Details',
-                                style: TextStyle(
-                                  color: defoultColor,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w700,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                            //SizedBox(height: 20.h),
-                          ],
-                        ),
-                        Spacer(),
-                        Container(
-                          width: 100.w,
-                          height: 100.w,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.r),
-                            image: const DecorationImage(
-                              image: AssetImage(
-                                  'assets/iphone.png'), // Placeholder
-                              fit: BoxFit.cover,
+                    if (response.responseType != 'price')
+                      Padding(
+                        padding: EdgeInsets.only(top: 8.h),
+                        child: GestureDetector(
+                          onTap: () => setState(
+                            () => _showMoreDetails = !_showMoreDetails,
+                          ),
+                          child: Text(
+                            _showMoreDetails ? 'Less Details' : 'More Details',
+                            style: TextStyle(
+                              color: defoultColor,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    if (_showMoreDetails) ...[
-                      SizedBox(height: 16.h),
-                      _buildItemDetailMiniCard(),
-                    ],
+                      ),
                   ],
                 ),
               ),
+              if (response.responseType != 'price') ...[
+                SizedBox(width: 12.w),
+                Container(
+                  width: 100.w,
+                  height: 100.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.r),
+                    image: DecorationImage(
+                      image: response.itemImages.isNotEmpty
+                          ? NetworkImage(response.itemImages.first
+                                  .startsWith('http')
+                              ? response.itemImages.first
+                              : '${ApiConstants.baseUrl2}${response.itemImages.first}')
+                          : (response.postItemImages.isNotEmpty)
+                              ? NetworkImage(response.postItemImages.first
+                                      .startsWith('http')
+                                  ? response.postItemImages.first
+                                  : '${ApiConstants.baseUrl2}${response.postItemImages.first}')
+                              : (post != null && post.itemImages.isNotEmpty)
+                                  ? NetworkImage(post.itemImages.first
+                                          .startsWith('http')
+                                      ? post.itemImages.first
+                                      : '${ApiConstants.baseUrl2}${post.itemImages.first}')
+                                  : const AssetImage('assets/iphone.png')
+                                      as ImageProvider,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ],
             ],
+          ),
+          if (_showMoreDetails && response.responseType != 'price') ...[
+            SizedBox(height: 16.h),
+            _buildItemDetailMiniCard(response),
+          ],
+          if (response.status == 'rejected' &&
+              response.rejectedReason != null) ...[
+            SizedBox(height: 16.h),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: Colors.red.withOpacity(0.1)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.red, size: 16.sp),
+                      SizedBox(width: 8.w),
+                      Text(
+                        'Status Note',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    response.rejectedReason!,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: context.textColor.withOpacity(0.8),
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    Color bgColor;
+    Color textColor;
+    String label;
+    IconData icon;
+
+    switch (status.toLowerCase()) {
+      case 'rejected':
+        bgColor = Colors.red.withOpacity(0.1);
+        textColor = Colors.red;
+        label = 'Rejected';
+        icon = Icons.cancel_outlined;
+        break;
+      case 'accepted':
+      case 'paid':
+        bgColor = Colors.green.withOpacity(0.1);
+        textColor = Colors.green;
+        label = 'Accepted';
+        icon = Icons.check_circle_outline;
+        break;
+      default:
+        bgColor = defoultColor.withOpacity(0.1);
+        textColor = defoultColor;
+        label = 'Pending';
+        icon = Icons.access_time_outlined;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: textColor, size: 14.sp),
+          SizedBox(width: 4.w),
+          Text(
+            label,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildItemDetailMiniCard() {
+  Widget _buildItemDetailMiniCard(TradeResponseModel response) {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
@@ -245,8 +466,37 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
             height: 70.h,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.r),
-              image: const DecorationImage(
-                image: AssetImage('assets/iphone.png'), // Placeholder
+              image: DecorationImage(
+                image: response.itemImages.isNotEmpty
+                    ? NetworkImage(response.itemImages.first.startsWith('http')
+                        ? response.itemImages.first
+                        : '${ApiConstants.baseUrl2}${response.itemImages.first}')
+                    : (response.postItemImages.isNotEmpty)
+                        ? NetworkImage(response.postItemImages.first
+                                .startsWith('http')
+                            ? response.postItemImages.first
+                            : '${ApiConstants.baseUrl2}${response.postItemImages.first}')
+                        : (context.read<TradeController>().selectedPost !=
+                                    null &&
+                                context
+                                    .read<TradeController>()
+                                    .selectedPost!
+                                    .itemImages
+                                    .isNotEmpty)
+                            ? NetworkImage(context
+                                    .read<TradeController>()
+                                    .selectedPost!
+                                    .itemImages
+                                    .first
+                                    .startsWith('http')
+                                ? context
+                                    .read<TradeController>()
+                                    .selectedPost!
+                                    .itemImages
+                                    .first
+                                : '${ApiConstants.baseUrl2}${context.read<TradeController>().selectedPost!.itemImages.first}')
+                            : const AssetImage('assets/iphone.png')
+                                as ImageProvider,
                 fit: BoxFit.cover,
               ),
             ),
@@ -257,7 +507,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '1L Vailla Icecream',
+                  response.itemName ?? 'Price Offer',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
@@ -265,7 +515,10 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                   ),
                 ),
                 Text(
-                  'Homemade',
+                  response.itemCondition ??
+                      (response.responseType == 'price'
+                          ? 'Cash Offer'
+                          : 'Unknown'),
                   style: TextStyle(
                     fontSize: 14.sp,
                     color: defoultColor,
@@ -280,11 +533,11 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                       color: context.subTextColor,
                       fontFamily: FontFamily.openSans,
                     ),
-                    children: const [
-                      TextSpan(text: 'Category : '),
+                    children: [
+                      const TextSpan(text: 'Category : '),
                       TextSpan(
-                          text: 'Other',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                          text: response.itemCategory ?? 'Other',
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -297,7 +550,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Text(
-                    'Item',
+                    response.responseType.toUpperCase(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10.sp,
@@ -313,7 +566,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
     );
   }
 
-  Widget _buildAcceptRejectSection() {
+  Widget _buildAcceptRejectSection(TradeResponseModel response) {
     return Column(
       children: [
         _buildInteractionCard(
@@ -326,7 +579,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Accept Offer (Notify Riya)',
+                    'Accept Offer (Notify ${response.responderName})',
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -460,7 +713,14 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
     );
   }
 
-  Widget _buildBottomAction() {
+  Widget _buildBottomAction(TradeController controller) {
+    final response = controller.selectedResponse;
+    final authController = context.read<AuthController>();
+    final isOwner = authController.currentUser?.id == response?.posterUserId;
+    final isAlreadyAccepted = response?.status == 'accepted' ||
+        response?.status == 'meeting_set' ||
+        response?.status == 'paid';
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -476,9 +736,9 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
               ],
       ),
       child: ElevatedButton(
-        onPressed: () {
-          _showConfirmationDialog(context);
-        },
+        onPressed: controller.isLoading
+            ? null
+            : () => _handleSubmit(context, controller),
         style: ElevatedButton.styleFrom(
           backgroundColor: defoultColor,
           minimumSize: Size(double.infinity, 50.h),
@@ -486,19 +746,149 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
           elevation: 0,
         ),
-        child: Text(
-          'Continue',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 16.sp,
-          ),
+        child: controller.isLoading
+            ? SizedBox(
+                height: 20.h,
+                width: 20.h,
+                child: const CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 2))
+            : Text(
+                isAlreadyAccepted && isOwner ? 'Go to Chat' : 'Continue',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16.sp,
+                ),
+              ),
+      ),
+    );
+  }
+
+  void _handleSubmit(BuildContext context, TradeController controller) {
+    final response = controller.selectedResponse;
+    if (response == null) return;
+
+    if (response.status == 'accepted' ||
+        response.status == 'meeting_set' ||
+        response.status == 'paid') {
+      final authController = context.read<AuthController>();
+      final isOwner = authController.currentUser?.id == response.posterUserId;
+
+      if (isOwner) {
+        if (response.paymentStatus == 'paid') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                otherUserId: response.responderId.toString(),
+                otherUserName: response.responderName,
+                tradeResponse: response,
+              ),
+            ),
+          );
+        } else {
+          ToastService.showErrorToast(
+            context,
+            'Waiting for partner response',
+          );
+        }
+      } else {
+        Navigator.pushNamed(context, AppRoutes.tradeCompletion);
+      }
+      return;
+    }
+
+    if (_isAcceptSelected) {
+      _showConfirmationDialog(context, controller);
+    } else {
+      // Direct reject
+      _updateStatus(context, controller, 'rejected');
+    }
+  }
+
+  Future<void> _updateStatus(
+      BuildContext context, TradeController controller, String status,
+      {String? preference}) async {
+    final response = controller.selectedResponse;
+    if (response == null) return;
+
+    // Map label to backend value
+    String? meetingType;
+    if (status == 'accepted' && preference != null) {
+      if (preference == 'Come to me') {
+        meetingType = 'come_to_me';
+      } else if (preference == 'I Pick Up')
+        meetingType = 'i_pick_up';
+      else if (preference == 'Centre Point')
+        meetingType = 'centre_point';
+      else
+        meetingType = preference.toLowerCase().replaceAll(' ', '_');
+    }
+
+    final success = await controller.updateResponseStatus(
+      responseId: response.id,
+      status: status, // status is already 'accepted' or 'rejected'
+      meetingType: meetingType,
+    );
+
+    if (success && mounted) {
+      if (status == 'accepted') {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context); // Close dialog if open
+        }
+        _showAcceptedSuccessDialog(context);
+      } else {
+        ToastService.showSuccessToast(context, 'Trade Rejected');
+        Navigator.pop(context);
+      }
+    } else if (mounted) {
+      ToastService.showErrorToast(
+        context,
+        controller.errorMessage ?? 'Action failed',
+      );
+    }
+  }
+
+  void _showAcceptedSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        backgroundColor: context.surfaceColor,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 60),
+            const SizedBox(height: 20),
+            const Text('Trade Accepted!',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            const Text(
+                'The partner will now be notified to pay and start the chat.',
+                textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void _showConfirmationDialog(BuildContext context) {
+  void _showConfirmationDialog(
+      BuildContext context, TradeController controller) {
+    final response = controller.selectedResponse;
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -521,7 +911,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'You Sure You will give money?\nYou chose to give Organic apples (2kg) First ?',
+                'Are you sure you want to accept this offer?\nPartner: ${response?.responderName}\nOffer: ${response?.itemName ?? (response?.responseType == 'price' ? 'Cash' : 'Free')}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16.sp,
@@ -555,10 +945,9 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, AppRoutes.tradeCompletion);
-                      },
+                      onPressed: () => _updateStatus(
+                          context, controller, 'accepted',
+                          preference: _selectedMeetingPreference),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
                             const Color(0xFF215BA3), // Specific blue from SS

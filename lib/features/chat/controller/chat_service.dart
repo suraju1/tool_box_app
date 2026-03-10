@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
 import 'package:tool_bocs/features/login_and_signup/model/user_model.dart';
 import 'package:flutter/foundation.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -17,8 +18,8 @@ class ChatService {
   }
 
   // Send message
-  Future<void> sendMessage(
-      String chatRoomId, String message, String receiverId) async {
+  Future<void> sendMessage(String chatRoomId, String message, String receiverId,
+      {TradeResponseModel? tradeResponse}) async {
     try {
       UserModel? currentUser = await getCurrentUser();
       if (currentUser == null) {
@@ -62,6 +63,23 @@ class ChatService {
           },
           'updatedAt': timestamp,
           'unreadCounts.$receiverId': FieldValue.increment(1),
+          if (tradeResponse != null) ...{
+            'tradeId': tradeResponse.id,
+            'tradeDetails': {
+              'itemName': tradeResponse.itemName,
+              'postItemName': tradeResponse.postItemName,
+              'posterName': tradeResponse.posterName,
+              'responderName': tradeResponse.responderName,
+              'responseType': tradeResponse.responseType,
+              'priceRangeStart': tradeResponse.priceRangeStart,
+              'priceRangeEnd': tradeResponse.priceRangeEnd,
+              'posterUserId': tradeResponse.posterUserId,
+              'responderId': tradeResponse.responderId,
+              'posterMobile': tradeResponse.posterMobile,
+              'responderMobile': tradeResponse.responderMobile,
+              'postType': tradeResponse.postType,
+            }
+          }
         });
         debugPrint("sendMessage: UPDATE complete");
       } catch (e) {
@@ -81,6 +99,23 @@ class ChatService {
             receiverId: 1, // Initial count
             currentUserId: 0,
           },
+          if (tradeResponse != null) ...{
+            'tradeId': tradeResponse.id,
+            'tradeDetails': {
+              'itemName': tradeResponse.itemName,
+              'postItemName': tradeResponse.postItemName,
+              'posterName': tradeResponse.posterName,
+              'responderName': tradeResponse.responderName,
+              'responseType': tradeResponse.responseType,
+              'priceRangeStart': tradeResponse.priceRangeStart,
+              'priceRangeEnd': tradeResponse.priceRangeEnd,
+              'posterUserId': tradeResponse.posterUserId,
+              'responderId': tradeResponse.responderId,
+              'posterMobile': tradeResponse.posterMobile,
+              'responderMobile': tradeResponse.responderMobile,
+              'postType': tradeResponse.postType,
+            }
+          }
         });
         debugPrint("sendMessage: SET complete");
       }
@@ -172,12 +207,16 @@ class ChatService {
   }
 
   // Generate chat room ID (for 1-on-1 chat)
-  String getChatRoomId(String userId1, String userId2) {
+  String getChatRoomId(String userId1, String userId2, {int? tradeId}) {
+    String baseId;
     if (userId1.hashCode <= userId2.hashCode) {
-      return '${userId1}_$userId2';
+      baseId = '${userId1}_$userId2';
     } else {
-      return '${userId2}_$userId1';
+      baseId = '${userId2}_$userId1';
     }
+
+    // If tradeId is provided, append it to allow multiple trades between same users
+    return tradeId != null ? '${baseId}_t$tradeId' : baseId;
   }
 
   // Method to mark messages as read could go here

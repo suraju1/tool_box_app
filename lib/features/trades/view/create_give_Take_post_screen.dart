@@ -26,7 +26,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
   bool _isTemporary = true;
   String _selectedCondition = 'New';
   bool _isPriceSelected = true;
-  RangeValues _priceRange = const RangeValues(10, 100);
+  RangeValues _priceRange = const RangeValues(10, 50000);
   bool _isNegotiable = false;
   bool _notifyPartnersOnly = true;
   bool _isHomemade = false;
@@ -35,6 +35,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
   bool _isReturnHomemade = false;
   bool _isReturnStoreBought = false;
   CategoryModel? _selectedCategory;
+  CategoryModel? _selectedReturnCategory;
 
   // Form Controllers
   final TextEditingController _itemNameController = TextEditingController();
@@ -497,7 +498,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         SizedBox(height: 20.h),
         Text('Category', style: _labelStyle()),
         SizedBox(height: 8.h),
-        _buildDropdown('Select Category'),
+        _buildDropdown('Select Category',
+            value: _selectedCategory,
+            onChanged: (val) => setState(() => _selectedCategory = val)),
         SizedBox(height: 16.h),
         Text('Condition', style: _labelStyle()),
         SizedBox(height: 12.h),
@@ -624,7 +627,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Desired Price Range : \$${_priceRange.start.toInt()} - \$${_priceRange.end.toInt()}',
+                  'Desired Price Range : ₹${_priceRange.start.toInt()} - ₹${_priceRange.end.toInt()}',
                   style:
                       TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
                 ),
@@ -632,7 +635,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                 RangeSlider(
                   values: _priceRange,
                   min: 0,
-                  max: 500,
+                  max: 200000,
                   padding: EdgeInsets.zero,
                   activeColor: defoultColor,
                   inactiveColor: context.dividerColor,
@@ -797,8 +800,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         // Wait, I see I missed adding `returnItemName` etc to the model.
         // I should probably add them.
         // For now, let's just update the UI Binding.
-        _buildDropdown(
-            'Select Category'), // This uses the SAME controller? That's wrong.
+        _buildDropdown('Select Category',
+            value: _selectedReturnCategory,
+            onChanged: (val) => setState(() => _selectedReturnCategory = val)),
         SizedBox(height: 16.h),
         Text('Condition', style: _labelStyle()),
         SizedBox(height: 12.h),
@@ -1088,14 +1092,37 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       itemNote: _itemNoteController.text,
       itemSource: _isHomemade ? "Homemade" : "Store bought",
       returnType: _isPriceSelected ? "Price" : "Item",
-      priceMin: _isPriceSelected ? _priceRange.start : 0,
-      priceMax: _isPriceSelected ? _priceRange.end : 0,
+      priceMin: _isPriceSelected ? _priceRange.start : null,
+      priceMax: _isPriceSelected ? _priceRange.end : null,
       isNegotiable: _isNegotiable,
-      walletCredits: 0, // Default for now
+      walletCredits: 5,
       notifyPartnersOnly: _notifyPartnersOnly,
       postType: postType,
       itemImages: _itemImages.map((e) => e.path).toList(),
-      returnItemImages: _returnItemImages.map((e) => e.path).toList(),
+      returnItemImages:
+          _isPriceSelected ? [] : _returnItemImages.map((e) => e.path).toList(),
+      returnItemName:
+          (!_isPriceSelected && _returnItemNameController.text.isNotEmpty)
+              ? _returnItemNameController.text
+              : null,
+      returnItemCategory:
+          _isPriceSelected ? null : _selectedReturnCategory?.name,
+      returnItemCategoryId:
+          _isPriceSelected ? null : _selectedReturnCategory?.id,
+      returnItemCondition: _isPriceSelected ? null : _returnSelectedCondition,
+      returnItemNote: (!_isPriceSelected &&
+              _returnItemDescriptionController.text.isNotEmpty)
+          ? _returnItemDescriptionController.text
+          : null,
+      returnItemDescription: (!_isPriceSelected &&
+              _returnItemDescriptionController.text.isNotEmpty)
+          ? _returnItemDescriptionController.text
+          : null,
+      returnItemSource: _isPriceSelected
+          ? null
+          : (_isReturnHomemade
+              ? 'Homemade'
+              : (_isReturnStoreBought ? 'Store bought' : null)),
     );
 
     final success = await context.read<TradeController>().createPost(request);
@@ -1153,7 +1180,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     );
   }
 
-  Widget _buildDropdown(String hint) {
+  Widget _buildDropdown(String hint,
+      {CategoryModel? value, ValueChanged<CategoryModel?>? onChanged}) {
     return Consumer<TradeController>(
       builder: (context, tradeController, child) {
         if (tradeController.isLoading) {
@@ -1225,7 +1253,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           hint: Text(hint,
               style: TextStyle(color: context.subTextColor, fontSize: 13.sp)),
           isExpanded: true,
-          value: _selectedCategory,
+          value: value,
           validator: (value) => value == null ? 'Category is required' : null,
           items: tradeController.categories.map((category) {
             return DropdownMenuItem<CategoryModel>(
@@ -1240,11 +1268,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
               ),
             );
           }).toList(),
-          onChanged: (CategoryModel? val) {
-            setState(() {
-              _selectedCategory = val;
-            });
-          },
+          onChanged: onChanged,
         );
       },
     );

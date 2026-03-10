@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/core/api/api_response.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
 class UserReviewDialog extends StatefulWidget {
-  const UserReviewDialog({super.key});
+  final int userId;
+  final String userName;
+
+  const UserReviewDialog({
+    super.key,
+    required this.userId,
+    required this.userName,
+  });
 
   @override
   State<UserReviewDialog> createState() => _UserReviewDialogState();
@@ -76,7 +87,7 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Riya was',
+                      '${widget.userName} was',
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -184,24 +195,66 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
               SizedBox(
                 width: double.infinity,
                 height: 50.h,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: themeColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Submit Review',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: FontFamily.openSans,
-                    ),
-                  ),
+                child: Consumer<ProfileController>(
+                  builder: (context, controller, child) {
+                    return ElevatedButton(
+                      onPressed: controller.isLoading
+                          ? null
+                          : () async {
+                              if (_selectedFeedbackIndex == null) {
+                                ToastService.showErrorToast(
+                                    context, 'Please select a label');
+                                return;
+                              }
+
+                              final ApiResponse<dynamic> response =
+                                  await controller.submitReview(
+                                userId: widget.userId,
+                                label: _feedbackOptions[_selectedFeedbackIndex!]
+                                    ['label']!,
+                                comment: _reviewController.text,
+                              );
+
+                              if (response.success) {
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                  ToastService.showSuccessToast(
+                                      context, response.message);
+                                }
+                              } else {
+                                if (context.mounted) {
+                                  ToastService.showErrorToast(
+                                      context, response.message);
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: themeColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: controller.isLoading
+                          ? SizedBox(
+                              height: 20.h,
+                              width: 20.h,
+                              child: const CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              'Submit Review',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: FontFamily.openSans,
+                              ),
+                            ),
+                    );
+                  },
                 ),
               ),
             ],

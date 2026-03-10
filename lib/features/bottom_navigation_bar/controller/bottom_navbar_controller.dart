@@ -23,6 +23,14 @@ class BottomNavBarController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void reset() {
+    _currentIndex = 0;
+    if (_pageController.hasClients) {
+      _pageController.jumpToPage(0);
+    }
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _pageController.dispose();

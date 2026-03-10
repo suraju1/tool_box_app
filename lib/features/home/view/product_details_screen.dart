@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/features/profile/view/profile_screen.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -268,7 +270,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               SizedBox(height: 8.h),
                               _buildDetailRow(
                                 'Price Range',
-                                '\$${post.priceMin} - \$${post.priceMax}',
+                                '₹${post.priceMin} - ₹${post.priceMax}',
                                 Icons.monetization_on_outlined,
                                 true,
                               ),
@@ -293,25 +295,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     separatorBuilder: (_, __) =>
                                         SizedBox(width: 8.w),
                                     itemBuilder: (context, index) {
-                                      return ClipRRect(
-                                        borderRadius: BorderRadius.circular(
-                                          8.r,
-                                        ),
-                                        child: Image.network(
-                                          '${ApiConstants.baseUrl2}${post.returnItemImages[index]}',
+                                      return AppCachedImage(
+                                        imageUrl:
+                                            '${ApiConstants.baseUrl2}${post.returnItemImages[index]}',
+                                        height: 100.h,
+                                        width: 100.h,
+                                        fit: BoxFit.cover,
+                                        radius: 8.r,
+                                        errorWidget: Container(
                                           height: 100.h,
                                           width: 100.h,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Container(
-                                            height: 100.h,
-                                            width: 100.h,
-                                            color: Colors.grey[200],
-                                            child: Icon(
-                                              Icons.image_not_supported,
-                                              color: Colors.grey,
-                                            ),
+                                          color: Colors.grey[200],
+                                          child: Icon(
+                                            Icons.image_not_supported,
+                                            color: Colors.grey,
                                           ),
                                         ),
                                       );
@@ -385,8 +382,45 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           final post = tradeController.selectedPost;
           if (post == null) return const SizedBox.shrink();
 
-          // Hide the button if the current user is the owner of the post
+          // Hide the response button for owners, but show "View Offers" if they have responses
           if (authController.currentUser?.id == post.userId) {
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
+              decoration: BoxDecoration(
+                color: context.surfaceColor,
+                border: Border(top: BorderSide(color: context.dividerColor)),
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.notifications,
+                    arguments: post.id,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: themeColor,
+                  minimumSize: Size(double.infinity, 50.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'View Offers',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: FontFamily.openSans,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          // Hide the button if the current user has already responded
+          if (post.hasResponded) {
             return const SizedBox.shrink();
           }
 
@@ -464,11 +498,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   final imagePath = images[index];
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(20.r),
-                    child: Image.network(
-                      '${ApiConstants.baseUrl2}$imagePath',
+                    child: AppCachedImage(
+                      imageUrl: '${ApiConstants.baseUrl2}$imagePath',
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                      radius: 20.r,
+                      errorWidget: Image.asset(
                         'assets/iphone.png',
                         fit: BoxFit.cover,
                         width: double.infinity,
@@ -601,10 +636,21 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   Widget _buildOwnerProfile(post) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserProfileScreen()),
-        );
+        final authController = context.read<AuthController>();
+        if (authController.currentUser?.id == post.userId) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProfileScreen()),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => UserProfileScreen(
+                      userId: post.userId.toString(),
+                    )),
+          );
+        }
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 20.w),
@@ -631,13 +677,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(28.r),
                 child: post.userImage != null && post.userImage!.isNotEmpty
-                    ? Image.network(
-                        '${ApiConstants.baseUrl2}${post.userImage}',
+                    ? AppCachedImage(
+                        imageUrl: '${ApiConstants.baseUrl2}${post.userImage}',
                         width: 56.r,
                         height: 56.r,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Image.asset(
+                        radius: 28.r,
+                        errorWidget: Image.asset(
                           'assets/profile2.png',
                           width: 56.r,
                           height: 56.r,

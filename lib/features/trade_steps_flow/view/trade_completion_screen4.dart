@@ -6,12 +6,126 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/features/chat/view/chat_screen.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 
-class TradeCompletionScreen extends StatelessWidget {
+class TradeCompletionScreen extends StatefulWidget {
   const TradeCompletionScreen({super.key});
 
   @override
+  State<TradeCompletionScreen> createState() => _TradeCompletionScreenState();
+}
+
+class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
+  @override
   Widget build(BuildContext context) {
+    final tradeController = context.watch<TradeController>();
+    final response = tradeController.selectedResponse;
+
+    if (response == null) {
+      return Scaffold(
+        appBar: _buildAppBar(context),
+        body: const Center(child: Text('No trade selected')),
+      );
+    }
+
+    final authController = context.watch<AuthController>();
+    final isOwner = authController.currentUser?.id == response.posterUserId;
+
+    if (isOwner) {
+      return Scaffold(
+        backgroundColor: context.scaffoldBg,
+        appBar: _buildAppBar(context),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                  'As the post owner, you don\'t need to complete this step.'),
+              SizedBox(height: 20.h),
+              ElevatedButton(
+                onPressed: () {
+                  if (response.paymentStatus == 'paid' ||
+                      response.status == 'paid' ||
+                      response.status == 'completed') {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatScreen(
+                          otherUserId: response.posterUserId.toString(),
+                          otherUserName: response.posterName,
+                          tradeResponse: response,
+                        ),
+                      ),
+                    );
+                  } else {
+                    ToastService.showErrorToast(
+                      context,
+                      'Waiting for partner response',
+                    );
+                  }
+                },
+                child: const Text('Go to Chat'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Guard for responders: Only allowed if status is accepted, paid, or completed
+    if (response.status != 'accepted' &&
+        response.status != 'paid' &&
+        response.status != 'completed') {
+      return Scaffold(
+        backgroundColor: context.scaffoldBg,
+        appBar: _buildAppBar(context),
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.all(24.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.lock_clock, size: 64.sp, color: Colors.orange),
+                SizedBox(height: 24.h),
+                Text(
+                  response.status == 'rejected'
+                      ? 'Trade Rejected'
+                      : 'Waiting for Owner',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: context.textColor,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  response.status == 'rejected'
+                      ? 'This trade offer was rejected by the owner.'
+                      : 'You can only complete the trade once the owner has accepted your offer.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: context.subTextColor,
+                  ),
+                ),
+                SizedBox(height: 32.h),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Go Back'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    bool isPaid = response.paymentStatus == 'paid' ||
+        response.status == 'paid' ||
+        response.status == 'completed';
+
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       appBar: _buildAppBar(context),
@@ -27,15 +141,15 @@ class TradeCompletionScreen extends StatelessWidget {
                 SizedBox(height: 10.h),
                 _buildHandshakeBanner(),
                 SizedBox(height: 24.h),
-                _buildTradeSummary(context),
+                _buildTradeSummary(response),
                 SizedBox(height: 16.h),
-                _buildChatTicketCard(context),
+                _buildChatTicketCard(response, isPaid, tradeController),
               ],
             ),
           ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: _buildBottomAction(context),
+            child: _buildBottomAction(tradeController, isPaid),
           ),
         ],
       ),
@@ -110,11 +224,47 @@ class TradeCompletionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTradeSummary(BuildContext context) {
+  Widget _buildTradeSummary(TradeResponseModel response) {
     final tradeController = context.watch<TradeController>();
     final post = tradeController.selectedPost;
-    final otherUserId = post?.userId.toString() ?? 'Unknown';
-    final otherUserName = post?.userName ?? 'User $otherUserId';
+    bool isGivePost = post?.postType == 'give';
+
+    String offeringText = '';
+    String offeringType = response.responseType;
+    double? ps = response.priceRangeStart;
+    double? pe = response.priceRangeEnd;
+    String? itm = response.itemName;
+
+    if (offeringType == 'existing' && post != null) {
+      if (post.returnType.toLowerCase() == 'price') {
+        offeringType = 'price';
+        ps = ps ?? post.priceMin;
+        pe = pe ?? post.priceMax;
+      } else if (post.returnType.toLowerCase() == 'free') {
+        offeringType = 'free';
+      } else {
+        offeringType = 'item';
+        itm = itm ?? post.returnItemName;
+      }
+    }
+
+    if (isGivePost) {
+      if (offeringType == 'price') {
+        offeringText = 'Paying ₹${ps?.toInt()} - ₹${pe?.toInt()}';
+      } else if (offeringType == 'item') {
+        offeringText = 'Offering ${itm ?? 'an item'}';
+      } else {
+        offeringText = 'Asking for free';
+      }
+    } else {
+      if (offeringType == 'price') {
+        offeringText = 'Asking for ₹${ps?.toInt()} - ₹${pe?.toInt()}';
+      } else if (offeringType == 'item') {
+        offeringText = 'Providing ${itm ?? 'an item'}';
+      } else {
+        offeringText = 'Providing for free';
+      }
+    }
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -127,48 +277,50 @@ class TradeCompletionScreen extends StatelessWidget {
             height: 1.5,
           ),
           children: [
+            const TextSpan(text: 'Your offer was '),
             TextSpan(
-              text: '$otherUserName ',
+              text: 'ACCEPTED',
               style: TextStyle(
-                  fontWeight: FontWeight.w800, color: Color(0xFF1E61CC)),
+                  fontWeight: FontWeight.w800, color: Colors.green.shade700),
             ),
-            const TextSpan(text: 'accepted your offer -\n'),
-            const TextSpan(text: 'Taking Icecream from you, Giving you\n'),
+            const TextSpan(text: ' -\n'),
+            TextSpan(text: 'You are $offeringText\n'),
+            const TextSpan(text: 'in exchange for '),
             TextSpan(
-              text: 'Money ',
+              text: post?.itemName ?? 'the product',
               style: TextStyle(
                   fontWeight: FontWeight.w800, color: context.textColor),
             ),
-            const TextSpan(text: 'in return'),
+            const TextSpan(
+                text: ' You will receive the product once completed.'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildChatTicketCard(BuildContext context) {
-    final tradeController = context.watch<TradeController>();
+  Widget _buildChatTicketCard(TradeResponseModel response, bool isPaid,
+      TradeController tradeController) {
+    // In Step 4, the user is the PARTNER (responder). So the OTHER user is the POST OWNER.
     final post = tradeController.selectedPost;
-    final otherUserId = post?.userId.toString() ?? 'Unknown';
-    final otherUserName = post?.userName ?? 'Unknown User';
+    final otherUserName = post?.userName ?? 'Owner';
 
     return InkWell(
       onTap: () {
-        if (post != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatScreen(
-                otherUserId: otherUserId,
-                otherUserName: otherUserName,
-              ),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No trade selected')),
-          );
+        if (!isPaid) {
+          _showPaymentRequiredDialog(context);
+          return;
         }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              otherUserId: response.posterUserId.toString(),
+              otherUserName: response.posterName ?? 'Owner',
+              tradeResponse: response,
+            ),
+          ),
+        );
       },
       child: Container(
         padding: EdgeInsets.all(16.w),
@@ -223,15 +375,64 @@ class TradeCompletionScreen extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios,
-                color: context.textColor, size: 18.sp),
+            Opacity(
+              opacity: isPaid ? 1.0 : 0.5,
+              child: Icon(Icons.arrow_forward_ios,
+                  color: context.textColor, size: 18.sp),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBottomAction(BuildContext context) {
+  void _showPaymentRequiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        title: Row(
+          children: [
+            Icon(Icons.lock_outline, color: appColor, size: 24.sp),
+            SizedBox(width: 10.w),
+            Text(
+              'Chat Locked',
+              style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontFamily: FontFamily.openSans,
+                  fontSize: 18.sp),
+            ),
+          ],
+        ),
+        content: Text(
+          'Kindly close the trade first; only then will the chat be enabled.',
+          style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: context.textColor,
+              fontFamily: FontFamily.openSans),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: appColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r)),
+              minimumSize: Size(100.w, 40.h),
+            ),
+            child: const Text('OK',
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomAction(TradeController controller, bool isPaid) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -247,25 +448,103 @@ class TradeCompletionScreen extends StatelessWidget {
               ],
       ),
       child: ElevatedButton(
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.tradeSuccess);
-        },
+        onPressed: controller.isLoading
+            ? null
+            : () {
+                if (!isPaid) {
+                  _showClosureConfirmation(context, controller);
+                } else {
+                  Navigator.pushNamed(context, AppRoutes.tradeDetails);
+                }
+              },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF215BA3),
+          backgroundColor: appColor,
           minimumSize: Size(double.infinity, 54.h),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
           elevation: 0,
         ),
-        child: Text(
-          'Close Trade',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 16.sp,
-          ),
-        ),
+        child: controller.isLoading
+            ? SizedBox(
+                height: 20.h,
+                width: 20.h,
+                child: const CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 2))
+            : Text(
+                isPaid ? 'View Trade Details' : 'Close Trade',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16.sp,
+                ),
+              ),
       ),
     );
+  }
+
+  void _showClosureConfirmation(
+      BuildContext context, TradeController controller) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        title: Text(
+          'Close Trade',
+          style: TextStyle(
+              fontWeight: FontWeight.w800, fontFamily: FontFamily.openSans),
+        ),
+        content: Text(
+          'A fee of 5 credits is required to close this trade. Do you wish to proceed?',
+          style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              fontFamily: FontFamily.openSans),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'No, Cancel',
+              style: TextStyle(
+                  color: context.subTextColor, fontWeight: FontWeight.w700),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _handlePayment(context, controller);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: appColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r)),
+            ),
+            child: const Text('Yes, Proceed',
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handlePayment(
+      BuildContext context, TradeController controller) async {
+    final response = controller.selectedResponse;
+    if (response == null) return;
+
+    final success = await controller.processTradePayment(response.id);
+    if (success && mounted) {
+      ToastService.showSuccessToast(
+          context, 'Payment Successful! Chat unlocked.');
+      Navigator.pushReplacementNamed(context, AppRoutes.tradeSuccess);
+    } else if (mounted) {
+      ToastService.showErrorToast(
+        context,
+        controller.errorMessage ?? 'Payment failed',
+      );
+    }
   }
 }

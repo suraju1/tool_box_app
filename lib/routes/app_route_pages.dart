@@ -51,7 +51,13 @@ class AppPages {
         body: Center(child: Text('Error: No Post ID provided')),
       );
     },
-    AppRoutes.notifications: (_) => const NotificationsScreen(),
+    AppRoutes.notifications: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is int) {
+        return NotificationsScreen(postId: args);
+      }
+      return const NotificationsScreen();
+    },
     AppRoutes.editProfile: (_) => const EditProfileScreen(),
     AppRoutes.tradeHistory: (_) => const TradeHistoryScreen(),
     AppRoutes.blockedUsers: (_) => const BlockedUsersScreen(),

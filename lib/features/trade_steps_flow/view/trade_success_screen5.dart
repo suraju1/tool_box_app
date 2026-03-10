@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -9,6 +11,10 @@ class TradeSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tradeController = context.watch<TradeController>();
+    final response = tradeController.selectedResponse;
+    final posterName = response?.posterName ?? 'the owner';
+
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       body: Center(
@@ -39,7 +45,7 @@ class TradeSuccessScreen extends StatelessWidget {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Your trade request has been sent to Riya. You can now chat with them to coordinate the handover.',
+                'Your trade request has been sent to $posterName. You can now chat with them to coordinate the handover.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.sp,
@@ -48,6 +54,32 @@ class TradeSuccessScreen extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
+              if (tradeController.lastTradeCompletion != null) ...[
+                SizedBox(height: 24.h),
+                Container(
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: context.surfaceColor,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: defoultColor.withOpacity(0.3)),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildDetailRow(
+                        'Trade ID',
+                        '#${tradeController.lastTradeCompletion!.tradeId}',
+                        context,
+                      ),
+                      SizedBox(height: 8.h),
+                      _buildDetailRow(
+                        'Amount',
+                        '${tradeController.lastTradeCompletion!.amount} Tickets',
+                        context,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               SizedBox(height: 48.h),
               _buildActionButton(
                 context,
@@ -96,6 +128,30 @@ class TradeSuccessScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: context.subTextColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: context.textColor,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }

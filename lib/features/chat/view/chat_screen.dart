@@ -4,24 +4,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/chat/controller/chat_service.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/widgets/user_review_dialog.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tool_bocs/core/services/chat_listener.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
   final String? otherUserId;
   final String? otherUserName;
+  final TradeResponseModel? tradeResponse;
 
   const ChatScreen({
     super.key,
     this.chatRoomId,
     this.otherUserId,
     this.otherUserName,
+    this.tradeResponse,
   });
 
   @override
@@ -60,8 +66,11 @@ class _ChatScreenState extends State<ChatScreen> {
         if (widget.chatRoomId != null) {
           _chatRoomId = widget.chatRoomId!;
         } else if (widget.otherUserId != null) {
-          _chatRoomId =
-              _chatService.getChatRoomId(_currentUserId!, widget.otherUserId!);
+          _chatRoomId = _chatService.getChatRoomId(
+            _currentUserId!,
+            widget.otherUserId!,
+            tradeId: widget.tradeResponse?.id,
+          );
         }
       });
 
@@ -81,12 +90,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Check if chatRoomId needs to be generated (if first message)
     if (_chatRoomId.isEmpty) {
-      _chatRoomId =
-          _chatService.getChatRoomId(_currentUserId!, widget.otherUserId!);
+      _chatRoomId = _chatService.getChatRoomId(
+        _currentUserId!,
+        widget.otherUserId!,
+        tradeId: widget.tradeResponse?.id,
+      );
     }
 
     await _chatService.sendMessage(
-        _chatRoomId, _messageController.text.trim(), widget.otherUserId!);
+        _chatRoomId, _messageController.text.trim(), widget.otherUserId!,
+        tradeResponse: widget.tradeResponse);
     _messageController.clear();
   }
 
@@ -113,19 +126,22 @@ class _ChatScreenState extends State<ChatScreen> {
         // or you can modify sendMessage to accept 'type'
 
         if (_chatRoomId.isEmpty) {
-          _chatRoomId =
-              _chatService.getChatRoomId(_currentUserId!, widget.otherUserId!);
+          _chatRoomId = _chatService.getChatRoomId(
+            _currentUserId!,
+            widget.otherUserId!,
+            tradeId: widget.tradeResponse?.id,
+          );
         }
 
         // Modify ChatService to handle image/text differentiation if needed.
         // For now, we prepend [IMAGE] to detect it
         await _chatService.sendMessage(
-            _chatRoomId, "[IMAGE] $imageUrl", widget.otherUserId!);
+            _chatRoomId, "[IMAGE] $imageUrl", widget.otherUserId!,
+            tradeResponse: widget.tradeResponse);
       } catch (e) {
         debugPrint("Error uploading image: $e");
         if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error uploading image')));
+        ToastService.showErrorToast(context, 'Error uploading image');
       }
     }
   }
@@ -285,7 +301,10 @@ class _ChatScreenState extends State<ChatScreen> {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder: (context) => const UserReviewDialog(),
+                  builder: (context) => UserReviewDialog(
+                    userId: int.tryParse(widget.otherUserId ?? '0') ?? 0,
+                    userName: otherUserName,
+                  ),
                 );
               },
             ),
@@ -327,14 +346,31 @@ class _ChatScreenState extends State<ChatScreen> {
                         color: context.textColor,
                       ),
                     ),
-                    Text(
-                      '(+44) 50 9285 3022',
-                      style: TextStyle(
-                        color: context.subTextColor,
-                        fontSize: 12.sp,
-                        fontFamily: FontFamily.openSans,
-                      ),
-                    ),
+                    if (widget.tradeResponse != null) ...[
+                      Builder(builder: (context) {
+                        if (_currentUserId == null) {
+                          return const SizedBox.shrink();
+                        }
+                        final trade = widget.tradeResponse!;
+                        final isOwner =
+                            context.read<AuthController>().currentUser?.id ==
+                                trade.posterUserId;
+                        final partnerMobile = isOwner
+                            ? trade.responderMobile
+                            : trade.posterMobile;
+
+                        return Text(
+                          partnerMobile != null && partnerMobile.isNotEmpty
+                              ? partnerMobile
+                              : 'NA',
+                          style: TextStyle(
+                            color: context.subTextColor,
+                            fontSize: 12.sp,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                        );
+                      }),
+                    ],
                   ],
                 ),
               ),
@@ -355,6 +391,50 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildTradeStatusBanner() {
+    if (widget.tradeResponse == null || _currentUserId == null) {
+      return const SizedBox.shrink();
+    }
+
+    final trade = widget.tradeResponse!;
+    final isOwner =
+        context.read<AuthController>().currentUser?.id == trade.posterUserId;
+
+    String givingItem = '';
+    String takingItem = '';
+    String partnerName = '';
+
+    final isGivePost = trade.postType?.toLowerCase() == 'give' ||
+        trade.postType?.toLowerCase() == 'giving';
+
+    partnerName = otherUserName;
+
+    if (isOwner) {
+      if (isGivePost) {
+        givingItem = trade.postItemName ?? 'Item';
+        takingItem = trade.responseType.toLowerCase() == 'price'
+            ? '₹${trade.priceRangeStart} - ₹${trade.priceRangeEnd}'
+            : (trade.itemName ?? 'Item');
+      } else {
+        givingItem = trade.responseType.toLowerCase() == 'price'
+            ? '₹${trade.priceRangeStart} - ₹${trade.priceRangeEnd}'
+            : (trade.itemName ?? 'Item');
+        takingItem = trade.postItemName ?? 'Item';
+      }
+    } else {
+      //actual owner name
+      if (isGivePost) {
+        givingItem = trade.responseType.toLowerCase() == 'price'
+            ? '₹${trade.priceRangeStart} - ₹${trade.priceRangeEnd}'
+            : (trade.itemName ?? 'Item');
+        takingItem = trade.postItemName ?? 'Item';
+      } else {
+        givingItem = trade.postItemName ?? 'Item';
+        takingItem = trade.responseType.toLowerCase() == 'price'
+            ? '₹${trade.priceRangeStart} - ₹${trade.priceRangeEnd}'
+            : (trade.itemName ?? 'Item');
+      }
+    }
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
@@ -380,7 +460,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   const TextSpan(text: "You chose "),
                   TextSpan(
-                    text: "Giving Rs 50 to David ",
+                    text: "Giving $givingItem to $partnerName ",
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       color: appColor,
@@ -388,7 +468,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   const TextSpan(text: "and "),
                   TextSpan(
-                    text: "Taking C-pin charger ",
+                    text: "Taking $takingItem ",
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       color: appColor,

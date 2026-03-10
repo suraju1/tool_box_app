@@ -17,7 +17,11 @@ class ApiResponse<T> {
   ) {
     return ApiResponse<T>(
       success: json['success'] ?? false,
-      message: json['message'] ?? '',
+      message: json['message'] ??
+          json['msg'] ??
+          json['error'] ??
+          json['data']?['message'] ??
+          '',
       data: json['data'] != null && fromJsonT != null
           ? fromJsonT(json['data'])
           : null,

@@ -57,19 +57,23 @@ class TermsConditionsScreen extends StatelessWidget {
               _buildSectionTitle(context, '1. Acceptance of Terms'),
               _buildSectionContent(
                 context,
-                'By accessing and using Tool Bocs, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use the application.',
+                'By accessing and using TOOLUCS, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use the application.',
               ),
               SizedBox(height: 20.h),
-              _buildSectionTitle(context, '2. User Registration'),
-              _buildSectionContent(
-                context,
+              _buildSectionTitle(context, '2. User Responsibilities'),
+              SizedBox(height: 10.h),
+              Text(
                 'Users must provide accurate information during registration. You are responsible for maintaining the confidentiality of your account credentials.',
+                style: TextStyle(
+                    fontSize: 14.sp, color: context.textColor.withOpacity(0.7)),
               ),
               SizedBox(height: 20.h),
-              _buildSectionTitle(context, '3. Giving & Taking Policy'),
-              _buildSectionContent(
-                context,
-                'Tool Bocs facilitates the exchange of items. Users are responsible for the accuracy of item descriptions and the safe handover of items.',
+              _buildSectionTitle(context, '3. Risk of Trading'),
+              SizedBox(height: 10.h),
+              Text(
+                'TOOLUCS facilitates the exchange of items. Users are responsible for the accuracy of item descriptions and the safe handover of items.',
+                style: TextStyle(
+                    fontSize: 14.sp, color: context.textColor.withOpacity(0.7)),
               ),
               SizedBox(height: 20.h),
               _buildSectionTitle(context, '4. Prohibited Items'),
@@ -81,7 +85,7 @@ class TermsConditionsScreen extends StatelessWidget {
               _buildSectionTitle(context, '5. Limitation of Liability'),
               _buildSectionContent(
                 context,
-                'Tool Bocs is not responsible for the quality, safety, or legality of items exchanged. Users trade at their own risk.',
+                'TOOLUCS is not responsible for the quality, safety, or legality of items exchanged. Users trade at their own risk.',
               ),
               SizedBox(height: 20.h),
               _buildSectionTitle(context, '6. Modifications to Terms'),

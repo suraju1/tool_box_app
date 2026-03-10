@@ -34,6 +34,7 @@ class PostModel {
   final double? userRating;
   final double? distanceKm;
   final int? responseCount;
+  final bool hasResponded;
 
   PostModel({
     required this.id,
@@ -71,6 +72,7 @@ class PostModel {
     this.userRating,
     this.distanceKm,
     this.responseCount,
+    this.hasResponded = false,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
@@ -107,18 +109,24 @@ class PostModel {
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      walletCredits: json['wallet_credits'] ?? 0,
+      walletCredits:
+          int.tryParse(json['wallet_credits']?.toString() ?? '0') ?? 0,
       notifyPartnersOnly: (json['notify_partners_only'] == 1 ||
-          json['notify_partners_only'] == true),
-      postType: json['post_type'] ?? '',
-      status: json['status'] ?? '',
-      createdAt: json['created_at'] ?? '',
-      updatedAt: json['updated_at'] ?? '',
-      userName: json['user_name'] ?? '',
-      userImage: json['user_image'],
+          json['notify_partners_only'] == true ||
+          json['notify_partners_only']?.toString() == "1"),
+      postType: json['post_type']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
+      createdAt: json['created_at']?.toString() ?? '',
+      updatedAt: json['updated_at']?.toString() ?? '',
+      userName: json['user_name']?.toString() ?? '',
+      userImage: json['user_image']?.toString(),
       userRating: double.tryParse(json['user_rating']?.toString() ?? ''),
       distanceKm: double.tryParse(json['distance_km']?.toString() ?? ''),
-      responseCount: json['response_count'],
+      responseCount: int.tryParse(json['response_count']?.toString() ?? ''),
+      hasResponded: json['is_responded'] == 1 ||
+          json['is_responded'] == true ||
+          json['has_responded'] == 1 ||
+          json['has_responded'] == true,
     );
   }
 }

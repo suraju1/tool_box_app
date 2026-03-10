@@ -48,7 +48,7 @@ class ChoosePlanScreen extends StatelessWidget {
             ),
             SizedBox(height: 10.h),
             Text(
-              'Unlock premium features and scale your productivity with Toolbocs.',
+              'Unlock premium features and scale your productivity with TOOLUCS.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,

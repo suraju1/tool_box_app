@@ -10,8 +10,9 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
+import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 
-class OtpScreen extends StatefulWidget {
+class OtpScreen extends StatefulWidget { 
   const OtpScreen({super.key});
 
   @override
@@ -139,6 +140,9 @@ class _OtpScreenState extends State<OtpScreen> {
 
       // Check if profile is complete
       if (user != null && user.isProfileComplete == 1) {
+        // Reset Bottom Navigation Bar state to Home
+        context.read<BottomNavBarController>().reset();
+
         // Navigate to home screen
         Navigator.pushNamedAndRemoveUntil(
           context,

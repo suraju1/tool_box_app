@@ -5,6 +5,7 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 
 class LogoutDialog extends StatelessWidget {
   const LogoutDialog({super.key});
@@ -89,6 +90,11 @@ class LogoutDialog extends StatelessWidget {
                     // Call logout from AuthController
                     final authController = context.read<AuthController>();
                     await authController.logout();
+
+                    // Reset Bottom Navigation Bar to Home
+                    if (context.mounted) {
+                      context.read<BottomNavBarController>().reset();
+                    }
 
                     // Navigate to login screen and clear navigation stack
                     if (context.mounted) {

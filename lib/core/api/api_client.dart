@@ -106,7 +106,10 @@ class ApiClient {
         // Try to extract error message from response
         String message = 'Server error occurred';
         if (data is Map<String, dynamic>) {
-          message = data['message'] ?? message;
+          message = data['error'] ??
+              data['message'] ??
+              data['data']?['message'] ??
+              message;
         }
 
         if (statusCode == 401) {

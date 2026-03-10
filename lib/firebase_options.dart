@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCXHO-qRyPYK7pSzWZ65qVMpiTNlgJYIZE',
-    appId: '1:996029238718:android:1ef40a15255d2f2d8bbdef',
+    appId: '1:996029238718:android:ff94aba999a00e5f8bbdef',
     messagingSenderId: '996029238718',
     projectId: 'tool-bocs-prod-v3',
     storageBucket: 'tool-bocs-prod-v3.firebasestorage.app',
@@ -59,20 +59,20 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAyigqnR42F1zhvBQNbyjxdtbT9Cr1Sd6U',
-    appId: '1:996029238718:ios:498dd50e8495f2458bbdef',
+    appId: '1:996029238718:ios:c18a1088471078b38bbdef',
     messagingSenderId: '996029238718',
     projectId: 'tool-bocs-prod-v3',
     storageBucket: 'tool-bocs-prod-v3.firebasestorage.app',
-    iosBundleId: 'com.example.toolBocs',
+    iosBundleId: 'com.example.toolucs',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAyigqnR42F1zhvBQNbyjxdtbT9Cr1Sd6U',
-    appId: '1:996029238718:ios:498dd50e8495f2458bbdef',
+    appId: '1:996029238718:ios:c18a1088471078b38bbdef',
     messagingSenderId: '996029238718',
     projectId: 'tool-bocs-prod-v3',
     storageBucket: 'tool-bocs-prod-v3.firebasestorage.app',
-    iosBundleId: 'com.example.toolBocs',
+    iosBundleId: 'com.example.toolucs',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

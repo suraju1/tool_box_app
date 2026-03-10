@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:tool_bocs/features/trades/model/category_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/features/trades/model/post_request_model.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_request_model.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
+import 'package:tool_bocs/features/trades/model/trade_completion_model.dart';
 import 'package:tool_bocs/features/trades/service/trade_service.dart';
+import 'package:tool_bocs/util/debouncer.dart';
 
 class TradeController extends ChangeNotifier {
   final TradeService _tradeService = TradeService();
@@ -28,6 +32,13 @@ class TradeController extends ChangeNotifier {
   List<CategoryModel> get categories => _categories;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  void clearErrorMessage() {
+    if (_errorMessage == null) return;
+    _errorMessage = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
+  }
 
   Future<void> fetchCategories() async {
     _isLoading = true;
@@ -89,7 +100,7 @@ class TradeController extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _errorMessage = 'An error occurred: $e';
+      _errorMessage = e.toString();
       _isLoading = false;
       notifyListeners();
       return false;
@@ -134,6 +145,15 @@ class TradeController extends ChangeNotifier {
 
   final int _limit = 10;
   Timer? _debounceTimer;
+  final _searchDebouncer = Debouncer(milliseconds: 500);
+
+  String _giveSearchQuery = '';
+  String _takeSearchQuery = '';
+  String _homeSearchQuery = '';
+
+  String get giveSearchQuery => _giveSearchQuery;
+  String get takeSearchQuery => _takeSearchQuery;
+  String get homeSearchQuery => _homeSearchQuery;
 
   double? _distanceKm; // Null means no distance filter applied
   double? _latitude;
@@ -142,7 +162,8 @@ class TradeController extends ChangeNotifier {
   double get distanceKm => _distanceKm ?? 10.0; // UI fallback
   double? get latitude => _latitude;
   double? get longitude => _longitude;
-  bool get isDistanceFilterActive => _distanceKm != null;
+  bool get hasLocation => _latitude != null && _longitude != null;
+  bool get isDistanceFilterActive => _distanceKm != null && hasLocation;
 
   void setDistance(double value,
       {bool triggerFetch = false, String fetchType = 'all'}) {
@@ -167,6 +188,7 @@ class TradeController extends ChangeNotifier {
   @override
   void dispose() {
     _debounceTimer?.cancel();
+    _searchDebouncer.cancel();
     super.dispose();
   }
 
@@ -191,13 +213,42 @@ class TradeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setSearchQuery(String query, {required String type}) {
+    if (type == 'give') {
+      if (_giveSearchQuery == query) return;
+      _giveSearchQuery = query;
+    } else if (type == 'take') {
+      if (_takeSearchQuery == query) return;
+      _takeSearchQuery = query;
+    } else {
+      if (_homeSearchQuery == query) return;
+      _homeSearchQuery = query;
+    }
+    notifyListeners();
+
+    _searchDebouncer.run(() {
+      if (type == 'give') {
+        fetchGivePosts(refresh: true);
+      } else if (type == 'take') {
+        fetchTakePosts(refresh: true);
+      } else {
+        fetchHomePosts(refresh: true);
+      }
+    });
+  }
+
   void resetFilters() {
     _selectedCategories = [];
     _selectedRating = 'All';
     _selectedReturnType = 'All';
     _selectedSort = 'Nearest First';
     _selectedPostType = 'all';
+    // _distanceKm = null; // Don't reset distance by default if user deliberately set it?
+    // User preference usually stays. But for "reset filters" we might want to keep it null.
     _distanceKm = null;
+    _giveSearchQuery = '';
+    _takeSearchQuery = '';
+    _homeSearchQuery = '';
     notifyListeners();
   }
 
@@ -262,6 +313,7 @@ class TradeController extends ChangeNotifier {
       latitude: _latitude,
       longitude: _longitude,
       distanceKm: _distanceKm,
+      search: _giveSearchQuery,
       onStart: (loading, loadMore) {
         if (loading != null) _isGiveLoading = loading;
         if (loadMore != null) _isGiveLoadMoreRunning = loadMore;
@@ -301,6 +353,7 @@ class TradeController extends ChangeNotifier {
       latitude: _latitude,
       longitude: _longitude,
       distanceKm: _distanceKm,
+      search: _takeSearchQuery,
       onStart: (loading, loadMore) {
         if (loading != null) _isTakeLoading = loading;
         if (loadMore != null) _isTakeLoadMoreRunning = loadMore;
@@ -343,6 +396,7 @@ class TradeController extends ChangeNotifier {
       latitude: _latitude,
       longitude: _longitude,
       distanceKm: _distanceKm,
+      search: _homeSearchQuery,
       onStart: (loading, loadMore) {
         if (loading != null) _isHomeLoading = loading;
         if (loadMore != null) _isHomeLoadMoreRunning = loadMore;
@@ -382,6 +436,7 @@ class TradeController extends ChangeNotifier {
     double? latitude,
     double? longitude,
     double? distanceKm,
+    String? search,
     required Function(bool? isLoading, bool? isLoadMoreRunning) onStart,
     required Function(List<PostModel> newPosts, bool hasNext, int page)
         onSuccess,
@@ -398,17 +453,18 @@ class TradeController extends ChangeNotifier {
     }
 
     try {
-      // Root fix: Prioritize real coordinates, fallback to Pune ONLY if both are null
-      final double finalLat = latitude ?? 18.5204;
-      final double finalLng = longitude ?? 73.8567;
+      // Only include distance if we have valid location data
+      final bool includeDistance =
+          distanceKm != null && latitude != null && longitude != null;
 
       final response = await _tradeService.getAllPosts(
         type: type,
         page: currentPage,
         limit: _limit,
-        latitude: finalLat,
-        longitude: finalLng,
-        distanceKm: distanceKm,
+        latitude: latitude,
+        longitude: longitude,
+        distanceKm: includeDistance ? distanceKm : null,
+        search: search,
       );
 
       if (response.success) {
@@ -438,12 +494,31 @@ class TradeController extends ChangeNotifier {
       await fetchHomePosts(refresh: false);
 
   PostModel? _selectedPost;
+  TradeResponseModel? _selectedResponse;
+
   PostModel? get selectedPost => _selectedPost;
+  TradeResponseModel? get selectedResponse => _selectedResponse;
+
+  TradeCompletionModel? _lastTradeCompletion;
+  TradeCompletionModel? get lastTradeCompletion => _lastTradeCompletion;
+
+  void setSelectedPost(PostModel post) {
+    _selectedPost = post;
+    notifyListeners();
+  }
+
+  void setSelectedResponse(TradeResponseModel response) {
+    _selectedResponse = response;
+    notifyListeners();
+  }
 
   Future<void> fetchPostDetails(int id) async {
+    // Only clear if we are fetching a DIFFERENT post to prevent flickering/state loss
+    if (_selectedPost?.id != id) {
+      _selectedPost = null;
+    }
     _isLoading = true;
     _errorMessage = null;
-    _selectedPost = null; // Clear previous selection
     notifyListeners();
 
     try {
@@ -459,6 +534,210 @@ class TradeController extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  // --- 4-Step Trade Flow Controller Methods ---
+
+  Future<bool> respondToPost(TradeResponseRequestModel request) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.respondToPost(request);
+      if (response.success) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  List<TradeResponseModel> _postResponses = [];
+  List<TradeResponseModel> _sentResponses = [];
+
+  List<TradeResponseModel> get postResponses => _postResponses;
+  List<TradeResponseModel> get sentResponses => _sentResponses;
+
+  PostModel? _responsesPost;
+  PostModel? get responsesPost => _responsesPost;
+
+  Future<void> fetchPostResponses(int postId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _postResponses = [];
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.getPostResponses(postId);
+      if (response.success) {
+        final data = response.data;
+        _postResponses =
+            (data?['responses'] as List<TradeResponseModel>?) ?? [];
+        _responsesPost = data?['giveaway'] as PostModel?;
+      } else {
+        _errorMessage = response.message;
+      }
+    } catch (e) {
+      _errorMessage = 'An error occurred: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchAllPostResponses() async {
+    _isLoading = true;
+    _errorMessage = null;
+    _postResponses = [];
+    _responsesPost = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.getMyPostResponses();
+      if (response.success) {
+        _postResponses = response.data ?? [];
+      } else {
+        _errorMessage = response.message;
+      }
+    } catch (e) {
+      _errorMessage = 'An error occurred: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchSentResponses() async {
+    _isLoading = true;
+    _errorMessage = null;
+    _sentResponses = [];
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.getMySentResponses();
+      if (response.success) {
+        _sentResponses = response.data ?? [];
+      } else {
+        _errorMessage = response.message;
+      }
+    } catch (e) {
+      _errorMessage = 'An error occurred: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateResponseStatus({
+    required int responseId,
+    required String status,
+    String? meetingType,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.updateResponseStatus(
+        responseId: responseId,
+        status: status,
+        meetingType: meetingType,
+      );
+      if (response.success) {
+        if (_selectedResponse != null && _selectedResponse!.id == responseId) {
+          _selectedResponse = _selectedResponse!.copyWith(status: status);
+        }
+        // Update in lists
+        final incomingIndex =
+            _postResponses.indexWhere((e) => e.id == responseId);
+        if (incomingIndex != -1) {
+          _postResponses[incomingIndex] =
+              _postResponses[incomingIndex].copyWith(status: status);
+        }
+
+        final sentIndex = _sentResponses.indexWhere((e) => e.id == responseId);
+        if (sentIndex != -1) {
+          _sentResponses[sentIndex] =
+              _sentResponses[sentIndex].copyWith(status: status);
+        }
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> processTradePayment(int responseId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _lastTradeCompletion = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.processTradePayment(responseId);
+      if (response.success) {
+        _lastTradeCompletion = response.data;
+        if (_selectedResponse != null && _selectedResponse!.id == responseId) {
+          _selectedResponse = _selectedResponse!.copyWith(
+            paymentStatus: 'paid',
+            status: 'paid',
+          );
+        }
+        // Update in lists
+        final incomingIndex =
+            _postResponses.indexWhere((e) => e.id == responseId);
+        if (incomingIndex != -1) {
+          _postResponses[incomingIndex] =
+              _postResponses[incomingIndex].copyWith(
+            paymentStatus: 'paid',
+            status: 'paid',
+          );
+        }
+
+        final sentIndex = _sentResponses.indexWhere((e) => e.id == responseId);
+        if (sentIndex != -1) {
+          _sentResponses[sentIndex] = _sentResponses[sentIndex].copyWith(
+            paymentStatus: 'paid',
+            status: 'paid',
+          );
+        }
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 }

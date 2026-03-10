@@ -8,8 +8,8 @@ import 'package:tool_bocs/routes/navigator_key.dart';
 
 import 'routes/app_routes.dart';
 
-class ToolBocsApp extends StatelessWidget {
-  const ToolBocsApp({super.key});
+class ToolUcsApp extends StatelessWidget {
+  const ToolUcsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class ToolBocsApp extends StatelessWidget {
 
     return ConnectivityWrapper(
       child: MaterialApp(
-        title: 'ToolBocs',
+        title: 'TOOLUCS',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,

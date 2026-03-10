@@ -74,30 +74,14 @@ class _SplashScreenState extends State<SplashScreen>
               child: ScaleTransition(
                 scale: _scaleAnimation,
                 child: Container(
-                  height: 150.h,
-                  width: 150.w,
+                  height: 160.h,
+                  width: 160.w,
                   decoration: BoxDecoration(
                     color: context.scaffoldBg,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/logo.png',
-                        fit: BoxFit.cover,
-                      ),
-                      Text(
-                        'Tool Bocs',
-                        style: TextStyle(
-                          fontFamily: FontFamily.openSans,
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.bold,
-                          color: context.isDarkMode ? Colors.white : appColor,
-                        ),
-                      ),
-                    ],
+                  child: Image.asset(
+                    'assets/logo.png',
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),

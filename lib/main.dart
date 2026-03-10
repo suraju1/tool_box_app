@@ -15,6 +15,7 @@ import 'package:tool_bocs/util/connectivity_service.dart';
 import 'package:tool_bocs/core/services/notification_service.dart';
 import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 
 import 'app.dart';
 
@@ -60,8 +61,10 @@ void main() async {
               create: (_) => LocationController()), // Location controller
           ChangeNotifierProvider(
               create: (_) => TradeController()), // Trade controller
+          ChangeNotifierProvider(
+              create: (_) => ProfileController()), // Profile controller
         ],
-        child: const ToolBocsApp(),
+        child: const ToolUcsApp(),
       ),
       child: const SizedBox(), // prevent black screen
     ),

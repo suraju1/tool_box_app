@@ -20,6 +20,18 @@ class ApiConstants {
   static const String updateGiveTakePost = 'update_post/{{postid}}'; //put
   static const String deleteGiveTakePost = 'delete_post/{{postid}}'; //delete
 
+  // 4-Step Trade Flow
+  static const String respondToPost = 'respond/{{postid}}'; //post
+  static const String getPostResponses = 'responses/{{postid}}'; //get
+  static const String getMyPostResponses = 'my-post-responses'; //get
+  static const String getMyResponses = 'my-responses'; //get
+  static const String updateResponseStatus = 'update_response_status'; //post
+  static const String processTradePayment = 'process_trade_payment'; //post
+  static const String completeTrade = 'complete/{{id}}'; //post
+  static const String getUserProfile = 'get_user_profile/{{id}}'; //get
+  static const String submitUserReview = 'submit_user_review'; //post
+  static const String updateProfile = 'update_profile'; //post
+
 //-----------------------------------------------------------------------------//
   // Timeout durations
   static const Duration connectTimeout = Duration(seconds: 30);
