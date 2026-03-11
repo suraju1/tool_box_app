@@ -4,12 +4,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
-import 'package:tool_bocs/features/profile/view/profile_screen.dart';
-import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -295,9 +295,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     separatorBuilder: (_, __) =>
                                         SizedBox(width: 8.w),
                                     itemBuilder: (context, index) {
+                                      final imageUrl = post
+                                              .returnItemImages[index]
+                                              .startsWith('http')
+                                          ? post.returnItemImages[index]
+                                          : '${ApiConstants.baseUrl2}${post.returnItemImages[index]}';
                                       return AppCachedImage(
-                                        imageUrl:
-                                            '${ApiConstants.baseUrl2}${post.returnItemImages[index]}',
+                                        imageUrl: imageUrl,
                                         height: 100.h,
                                         width: 100.h,
                                         fit: BoxFit.cover,
@@ -399,7 +403,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: themeColor,
+                  backgroundColor: context.primaryColor,
                   minimumSize: Size(double.infinity, 50.h),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.r),
@@ -409,7 +413,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 child: Text(
                   'View Offers',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: context.onPrimaryColor,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     fontFamily: FontFamily.openSans,
@@ -437,7 +441,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 Navigator.pushNamed(context, AppRoutes.tradeOffer);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: appColor,
+                backgroundColor: context.primaryColor,
                 minimumSize: Size(double.infinity, 50.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r),
@@ -452,7 +456,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             post.postType.toLowerCase() == 'taking')
                         ? Icons.arrow_upward_rounded
                         : Icons.arrow_downward_rounded,
-                    color: Colors.white,
+                    color: context.onPrimaryColor,
                     size: 20.sp,
                   ),
                   SizedBox(width: 8.w),
@@ -462,7 +466,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ? 'Give It'
                         : 'Take It',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: context.onPrimaryColor,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       fontFamily: FontFamily.openSans,
@@ -499,9 +503,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(20.r),
                     child: AppCachedImage(
-                      imageUrl: '${ApiConstants.baseUrl2}$imagePath',
+                      imageUrl: imagePath,
                       fit: BoxFit.cover,
-                      width: double.infinity,
+                      width: 1.sw - 40.w,
+                      height: 320.h,
                       radius: 20.r,
                       errorWidget: Image.asset(
                         'assets/iphone.png',
@@ -546,13 +551,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: appColor,
+        color: context.primaryColor,
         borderRadius: BorderRadius.circular(30.r),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: Colors.white,
+          color: context.onPrimaryColor,
           fontSize: 12.sp,
           fontWeight: FontWeight.w700,
           fontFamily: FontFamily.openSans,
@@ -571,7 +576,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.location_on_rounded, color: appColor, size: 18.sp),
+          Icon(Icons.location_on_rounded,
+              color: context.primaryColor, size: 18.sp),
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
@@ -599,10 +605,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           Container(
             padding: EdgeInsets.all(8.r),
             decoration: BoxDecoration(
-              color: appColor.withOpacity(0.08),
+              color: context.primaryColor.withOpacity(0.08),
               borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(icon, color: appColor, size: 18.sp),
+            child: Icon(icon, color: context.primaryColor, size: 18.sp),
           ),
           SizedBox(width: 12.w),
         ],
@@ -636,21 +642,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   Widget _buildOwnerProfile(post) {
     return InkWell(
       onTap: () {
-        final authController = context.read<AuthController>();
-        if (authController.currentUser?.id == post.userId) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ProfileScreen()),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => UserProfileScreen(
-                      userId: post.userId.toString(),
-                    )),
-          );
-        }
+        ProfileController.navigateToUserProfile(context, post.userId);
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 20.w),
@@ -672,30 +664,21 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: appColor.withOpacity(0.2), width: 2),
+                border: Border.all(
+                    color: context.primaryColor.withOpacity(0.2), width: 2),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(28.r),
                 child: post.userImage != null && post.userImage!.isNotEmpty
                     ? AppCachedImage(
-                        imageUrl: '${ApiConstants.baseUrl2}${post.userImage}',
+                        imageUrl: post.userImage!,
+                        userName: post.userName,
                         width: 56.r,
                         height: 56.r,
                         fit: BoxFit.cover,
                         radius: 28.r,
-                        errorWidget: Image.asset(
-                          'assets/profile2.png',
-                          width: 56.r,
-                          height: 56.r,
-                          fit: BoxFit.cover,
-                        ),
                       )
-                    : Image.asset(
-                        'assets/profile2.png',
-                        width: 56.r,
-                        height: 56.r,
-                        fit: BoxFit.cover,
-                      ),
+                    : _buildLetterPlaceholder(post.userName, 56.r),
               ),
             ),
             SizedBox(width: 15.w),
@@ -795,6 +778,28 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLetterPlaceholder(String name, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: context.primaryColor.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        name.trim().isNotEmpty
+            ? name.trim().substring(0, 1).toUpperCase()
+            : '?',
+        style: TextStyle(
+          color: context.primaryColor,
+          fontSize: size * 0.4,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

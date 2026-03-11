@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
-import 'package:tool_bocs/features/profile/view/profile_screen.dart';
-import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
@@ -160,7 +159,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
                     fontFamily: FontFamily.openSans,
-                    color: defoultColor,
+                    color: context.primaryColor,
                   ),
                 ),
                 SizedBox(height: 8.h),
@@ -226,20 +225,14 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
       ),
       child: Row(
         children: [
-          imageUrl.isNotEmpty
-              ? AppCachedImage(
-                  imageUrl: imageUrl,
-                  width: 56.r,
-                  height: 56.r,
-                  radius: 28.r,
-                  fit: BoxFit.cover,
-                  errorWidget: Image.asset('assets/profile1.png',
-                      width: 56.r, height: 56.r, fit: BoxFit.cover),
-                )
-              : CircleAvatar(
-                  radius: 28.r,
-                  backgroundImage: const AssetImage('assets/profile1.png'),
-                ),
+          AppCachedImage(
+            imageUrl: imageUrl,
+            userName: userName,
+            width: 56.r,
+            height: 56.r,
+            radius: 28.r,
+            fit: BoxFit.cover,
+          ),
           SizedBox(width: 16.w),
           Expanded(
             child: Column(
@@ -298,26 +291,10 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
                 partnerId = response.responderId;
               }
 
-              if (partnerId == currentUserId) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ProfileScreen(),
-                  ),
-                );
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UserProfileScreen(
-                      userId: partnerId.toString(),
-                    ),
-                  ),
-                );
-              }
+              ProfileController.navigateToUserProfile(context, partnerId);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: defoultColor,
+              backgroundColor: context.primaryColor,
               elevation: 0,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r)),
@@ -328,7 +305,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
               style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white),
+                  color: context.onPrimaryColor),
             ),
           ),
         ],
@@ -379,7 +356,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
                   )
                 : Icon(
                     isTicketPost ? Icons.confirmation_number : Icons.inventory,
-                    color: defoultColor),
+                    color: context.primaryColor),
           ),
           SizedBox(width: 16.w),
           Expanded(

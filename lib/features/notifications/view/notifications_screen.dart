@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
-import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -213,7 +213,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     List<TextSpan> messageSpans = [];
     String subText = '';
     String actionLabel = '';
-    Color actionColor = appColor;
+    Color actionColor = context.primaryColor;
 
     if (response.responseType == 'price' || response.responseType == 'Price') {
       messageSpans = [
@@ -264,7 +264,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     if (response.status == 'pending') {
       actionLabel = isIncoming ? 'Review' : 'Waiting';
-      actionColor = appColor;
+      actionColor = context.primaryColor;
     } else if (response.status == 'accepted') {
       actionLabel = 'Continue';
       actionColor = Colors.green;
@@ -297,19 +297,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final imageToUse =
         responseImagePath.isNotEmpty ? responseImagePath : postImagePath;
 
-    final imageUrl =
-        imageToUse.isNotEmpty ? '${ApiConstants.baseUrl2}$imageToUse' : '';
-
     return _buildNotificationCard(
       context,
-      imageUrl: imageUrl,
+      imageUrl: imageToUse,
       distance: 'Unknown',
       message: messageSpans,
       subMessage: [
         TextSpan(text: subText),
       ],
       actions: [
-        _buildActionButton(actionLabel, actionColor, Colors.white,
+        _buildActionButton(actionLabel, actionColor, context.onPrimaryColor,
             () => _onResponseTap(response)),
       ],
       onTap: () => _onResponseTap(response),
@@ -362,7 +359,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: context.scaffoldBg,
+      backgroundColor: context.appBarColor,
       elevation: 0,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
@@ -381,8 +378,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       bottom: widget.postId == null
           ? TabBar(
               dividerColor: Colors.transparent,
-              indicatorColor: appColor,
-              labelColor: appColor,
+              indicatorColor: context.primaryColor,
+              labelColor: context.primaryColor,
               unselectedLabelColor: context.subTextColor,
               labelStyle: TextStyle(
                 fontSize: 14.sp,
@@ -396,7 +393,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             )
           : PreferredSize(
               preferredSize: const Size.fromHeight(10),
-              child: Divider(height: 1, color: greyColor.withOpacity(0.4)),
+              child: Divider(height: 1, color: context.dividerColor),
             ),
     );
   }
@@ -438,7 +435,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ? []
               : [
                   BoxShadow(
-                    color: greyColor.withOpacity(0.3),
+                    color: context.dividerColor.withOpacity(0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -451,25 +448,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12.r),
-                  child: imageUrl != null && imageUrl.isNotEmpty
-                      ? Image.network(
-                          imageUrl,
-                          width: 85.w,
-                          height: 75.w,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildImageErrorPlaceholder(context),
-                        )
-                      : imagePath != null
-                          ? Image.asset(
-                              imagePath,
-                              width: 85.w,
-                              height: 75.w,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  _buildImageErrorPlaceholder(context),
-                            )
-                          : _buildImageErrorPlaceholder(context),
+                  child: AppCachedImage(
+                    imageUrl: imageUrl ?? imagePath ?? '',
+                    width: 85.w,
+                    height: 75.w,
+                    fit: BoxFit.cover,
+                    errorWidget: _buildImageErrorPlaceholder(context),
+                  ),
                 ),
                 Positioned(
                   top: 6.h,
@@ -478,13 +463,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     padding:
                         EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
                     decoration: BoxDecoration(
-                      color: blackColor.withOpacity(0.4),
+                      color: Colors.black.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(4.r),
                     ),
                     child: Text(
                       distance,
                       style: TextStyle(
-                        color: whiteColor,
+                        color: context.onPrimaryColor,
                         fontSize: 8.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -534,9 +519,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Container(
       width: 85.w,
       height: 75.w,
-      color: context.isDarkMode ? Colors.white10 : Colors.grey.shade200,
+      color: context.surfaceColor,
       child: Icon(Icons.image,
-          color: context.isDarkMode ? Colors.white24 : Colors.grey.shade400),
+          color: context.isDarkMode ? Colors.white10 : Colors.grey.shade400),
     );
   }
 

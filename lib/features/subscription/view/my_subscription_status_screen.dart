@@ -118,7 +118,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                 child: Text(
                   'ACTIVE',
                   style: TextStyle(
-                    color: defoultColor,
+                    color: context.primaryColor,
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
@@ -132,7 +132,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                     TextSpan(
                       text: '₹999\n',
                       style: TextStyle(
-                        color: defoultColor,
+                        color: context.primaryColor,
                         fontSize: 28.sp,
                         fontWeight: FontWeight.w700,
                         fontFamily: FontFamily.openSans,
@@ -171,7 +171,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                   color: const Color(0xFFF2F7FF),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(Icons.sync, color: defoultColor, size: 24.sp),
+                child: Icon(Icons.sync, color: context.primaryColor, size: 24.sp),
               ),
               SizedBox(width: 15.w),
               Column(
@@ -317,7 +317,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                 height: 8.h,
                 width: 1.sw * 0.5, // 420/500 usage
                 decoration: BoxDecoration(
-                  color: defoultColor,
+                  color: context.primaryColor,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
               ),
@@ -344,7 +344,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
               color: Color(0xFFE8F1FF),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.check, color: defoultColor, size: 14.sp),
+            child: Icon(Icons.check, color: context.primaryColor, size: 14.sp),
           ),
           SizedBox(width: 15.w),
           Text(
@@ -372,7 +372,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? defoultColor : context.surfaceColor,
+          backgroundColor: isPrimary ? context.primaryColor : context.surfaceColor,
           elevation: isPrimary ? 2 : 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),

@@ -121,7 +121,7 @@ class ChoosePlanScreen extends StatelessWidget {
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(25.r),
         border: Border.all(
-          color: isPopular ? defoultColor : context.dividerColor,
+          color: isPopular ? context.primaryColor : context.dividerColor,
           width: isPopular ? 2 : 1,
         ),
         boxShadow: [
@@ -141,7 +141,7 @@ class ChoosePlanScreen extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 decoration: BoxDecoration(
-                  color: defoultColor,
+                  color: context.primaryColor,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(23.r),
                     bottomLeft: Radius.circular(15.r),
@@ -150,7 +150,7 @@ class ChoosePlanScreen extends StatelessWidget {
                 child: Text(
                   'MOST POPULAR',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: context.onPrimaryColor,
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w800,
                   ),
@@ -180,7 +180,7 @@ class ChoosePlanScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 32.sp,
                         fontWeight: FontWeight.w800,
-                        color: defoultColor,
+                        color: context.primaryColor,
                       ),
                     ),
                     Text(
@@ -196,14 +196,14 @@ class ChoosePlanScreen extends StatelessWidget {
                 SizedBox(height: 15.h),
                 Row(
                   children: [
-                    Icon(Icons.stars, color: defoultColor, size: 20.sp),
+                    Icon(Icons.stars, color: context.primaryColor, size: 20.sp),
                     SizedBox(width: 8.w),
                     Text(
                       credits,
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
-                        color: defoultColor,
+                        color: context.primaryColor,
                       ),
                     ),
                   ],
@@ -235,7 +235,7 @@ class ChoosePlanScreen extends StatelessWidget {
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
-                          isPopular ? defoultColor : const Color(0xFFE8F1FF),
+                          isPopular ? context.primaryColor : const Color(0xFFE8F1FF),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
@@ -244,7 +244,7 @@ class ChoosePlanScreen extends StatelessWidget {
                     child: Text(
                       buttonLabel,
                       style: TextStyle(
-                        color: isPopular ? Colors.white : defoultColor,
+                        color: isPopular ? Colors.white : context.primaryColor,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
                       ),

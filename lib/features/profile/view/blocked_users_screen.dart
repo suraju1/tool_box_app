@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 
 class BlockedUsersScreen extends StatelessWidget {
   const BlockedUsersScreen({super.key});
@@ -54,15 +55,15 @@ class BlockedUsersScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: context.isDarkMode
-            ? appColor.withOpacity(0.1)
+            ? context.primaryColor.withOpacity(0.1)
             : const Color(0xFFE8F1FF),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: appColor.withOpacity(0.3)),
+        border: Border.all(color: context.primaryColor.withOpacity(0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.info, color: appColor, size: 20.sp),
+          Icon(Icons.info, color: context.primaryColor, size: 20.sp),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
@@ -106,16 +107,13 @@ class BlockedUsersScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(30.r),
-                child: Image.asset(
-                  'assets/profile1.png',
+                child: AppCachedImage(
+                  imageUrl: '', // Blank to force placeholder
+                  userName: 'John Doe',
                   width: 56.r,
                   height: 56.r,
+                  radius: 30.r,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => CircleAvatar(
-                    radius: 28.r,
-                    backgroundColor: Colors.grey.shade200,
-                    child: Icon(Icons.person, color: Colors.grey),
-                  ),
                 ),
               ),
               Positioned(
@@ -155,13 +153,13 @@ class BlockedUsersScreen extends StatelessWidget {
                   padding:
                       EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
                   decoration: BoxDecoration(
-                    color: appColor.withOpacity(0.1),
+                    color: context.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
                     'Giver',
                     style: TextStyle(
-                      color: appColor,
+                      color: context.primaryColor,
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w700,
                       fontFamily: FontFamily.openSans,
@@ -176,7 +174,7 @@ class BlockedUsersScreen extends StatelessWidget {
             child: OutlinedButton(
               onPressed: () => _showUnblockBottomSheet(context),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: appColor),
+                side: BorderSide(color: context.primaryColor),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6.r),
                 ),
@@ -185,7 +183,7 @@ class BlockedUsersScreen extends StatelessWidget {
               child: Text(
                 'Unblock',
                 style: TextStyle(
-                  color: appColor,
+                  color: context.primaryColor,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
                   fontFamily: FontFamily.openSans,
@@ -213,18 +211,13 @@ class BlockedUsersScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(50.r),
-                child: Image.asset(
-                  'assets/profile1.png',
+                child: AppCachedImage(
+                  imageUrl: '', // Blank to force placeholder
+                  userName: 'John Doe',
                   width: 100.r,
                   height: 100.r,
+                  radius: 50.r,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => CircleAvatar(
-                    radius: 50.r,
-                    backgroundColor: context.isDarkMode
-                        ? Colors.white10
-                        : Colors.grey.shade200,
-                    child: Icon(Icons.person, color: Colors.grey, size: 40.r),
-                  ),
                 ),
               ),
               SizedBox(height: 24.h),
@@ -253,7 +246,7 @@ class BlockedUsersScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: appColor,
+                        backgroundColor: context.primaryColor,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.r),
@@ -263,7 +256,7 @@ class BlockedUsersScreen extends StatelessWidget {
                       child: Text(
                         'Unblock',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: context.onPrimaryColor,
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
                           fontFamily: FontFamily.openSans,

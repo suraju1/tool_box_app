@@ -37,7 +37,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
         children: [
           _buildActivePlanHeader(context),
           SizedBox(height: 12.h),
-          _buildYearFilter(),
+          _buildYearFilter(context),
           Expanded(
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
@@ -89,7 +89,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: defoultColor,
+              backgroundColor: context.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
@@ -97,7 +97,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
             child: Text(
               'Upgrade to Annual Plan',
               style: TextStyle(
-                color: Colors.white,
+                color: context.onPrimaryColor,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
               ),
@@ -113,11 +113,11 @@ class MySubscriptionsListScreen extends StatelessWidget {
       width: double.infinity,
       margin: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
-        color: defoultColor,
+        color: context.primaryColor,
         borderRadius: BorderRadius.circular(25.r),
         boxShadow: [
           BoxShadow(
-            color: defoultColor.withOpacity(0.3),
+            color: context.primaryColor.withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           )
@@ -163,7 +163,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                       child: Text(
                         'ACTIVE',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: context.onPrimaryColor,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w800,
                         ),
@@ -175,7 +175,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                 Text(
                   'Toolucs Pro',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: context.onPrimaryColor,
                     fontSize: 32.sp,
                     fontWeight: FontWeight.w800,
                   ),
@@ -197,7 +197,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildYearFilter() {
+  Widget _buildYearFilter(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -207,27 +207,29 @@ class MySubscriptionsListScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           spacing: 20.w,
           children: [
-            _buildFilterChip('All Years', isActive: true),
-            _buildFilterChip('2025', isActive: false),
-            _buildFilterChip('2024', isActive: false),
+            _buildFilterChip(context, 'All Years', isActive: true),
+            _buildFilterChip(context, '2025', isActive: false),
+            _buildFilterChip(context, '2024', isActive: false),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, {required bool isActive}) {
+  Widget _buildFilterChip(BuildContext context, String label,
+      {required bool isActive}) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: isActive ? defoultColor : Colors.white,
+        color: isActive ? context.primaryColor : Colors.white,
         borderRadius: BorderRadius.circular(15.r),
         border: Border.all(
-            color: isActive ? defoultColor : Colors.grey.withOpacity(0.2)),
+            color:
+                isActive ? context.primaryColor : Colors.grey.withOpacity(0.2)),
         boxShadow: isActive
             ? [
                 BoxShadow(
-                  color: defoultColor.withOpacity(0.2),
+                  color: context.primaryColor.withOpacity(0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 )
@@ -338,7 +340,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.stars, color: defoultColor, size: 20.sp),
+                    Icon(Icons.stars, color: context.primaryColor, size: 20.sp),
                     SizedBox(width: 8.w),
                     Text(
                       credits,
@@ -353,7 +355,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                       'Credits',
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: defoultColor,
+                        color: context.primaryColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -362,7 +364,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                 Text(
                   status == 'Completed' ? 'View Receipt' : 'Archive',
                   style: TextStyle(
-                    color: defoultColor,
+                    color: context.primaryColor,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
                   ),

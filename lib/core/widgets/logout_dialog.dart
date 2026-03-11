@@ -38,9 +38,9 @@ class LogoutDialog extends StatelessWidget {
             width: 100.r,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(50.r),
-              border: Border.all(color: defoultColor, width: 2.w),
+              border: Border.all(color: context.primaryColor, width: 2.w),
             ),
-            child: Icon(Icons.logout, size: 60.r, color: defoultColor),
+            child: Icon(Icons.logout, size: 60.r, color: context.primaryColor),
           ),
           SizedBox(height: 10.h),
           Text(
@@ -108,7 +108,7 @@ class LogoutDialog extends StatelessWidget {
                   child: Container(
                     height: 45.h,
                     decoration: BoxDecoration(
-                      color: defoultColor,
+                      color: context.primaryColor,
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     alignment: Alignment.center,
@@ -117,7 +117,7 @@ class LogoutDialog extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
-                        color: whiteColor,
+                        color: context.onPrimaryColor,
                         fontFamily: FontFamily.openSans,
                       ),
                     ),

@@ -117,7 +117,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
         height: 5.h,
         margin: EdgeInsets.symmetric(horizontal: 2.w),
         decoration: BoxDecoration(
-          color: isActive ? defoultColor : greyColorWithOpacity0_4,
+          color: isActive ? context.primaryColor : greyColorWithOpacity0_4,
           borderRadius: BorderRadius.circular(8.r),
         ),
       ),
@@ -173,7 +173,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                   min: 0,
                   max: 200000,
                   padding: EdgeInsets.zero,
-                  activeColor: defoultColor,
+                  activeColor: context.primaryColor,
                   inactiveColor: context.dividerColor,
                   onChanged: (val) => setState(() => _priceRange = val),
                 ),
@@ -184,7 +184,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                       height: 24,
                       child: Switch(
                         value: _isNegotiable,
-                        activeColor: defoultColor,
+                        activeColor: context.primaryColor,
                         onChanged: (val) => setState(() => _isNegotiable = val),
                       ),
                     ),
@@ -242,7 +242,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isReturnHomemade,
-                    activeColor: defoultColor,
+                    activeColor: context.primaryColor,
                     onChanged: (val) {
                       setState(() {
                         _isReturnHomemade = val ?? false;
@@ -270,7 +270,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isReturnStoreBought,
-                    activeColor: defoultColor,
+                    activeColor: context.primaryColor,
                     onChanged: (val) {
                       setState(() {
                         _isReturnStoreBought = val ?? false;
@@ -304,14 +304,14 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: isSelected ? defoultColor : context.surfaceColor,
+          color: isSelected ? context.primaryColor : context.surfaceColor,
           borderRadius: BorderRadius.circular(25.r),
           border: Border.all(
-              color: isSelected ? defoultColor : context.dividerColor),
+              color: isSelected ? context.primaryColor : context.dividerColor),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                      color: defoultColor.withOpacity(0.3),
+                      color: context.primaryColor.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4))
                 ]
@@ -320,7 +320,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : context.subTextColor,
+            color: isSelected ? context.onPrimaryColor : context.subTextColor,
             fontWeight: FontWeight.bold,
             fontSize: 13.sp,
           ),
@@ -351,7 +351,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: BorderSide(color: defoultColor),
+          borderSide: BorderSide(color: context.primaryColor),
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       ),
@@ -403,7 +403,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
         child: Container(
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? defoultColor : Colors.transparent,
+            color: isSelected ? context.primaryColor : Colors.transparent,
             borderRadius: BorderRadius.circular(10.r),
           ),
           child: Text(
@@ -481,7 +481,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
           Navigator.pushNamed(context, AppRoutes.tradeOffer);
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: defoultColor,
+          backgroundColor: context.primaryColor,
           minimumSize: Size(double.infinity, 56.h),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
@@ -490,7 +490,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
         child: Text(
           'Continue',
           style: TextStyle(
-              color: Colors.white,
+              color: context.onPrimaryColor,
               fontWeight: FontWeight.w800,
               fontSize: 18.sp),
         ),

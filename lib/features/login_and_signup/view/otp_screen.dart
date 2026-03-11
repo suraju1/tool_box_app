@@ -231,7 +231,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 style: TextStyle(
                   fontSize: 28.sp,
                   fontWeight: FontWeight.w700,
-                  color: defoultColor,
+                  color: context.primaryColor,
                   fontFamily: FontFamily.openSans,
                 ),
               ),
@@ -258,7 +258,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: _controllers[index].text.isNotEmpty
-                            ? defoultColor
+                            ? context.primaryColor
                             : greyColor.withOpacity(0.5),
                       ),
                       borderRadius: BorderRadius.circular(8.r),
@@ -321,7 +321,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         style: TextStyle(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w700,
-                          color: defoultColor,
+                          color: context.primaryColor,
                         ),
                         decoration: const InputDecoration(
                           border: InputBorder.none,
@@ -362,7 +362,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       'Resend',
                       style: TextStyle(
                         fontSize: 14.sp,
-                        color: _canResend ? defoultColor : greyColor,
+                        color: _canResend ? context.primaryColor : greyColor,
                         fontWeight: FontWeight.w700,
                         fontFamily: FontFamily.openSans,
                       ),
@@ -380,14 +380,14 @@ class _OtpScreenState extends State<OtpScreen> {
                       onPressed:
                           authController.isLoading ? null : _handleVerifyOtp,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: defoultColor,
+                        backgroundColor: context.primaryColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                         elevation: 4,
-                        shadowColor: defoultColor.withOpacity(0.5),
-                        disabledBackgroundColor: defoultColor.withOpacity(0.6),
+                        shadowColor: context.primaryColor.withOpacity(0.5),
+                        disabledBackgroundColor: context.primaryColor.withOpacity(0.6),
                       ),
                       child: authController.isLoading
                           ? SizedBox(

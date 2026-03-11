@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/core/widgets/logout_dialog.dart';
@@ -12,10 +11,13 @@ import 'package:tool_bocs/features/profile/view/setting_screen.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 
 class ProfileScreen extends StatefulWidget {
+  final bool isTab;
   const ProfileScreen({
     super.key,
+    this.isTab = true,
   });
 
   @override
@@ -26,10 +28,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final currentUserId = context.read<AuthController>().currentUser?.id;
       if (currentUserId != null) {
-        context.read<ProfileController>().getUserProfile(currentUserId);
+        final success = await context
+            .read<ProfileController>()
+            .getUserProfile(currentUserId, isOwnProfile: true);
+        // Sync name and profile image to Firestore so chat screens show the real avatar
+        if (success && mounted) {
+          final profile = context.read<ProfileController>().ownProfile;
+          FirebaseNotificationService.syncProfileData(
+            fullName: profile?.userDetails.fullName,
+            profileImageUrl: profile?.userDetails.image,
+          );
+        }
       }
     });
   }
@@ -37,11 +49,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profileController = context.watch<ProfileController>();
-    final profile = profileController.userProfile;
+    final profile = profileController.ownProfile;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: profileController.isLoading
+      body: (profileController.isLoading ||
+              (profile == null && profileController.errorMessage == null))
           ? _buildShimmer(context)
           : profile == null
               ? Center(
@@ -105,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: defoultColor,
+              color: context.appBarColor,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30.r),
                 bottomRight: Radius.circular(30.r),
@@ -298,10 +311,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: defoultColor,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30.r),
           bottomRight: Radius.circular(30.r),
+        ),
+        border: Border(
+          bottom: BorderSide(color: context.dividerColor, width: 1.w),
         ),
       ),
       padding: EdgeInsets.fromLTRB(25.w, 50.h, 20.w, 40.h),
@@ -310,16 +326,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Row(
             children: [
-              if (Navigator.of(context).canPop())
+              if (!widget.isTab && Navigator.of(context).canPop())
                 IconButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.of(context).maybePop(),
                   icon: Icon(Icons.arrow_back_ios,
-                      color: Colors.white, size: 20.sp),
+                      color: context.textColor, size: 20.sp),
                 ),
               Text(
                 'Profile',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: context.textColor,
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
                   fontFamily: FontFamily.openSans,
@@ -335,7 +351,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   );
                 },
-                icon: Icon(Icons.menu, color: Colors.white, size: 28.sp),
+                icon: Icon(Icons.menu, color: context.textColor, size: 28.sp),
               ),
             ],
           ),
@@ -347,45 +363,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: context.dividerColor, width: 1),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(48.r),
-                      child: user.image != null && user.image!.isNotEmpty
-                          ? AppCachedImage(
-                              imageUrl: '${ApiConstants.baseUrl2}${user.image}',
-                              width: 96.r,
-                              height: 96.r,
-                              fit: BoxFit.cover,
-                              radius: 48.r,
-                              errorWidget: Image.asset(
-                                'assets/profile1.png',
-                                width: 96.r,
-                                height: 96.r,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Image.asset(
-                              'assets/profile1.png',
-                              width: 96.r,
-                              height: 96.r,
-                              fit: BoxFit.cover,
-                            ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 2.h,
-                    right: 6.w,
-                    child: Container(
-                      padding: EdgeInsets.all(4.w),
-                      decoration: BoxDecoration(
-                        color: context.surfaceColor,
-                        shape: BoxShape.circle,
+                      child: AppCachedImage(
+                        imageUrl: user.image ?? '',
+                        userName: user.fullName,
+                        width: 96.r,
+                        height: 96.r,
+                        fit: BoxFit.cover,
+                        radius: 48.r,
+                        placeholderBgColor:
+                            context.primaryColor.withOpacity(0.1),
+                        placeholderTextColor: context.textColor,
                       ),
-                      child: Icon(Icons.camera_alt,
-                          color: defoultColor, size: 16.sp),
                     ),
                   ),
+                  // hide camera icon from here
+                  // Positioned(
+                  //   bottom: 2.h,
+                  //   right: 6.w,
+                  //   child: Container(
+                  //     padding: EdgeInsets.all(4.w),
+                  //     decoration: BoxDecoration(
+                  //       color: context.surfaceColor,
+                  //       shape: BoxShape.circle,
+                  //     ),
+                  //     child: Icon(Icons.camera_alt,
+                  //         color: context.primaryColor, size: 16.sp),
+                  //   ),
+                  // ),
                 ],
               ),
               SizedBox(width: 20.w),
@@ -396,7 +404,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text(
                       user.fullName,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: context.textColor,
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w700,
                         fontFamily: FontFamily.openSans,
@@ -405,7 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text(
                       user.location ?? 'No location provided',
                       style: TextStyle(
-                        color: whiteColor.withOpacity(0.8),
+                        color: context.subTextColor,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
                         fontFamily: FontFamily.openSans,
@@ -429,7 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             'Wallet Balance ',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: context.textColor,
                               fontSize: 10.sp,
                               fontFamily: FontFamily.openSans,
                               fontWeight: FontWeight.w600,
@@ -438,7 +446,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             '₹120.00',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: context.textColor,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w900,
                               fontFamily: FontFamily.openSans,
@@ -535,7 +543,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
-          SizedBox(height: 20.h),
           if (profile.reviews.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 20.h),
@@ -566,7 +573,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontWeight: FontWeight.w700,
                     fontSize: 14.sp,
                     fontFamily: FontFamily.openSans,
-                    color: defoultColor,
+                    color: context.primaryColor,
                   ),
                 ),
               ),
@@ -579,88 +586,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildReviewItem(Review review) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border:
-                  Border.all(color: defoultColor.withOpacity(0.1), width: 1),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(25.r),
-              child: review.reviewerImage != null &&
-                      review.reviewerImage!.isNotEmpty
-                  ? AppCachedImage(
-                      imageUrl:
-                          '${ApiConstants.baseUrl2}${review.reviewerImage}',
-                      width: 50.r,
-                      height: 50.r,
-                      fit: BoxFit.cover,
-                      radius: 25.r,
-                      errorWidget: Image.asset(
-                        'assets/profile1.png',
-                        width: 50.r,
-                        height: 50.r,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Image.asset(
-                      'assets/profile1.png',
-                      width: 50.r,
-                      height: 50.r,
-                      fit: BoxFit.cover,
-                    ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  review.reviewerName,
-                  style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: context.textColor),
+      padding: EdgeInsets.symmetric(vertical: 5.h),
+      child: InkWell(
+        onTap: () {
+          ProfileController.navigateToUserProfile(context, review.reviewerId);
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: context.primaryColor.withOpacity(0.1), width: 1),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(25.r),
+                child: AppCachedImage(
+                  imageUrl: review.reviewerImage ?? '',
+                  userName: review.reviewerName,
+                  width: 50.r,
+                  height: 50.r,
+                  fit: BoxFit.cover,
+                  radius: 25.r,
                 ),
-                Row(
-                  children: List.generate(
-                    5,
-                    (index) {
-                      final ratingValue = review.rating is int
-                          ? review.rating
-                          : int.tryParse(review.rating.toString()) ?? 0;
-                      return Icon(
-                        index < ratingValue ? Icons.star : Icons.star_border,
-                        color: index < ratingValue ? Colors.amber : greyColor,
-                        size: 14.sp,
-                      );
-                    },
-                  ),
-                ),
-                if (review.comment != null)
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    review.comment!,
-                    style: TextStyle(fontSize: 12.sp, color: greyColor),
+                    review.reviewerName,
+                    style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: context.textColor),
                   ),
-                SizedBox(height: 4.h),
-                Row(
-                  children: [
-                    Icon(Icons.thumb_up_outlined,
-                        size: 14.sp, color: greyColor),
-                    SizedBox(width: 12.w),
-                    Icon(Icons.thumb_down_outlined,
-                        size: 14.sp, color: greyColor),
-                  ],
-                ),
-              ],
+                  Row(
+                    children: List.generate(
+                      5,
+                      (index) {
+                        final ratingValue = review.rating is int
+                            ? review.rating
+                            : int.tryParse(review.rating.toString()) ?? 0;
+                        return Icon(
+                          index < ratingValue ? Icons.star : Icons.star_border,
+                          color: index < ratingValue ? Colors.amber : greyColor,
+                          size: 14.sp,
+                        );
+                      },
+                    ),
+                  ),
+                  if (review.comment != null)
+                    Text(
+                      review.comment!,
+                      style: TextStyle(fontSize: 12.sp, color: greyColor),
+                    ),
+                  SizedBox(height: 4.h),
+                  Row(
+                    children: [
+                      Icon(Icons.thumb_up_outlined,
+                          size: 14.sp, color: greyColor),
+                      SizedBox(width: 12.w),
+                      Icon(Icons.thumb_down_outlined,
+                          size: 14.sp, color: greyColor),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -729,7 +727,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
               width: double.infinity,
               decoration: BoxDecoration(
-                color: defoultColor,
+                color: context.primaryColor,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Text(
@@ -737,7 +735,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14.sp,
-                  color: whiteColor,
+                  color: context.onPrimaryColor,
                 ),
               ),
             ),
@@ -764,7 +762,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: TextStyle(
               fontSize: 22.sp,
               fontWeight: FontWeight.w800,
-              color: defoultColor,
+              color: context.primaryColor,
               fontFamily: FontFamily.openSans,
             ),
           ),

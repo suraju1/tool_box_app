@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/features/splash/controller/on_bording_controller.dart';
 import 'package:tool_bocs/features/splash/model/on_bording_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -47,11 +46,18 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         ),
         padding: EdgeInsets.only(top: 50.h),
         child: Center(
-          child: Image.asset(
-            "assets/logo.png",
+          child: Container(
             height: 200.h,
             width: 200.w,
-            fit: BoxFit.contain,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                "assets/logo.png",
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
         ),
       ),
@@ -111,8 +117,8 @@ class _BoardingScreenState extends State<BoardingPage> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: index == currentPage
-            ? GradientColors.defoultColor
-            : GradientColors.defoultColor.withOpacity(0.5),
+            ? context.primaryColor
+            : context.primaryColor.withOpacity(0.5),
       ),
     );
   }
@@ -219,7 +225,7 @@ class _BoardingScreenState extends State<BoardingPage> {
 
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          backgroundColor: GradientColors.defoultColor,
+          backgroundColor: context.primaryColor,
           body: Stack(
             children: <Widget>[
               PageView.builder(
@@ -242,16 +248,9 @@ class _BoardingScreenState extends State<BoardingPage> {
                           padding: EdgeInsets.all(10.w),
                           child: slide.imageUrl.startsWith('assets/')
                               ? Image.asset(slide.imageUrl, fit: BoxFit.cover)
-                              : CachedNetworkImage(
-                                  imageUrl: slide.imageUrl.startsWith('/')
-                                      ? ApiConstants.baseUrl2 +
-                                          slide.imageUrl.substring(1)
-                                      : ApiConstants.baseUrl2 + slide.imageUrl,
+                              : AppCachedImage(
+                                  imageUrl: slide.imageUrl,
                                   fit: BoxFit.cover,
-                                  placeholder: (context, url) => const Center(
-                                      child: CircularProgressIndicator()),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
                                 ),
                         ),
                       ],
@@ -288,7 +287,7 @@ class _BoardingScreenState extends State<BoardingPage> {
                               style: TextStyle(
                                 fontFamily: FontFamily.openSans,
                                 fontSize: 17.sp,
-                                color: defoultColor.withOpacity(0.5),
+                                color: context.primaryColor.withOpacity(0.5),
                               ),
                             ),
                           ),
@@ -311,7 +310,7 @@ class _BoardingScreenState extends State<BoardingPage> {
                               style: TextStyle(
                                 fontFamily: FontFamily.openSans,
                                 fontSize: 17.sp,
-                                color: defoultColor,
+                                color: context.primaryColor,
                               ),
                             ),
                           ),

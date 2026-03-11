@@ -232,10 +232,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 40.h),
-                Image.asset(
-                  'assets/logo.png',
+                Container(
                   width: 100.w,
                   height: 100.h,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/logo.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
                 SizedBox(height: 32.h),
                 Text(
@@ -243,7 +251,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   style: TextStyle(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w700,
-                    color: defoultColor,
+                    color: context.primaryColor,
                     fontFamily: FontFamily.openSans,
                   ),
                 ),
@@ -348,7 +356,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                      defoultColor),
+                                      context.primaryColor),
                                 ),
                               ),
                             )
@@ -356,7 +364,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               onPressed: _fetchUserLocation,
                               icon: Icon(
                                 Icons.my_location,
-                                color: defoultColor,
+                                color: context.primaryColor,
                                 size: 20.sp,
                               ),
                             ),
@@ -373,7 +381,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           _agreeToTerms = value!;
                         });
                       },
-                      activeColor: defoultColor,
+                      activeColor: context.primaryColor,
                     ),
                     Expanded(
                       child: RichText(
@@ -388,7 +396,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             TextSpan(
                               text: 'Terms & Privacy Policy',
                               style: TextStyle(
-                                color: defoultColor,
+                                color: context.primaryColor,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -408,14 +416,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         onPressed:
                             authController.isLoading ? null : _handleRegister,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: defoultColor,
+                          backgroundColor: context.primaryColor,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                           elevation: 4,
                           disabledBackgroundColor:
-                              defoultColor.withOpacity(0.6),
+                              context.primaryColor.withOpacity(0.6),
                         ),
                         child: authController.isLoading
                             ? SizedBox(
@@ -499,7 +507,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: defoultColor),
+              borderSide: BorderSide(color: context.primaryColor),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
@@ -529,7 +537,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               _gender = val!;
             });
           },
-          activeColor: defoultColor,
+          activeColor: context.primaryColor,
         ),
         Text(
           value,

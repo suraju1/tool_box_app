@@ -124,7 +124,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
-                  color: defoultColor,
+                  color: context.primaryColor,
                   fontFamily: FontFamily.openSans,
                 ),
               ),
@@ -188,16 +188,16 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
         margin: EdgeInsets.only(right: 8.w),
         padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? defoultColor : context.surfaceColor,
+          color: isSelected ? context.primaryColor : context.surfaceColor,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-              color: isSelected ? defoultColor : context.dividerColor),
+              color: isSelected ? context.primaryColor : context.dividerColor),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 14.sp,
-            color: isSelected ? Colors.white : context.subTextColor,
+            color: isSelected ? context.onPrimaryColor : context.subTextColor,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -291,7 +291,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
                           isGive ? 'Give' : 'Take',
                           style: TextStyle(
                             fontSize: 10.sp,
-                            color: Colors.white,
+                            color: context.onPrimaryColor,
                             fontWeight: FontWeight.w700,
                           ),
                         ),

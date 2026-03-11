@@ -76,7 +76,7 @@ class FirebaseNotificationService {
     }
   }
 
-  Future<void> saveTokenToFirestore() async {
+  Future<void> saveTokenToFirestore({String? profileImageUrl}) async {
     // Get current user
     final userData = await StorageService.getUserData();
     if (userData != null) {
@@ -86,7 +86,8 @@ class FirebaseNotificationService {
 
         String? token = await _firebaseMessaging.getToken();
         if (token != null) {
-          await _saveToken(token, userId, fullName: user.fullName);
+          await _saveToken(token, userId,
+              fullName: user.fullName, profileImageUrl: profileImageUrl);
         }
       } catch (e) {
         debugPrint("Error saving FCM token: $e");
@@ -95,13 +96,16 @@ class FirebaseNotificationService {
   }
 
   Future<void> _saveToken(String token, String userId,
-      {String? fullName}) async {
+      {String? fullName, String? profileImageUrl}) async {
     Map<String, dynamic> data = {
       'fcmToken': token,
       'updatedAt': FieldValue.serverTimestamp(),
     };
     if (fullName != null) {
       data['fullName'] = fullName;
+    }
+    if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
+      data['profileImage'] = profileImageUrl;
     }
     await FirebaseFirestore.instance
         .collection('users')
@@ -110,5 +114,41 @@ class FirebaseNotificationService {
 
     debugPrint(
         "User data (including FCM token) saved to Firestore for user $userId");
+  }
+
+  /// Sync profile name and image directly to Firestore without needing FCM token.
+  /// Call this whenever the user updates their profile.
+  static Future<void> syncProfileData({
+    String? fullName,
+    String? profileImageUrl,
+  }) async {
+    try {
+      final userData = await StorageService.getUserData();
+      if (userData == null) return;
+
+      final user = UserModel.fromJson(jsonDecode(userData));
+      final String userId = user.id.toString();
+
+      final Map<String, dynamic> data = {
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      if (fullName != null && fullName.isNotEmpty) {
+        data['fullName'] = fullName;
+      }
+      if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
+        data['profileImage'] = profileImageUrl;
+      }
+
+      if (data.length > 1) {
+        // At least one real field besides updatedAt
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .set(data, SetOptions(merge: true));
+        debugPrint("Profile data synced to Firestore for user $userId: $data");
+      }
+    } catch (e) {
+      debugPrint("Error syncing profile data to Firestore: $e");
+    }
   }
 }

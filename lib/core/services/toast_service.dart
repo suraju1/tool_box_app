@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
 class ToastService {
@@ -55,7 +56,7 @@ class ToastService {
               return Opacity(
                 opacity: value,
                 child: Transform.translate(
-                  offset: Offset(0, (1 - value) * -20),
+                  offset: Offset(0, (1 - value) * -20), 
                   child: child,
                 ),
               );
@@ -75,13 +76,13 @@ class ToastService {
               ),
               child: Row(
                 children: [
-                  Icon(icon, color: Colors.white, size: 22.sp),
+                  Icon(icon, color: context.onPrimaryColor, size: 22.sp),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
                       message,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: context.onPrimaryColor,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         fontFamily: FontFamily.openSans,

@@ -121,10 +121,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           leading: Container(
             padding: EdgeInsets.all(8.r),
             decoration: BoxDecoration(
-              color: appColor.withOpacity(0.1),
+              color: context.primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.help_outline, color: appColor, size: 18.sp),
+            child: Icon(Icons.help_outline, color: context.primaryColor, size: 18.sp),
           ),
           title: Text(
             question,
@@ -164,10 +164,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         Container(
           padding: EdgeInsets.all(12.r),
           decoration: BoxDecoration(
-            color: appColor.withOpacity(0.1),
+            color: context.primaryColor.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.chat_bubble_outline, color: appColor, size: 24.sp),
+          child: Icon(Icons.chat_bubble_outline, color: context.primaryColor, size: 24.sp),
         ),
         SizedBox(height: 15.h),
         Text(
@@ -203,7 +203,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 });
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: appColor,
+                backgroundColor: context.primaryColor,
                 padding: EdgeInsets.symmetric(vertical: 14.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),
@@ -213,7 +213,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               child: Text(
                 'Add Feedback',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: context.onPrimaryColor,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                 ),
@@ -268,7 +268,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: appColor,
+                backgroundColor: context.primaryColor,
                 padding: EdgeInsets.symmetric(vertical: 14.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),
@@ -278,7 +278,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               child: Text(
                 'Submit',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: context.onPrimaryColor,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                 ),

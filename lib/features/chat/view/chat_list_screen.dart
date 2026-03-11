@@ -14,6 +14,7 @@ import 'package:tool_bocs/features/login_and_signup/model/user_model.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'dart:convert';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -72,8 +73,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
           : Column(
               children: [
                 Container(
-                  height: 75.h,
-                  color: defoultColor,
+                  height: 65.h,
+                  color: context.appBarColor,
                 ),
                 _buildSearchBox(context),
                 Expanded(
@@ -168,6 +169,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 .snapshots(),
                             builder: (context, userSnapshot) {
                               String displayName = "User $otherUserId";
+                              String? otherUserImage;
                               if (userSnapshot.hasData &&
                                   userSnapshot.data!.exists) {
                                 final userData = userSnapshot.data!.data()
@@ -175,6 +177,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 if (userData != null &&
                                     userData.containsKey('fullName')) {
                                   displayName = userData['fullName'];
+                                }
+                                if (userData != null &&
+                                    userData.containsKey('profileImage')) {
+                                  otherUserImage =
+                                      userData['profileImage'] as String?;
                                 }
                               }
 
@@ -300,7 +307,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 timeString,
                                 unreadCountStr,
                                 false, // Online status not implemented
-                                'assets/profile1.png', // Placeholder image
+                                otherUserImage ??
+                                    '', // Actual profile image from Firestore
                                 otherUserId: otherUserId,
                                 tradeResponse: tradeResponse,
                               );
@@ -321,10 +329,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
       children: [
         Container(
           height: 75.h,
-          color: defoultColor,
+          color: context.appBarColor,
         ),
         Container(
-          color: defoultColor,
+          color: context.appBarColor,
           padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
           child: ShimmerBox(height: 50.h, width: double.infinity, radius: 10.r),
         ),
@@ -376,7 +384,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   Widget _buildSearchBox(BuildContext context) {
     return Container(
-      color: defoultColor,
+      color: context.appBarColor,
       padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w),
@@ -384,6 +392,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         decoration: BoxDecoration(
           color: context.surfaceColor,
           borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(color: context.dividerColor),
         ),
         child: Row(
           children: [
@@ -420,6 +429,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               chatRoomId: chatRoomId,
               otherUserId: otherUserId,
               otherUserName: name,
+              otherUserImage: imagePath.isNotEmpty ? imagePath : null,
               tradeResponse: tradeResponse,
             ),
           ),
@@ -432,9 +442,16 @@ class _ChatListScreenState extends State<ChatListScreen> {
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 30.r,
-              backgroundImage: AssetImage(imagePath),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(30.r),
+              child: AppCachedImage(
+                imageUrl: imagePath,
+                userName: name,
+                width: 60.r,
+                height: 60.r,
+                radius: 30.r,
+                fit: BoxFit.cover,
+              ),
             ),
             SizedBox(width: 15.w),
             Expanded(
@@ -486,13 +503,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               horizontal: 4.w, vertical: 2.h),
                           margin: EdgeInsets.symmetric(horizontal: 8.w),
                           decoration: BoxDecoration(
-                            color: defoultColor,
+                            color: context.primaryColor,
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
                             unreadCount,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: context.onPrimaryColor,
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w700,
                               fontFamily: FontFamily.openSans,

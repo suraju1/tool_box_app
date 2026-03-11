@@ -198,7 +198,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
         height: 5.h,
         margin: EdgeInsets.symmetric(horizontal: 2.w),
         decoration: BoxDecoration(
-          color: isActive ? defoultColor : greyColorWithOpacity0_4,
+          color: isActive ? context.primaryColor : greyColorWithOpacity0_4,
           borderRadius: BorderRadius.circular(8.r),
         ),
       ),
@@ -395,7 +395,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
         title: Row(
           children: [
-            Icon(Icons.lock_outline, color: appColor, size: 24.sp),
+            Icon(Icons.lock_outline, color: context.primaryColor, size: 24.sp),
             SizedBox(width: 10.w),
             Text(
               'Chat Locked',
@@ -418,14 +418,15 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: appColor,
+              backgroundColor: context.primaryColor,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r)),
               minimumSize: Size(100.w, 40.h),
             ),
-            child: const Text('OK',
+            child: Text('OK',
                 style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w700)),
+                    color: context.onPrimaryColor,
+                    fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -458,7 +459,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
                 }
               },
         style: ElevatedButton.styleFrom(
-          backgroundColor: appColor,
+          backgroundColor: context.primaryColor,
           minimumSize: Size(double.infinity, 54.h),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
@@ -468,12 +469,12 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
             ? SizedBox(
                 height: 20.h,
                 width: 20.h,
-                child: const CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2))
+                child: CircularProgressIndicator(
+                    color: context.onPrimaryColor, strokeWidth: 2))
             : Text(
                 isPaid ? 'View Trade Details' : 'Close Trade',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: context.onPrimaryColor,
                   fontWeight: FontWeight.w700,
                   fontSize: 16.sp,
                 ),
@@ -517,13 +518,14 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
               _handlePayment(context, controller);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: appColor,
+              backgroundColor: context.primaryColor,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r)),
             ),
-            child: const Text('Yes, Proceed',
+            child: Text('Yes, Proceed',
                 style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w700)),
+                    color: context.onPrimaryColor,
+                    fontWeight: FontWeight.w700)),
           ),
         ],
       ),

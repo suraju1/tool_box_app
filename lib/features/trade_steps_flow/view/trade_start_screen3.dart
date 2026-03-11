@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
-import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/chat/view/chat_screen.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -158,7 +158,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
         height: 5.h,
         margin: EdgeInsets.symmetric(horizontal: 2.w),
         decoration: BoxDecoration(
-          color: isActive ? defoultColor : greyColorWithOpacity0_4,
+          color: isActive ? context.primaryColor : greyColorWithOpacity0_4,
           borderRadius: BorderRadius.circular(8.r),
         ),
       ),
@@ -228,8 +228,9 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                         ? 'Trade Accepted'
                         : 'Trade Initiated',
                 style: TextStyle(
-                  color:
-                      response.status == 'rejected' ? Colors.red : defoultColor,
+                  color: response.status == 'rejected'
+                      ? Colors.red
+                      : context.primaryColor,
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w900,
                   fontFamily: FontFamily.openSans,
@@ -305,7 +306,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                           child: Text(
                             _showMoreDetails ? 'Less Details' : 'More Details',
                             style: TextStyle(
-                              color: defoultColor,
+                              color: context.primaryColor,
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               decoration: TextDecoration.underline,
@@ -325,20 +326,14 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                     borderRadius: BorderRadius.circular(12.r),
                     image: DecorationImage(
                       image: response.itemImages.isNotEmpty
-                          ? NetworkImage(response.itemImages.first
-                                  .startsWith('http')
-                              ? response.itemImages.first
-                              : '${ApiConstants.baseUrl2}${response.itemImages.first}')
+                          ? NetworkImage(AppCachedImage.getFormattedUrl(
+                              response.itemImages.first))
                           : (response.postItemImages.isNotEmpty)
-                              ? NetworkImage(response.postItemImages.first
-                                      .startsWith('http')
-                                  ? response.postItemImages.first
-                                  : '${ApiConstants.baseUrl2}${response.postItemImages.first}')
+                              ? NetworkImage(AppCachedImage.getFormattedUrl(
+                                  response.postItemImages.first))
                               : (post != null && post.itemImages.isNotEmpty)
-                                  ? NetworkImage(post.itemImages.first
-                                          .startsWith('http')
-                                      ? post.itemImages.first
-                                      : '${ApiConstants.baseUrl2}${post.itemImages.first}')
+                                  ? NetworkImage(AppCachedImage.getFormattedUrl(
+                                      post.itemImages.first))
                                   : const AssetImage('assets/iphone.png')
                                       as ImageProvider,
                       fit: BoxFit.cover,
@@ -420,8 +415,8 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
         icon = Icons.check_circle_outline;
         break;
       default:
-        bgColor = defoultColor.withOpacity(0.1);
-        textColor = defoultColor;
+        bgColor = context.primaryColor.withOpacity(0.1);
+        textColor = context.primaryColor;
         label = 'Pending';
         icon = Icons.access_time_outlined;
     }
@@ -468,14 +463,11 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
               borderRadius: BorderRadius.circular(8.r),
               image: DecorationImage(
                 image: response.itemImages.isNotEmpty
-                    ? NetworkImage(response.itemImages.first.startsWith('http')
-                        ? response.itemImages.first
-                        : '${ApiConstants.baseUrl2}${response.itemImages.first}')
+                    ? NetworkImage(AppCachedImage.getFormattedUrl(
+                        response.itemImages.first))
                     : (response.postItemImages.isNotEmpty)
-                        ? NetworkImage(response.postItemImages.first
-                                .startsWith('http')
-                            ? response.postItemImages.first
-                            : '${ApiConstants.baseUrl2}${response.postItemImages.first}')
+                        ? NetworkImage(AppCachedImage.getFormattedUrl(
+                            response.postItemImages.first))
                         : (context.read<TradeController>().selectedPost !=
                                     null &&
                                 context
@@ -483,18 +475,12 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                                     .selectedPost!
                                     .itemImages
                                     .isNotEmpty)
-                            ? NetworkImage(context
+                            ? NetworkImage(AppCachedImage.getFormattedUrl(
+                                context
                                     .read<TradeController>()
                                     .selectedPost!
                                     .itemImages
-                                    .first
-                                    .startsWith('http')
-                                ? context
-                                    .read<TradeController>()
-                                    .selectedPost!
-                                    .itemImages
-                                    .first
-                                : '${ApiConstants.baseUrl2}${context.read<TradeController>().selectedPost!.itemImages.first}')
+                                    .first))
                             : const AssetImage('assets/iphone.png')
                                 as ImageProvider,
                 fit: BoxFit.cover,
@@ -521,7 +507,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                           : 'Unknown'),
                   style: TextStyle(
                     fontSize: 14.sp,
-                    color: defoultColor,
+                    color: context.primaryColor,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -546,13 +532,13 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                   padding:
                       EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
                   decoration: BoxDecoration(
-                    color: defoultColor,
+                    color: context.primaryColor,
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Text(
                     response.responseType.toUpperCase(),
                     style: TextStyle(
-                      color: Colors.white,
+                      color: context.onPrimaryColor,
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w800,
                     ),
@@ -578,15 +564,20 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Accept Offer (Notify ${response.responderName})',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: FontFamily.openSans,
-                      color: context.textColor,
+                  Expanded(
+                    child: Text(
+                      'Accept Offer (Notify ${response.responderName})',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: FontFamily.openSans,
+                        color: context.textColor,
+                      ),
                     ),
                   ),
+                  SizedBox(width: 8.w),
                   _buildRadioButton(isActive: _isAcceptSelected),
                 ],
               ),
@@ -643,7 +634,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isSelected
-                ? defoultColor.withOpacity(0.1)
+                ? context.primaryColor.withOpacity(0.1)
                 : context.dividerColor,
           ),
         ),
@@ -659,7 +650,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isActive ? defoultColor : context.dividerColor,
+          color: isActive ? context.primaryColor : context.dividerColor,
           width: 2.w,
         ),
       ),
@@ -670,7 +661,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                 height: 10.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: defoultColor,
+                  color: context.primaryColor,
                 ),
               ),
             )
@@ -686,10 +677,10 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
         width: 100.w,
         padding: EdgeInsets.symmetric(vertical: 12.h),
         decoration: BoxDecoration(
-          color: isSelected ? defoultColor : context.surfaceColor,
+          color: isSelected ? context.primaryColor : context.surfaceColor,
           borderRadius: BorderRadius.circular(10.r),
           border: Border.all(
-              color: isSelected ? defoultColor : context.dividerColor),
+              color: isSelected ? context.primaryColor : context.dividerColor),
           boxShadow: isSelected
               ? []
               : [
@@ -704,7 +695,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : context.subTextColor,
+            color: isSelected ? context.onPrimaryColor : context.subTextColor,
             fontWeight: FontWeight.w600,
             fontSize: 12.sp,
           ),
@@ -740,7 +731,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
             ? null
             : () => _handleSubmit(context, controller),
         style: ElevatedButton.styleFrom(
-          backgroundColor: defoultColor,
+          backgroundColor: context.primaryColor,
           minimumSize: Size(double.infinity, 50.h),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
@@ -750,12 +741,12 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
             ? SizedBox(
                 height: 20.h,
                 width: 20.h,
-                child: const CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2))
+                child: CircularProgressIndicator(
+                    color: context.onPrimaryColor, strokeWidth: 2))
             : Text(
                 isAlreadyAccepted && isOwner ? 'Go to Chat' : 'Continue',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: context.onPrimaryColor,
                   fontWeight: FontWeight.w700,
                   fontSize: 16.sp,
                 ),
@@ -959,7 +950,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                       child: Text(
                         'Yes',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: context.onPrimaryColor,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
                         ),

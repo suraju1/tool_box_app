@@ -78,13 +78,13 @@ class _NoInternetScreenState extends State<NoInternetScreen>
                           : context.surfaceColor,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: appColor,
+                        color: context.primaryColor,
                       ),
                     ),
                     child: Icon(
                       Icons.wifi_off_rounded,
                       size: 60,
-                      color: appColor,
+                      color: context.primaryColor,
                     ),
                   ),
 
@@ -132,7 +132,7 @@ class _NoInternetScreenState extends State<NoInternetScreen>
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: appColor,
+                      backgroundColor: context.primaryColor,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 48,
@@ -160,7 +160,7 @@ class _NoInternetScreenState extends State<NoInternetScreen>
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(appColor),
+                          valueColor: AlwaysStoppedAnimation<Color>(context.primaryColor),
                         ),
                       ),
                       const SizedBox(width: 12),

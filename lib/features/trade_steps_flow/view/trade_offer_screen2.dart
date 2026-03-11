@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/category_model.dart';
@@ -197,11 +197,12 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                   Navigator.pop(context); // Go back to details or home
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: defoultColor,
+                  backgroundColor: context.primaryColor,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.r)),
                 ),
-                child: const Text('OK', style: TextStyle(color: Colors.white)),
+                child:  Text('OK',
+                    style: TextStyle(color: context.onPrimaryColor)),
               ),
             ),
           ],
@@ -363,7 +364,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
         height: 5.h,
         margin: EdgeInsets.symmetric(horizontal: 2.w),
         decoration: BoxDecoration(
-          color: isActive ? defoultColor : greyColorWithOpacity0_4,
+          color: isActive ? context.primaryColor : greyColorWithOpacity0_4,
           borderRadius: BorderRadius.circular(8.r),
         ),
       ),
@@ -405,7 +406,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                             Text(
                               isGivePost ? 'GIVER' : 'TAKER',
                               style: TextStyle(
-                                color: defoultColor,
+                                color: context.primaryColor,
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -467,16 +468,12 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       image: DecorationImage(
                         image: (post?.itemImages != null &&
                                 post!.itemImages.isNotEmpty)
-                            ? NetworkImage(post.itemImages.first
-                                    .startsWith('http')
-                                ? post.itemImages.first
-                                : '${ApiConstants.baseUrl2}${post.itemImages.first}')
+                            ? NetworkImage(AppCachedImage.getFormattedUrl(
+                                post.itemImages.first))
                             : (post?.returnItemImages != null &&
                                     post!.returnItemImages.isNotEmpty)
-                                ? NetworkImage(post.returnItemImages.first
-                                        .startsWith('http')
-                                    ? post.returnItemImages.first
-                                    : '${ApiConstants.baseUrl2}${post.returnItemImages.first}')
+                                ? NetworkImage(AppCachedImage.getFormattedUrl(
+                                    post.returnItemImages.first))
                                 : const AssetImage('assets/iphone.png')
                                     as ImageProvider,
                         fit: BoxFit.cover,
@@ -556,7 +553,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isSelected
-                ? defoultColor.withOpacity(0.1)
+                ? context.primaryColor.withOpacity(0.1)
                 : context.dividerColor,
           ),
         ),
@@ -598,7 +595,9 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? defoultColor : context.dividerColor,
+                      color: isSelected
+                          ? context.primaryColor
+                          : context.dividerColor,
                       width: 2.w,
                     ),
                   ),
@@ -609,7 +608,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                             height: 10.w,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: defoultColor,
+                              color: context.primaryColor,
                             ),
                           ),
                         )
@@ -639,11 +638,11 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             Container(
               padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                color: defoultColor.withOpacity(0.1),
+                color: context.primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(Icons.payments_outlined,
-                  color: defoultColor, size: 24.sp),
+                  color: context.primaryColor, size: 24.sp),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -694,16 +693,11 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
               image: DecorationImage(
                 image: (post?.returnItemImages != null &&
                         post!.returnItemImages.isNotEmpty)
-                    ? NetworkImage(post.returnItemImages.first
-                                .startsWith('http')
-                            ? post.returnItemImages.first
-                            : '${ApiConstants.baseUrl2}${post.returnItemImages.first}')
-                        as ImageProvider
+                    ? NetworkImage(AppCachedImage.getFormattedUrl(
+                        post.returnItemImages.first)) as ImageProvider
                     : (post?.itemImages != null && post!.itemImages.isNotEmpty)
-                        ? NetworkImage(post.itemImages.first.startsWith('http')
-                                ? post.itemImages.first
-                                : '${ApiConstants.baseUrl2}${post.itemImages.first}')
-                            as ImageProvider
+                        ? NetworkImage(AppCachedImage.getFormattedUrl(
+                            post.itemImages.first)) as ImageProvider
                         : const AssetImage('assets/iphone.png'),
                 fit: BoxFit.cover,
               ),
@@ -854,11 +848,11 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       right: -5,
                       child: GestureDetector(
                         onTap: () => _removeImage(index),
-                        child: const CircleAvatar(
+                        child: CircleAvatar(
                           radius: 10,
                           backgroundColor: Colors.red,
-                          child:
-                              Icon(Icons.close, size: 12, color: Colors.white),
+                          child: Icon(Icons.close,
+                              size: 12, color: context.onPrimaryColor),
                         ),
                       ),
                     ),
@@ -894,7 +888,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
           max: 200000,
           divisions: 1000,
           padding: EdgeInsets.zero,
-          activeColor: defoultColor,
+          activeColor: context.primaryColor,
           inactiveColor: context.dividerColor,
           onChanged: (val) => setState(() => _priceRange = val),
         ),
@@ -905,7 +899,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
               scale: 0.8,
               child: Switch(
                 value: _isNegotiable,
-                activeColor: defoultColor,
+                activeColor: context.primaryColor,
                 onChanged: (val) => setState(() => _isNegotiable = val),
               ),
             ),
@@ -960,7 +954,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: BorderSide(color: defoultColor),
+          borderSide: BorderSide(color: context.primaryColor),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
@@ -984,7 +978,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
               height: 20.w,
               width: 20.w,
               child: CircularProgressIndicator(
-                  strokeWidth: 2, color: defoultColor),
+                  strokeWidth: 2, color: context.primaryColor),
             ),
           );
         }
@@ -1005,7 +999,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.r),
-              borderSide: BorderSide(color: defoultColor),
+              borderSide: BorderSide(color: context.primaryColor),
             ),
           ),
           hint: Text(hint,
@@ -1043,14 +1037,14 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: isSelected ? defoultColor : context.surfaceColor,
+          color: isSelected ? context.primaryColor : context.surfaceColor,
           borderRadius: BorderRadius.circular(25.r),
           border: Border.all(
-              color: isSelected ? defoultColor : context.dividerColor),
+              color: isSelected ? context.primaryColor : context.dividerColor),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                      color: defoultColor.withOpacity(0.3),
+                      color: context.primaryColor.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4))
                 ]
@@ -1077,7 +1071,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
           height: 24.w,
           child: Checkbox(
             value: value,
-            activeColor: defoultColor,
+            activeColor: context.primaryColor,
             onChanged: onChanged,
           ),
         ),
@@ -1119,7 +1113,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
           return ElevatedButton(
             onPressed: controller.isLoading ? null : _handleOfferSubmission,
             style: ElevatedButton.styleFrom(
-              backgroundColor: defoultColor,
+              backgroundColor: context.primaryColor,
               minimumSize: Size(double.infinity, 50.h),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r)),
@@ -1129,15 +1123,15 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                 ? SizedBox(
                     height: 20.h,
                     width: 20.h,
-                    child: const CircularProgressIndicator(
-                      color: Colors.white,
+                    child: CircularProgressIndicator(
+                      color: context.onPrimaryColor,
                       strokeWidth: 2,
                     ),
                   )
                 : Text(
                     _getButtonName(isGivePost),
                     style: TextStyle(
-                      color: Colors.white,
+                      color: context.onPrimaryColor,
                       fontWeight: FontWeight.w700,
                       fontSize: 16.sp,
                     ),

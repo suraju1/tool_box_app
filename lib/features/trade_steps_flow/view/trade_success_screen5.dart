@@ -27,11 +27,11 @@ class TradeSuccessScreen extends StatelessWidget {
                 width: 120.w,
                 height: 120.w,
                 decoration: BoxDecoration(
-                  color: defoultColor.withOpacity(0.1),
+                  color: context.primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child:
-                    Icon(Icons.check_circle, color: defoultColor, size: 80.sp),
+                    Icon(Icons.check_circle, color: context.primaryColor, size: 80.sp),
               ),
               SizedBox(height: 32.h),
               Text(
@@ -61,7 +61,7 @@ class TradeSuccessScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: defoultColor.withOpacity(0.3)),
+                    border: Border.all(color: context.primaryColor.withOpacity(0.3)),
                   ),
                   child: Column(
                     children: [
@@ -113,8 +113,8 @@ class TradeSuccessScreen extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? defoultColor : context.surfaceColor,
-          side: isPrimary ? null : BorderSide(color: defoultColor, width: 1.5),
+          backgroundColor: isPrimary ? context.primaryColor : context.surfaceColor,
+          side: isPrimary ? null : BorderSide(color: context.primaryColor, width: 1.5),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
           elevation: 0,
@@ -122,7 +122,7 @@ class TradeSuccessScreen extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: isPrimary ? Colors.white : defoultColor,
+            color: isPrimary ? Colors.white : context.primaryColor,
             fontWeight: FontWeight.w700,
             fontSize: 16.sp,
           ),

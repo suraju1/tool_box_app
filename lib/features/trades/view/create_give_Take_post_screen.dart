@@ -224,15 +224,15 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                 margin: EdgeInsets.symmetric(vertical: 8.h),
                 padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 12.w),
                 decoration: BoxDecoration(
-                  color: appColor.withOpacity(0.05),
+                  color: context.primaryColor.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12.r),
-                  border:
-                      Border.all(color: appColor.withOpacity(0.2), width: 1.5),
+                  border: Border.all(
+                      color: context.primaryColor.withOpacity(0.2), width: 1.5),
                   boxShadow: context.isDarkMode
                       ? []
                       : [
                           BoxShadow(
-                            color: appColor.withOpacity(0.1),
+                            color: context.primaryColor.withOpacity(0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -334,7 +334,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                 Text(
                   'Change',
                   style: TextStyle(
-                      color: defoultColor,
+                      color: context.primaryColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 12.sp),
                 ),
@@ -356,7 +356,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           min: 1,
           max: 50,
           padding: EdgeInsets.zero,
-          activeColor: defoultColor,
+          activeColor: context.primaryColor,
           inactiveColor: context.dividerColor,
           onChanged: (val) => setState(() => _diameter = val),
         ),
@@ -468,8 +468,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                         child: CircleAvatar(
                           radius: 10,
                           backgroundColor: Colors.red,
-                          child:
-                              Icon(Icons.close, size: 12, color: Colors.white),
+                          child: Icon(Icons.close,
+                              size: 12, color: context.onPrimaryColor),
                         ),
                       ),
                     ),
@@ -529,7 +529,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isHomemade,
-                    activeColor: defoultColor,
+                    activeColor: context.primaryColor,
                     onChanged: (val) {
                       setState(() {
                         _isHomemade = val ?? false;
@@ -557,7 +557,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isStoreBought,
-                    activeColor: defoultColor,
+                    activeColor: context.primaryColor,
                     onChanged: (val) {
                       setState(() {
                         _isStoreBought = val ?? false;
@@ -637,7 +637,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   min: 0,
                   max: 200000,
                   padding: EdgeInsets.zero,
-                  activeColor: defoultColor,
+                  activeColor: context.primaryColor,
                   inactiveColor: context.dividerColor,
                   onChanged: (val) => setState(() => _priceRange = val),
                 ),
@@ -648,7 +648,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                       height: 24,
                       child: Switch(
                         value: _isNegotiable,
-                        activeColor: defoultColor,
+                        activeColor: context.primaryColor,
                         onChanged: (val) => setState(() => _isNegotiable = val),
                       ),
                     ),
@@ -753,7 +753,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                               radius: 10,
                               backgroundColor: Colors.red,
                               child: Icon(Icons.close,
-                                  size: 12, color: Colors.white),
+                                  size: 12, color: context.onPrimaryColor),
                             ),
                           ),
                         ),
@@ -832,7 +832,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isReturnHomemade,
-                    activeColor: defoultColor,
+                    activeColor: context.primaryColor,
                     onChanged: (val) {
                       setState(() {
                         _isReturnHomemade = val ?? false;
@@ -860,7 +860,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isReturnStoreBought,
-                    activeColor: defoultColor,
+                    activeColor: context.primaryColor,
                     onChanged: (val) {
                       setState(() {
                         _isReturnStoreBought = val ?? false;
@@ -894,14 +894,14 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: isSelected ? defoultColor : context.surfaceColor,
+          color: isSelected ? context.primaryColor : context.surfaceColor,
           borderRadius: BorderRadius.circular(25.r),
           border: Border.all(
-              color: isSelected ? defoultColor : context.dividerColor),
+              color: isSelected ? context.primaryColor : context.dividerColor),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                      color: defoultColor.withOpacity(0.3),
+                      color: context.primaryColor.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4))
                 ]
@@ -910,7 +910,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : context.subTextColor,
+            color: isSelected ? context.onPrimaryColor : context.subTextColor,
             fontWeight: FontWeight.bold,
             fontSize: 13.sp,
           ),
@@ -945,7 +945,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
               Row(
                 children: [
                   Icon(Icons.account_balance_wallet_outlined,
-                      color: defoultColor, size: 18.sp),
+                      color: context.primaryColor, size: 18.sp),
                   SizedBox(width: 8.w),
                   Text('5 rs per trade',
                       style: TextStyle(
@@ -975,7 +975,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   ),
                   Switch(
                     value: _notifyPartnersOnly,
-                    activeColor: defoultColor,
+                    activeColor: context.primaryColor,
                     padding: EdgeInsets.all(8.w),
                     onChanged: (val) =>
                         setState(() => _notifyPartnersOnly = val),
@@ -998,16 +998,16 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           child: ElevatedButton(
             onPressed: tradeController.isLoading ? null : _onPost,
             style: ElevatedButton.styleFrom(
-              backgroundColor: defoultColor,
+              backgroundColor: context.primaryColor,
               shape: RoundedRectangleManager.roundedRadius(10.r),
               elevation: 0,
             ),
             child: tradeController.isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? CircularProgressIndicator(color: context.onPrimaryColor)
                 : Text(
                     'Post Item',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: context.onPrimaryColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 16.sp,
                     ),
@@ -1165,7 +1165,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: BorderSide(color: defoultColor),
+          borderSide: BorderSide(color: context.primaryColor),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
@@ -1190,7 +1190,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
               height: 20.w,
               width: 20.w,
               child: CircularProgressIndicator(
-                  strokeWidth: 2, color: defoultColor),
+                  strokeWidth: 2, color: context.primaryColor),
             ),
           );
         }
@@ -1239,7 +1239,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.r),
-              borderSide: BorderSide(color: defoultColor),
+              borderSide: BorderSide(color: context.primaryColor),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.r),
@@ -1281,13 +1281,13 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         child: Container(
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? defoultColor : Colors.transparent,
+            color: isSelected ? context.primaryColor : Colors.transparent,
             borderRadius: BorderRadius.circular(10.r),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? Colors.white : context.subTextColor,
+              color: isSelected ? context.onPrimaryColor : context.subTextColor,
               fontWeight: FontWeight.w600,
               fontSize: 12.sp,
             ),
@@ -1304,14 +1304,14 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: isSelected ? defoultColor : context.surfaceColor,
+          color: isSelected ? context.primaryColor : context.surfaceColor,
           borderRadius: BorderRadius.circular(25.r),
           border: Border.all(
-              color: isSelected ? defoultColor : context.dividerColor),
+              color: isSelected ? context.primaryColor : context.dividerColor),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                      color: defoultColor.withOpacity(0.3),
+                      color: context.primaryColor.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4))
                 ]
@@ -1320,7 +1320,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : context.subTextColor,
+            color: isSelected ? context.onPrimaryColor : context.subTextColor,
             fontWeight: FontWeight.bold,
             fontSize: 13.sp,
           ),

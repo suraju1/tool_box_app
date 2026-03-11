@@ -113,12 +113,12 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
                                 horizontal: 16.w, vertical: 8.h),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? themeColor.withOpacity(0.05)
+                                  ? context.primaryColor.withOpacity(0.05)
                                   : Colors.blue.withOpacity(0.02),
                               borderRadius: BorderRadius.circular(30.r),
                               border: Border.all(
                                 color: isSelected
-                                    ? themeColor
+                                    ? context.primaryColor
                                     : context.dividerColor,
                               ),
                             ),
@@ -136,7 +136,7 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
                                         ? FontWeight.w600
                                         : FontWeight.w400,
                                     color: isSelected
-                                        ? themeColor
+                                        ? context.primaryColor
                                         : context.textColor,
                                     fontFamily: FontFamily.openSans,
                                   ),
@@ -187,7 +187,7 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16.r),
-                    borderSide: BorderSide(color: themeColor),
+                    borderSide: BorderSide(color: context.primaryColor),
                   ),
                 ),
               ),
@@ -229,7 +229,7 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
                               }
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: themeColor,
+                        backgroundColor: context.primaryColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
@@ -240,8 +240,8 @@ class _UserReviewDialogState extends State<UserReviewDialog> {
                           ? SizedBox(
                               height: 20.h,
                               width: 20.h,
-                              child: const CircularProgressIndicator(
-                                color: Colors.white,
+                              child: CircularProgressIndicator(
+                                color: context.onPrimaryColor,
                                 strokeWidth: 2,
                               ),
                             )

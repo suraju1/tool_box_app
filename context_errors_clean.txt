@@ -1,0 +1,2 @@
+error - The getter 'onPrimaryColor' isn't defined for the type 'BuildContext' - lib\core\services\toast_service.dart:78:45 - undefined_getter
+error - The getter 'onPrimaryColor' isn't defined for the type 'BuildContext' - lib\core\services\toast_service.dart:84:40 - undefined_getter

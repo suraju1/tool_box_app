@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/splash/controller/splash_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
-import 'package:tool_bocs/util/font_family.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -78,10 +77,13 @@ class _SplashScreenState extends State<SplashScreen>
                   width: 160.w,
                   decoration: BoxDecoration(
                     color: context.scaffoldBg,
+                    shape: BoxShape.circle,
                   ),
-                  child: Image.asset(
-                    'assets/logo.png',
-                    fit: BoxFit.contain,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/logo.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),

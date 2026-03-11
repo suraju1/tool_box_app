@@ -41,13 +41,14 @@ class NotificationService {
           if (parts.length >= 2) {
             final chatRoomId = parts[0];
             final otherUserId = parts[1];
+            final otherUserName = parts.length >= 3 ? parts[2] : 'Chat';
 
             navigatorKey.currentState?.push(
               MaterialPageRoute(
                 builder: (context) => ChatScreen(
                   chatRoomId: chatRoomId,
                   otherUserId: otherUserId,
-                  otherUserName: 'Chat', // Default or fetch if possible
+                  otherUserName: otherUserName,
                 ),
               ),
             );

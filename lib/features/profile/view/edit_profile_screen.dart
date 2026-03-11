@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:tool_bocs/core/controller/location_controller.dart';
+import 'package:tool_bocs/features/location/view/map_address_picker_screen.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/core/widgets/app_success_dialog.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
@@ -29,7 +33,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    final profile = context.read<ProfileController>().userProfile?.userDetails;
+    final profile = context.read<ProfileController>().ownProfile?.userDetails;
     _nameController = TextEditingController(text: profile?.fullName ?? '');
     _locationController = TextEditingController(text: profile?.location ?? '');
     _emailController = TextEditingController(text: profile?.email ?? '');
@@ -81,6 +85,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  void _updateLocationFromController() {
+    final locationController = context.read<LocationController>();
+    if (mounted) {
+      if (locationController.address != null) {
+        setState(() {
+          _locationController.text = locationController.address!;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<ProfileController>();
@@ -100,14 +115,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 SizedBox(height: 10.h),
                 _buildTextField('Full Name', _nameController),
                 _buildTextField('Location', _locationController,
-                    icon: Icons.location_on_outlined),
+                    icon: Icons.location_on_outlined,
+                    readOnly: true, onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const MapAddressPickerScreen(isPickOnly: true),
+                    ),
+                  ).then((_) => _updateLocationFromController());
+                }),
                 _buildTextField('Email Address', _emailController,
                     icon: Icons.email_outlined,
                     helperText: 'Used for notifications and account recovery'),
                 _buildTextField('Mobile Number', _mobileController,
                     icon: Icons.phone_android_outlined,
                     helperText: 'Verified mobile number',
-                    readOnly: false),
+                    readOnly: true),
                 SizedBox(height: 10.h),
                 _buildSectionTitle('Bio'),
                 SizedBox(height: 10.h),
@@ -203,28 +227,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildProfileImage() {
+    final user = context.watch<ProfileController>().ownProfile?.userDetails;
     return Center(
       child: Column(
         children: [
           Stack(
             children: [
-              CircleAvatar(
-                radius: 70.r,
-                backgroundImage: _selectedImage != null
-                    ? FileImage(_selectedImage!) as ImageProvider
-                    : (context
-                                    .read<ProfileController>()
-                                    .userProfile
-                                    ?.userDetails
-                                    .image !=
-                                null
-                            ? NetworkImage(context
-                                .read<ProfileController>()
-                                .userProfile!
-                                .userDetails
-                                .image!)
-                            : const AssetImage('assets/profile1.png'))
-                        as ImageProvider,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: context.onPrimaryColor, width: 1),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(60.r),
+                  child: _selectedImage != null
+                      ? Image.file(
+                          _selectedImage!,
+                          width: 120.r,
+                          height: 120.r,
+                          fit: BoxFit.cover,
+                        )
+                      : AppCachedImage(
+                          imageUrl: user!.image ?? '',
+                          userName: user.fullName,
+                          width: 120.r,
+                          height: 120.r,
+                          fit: BoxFit.cover,
+                          radius: 60.r,
+                        ),
+                ),
               ),
               Positioned(
                 bottom: 2,
@@ -245,7 +276,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ],
                     ),
                     child: Icon(Icons.camera_alt,
-                        color: defoultColor, size: 24.sp),
+                        color: context.textColor, size: 24.sp),
                   ),
                 ),
               ),
@@ -278,7 +309,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildTextField(String label, TextEditingController controller,
-      {IconData? icon, String? helperText, bool readOnly = false}) {
+      {IconData? icon,
+      String? helperText,
+      bool readOnly = false,
+      VoidCallback? onTap}) {
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: Column(
@@ -295,6 +329,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           TextField(
             controller: controller,
             readOnly: readOnly,
+            onTap: onTap,
             decoration: InputDecoration(
               filled: true,
               fillColor: readOnly
@@ -315,7 +350,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.r),
-                borderSide: BorderSide(color: defoultColor),
+                borderSide: BorderSide(color: context.primaryColor),
               ),
             ),
           ),
@@ -429,7 +464,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           Row(
             children: [
               Icon(Icons.account_balance_wallet_outlined,
-                  color: defoultColor, size: 25.sp),
+                  color: context.primaryColor, size: 25.sp),
               SizedBox(width: 8.w),
               Text(
                 'Wallet Balance',
@@ -500,9 +535,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                 if (context.mounted) {
                   if (response.success) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(response.message)));
-                    Navigator.pop(context);
+                    AppSuccessDialog.show(
+                      context,
+                      message: response.message,
+                      onButtonPressed: () {
+                        Navigator.pop(context);
+                      },
+                    );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content:
@@ -511,19 +550,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: defoultColor,
+                backgroundColor: context.primaryColor,
                 minimumSize: Size(double.infinity, 55.h),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.r)),
                 elevation: 0,
-                shadowColor: defoultColor,
+                shadowColor: context.primaryColor,
               ),
               child: Text(
                 'Save Changes',
                 style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
-                    color: whiteColor,
+                    color: context.onPrimaryColor,
                     fontFamily: FontFamily.openSans),
               ),
             ),

@@ -106,10 +106,18 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Image.asset(
-                  'assets/logo.png',
+                Container(
                   width: 120.w,
                   height: 120.h,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/logo.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
 
                 SizedBox(height: 60.h),
@@ -121,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w700,
                     fontFamily: FontFamily.openSans,
-                    color: defoultColor,
+                    color: context.primaryColor,
                   ),
                 ),
 
@@ -234,15 +242,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed:
                             authController.isLoading ? null : _handleGetOtp,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: defoultColor,
+                          backgroundColor: context.primaryColor,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                           elevation: 4,
-                          shadowColor: defoultColor.withOpacity(0.5),
+                          shadowColor: context.primaryColor.withOpacity(0.5),
                           disabledBackgroundColor:
-                              defoultColor.withOpacity(0.6),
+                              context.primaryColor.withOpacity(0.6),
                         ),
                         child: authController.isLoading
                             ? SizedBox(
@@ -289,7 +297,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 //         'Signup',
                 //         style: TextStyle(
                 //           fontSize: 14.sp,
-                //           color: defoultColor,
+                //           color: context.primaryColor,
                 //           fontWeight: FontWeight.w500,
                 //           fontFamily: FontFamily.openSans,
                 //         ),

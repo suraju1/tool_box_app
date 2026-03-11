@@ -43,7 +43,7 @@ class BottomNavBarScreen extends StatelessWidget {
           controller.setIndex(index);
         },
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: defoultColor,
+        selectedItemColor: context.primaryColor,
         unselectedItemColor: greyColor,
         selectedLabelStyle:
             TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
@@ -62,7 +62,7 @@ class BottomNavBarScreen extends StatelessWidget {
             ), // Icon(Icons.card_giftcard_outlined),
             activeIcon: SvgPicture.asset(
               'assets/icons/give.svg',
-              colorFilter: ColorFilter.mode(defoultColor, BlendMode.srcIn),
+              colorFilter: ColorFilter.mode(context.primaryColor, BlendMode.srcIn),
             ), // Icon(Icons.card_giftcard),
             label: 'Give',
           ),
@@ -85,7 +85,7 @@ class BottomNavBarScreen extends StatelessWidget {
                         child: Container(
                           padding: EdgeInsets.all(4.r),
                           decoration: BoxDecoration(
-                            color: defoultColor, // Blue badge as requested
+                            color: context.primaryColor, // Blue badge as requested
                             shape: BoxShape.circle,
                           ),
                           constraints: BoxConstraints(
@@ -96,7 +96,7 @@ class BottomNavBarScreen extends StatelessWidget {
                             child: Text(
                               count > 99 ? '99+' : count.toString(),
                               style: TextStyle(
-                                color: Colors.white,
+                                color: context.onPrimaryColor,
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -119,7 +119,7 @@ class BottomNavBarScreen extends StatelessWidget {
                     SvgPicture.asset(
                       'assets/icons/chat.svg',
                       colorFilter:
-                          ColorFilter.mode(defoultColor, BlendMode.srcIn),
+                          ColorFilter.mode(context.primaryColor, BlendMode.srcIn),
                     ),
                     if (count > 0)
                       Positioned(
@@ -128,9 +128,9 @@ class BottomNavBarScreen extends StatelessWidget {
                         child: Container(
                           padding: EdgeInsets.all(4.r),
                           decoration: BoxDecoration(
-                            color: defoultColor,
+                            color: context.primaryColor,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 1.5),
+                            border: Border.all(color: context.onPrimaryColor, width: 1.5),
                           ),
                           constraints: BoxConstraints(
                             minWidth: 16.r,
@@ -140,7 +140,7 @@ class BottomNavBarScreen extends StatelessWidget {
                             child: Text(
                               count > 99 ? '99+' : count.toString(),
                               style: TextStyle(
-                                color: Colors.white,
+                                color: context.onPrimaryColor,
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -162,7 +162,7 @@ class BottomNavBarScreen extends StatelessWidget {
             ), // Icon(Icons.save_alt_outlined),
             activeIcon: SvgPicture.asset(
               'assets/icons/take.svg',
-              colorFilter: ColorFilter.mode(defoultColor, BlendMode.srcIn),
+              colorFilter: ColorFilter.mode(context.primaryColor, BlendMode.srcIn),
             ), // Icon(Icons.save_alt),
             label: 'Take',
           ),

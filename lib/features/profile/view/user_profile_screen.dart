@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/core/widgets/user_review_dialog.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -38,7 +40,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       }
 
       if (targetUserId != null) {
-        context.read<ProfileController>().getUserProfile(targetUserId);
+        context
+            .read<ProfileController>()
+            .getUserProfile(targetUserId, isOwnProfile: false)
+            .then((success) {
+          if (!success &&
+              context.read<ProfileController>().errorMessage ==
+                  "This profile is private") {
+            Navigator.of(context).pop();
+          }
+        });
       }
     });
   }
@@ -47,11 +58,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     final shimmer = context.watch<ShimmerController>();
     final profileController = context.watch<ProfileController>();
-    final userProfile = profileController.userProfile;
+    final userProfile = profileController.viewedProfile;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: (shimmer.isLoading || profileController.isLoading)
+      body: (shimmer.isLoading ||
+              profileController.isLoading ||
+              (userProfile == null && profileController.errorMessage == null))
           ? _buildShimmer(context)
           : userProfile == null
               ? Center(
@@ -98,11 +111,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: defoultColor,
+              color: context.appBarColor,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30.r),
                 bottomRight: Radius.circular(30.r),
               ),
+              border: Border(
+                  bottom: BorderSide(color: context.dividerColor, width: 1.w)),
             ),
             padding: EdgeInsets.fromLTRB(25.w, 50.h, 25.w, 40.h),
             child: Column(
@@ -286,10 +301,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: defoultColor,
+        color: context.appBarColor,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30.r),
           bottomRight: Radius.circular(30.r),
+        ),
+        border: Border(
+          bottom: BorderSide(color: context.dividerColor, width: 1.w),
         ),
       ),
       padding: EdgeInsets.fromLTRB(20.w, 30.h, 20.w, 40.h),
@@ -303,12 +321,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                icon: Icon(Icons.arrow_back_ios, color: context.textColor),
               ),
               Text(
                 'Profile',
                 style: TextStyle(
-                  color: whiteColor,
+                  color: context.textColor,
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
                   fontFamily: FontFamily.openSans,
@@ -365,7 +383,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   padding: EdgeInsets.all(8.r),
                   child: Icon(
                     Icons.more_vert,
-                    color: whiteColor,
+                    color: context.textColor,
                     size: 28.sp,
                   ),
                 ),
@@ -376,18 +394,30 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: 20.h),
-              CircleAvatar(
-                radius: 48.r,
-                backgroundColor: Colors.white24,
-                backgroundImage: details.image != null
-                    ? NetworkImage(details.image!)
-                    : const AssetImage('assets/profile2.png') as ImageProvider,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: context.dividerColor, width: 1),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(48.r),
+                  child: AppCachedImage(
+                    imageUrl: details.image ?? '',
+                    userName: details.fullName,
+                    width: 96.r,
+                    height: 96.r,
+                    fit: BoxFit.cover,
+                    radius: 48.r,
+                    placeholderBgColor: context.primaryColor.withOpacity(0.1),
+                    placeholderTextColor: context.textColor,
+                  ),
+                ),
               ),
               SizedBox(height: 10.h),
               Text(
                 details.fullName,
                 style: TextStyle(
-                  color: whiteColor,
+                  color: context.textColor,
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w700,
                   fontFamily: FontFamily.openSans,
@@ -398,7 +428,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   details.location!,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: whiteColor.withOpacity(0.8),
+                    color: context.subTextColor,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                     fontFamily: FontFamily.openSans,
@@ -492,7 +522,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
             ],
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 10.h),
           if (reviews.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 20.h),
@@ -522,7 +552,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   fontWeight: FontWeight.w700,
                   fontSize: 14.sp,
                   fontFamily: FontFamily.openSans,
-                  color: defoultColor,
+                  color: context.primaryColor,
                 ),
               ),
             ),
@@ -533,74 +563,90 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Widget _buildReviewItem(Review review) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 25.r,
-            backgroundColor: Colors.white24,
-            backgroundImage: review.reviewerImage != null
-                ? NetworkImage(review.reviewerImage!)
-                : const AssetImage('assets/profile1.png') as ImageProvider,
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  review.reviewerName,
-                  style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: context.textColor),
+      padding: EdgeInsets.symmetric(vertical: 5.h),
+      child: InkWell(
+        onTap: () {
+          ProfileController.navigateToUserProfile(context, review.reviewerId);
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: context.primaryColor.withOpacity(0.1), width: 1),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(25.r),
+                child: AppCachedImage(
+                  imageUrl: review.reviewerImage ?? '',
+                  userName: review.reviewerName,
+                  width: 50.r,
+                  height: 50.r,
+                  fit: BoxFit.cover,
+                  radius: 25.r,
                 ),
-                Row(
-                  children: [
-                    Row(
-                      children: List.generate(
-                          5,
-                          (index) => Icon(
-                                Icons.star,
-                                color: index < (review.rating as num).toInt()
-                                    ? Colors.amber
-                                    : Colors.grey.withOpacity(0.3),
-                                size: 14.sp,
-                              )),
-                    ),
-                    if (review.feedbackLabel != null) ...[
-                      SizedBox(width: 8.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 6.w, vertical: 2.h),
-                        decoration: BoxDecoration(
-                          color: defoultColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                        child: Text(
-                          review.feedbackLabel!,
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            color: defoultColor,
-                            fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    review.reviewerName,
+                    style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: context.textColor),
+                  ),
+                  Row(
+                    children: [
+                      Row(
+                        children: List.generate(
+                            5,
+                            (index) => Icon(
+                                  Icons.star,
+                                  color: index < (review.rating as num).toInt()
+                                      ? Colors.amber
+                                      : Colors.grey.withOpacity(0.3),
+                                  size: 14.sp,
+                                )),
+                      ),
+                      if (review.feedbackLabel != null) ...[
+                        SizedBox(width: 8.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: context.primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            review.feedbackLabel!,
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: context.primaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
-                ),
-                SizedBox(height: 4.h),
-                if (review.comment != null && review.comment!.isNotEmpty)
-                  Text(
-                    review.comment!,
-                    style:
-                        TextStyle(fontSize: 12.sp, color: context.subTextColor),
                   ),
-              ],
+                  SizedBox(height: 4.h),
+                  if (review.comment != null && review.comment!.isNotEmpty)
+                    Text(
+                      review.comment!,
+                      style: TextStyle(
+                          fontSize: 12.sp, color: context.subTextColor),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -678,7 +724,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             style: TextStyle(
               fontSize: 22.sp,
               fontWeight: FontWeight.w800,
-              color: defoultColor,
+              color: context.primaryColor,
               fontFamily: FontFamily.openSans,
             ),
           ),
@@ -709,7 +755,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         alignment: Alignment.centerLeft,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: defoultColor,
+          color: context.primaryColor,
           borderRadius: BorderRadius.circular(8.r),
           //border: Border.all(color: greyColor.withOpacity(0.2)),
         ),
@@ -719,7 +765,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             Icon(
               _isUserSaved ? Icons.bookmark : Icons.bookmark_border,
               size: 25.sp,
-              color: whiteColor,
+              color: context.onPrimaryColor,
             ),
             SizedBox(width: 8.w),
             Text(
@@ -727,7 +773,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
-                color: whiteColor,
+                color: context.onPrimaryColor,
                 fontFamily: FontFamily.openSans,
               ),
             ),
@@ -754,7 +800,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         padding: EdgeInsets.symmetric(vertical: 12.h),
         margin: EdgeInsets.symmetric(horizontal: 45.w),
         decoration: BoxDecoration(
-          color: appColor,
+          color: context.primaryColor,
           borderRadius: BorderRadius.circular(8.r),
           boxShadow: [
             BoxShadow(
@@ -770,48 +816,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             fontFamily: FontFamily.openSans,
-            color: whiteColor,
+            color: context.onPrimaryColor,
           ),
         ),
       ),
     );
   }
-}
-
-class PopupMenuArrowShape extends ShapeBorder {
-  final double borderRadius;
-  final double arrowWidth;
-  final double arrowHeight;
-
-  const PopupMenuArrowShape({
-    this.borderRadius = 12.0,
-    this.arrowWidth = 16.0,
-    this.arrowHeight = 10.0,
-  });
-
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path();
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    rect = Rect.fromPoints(
-        rect.topLeft + Offset(0, arrowHeight), rect.bottomRight);
-    final double x = rect.width - 24; // Position arrow near the right side
-
-    return Path()
-      ..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(borderRadius)))
-      ..moveTo(x - arrowWidth / 2, rect.top)
-      ..lineTo(x, rect.top - arrowHeight)
-      ..lineTo(x + arrowWidth / 2, rect.top)
-      ..close();
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
-
-  @override
-  ShapeBorder scale(double t) => this;
 }

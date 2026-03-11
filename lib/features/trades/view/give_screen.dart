@@ -8,9 +8,9 @@ import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart'; // Import for ScrollDirection
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
-import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 
 class GiveScreen extends StatefulWidget {
@@ -144,7 +144,7 @@ class _GiveScreenState extends State<GiveScreen> {
                                         child: Padding(
                                           padding: EdgeInsets.all(16.0),
                                           child: CircularProgressIndicator(
-                                              color: defoultColor),
+                                              color: context.primaryColor),
                                         ),
                                       );
                                     }
@@ -156,6 +156,7 @@ class _GiveScreenState extends State<GiveScreen> {
                                       child: _buildProductCard(
                                         context,
                                         id: post.id,
+                                        userId: post.userId,
                                         title: post.itemName,
                                         owner: post.userName.isNotEmpty
                                             ? post.userName
@@ -196,14 +197,15 @@ class _GiveScreenState extends State<GiveScreen> {
                           topLeft: Radius.circular(30.r),
                           topRight: Radius.circular(30.r),
                         ),
-                        color: context.surfaceColor,
-                        boxShadow: [
-                          BoxShadow(
-                            color: greyColorWithOpacity0_4,
-                            offset: const Offset(0, -2),
-                            blurRadius: 4,
-                          ),
-                        ],
+                        color: Colors.transparent,
+                        // color: context.surfaceColor,
+                        // boxShadow: [
+                        //   BoxShadow(
+                        //     color: greyColorWithOpacity0_4,
+                        //     offset: const Offset(0, -2),
+                        //     blurRadius: 4,
+                        //   ),
+                        // ],
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -214,7 +216,7 @@ class _GiveScreenState extends State<GiveScreen> {
                             height: 45.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12.r),
-                              color: defoultColor,
+                              color: context.primaryColor,
                             ),
                             child: InkWell(
                               onTap: () {
@@ -233,11 +235,12 @@ class _GiveScreenState extends State<GiveScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.add,
-                                        color: whiteColor, size: 28.sp),
+                                        color: context.onPrimaryColor,
+                                        size: 28.sp),
                                     Text(
                                       "Make a New Post",
                                       style: TextStyle(
-                                        color: whiteColor,
+                                        color: context.onPrimaryColor,
                                         fontSize: 14.sp,
                                         fontFamily: FontFamily.openSans,
                                         fontWeight: FontWeight.w800,
@@ -296,12 +299,17 @@ class _GiveScreenState extends State<GiveScreen> {
             children: [
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  padding: EdgeInsets.symmetric(horizontal: 6.w),
                   decoration: BoxDecoration(
                     color: context.isDarkMode
-                        ? Colors.white10
-                        : const Color(0xFFF0F2F5),
+                        ? Colors.white.withOpacity(0.05)
+                        : const Color(0xFFF5F7F9),
                     borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                        color: context.isDarkMode
+                            ? Colors.white24
+                            : Colors.grey.shade300,
+                        width: 1),
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -312,7 +320,7 @@ class _GiveScreenState extends State<GiveScreen> {
                     },
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                      contentPadding: EdgeInsets.symmetric(vertical: 8.h),
                       hintText: 'Search any Product..',
                       hintStyle: TextStyle(
                           color: context.subTextColor, fontSize: 14.sp),
@@ -346,13 +354,17 @@ class _GiveScreenState extends State<GiveScreen> {
       margin: EdgeInsets.only(left: 8.w),
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: defoultColor,
+        color: context.primaryColor,
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: SvgPicture.asset(
         'assets/filter_icon.svg',
         width: 24.w,
         height: 24.h,
+        colorFilter: ColorFilter.mode(
+          context.onPrimaryColor,
+          BlendMode.srcIn,
+        ),
       ),
     );
   }
@@ -360,6 +372,7 @@ class _GiveScreenState extends State<GiveScreen> {
   Widget _buildProductCard(
     BuildContext context, {
     required int id,
+    required int userId,
     required String title,
     required String owner,
     required String category,
@@ -370,6 +383,10 @@ class _GiveScreenState extends State<GiveScreen> {
     String? imagePath,
     String? postType,
   }) {
+    final authController = context.read<AuthController>();
+    final isOwner = authController.currentUser?.id == userId;
+    final finalActionLabel = isOwner ? 'Offers' : actionLabel;
+
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, AppRoutes.productDetails, arguments: id);
@@ -400,7 +417,9 @@ class _GiveScreenState extends State<GiveScreen> {
               ),
               child: imagePath != null
                   ? AppCachedImage(
-                      imageUrl: '${ApiConstants.baseUrl2}$imagePath',
+                      imageUrl: imagePath,
+                      width: 136.w,
+                      height: 154.w,
                       fit: BoxFit.cover,
                       radius: 12.r,
                       errorWidget:
@@ -455,7 +474,7 @@ class _GiveScreenState extends State<GiveScreen> {
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       fontFamily: FontFamily.openSans,
-                      color: defoultColor,
+                      color: context.primaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -477,7 +496,8 @@ class _GiveScreenState extends State<GiveScreen> {
                   SizedBox(height: 3.h),
                   Row(
                     children: [
-                      Icon(Icons.person, color: defoultColor, size: 16.sp),
+                      Icon(Icons.person,
+                          color: context.primaryColor, size: 16.sp),
                       SizedBox(width: 4.w),
                       Expanded(
                         child: Text.rich(
@@ -536,11 +556,19 @@ class _GiveScreenState extends State<GiveScreen> {
                   SizedBox(height: 3.h),
                   InkWell(
                     onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.productDetails,
-                        arguments: id,
-                      );
+                      if (isOwner) {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.notifications,
+                          arguments: id,
+                        );
+                      } else {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.productDetails,
+                          arguments: id,
+                        );
+                      }
                     },
                     child: Container(
                       padding: EdgeInsets.symmetric(
@@ -548,14 +576,14 @@ class _GiveScreenState extends State<GiveScreen> {
                         vertical: 7.h,
                       ),
                       decoration: BoxDecoration(
-                        color: themeColor,
+                        color: context.primaryColor,
                         borderRadius: BorderRadius.circular(6.r),
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        actionLabel,
+                        finalActionLabel,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: context.onPrimaryColor,
                           fontWeight: FontWeight.w700,
                           fontSize: 12.sp,
                         ),

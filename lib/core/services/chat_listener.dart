@@ -13,7 +13,6 @@ class ChatListener {
   bool _isFirstLoad = true;
   final Map<String, Timestamp> _lastMessageTimestamps = {};
   String? _currentUserId;
-  // StreamSubscription? _subscription; // Keep track if we need to cancel
 
   static String? currentChatRoomId;
 
@@ -51,8 +50,6 @@ class ChatListener {
             final String roomId = change.doc.id;
             // Check if we are currently in this chat room
             if (currentChatRoomId == roomId) {
-              // We are active in this room, no need to notify
-              // We should update the timestamp cache though to avoid notifying later if we leave
               final Timestamp? timestamp =
                   lastMessage['timestamp'] as Timestamp?;
               if (timestamp != null) {
@@ -63,7 +60,7 @@ class ChatListener {
 
             final Timestamp timestamp = lastMessage['timestamp'] as Timestamp;
             final String senderId = lastMessage['senderId'].toString();
-            final String text = lastMessage['text'] ?? 'New Message';
+            final String text = lastMessage['text'] ?? '';
 
             // Ignore own messages
             if (senderId == _currentUserId) {
@@ -80,17 +77,17 @@ class ChatListener {
 
               if (lastKnownTimestamp == null ||
                   timestamp.compareTo(lastKnownTimestamp) > 0) {
-                // It's a new message!
-
-                // Update cache
+                // It's a new message! Update cache.
                 _lastMessageTimestamps[roomId] = timestamp;
 
-                // Trigger Notification
-                NotificationService().showNotification(
-                  id: roomId.hashCode,
-                  title: 'New Message', // You might want to fetch sender name
-                  body: text,
-                  payload: '$roomId|$senderId',
+                // Try to resolve sender name from chat room document first
+                final tradeDetails =
+                    data['tradeDetails'] as Map<String, dynamic>?;
+                _resolveAndNotify(
+                  roomId: roomId,
+                  senderId: senderId,
+                  messageText: text,
+                  tradeDetails: tradeDetails,
                 );
               }
             }
@@ -99,5 +96,56 @@ class ChatListener {
       }
       _isFirstLoad = false;
     });
+  }
+
+  /// Resolves the sender's name (from tradeDetails or Firestore) then shows a notification.
+  Future<void> _resolveAndNotify({
+    required String roomId,
+    required String senderId,
+    required String messageText,
+    Map<String, dynamic>? tradeDetails,
+  }) async {
+    String senderName = '';
+
+    // 1. Try to get name from tradeDetails stored in the chat room document
+    if (tradeDetails != null) {
+      final posterUserId = tradeDetails['posterUserId']?.toString();
+      final responderId = tradeDetails['responderId']?.toString();
+      if (senderId == posterUserId) {
+        senderName = (tradeDetails['posterName'] as String?)?.trim() ?? '';
+      } else if (senderId == responderId) {
+        senderName = (tradeDetails['responderName'] as String?)?.trim() ?? '';
+      }
+    }
+
+    // 2. Fallback: fetch from Firestore users collection
+    if (senderName.isEmpty) {
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(senderId)
+            .get();
+        if (userDoc.exists) {
+          final name = userDoc.data()?['fullName'] as String?;
+          if (name != null && name.trim().isNotEmpty) {
+            senderName = name.trim();
+          }
+        }
+      } catch (e) {
+        debugPrint('ChatListener: Failed to fetch sender name: $e');
+      }
+    }
+
+    // 3. Final fallback
+    if (senderName.isEmpty) senderName = 'New Message';
+
+    final body = messageText.startsWith('[IMAGE] ') ? '📷 Photo' : messageText;
+
+    NotificationService().showNotification(
+      id: roomId.hashCode,
+      title: senderName,
+      body: body.isNotEmpty ? body : '...',
+      payload: '$roomId|$senderId|$senderName',
+    );
   }
 }

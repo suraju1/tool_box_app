@@ -93,7 +93,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 color: context.surfaceColor,
                 boxShadow: [
                   BoxShadow(
-                    color: context.dividerColor.withOpacity(1),
+                    color: context.isDarkMode
+                        ? Colors.black54
+                        : context.dividerColor.withOpacity(0.5),
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),
@@ -183,20 +185,21 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         width: 20.w,
                         height: 20.w,
                         decoration: BoxDecoration(
-                          color:
-                              isSelected ? defoultColor : context.surfaceColor,
+                          color: isSelected
+                              ? context.primaryColor
+                              : context.surfaceColor,
                           borderRadius: BorderRadius.circular(4.r),
                           border: Border.all(
                             color: isSelected
-                                ? defoultColor
-                                : greyColor.withOpacity(0.4),
+                                ? context.primaryColor
+                                : context.dividerColor,
                           ),
                         ),
                         child: isSelected
                             ? Icon(
                                 Icons.check,
                                 size: 14.sp,
-                                color: Colors.white,
+                                color: context.onPrimaryColor,
                               )
                             : null,
                       ),
@@ -239,9 +242,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 value: distance,
                 min: 0,
                 max: 50,
-                activeColor: defoultColor,
-                inactiveColor: Colors.grey.shade200,
-                thumbColor: defoultColor,
+                activeColor: context.primaryColor,
+                inactiveColor:
+                    context.isDarkMode ? Colors.white12 : Colors.grey.shade200,
+                thumbColor: context.primaryColor,
                 onChanged: (val) {
                   setState(() => distance = val);
                   context.read<TradeController>().setDistance(
@@ -291,12 +295,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ? EdgeInsets.symmetric(horizontal: 25.w, vertical: 8.h)
                     : EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                 decoration: BoxDecoration(
-                  color: isSelected ? defoultColor : context.surfaceColor,
+                  color:
+                      isSelected ? context.primaryColor : context.surfaceColor,
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
                       color: isSelected
-                          ? defoultColor
-                          : greyColor.withOpacity(0.4)),
+                          ? context.primaryColor
+                          : context.dividerColor),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -313,7 +318,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       rating,
                       style: TextStyle(
                         fontSize: 14.sp,
-                        color: isSelected ? Colors.white : context.subTextColor,
+                        color: isSelected
+                            ? context.onPrimaryColor
+                            : context.subTextColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -352,10 +359,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected ? defoultColor : context.surfaceColor,
+            color: isSelected ? context.primaryColor : context.surfaceColor,
             borderRadius: BorderRadius.circular(22.r),
             border: Border.all(
-              color: isSelected ? defoultColor : greyColor.withOpacity(0.4),
+              color: isSelected ? context.primaryColor : context.dividerColor,
             ),
           ),
           alignment: Alignment.center,
@@ -363,7 +370,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             type,
             style: TextStyle(
               fontSize: 16.sp,
-              color: isSelected ? Colors.white : context.subTextColor,
+              color: isSelected ? context.onPrimaryColor : context.subTextColor,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -379,7 +386,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           child: ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: defoultColor,
+              backgroundColor: context.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.r),
               ),
@@ -390,7 +397,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: context.onPrimaryColor,
               ),
             ),
           ),
@@ -410,8 +417,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor:
-                  context.isDarkMode ? Colors.white10 : const Color(0xFFF3F4F6),
-              foregroundColor: context.subTextColor,
+                  context.isDarkMode ? Colors.white10 : const Color(0xFFF0F2F5),
+              foregroundColor: context.textColor,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.r),

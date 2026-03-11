@@ -7,19 +7,23 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/chat/controller/chat_service.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/widgets/user_review_dialog.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tool_bocs/core/services/chat_listener.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
   final String? otherUserId;
   final String? otherUserName;
+  final String? otherUserImage;
   final TradeResponseModel? tradeResponse;
 
   const ChatScreen({
@@ -27,6 +31,7 @@ class ChatScreen extends StatefulWidget {
     this.chatRoomId,
     this.otherUserId,
     this.otherUserName,
+    this.otherUserImage,
     this.tradeResponse,
   });
 
@@ -204,7 +209,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: context.scaffoldBg,
+      backgroundColor: context.appBarColor,
       elevation: 0,
       leading: Padding(
         padding: EdgeInsets.only(left: 16.0.w),
@@ -279,7 +284,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Text(
                             'OK',
                             style: TextStyle(
-                              color: appColor,
+                              color: context.primaryColor,
                               fontWeight: FontWeight.bold,
                               fontSize: 16.sp,
                               fontFamily: FontFamily.openSans,
@@ -325,65 +330,102 @@ class _ChatScreenState extends State<ChatScreen> {
         preferredSize: const Size.fromHeight(75),
         child: Padding(
           padding: EdgeInsets.fromLTRB(22.w, 0, 22.w, 15.h),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 28.r,
-                backgroundImage: const AssetImage('assets/profile3.png'),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      otherUserName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16.sp,
-                        fontFamily: FontFamily.openSans,
-                        color: context.textColor,
-                      ),
-                    ),
-                    if (widget.tradeResponse != null) ...[
-                      Builder(builder: (context) {
-                        if (_currentUserId == null) {
-                          return const SizedBox.shrink();
-                        }
-                        final trade = widget.tradeResponse!;
-                        final isOwner =
-                            context.read<AuthController>().currentUser?.id ==
-                                trade.posterUserId;
-                        final partnerMobile = isOwner
-                            ? trade.responderMobile
-                            : trade.posterMobile;
-
-                        return Text(
-                          partnerMobile != null && partnerMobile.isNotEmpty
-                              ? partnerMobile
-                              : 'NA',
-                          style: TextStyle(
-                            color: context.subTextColor,
-                            fontSize: 12.sp,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                        );
-                      }),
-                    ],
-                  ],
+          child: InkWell(
+            onTap: () {
+              if (widget.otherUserId != null) {
+                final int? userId = int.tryParse(widget.otherUserId!);
+                if (userId != null) {
+                  ProfileController.navigateToUserProfile(context, userId);
+                }
+              }
+            },
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(28.r),
+                  child: (widget.tradeResponse != null)
+                      ? AppCachedImage(
+                          imageUrl:
+                              (context.read<AuthController>().currentUser?.id ==
+                                      widget.tradeResponse!.posterUserId)
+                                  ? (widget.tradeResponse!.responderImage ??
+                                      widget.otherUserImage ??
+                                      '')
+                                  : (widget.tradeResponse!.posterImage ??
+                                      widget.otherUserImage ??
+                                      ''),
+                          userName: otherUserName,
+                          width: 56.r,
+                          height: 56.r,
+                          fit: BoxFit.cover,
+                          radius: 28.r,
+                        )
+                      : (widget.otherUserImage != null &&
+                              widget.otherUserImage!.isNotEmpty)
+                          ? AppCachedImage(
+                              imageUrl: widget.otherUserImage!,
+                              userName: otherUserName,
+                              width: 56.r,
+                              height: 56.r,
+                              fit: BoxFit.cover,
+                              radius: 28.r,
+                            )
+                          : _buildLetterPlaceholder(otherUserName, 56.r),
                 ),
-              ),
-              //no need to show video and phone icon
-              // IconButton(
-              //   icon: Icon(Icons.videocam_outlined, color: context.textColor),
-              //   onPressed: () {},
-              // ),
-              // IconButton(
-              //   icon: Icon(Icons.phone_outlined, color: context.textColor),
-              //   onPressed: () {},
-              // ),
-            ],
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        otherUserName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16.sp,
+                          fontFamily: FontFamily.openSans,
+                          color: context.textColor,
+                        ),
+                      ),
+                      if (widget.tradeResponse != null) ...[
+                        Builder(builder: (context) {
+                          if (_currentUserId == null) {
+                            return const SizedBox.shrink();
+                          }
+                          final trade = widget.tradeResponse!;
+                          final isOwner =
+                              context.read<AuthController>().currentUser?.id ==
+                                  trade.posterUserId;
+                          final partnerMobile = isOwner
+                              ? trade.responderMobile
+                              : trade.posterMobile;
+
+                          return Text(
+                            partnerMobile != null && partnerMobile.isNotEmpty
+                                ? partnerMobile
+                                : 'NA',
+                            style: TextStyle(
+                              color: context.subTextColor,
+                              fontSize: 12.sp,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          );
+                        }),
+                      ],
+                    ],
+                  ),
+                ),
+                //no need to show video and phone icon
+                // IconButton(
+                //   icon: Icon(Icons.videocam_outlined, color: context.textColor),
+                //   onPressed: () {},
+                // ),
+                // IconButton(
+                //   icon: Icon(Icons.phone_outlined, color: context.textColor),
+                //   onPressed: () {},
+                // ),
+              ],
+            ),
           ),
         ),
       ),
@@ -435,51 +477,60 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     }
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.white10 : const Color(0xFFF1F6FF),
-        border: Border(
-          bottom: BorderSide(color: context.dividerColor, width: 0.5),
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          AppRoutes.tradeDetails,
+          arguments: trade.id,
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: context.isDarkMode ? Colors.white10 : const Color(0xFFF1F6FF),
+          border: Border(
+            bottom: BorderSide(color: context.dividerColor, width: 0.5),
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.swap_horiz, color: appColor, size: 20.sp),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: context.textColor,
-                  fontFamily: FontFamily.openSans,
-                  fontWeight: FontWeight.w500,
+        child: Row(
+          children: [
+            Icon(Icons.swap_horiz, color: context.primaryColor, size: 20.sp),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: RichText(
+                text: TextSpan(
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: context.textColor,
+                    fontFamily: FontFamily.openSans,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  children: [
+                    const TextSpan(text: "You chose "),
+                    TextSpan(
+                      text: "Giving $givingItem to $partnerName ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: context.primaryColor,
+                      ),
+                    ),
+                    const TextSpan(text: "and "),
+                    TextSpan(
+                      text: "Taking $takingItem ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: context.primaryColor,
+                      ),
+                    ),
+                    const TextSpan(text: "in return"),
+                  ],
                 ),
-                children: [
-                  const TextSpan(text: "You chose "),
-                  TextSpan(
-                    text: "Giving $givingItem to $partnerName ",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: appColor,
-                    ),
-                  ),
-                  const TextSpan(text: "and "),
-                  TextSpan(
-                    text: "Taking $takingItem ",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: appColor,
-                    ),
-                  ),
-                  const TextSpan(text: "in return"),
-                ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -526,15 +577,15 @@ class _ChatScreenState extends State<ChatScreen> {
                     width: 150,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image, color: Colors.white),
+                        Icon(Icons.broken_image, color: context.onPrimaryColor),
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
-                      return const SizedBox(
+                      return SizedBox(
                           width: 150,
                           height: 150,
                           child: Center(
                               child: CircularProgressIndicator(
-                                  color: Colors.white)));
+                                  color: context.onPrimaryColor)));
                     },
                   )
                 : Text(
@@ -588,7 +639,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           //no need to show attachment icon
           // IconButton(
-          //   icon: Icon(Icons.attach_file, color: appColor, size: 28),
+          //   icon: Icon(Icons.attach_file, color: context.primaryColor, size: 28),
           //   onPressed: _showAttachmentMenu,
           // ),
           Expanded(
@@ -613,11 +664,11 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(width: 8),
           Container(
             decoration: BoxDecoration(
-              color: appColor,
+              color: context.primaryColor,
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white, size: 20),
+              icon: Icon(Icons.send, color: context.onPrimaryColor, size: 20),
               onPressed: _sendMessage,
             ),
           )
@@ -687,5 +738,27 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ));
+  }
+
+  Widget _buildLetterPlaceholder(String name, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: context.primaryColor.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        name.trim().isNotEmpty
+            ? name.trim().substring(0, 1).toUpperCase()
+            : '?',
+        style: TextStyle(
+          color: context.primaryColor,
+          fontSize: size * 0.4,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 }

@@ -154,11 +154,12 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
               ),
               child: Text(
                 'Move the pin to adjust your location',
-                style: TextStyle(color: Colors.white, fontSize: 10.sp),
+                style:
+                    TextStyle(color: context.onPrimaryColor, fontSize: 10.sp),
               ),
             ),
             SizedBox(height: 8.h),
-            Icon(Icons.location_on, color: Colors.black, size: 40.sp),
+            Icon(Icons.location_on, color: context.textColor, size: 40.sp),
           ],
         ),
       ),
@@ -173,14 +174,18 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       child: Container(
         height: 50.h,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.onPrimaryColor,
           borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+          boxShadow: [
+            BoxShadow(
+                color: context.isDarkMode ? Colors.black45 : Colors.black12,
+                blurRadius: 10)
+          ],
         ),
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: Row(
           children: [
-            Icon(Icons.search, color: defoultColor),
+            Icon(Icons.search, color: context.primaryColor),
             SizedBox(width: 10.w),
             Expanded(
               child: Text(
@@ -206,20 +211,25 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.onPrimaryColor,
               borderRadius: BorderRadius.circular(30.r),
-              border: Border.all(color: defoultColor.withOpacity(0.3)),
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+              border: Border.all(color: context.primaryColor.withOpacity(0.3)),
+              boxShadow: [
+                BoxShadow(
+                    color: context.isDarkMode ? Colors.black45 : Colors.black12,
+                    blurRadius: 4)
+              ],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.my_location, color: defoultColor, size: 20.sp),
+                Icon(Icons.my_location,
+                    color: context.primaryColor, size: 20.sp),
                 SizedBox(width: 8.w),
                 Text(
                   'Use current location',
                   style: TextStyle(
-                    color: defoultColor,
+                    color: context.primaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 14.sp,
                   ),
@@ -239,11 +249,14 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         duration: const Duration(milliseconds: 300),
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.onPrimaryColor,
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20.r), topRight: Radius.circular(20.r)),
           boxShadow: [
-            BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 5)
+            BoxShadow(
+                color: context.isDarkMode ? Colors.black45 : Colors.black12,
+                blurRadius: 10,
+                spreadRadius: 5)
           ],
         ),
         child: SingleChildScrollView(
@@ -266,16 +279,16 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         Container(
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.onPrimaryColor,
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.grey[200]!),
+            border: Border.all(color: context.dividerColor),
             boxShadow: [
               BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)
             ],
           ),
           child: Row(
             children: [
-              Icon(Icons.location_on, color: defoultColor, size: 28.sp),
+              Icon(Icons.location_on, color: context.primaryColor, size: 28.sp),
               SizedBox(width: 12.w),
               Expanded(
                 child: Column(
@@ -301,7 +314,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                 onPressed: () {}, // Handled by map movement mostly
                 child: Text('Change',
                     style: TextStyle(
-                        color: defoultColor, fontWeight: FontWeight.bold)),
+                        color: context.primaryColor,
+                        fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -315,7 +329,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                 ? _onConfirmLocation
                 : () => setState(() => _showFullForm = true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: defoultColor,
+              backgroundColor: context.primaryColor,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r)),
             ),
@@ -327,12 +341,13 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                         ? 'Confirm Location'
                         : 'Add more address details',
                     style: TextStyle(
-                        color: Colors.white,
+                        color: context.onPrimaryColor,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold)),
                 if (!widget.isPickOnly) ...[
                   SizedBox(width: 8.w),
-                  Icon(Icons.keyboard_arrow_right, color: Colors.white),
+                  Icon(Icons.keyboard_arrow_right,
+                      color: context.onPrimaryColor),
                 ]
               ],
             ),
@@ -348,7 +363,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
               child: Text(
                 'I don\'t know the exact location on map',
                 style: TextStyle(
-                  color: defoultColor,
+                  color: context.primaryColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 14.sp,
                   decoration: TextDecoration.underline,
@@ -437,7 +452,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           Radio<String>(
             value: label,
             groupValue: _orderFor,
-            activeColor: defoultColor,
+            activeColor: context.primaryColor,
             onChanged: (v) => setState(() => _orderFor = v!),
           ),
           Text(label, style: TextStyle(fontSize: 12.sp)),
@@ -464,21 +479,26 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
-              color: isSelected ? defoultColor.withOpacity(0.1) : Colors.white,
+              color: isSelected
+                  ? context.primaryColor.withOpacity(0.1)
+                  : context.surfaceColor,
               border: Border.all(
-                  color: isSelected ? defoultColor : Colors.grey[300]!),
+                  color:
+                      isSelected ? context.primaryColor : context.dividerColor),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Row(
               children: [
                 Icon(icons[index],
-                    color: isSelected ? defoultColor : Colors.grey,
+                    color: isSelected ? context.primaryColor : Colors.grey,
                     size: 16.sp),
                 SizedBox(width: 4.w),
                 Text(labels[index],
                     style: TextStyle(
                         fontSize: 12.sp,
-                        color: isSelected ? defoultColor : Colors.black)),
+                        color: isSelected
+                            ? context.primaryColor
+                            : context.textColor)),
               ],
             ),
           ),
@@ -507,9 +527,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: context.isDarkMode ? Colors.white10 : Colors.grey[100],
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: context.dividerColor),
       ),
       child: Row(
         children: [
@@ -531,7 +551,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           ),
           TextButton(
             onPressed: () {}, // Trigger search
-            child: Text('Change', style: TextStyle(color: defoultColor)),
+            child:
+                Text('Change', style: TextStyle(color: context.primaryColor)),
           ),
         ],
       ),
@@ -545,13 +566,13 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       child: ElevatedButton(
         onPressed: _onSave,
         style: ElevatedButton.styleFrom(
-          backgroundColor: defoultColor,
+          backgroundColor: context.primaryColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
         ),
         child: Text('Save address',
             style: TextStyle(
-                color: Colors.white,
+                color: context.onPrimaryColor,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold)),
       ),

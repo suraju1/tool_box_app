@@ -37,7 +37,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.onPrimaryColor,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20.r),
           topRight: Radius.circular(20.r),
@@ -153,7 +153,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
         decoration: InputDecoration(
           hintText: 'Search for area, street name...',
           hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
-          prefixIcon: Icon(Icons.search, color: defoultColor, size: 22.sp),
+          prefixIcon: Icon(Icons.search, color: context.primaryColor, size: 22.sp),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 12.h),
         ),
@@ -180,7 +180,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
         padding: EdgeInsets.symmetric(vertical: 12.h),
         child: Row(
           children: [
-            Icon(Icons.my_location, color: defoultColor, size: 24.sp),
+            Icon(Icons.my_location, color: context.primaryColor, size: 24.sp),
             SizedBox(width: 12.w),
             Expanded(
               child: Column(
@@ -191,7 +191,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
-                      color: defoultColor,
+                      color: context.primaryColor,
                     ),
                   ),
                   Text(
@@ -230,7 +230,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
             child: Row(
               children: [
                 if (icon != null)
-                  Icon(icon, color: iconColor ?? defoultColor, size: 24.sp)
+                  Icon(icon, color: iconColor ?? context.primaryColor, size: 24.sp)
                 else if (image != null)
                   Image.asset(image,
                       width: 24.w,
@@ -294,7 +294,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                           width: 8.w,
                           height: 8.w,
                           decoration: BoxDecoration(
-                            color: defoultColor,
+                            color: context.primaryColor,
                             shape: BoxShape.circle,
                           ),
                         ),

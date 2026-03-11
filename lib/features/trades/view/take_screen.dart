@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -187,14 +187,15 @@ class _TakeScreenState extends State<TakeScreen> {
                       topLeft: Radius.circular(30.r),
                       topRight: Radius.circular(30.r),
                     ),
-                    color: context.surfaceColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: greyColorWithOpacity0_4,
-                        offset: const Offset(0, -2),
-                        blurRadius: 4,
-                      ),
-                    ],
+                    color: Colors.transparent,
+                    // color: context.surfaceColor,
+                    // boxShadow: [
+                    //   BoxShadow(
+                    //     color: greyColorWithOpacity0_4,
+                    //     offset: const Offset(0, -2),
+                    //     blurRadius: 4,
+                    //   ),
+                    // ],
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -205,7 +206,7 @@ class _TakeScreenState extends State<TakeScreen> {
                         height: 45.h,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12.r),
-                          color: defoultColor,
+                          color: context.primaryColor,
                         ),
                         child: InkWell(
                           onTap: () {
@@ -225,11 +226,12 @@ class _TakeScreenState extends State<TakeScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.add, color: whiteColor, size: 28.sp),
+                                Icon(Icons.add,
+                                    color: context.onPrimaryColor, size: 28.sp),
                                 Text(
                                   "Make a New Post",
                                   style: TextStyle(
-                                    color: whiteColor,
+                                    color: context.onPrimaryColor,
                                     fontSize: 14.sp,
                                     fontFamily: FontFamily.openSans,
                                     fontWeight: FontWeight.w800,
@@ -292,9 +294,14 @@ class _TakeScreenState extends State<TakeScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 8.w),
                   decoration: BoxDecoration(
                     color: context.isDarkMode
-                        ? Colors.white10
-                        : const Color(0xFFF0F2F5),
+                        ? Colors.white.withOpacity(0.05)
+                        : const Color(0xFFF5F7F9),
                     borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                        color: context.isDarkMode
+                            ? Colors.white24
+                            : Colors.grey.shade300,
+                        width: 1),
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -344,21 +351,23 @@ class _TakeScreenState extends State<TakeScreen> {
       margin: EdgeInsets.only(left: 8.w),
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: defoultColor,
+        color: context.primaryColor,
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: SvgPicture.asset(
         'assets/filter_icon.svg',
         width: 24.w,
         height: 24.h,
+        colorFilter: ColorFilter.mode(
+          context.onPrimaryColor,
+          BlendMode.srcIn,
+        ),
       ),
     );
   }
 
   Widget _buildProductCard(BuildContext context, PostModel post) {
     final imagePath = post.itemImages.isNotEmpty ? post.itemImages.first : '';
-    final imageUrl =
-        imagePath.isNotEmpty ? '${ApiConstants.baseUrl2}$imagePath' : '';
 
     return GestureDetector(
       onTap: () {
@@ -392,9 +401,11 @@ class _TakeScreenState extends State<TakeScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: imageUrl.isNotEmpty
+              child: imagePath.isNotEmpty
                   ? AppCachedImage(
-                      imageUrl: imageUrl,
+                      imageUrl: imagePath,
+                      width: 136.w,
+                      height: 154.w,
                       fit: BoxFit.cover,
                       radius: 12.r,
                       errorWidget:
@@ -454,7 +465,7 @@ class _TakeScreenState extends State<TakeScreen> {
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       fontFamily: FontFamily.openSans,
-                      color: defoultColor,
+                      color: context.primaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -476,7 +487,8 @@ class _TakeScreenState extends State<TakeScreen> {
                   SizedBox(height: 3.h),
                   Row(
                     children: [
-                      Icon(Icons.person, color: defoultColor, size: 16.sp),
+                      Icon(Icons.person,
+                          color: context.primaryColor, size: 16.sp),
                       SizedBox(width: 4.w),
                       Expanded(
                         child: Text.rich(
@@ -534,37 +546,54 @@ class _TakeScreenState extends State<TakeScreen> {
                     ],
                   ),
                   SizedBox(height: 3.h),
-                  InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.productDetails,
-                        arguments: post.id,
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 34.w,
-                        vertical: 7.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: themeColor,
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        post.postType.toLowerCase() == 'give' ||
+                  (() {
+                    final authController = context.read<AuthController>();
+                    final isOwner =
+                        authController.currentUser?.id == post.userId;
+                    final actionLabel = isOwner
+                        ? 'Offers'
+                        : (post.postType.toLowerCase() == 'give' ||
                                 post.postType.toLowerCase() == 'giving'
                             ? 'Take'
-                            : 'Give', // Action Label
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12.sp,
+                            : 'Give');
+
+                    return InkWell(
+                      onTap: () {
+                        if (isOwner) {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.notifications,
+                            arguments: post.id,
+                          );
+                        } else {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.productDetails,
+                            arguments: post.id,
+                          );
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 34.w,
+                          vertical: 7.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.primaryColor,
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          actionLabel,
+                          style: TextStyle(
+                            color: context.onPrimaryColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.sp,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  })(),
                 ],
               ),
             ),

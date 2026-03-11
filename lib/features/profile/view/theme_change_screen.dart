@@ -11,12 +11,10 @@ class ThemeChangeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = context.watch<ThemeController>();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: isDark ? Colors.black : bg1Color,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        backgroundColor: isDark ? Colors.black : Colors.white,
+        backgroundColor: context.appBarColor,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -25,7 +23,7 @@ class ThemeChangeScreen extends StatelessWidget {
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
             fontFamily: FontFamily.openSans,
-            color: isDark ? Colors.white : blackColor,
+            color: context.textColor,
           ),
         ),
         leading: IconButton(
@@ -33,14 +31,14 @@ class ThemeChangeScreen extends StatelessWidget {
           icon: Icon(
             Icons.arrow_back_ios_new,
             size: 20.sp,
-            color: isDark ? Colors.white : blackColor,
+            color: context.textColor,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(10),
           child: Divider(
             height: 1,
-            color: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
+            color: context.dividerColor,
           ),
         ),
       ),
@@ -55,15 +53,15 @@ class ThemeChangeScreen extends StatelessWidget {
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 fontFamily: FontFamily.openSans,
-                color: isDark ? Colors.white70 : Colors.grey.shade600,
+                color: context.subTextColor,
               ),
             ),
             SizedBox(height: 16.h),
             Container(
               decoration: BoxDecoration(
-                color: isDark ? Colors.grey.shade900 : Colors.white,
+                color: context.surfaceColor,
                 borderRadius: BorderRadius.circular(12.r),
-                boxShadow: isDark
+                boxShadow: context.isDarkMode
                     ? []
                     : [
                         BoxShadow(
@@ -81,25 +79,22 @@ class ThemeChangeScreen extends StatelessWidget {
                     icon: Icons.light_mode_outlined,
                     mode: ThemeMode.light,
                     currentMode: themeController.themeMode,
-                    isDark: isDark,
                   ),
-                  _buildDivider(isDark),
+                  _buildDivider(context),
                   _buildThemeOption(
                     context,
                     title: 'Dark Mode',
                     icon: Icons.dark_mode_outlined,
                     mode: ThemeMode.dark,
                     currentMode: themeController.themeMode,
-                    isDark: isDark,
                   ),
-                  _buildDivider(isDark),
+                  _buildDivider(context),
                   _buildThemeOption(
                     context,
                     title: 'System Default',
                     icon: Icons.settings_brightness_outlined,
                     mode: ThemeMode.system,
                     currentMode: themeController.themeMode,
-                    isDark: isDark,
                   ),
                 ],
               ),
@@ -116,16 +111,13 @@ class ThemeChangeScreen extends StatelessWidget {
     required IconData icon,
     required ThemeMode mode,
     required ThemeMode currentMode,
-    required bool isDark,
   }) {
     final isSelected = currentMode == mode;
     return ListTile(
       onTap: () => context.read<ThemeController>().setTheme(mode),
       leading: Icon(
         icon,
-        color: isSelected
-            ? themeColor
-            : (isDark ? Colors.white70 : Colors.grey.shade600),
+        color: isSelected ? context.primaryColor : context.subTextColor,
         size: 24.sp,
       ),
       title: Text(
@@ -133,26 +125,26 @@ class ThemeChangeScreen extends StatelessWidget {
         style: TextStyle(
           fontSize: 15.sp,
           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-          color: isSelected ? themeColor : (isDark ? Colors.white : blackColor),
+          color: isSelected ? context.primaryColor : context.textColor,
           fontFamily: FontFamily.openSans,
         ),
       ),
       trailing: isSelected
-          ? Icon(Icons.check_circle, color: themeColor, size: 24.sp)
+          ? Icon(Icons.check_circle, color: context.primaryColor, size: 24.sp)
           : Icon(
               Icons.circle_outlined,
-              color: isDark ? Colors.white24 : Colors.grey.shade300,
+              color: context.dividerColor,
               size: 24.sp,
             ),
     );
   }
 
-  Widget _buildDivider(bool isDark) {
+  Widget _buildDivider(BuildContext context) {
     return Divider(
       height: 1,
       thickness: 1,
       indent: 50.w,
-      color: isDark ? Colors.white10 : Colors.grey.shade100,
+      color: context.dividerColor,
     );
   }
 }

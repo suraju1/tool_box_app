@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/features/location/view/location_selection_sheet.dart';
 import 'package:tool_bocs/features/notifications/view/notifications_screen.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -105,6 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   child: Column(
                     children: [
+                      Divider(
+                        color: context.dividerColor,
+                        thickness: 1.h,
+                        height: 1.h,
+                      ),
                       _buildDistanceSection(context),
                       Divider(
                         color: context.dividerColor,
@@ -176,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
         bottom: 8.h,
       ),
       decoration: BoxDecoration(
-        color: themeColor,
+        color: context.appBarColor,
       ),
       child: Column(
         children: [
@@ -186,10 +191,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Icon(
                 Icons.location_on_outlined,
-                color: Colors.white,
+                color: context.textColor,
                 size: 20.sp,
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: 10.w),
               Consumer<LocationController>(
                 builder: (context, locationController, child) {
                   return Expanded(
@@ -212,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Text(
                               locationController.address ?? 'NA',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: context.textColor,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14.sp,
                               ),
@@ -226,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             margin: EdgeInsets.only(right: 25.w),
                             child: Icon(
                               Icons.keyboard_arrow_down,
-                              color: Colors.white,
+                              color: context.textColor,
                               size: 26.sp,
                             ),
                           ),
@@ -263,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
               //     ),
               //   ),
               // ),
-              SizedBox(width: 1.w),
+              //SizedBox(width: 1.w),
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -277,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Icon(
                       Icons.notifications_none_outlined,
-                      color: Colors.white,
+                      color: context.textColor,
                       size: 28.sp,
                     ),
                     Positioned(
@@ -344,9 +349,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: controller.distanceKm,
                       min: 0,
                       max: 50,
-                      activeColor: defoultColor,
+                      activeColor: context.primaryColor,
                       inactiveColor: Colors.grey.shade200,
-                      thumbColor: defoultColor,
+                      thumbColor: context.primaryColor,
                       onChanged: (val) {
                         controller.setDistance(
                           val,
@@ -385,15 +390,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildProductCard(BuildContext context, PostModel post) {
     final imagePath = post.itemImages.isNotEmpty ? post.itemImages.first : '';
-    final imageUrl =
-        imagePath.isNotEmpty ? '${ApiConstants.baseUrl2}$imagePath' : '';
 
     // Determine action label based on post type
     // If it's a "give_away" (give), the user can "Take" it.
     // If it's a "taking" (take) request, the user can "Give" it.
     final isTake = post.postType.toLowerCase() == 'take' ||
         post.postType.toLowerCase() == 'taking';
-    final actionLabel = isTake ? 'Give' : 'Take';
+    final authController = context.read<AuthController>();
+    final isOwner = authController.currentUser?.id == post.userId;
+    final actionLabel = isOwner ? 'Offers' : (isTake ? 'Give' : 'Take');
 
     return GestureDetector(
       onTap: () {
@@ -441,7 +446,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16.sp,
-                            color: defoultColor,
+                            color: context.primaryColor,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -475,10 +480,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.blue.withOpacity(
                   0.1,
                 ), // Fixed withValues to withOpacity for compatibility if needed, or keeping withValues if on new Flutter
-                child: imageUrl.isNotEmpty
+                child: imagePath.isNotEmpty
                     ? AppCachedImage(
-                        imageUrl: imageUrl,
+                        imageUrl: imagePath,
                         fit: BoxFit.fill,
+                        width: 1.sw - 44.w,
+                        height: (1.sw - 44.w) * 9 / 14,
                         radius: 0,
                         errorWidget:
                             Icon(Icons.image, size: 50.sp, color: Colors.grey),
@@ -497,8 +504,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.person, color: themeColor, size: 16.sp),
-                            SizedBox(width: 4.w),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10.r),
+                              child: post.userImage != null &&
+                                      post.userImage!.isNotEmpty
+                                  ? AppCachedImage(
+                                      imageUrl: post.userImage!,
+                                      userName: post.userName,
+                                      width: 20.r,
+                                      height: 20.r,
+                                      fit: BoxFit.cover,
+                                      radius: 10.r,
+                                    )
+                                  : _buildLetterPlaceholder(
+                                      post.userName, 20.r),
+                            ),
+                            SizedBox(width: 6.w),
                             Expanded(
                               child: Text(
                                 "${post.userName}  •  ${post.itemCategory}",
@@ -547,16 +568,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.productDetails,
-                        arguments: post.id,
-                      );
+                      if (isOwner) {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.notifications,
+                          arguments: post.id,
+                        );
+                      } else {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.productDetails,
+                          arguments: post.id,
+                        );
+                      }
                     },
                     child: Container(
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: themeColor,
+                        color: context.primaryColor,
                         borderRadius: BorderRadius.circular(6.r),
                       ),
                       padding: EdgeInsets.symmetric(
@@ -568,7 +597,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 12.sp,
-                          color: Colors.white,
+                          color: context.onPrimaryColor,
                         ),
                       ),
                     ),
@@ -673,6 +702,28 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLetterPlaceholder(String name, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: context.primaryColor.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        name.trim().isNotEmpty
+            ? name.trim().substring(0, 1).toUpperCase()
+            : '?',
+        style: TextStyle(
+          color: context.primaryColor,
+          fontSize: size * 0.4,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

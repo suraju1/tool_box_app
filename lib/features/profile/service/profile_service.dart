@@ -26,7 +26,8 @@ class ProfileService {
         } else {
           return ApiResponse(
             success: false,
-            message: data['message'] ?? 'Failed to fetch profile',
+            message:
+                data['error'] ?? data['message'] ?? 'Failed to fetch profile',
           );
         }
       } else {
