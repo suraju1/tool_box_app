@@ -9,6 +9,7 @@ import 'package:tool_bocs/features/location/view/map_address_picker_screen.dart'
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/app_success_dialog.dart';
+import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
@@ -42,47 +43,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _profileVisibility = profile?.profileVisibility == 1;
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
-    if (pickedFile != null) {
+  Future<void> _pickImage() async {
+    final List<XFile>? images = await AppImagePickerBS.show(context);
+    if (images != null && images.isNotEmpty) {
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImage = File(images.first.path);
       });
     }
-  }
-
-  void _showImageSourceSheet() {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Gallery'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Camera'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   void _updateLocationFromController() {
@@ -261,7 +228,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 bottom: 2,
                 right: 2,
                 child: GestureDetector(
-                  onTap: _showImageSourceSheet,
+                  onTap: _pickImage,
                   child: Container(
                     padding: EdgeInsets.all(8.w),
                     decoration: BoxDecoration(

@@ -11,6 +11,7 @@ import 'package:tool_bocs/features/trades/model/category_model.dart';
 import 'package:tool_bocs/features/trades/model/post_request_model.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
@@ -60,7 +61,6 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
   }
 
   // Images
-  final ImagePicker _picker = ImagePicker();
   final List<XFile> _itemImages = [];
   final List<XFile> _returnItemImages = [];
 
@@ -102,8 +102,10 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
   }
 
   Future<void> _pickImage(bool isReturnItem) async {
-    final List<XFile> images = await _picker.pickMultiImage();
-    if (images.isNotEmpty) {
+    final List<XFile>? images =
+        await AppImagePickerBS.show(context, allowMultiple: true);
+
+    if (images != null && images.isNotEmpty) {
       setState(() {
         if (isReturnItem) {
           if (_returnItemImages.length + images.length > 5) {

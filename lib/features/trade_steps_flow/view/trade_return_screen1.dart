@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -23,6 +27,29 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
   String _returnSelectedCondition = 'New';
   bool _isReturnHomemade = false;
   bool _isReturnStoreBought = false;
+  final List<XFile> _returnItemImages = [];
+
+  Future<void> _pickImage() async {
+    final List<XFile>? images =
+        await AppImagePickerBS.show(context, allowMultiple: true);
+    if (images != null && images.isNotEmpty) {
+      setState(() {
+        if (_returnItemImages.length + images.length > 5) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Max 5 images allowed')),
+          );
+        } else {
+          _returnItemImages.addAll(images);
+        }
+      });
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _returnItemImages.removeAt(index);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -364,34 +391,75 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
       children: [
         Text('Add Photos', style: _labelStyle(context, size: 14)),
         SizedBox(height: 15.h),
-        Container(
-          width: double.infinity,
-          height: 150.h,
-          decoration: BoxDecoration(
-            color:
-                context.isDarkMode ? Colors.white10 : const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-                color: context.dividerColor, style: BorderStyle.solid),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.camera_alt_outlined,
-                  color: context.subTextColor, size: 30.sp),
-              SizedBox(height: 8.h),
-              Text(
-                'Add up to 5 photos',
-                style: TextStyle(color: context.subTextColor, fontSize: 12.sp),
-              ),
-            ],
+        GestureDetector(
+          onTap: _pickImage,
+          child: Container(
+            width: double.infinity,
+            height: 150.h,
+            decoration: BoxDecoration(
+              color:
+                  context.isDarkMode ? Colors.white10 : const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                  color: context.dividerColor, style: BorderStyle.solid),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.camera_alt_outlined,
+                    color: context.subTextColor, size: 30.sp),
+                SizedBox(height: 8.h),
+                Text(
+                  'Add up to 5 photos',
+                  style:
+                      TextStyle(color: context.subTextColor, fontSize: 12.sp),
+                ),
+              ],
+            ),
           ),
         ),
-        SizedBox(height: 12.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(4, (index) => _buildSmallPhotoBox()),
-        ),
+        if (_returnItemImages.isNotEmpty) ...[
+          SizedBox(height: 12.h),
+          SizedBox(
+            height: 80.h,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _returnItemImages.length,
+              separatorBuilder: (_, __) => SizedBox(width: 8.w),
+              itemBuilder: (context, index) {
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 70.w,
+                      height: 70.w,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.r),
+                        image: DecorationImage(
+                          image: FileImage(File(_returnItemImages[index].path)),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: -5,
+                      right: -5,
+                      child: GestureDetector(
+                        onTap: () => _removeImage(index),
+                        child: CircleAvatar(
+                          radius: 10,
+                          backgroundColor: Colors.red,
+                          child: Icon(Icons.close,
+                              size: 12, color: context.onPrimaryColor),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -417,17 +485,6 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSmallPhotoBox() {
-    return Container(
-      width: 70.w,
-      height: 70.w,
-      decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.white10 : const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(8.r),
       ),
     );
   }

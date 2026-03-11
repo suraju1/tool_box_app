@@ -18,6 +18,7 @@ import 'package:uuid/uuid.dart';
 import 'package:tool_bocs/core/services/chat_listener.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
@@ -111,11 +112,9 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _sendImage() async {
     if (_currentUserId == null || widget.otherUserId == null) return;
 
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-    if (image != null) {
-      File file = File(image.path);
+    final List<XFile>? images = await AppImagePickerBS.show(context);
+    if (images != null && images.isNotEmpty) {
+      File file = File(images.first.path);
       String fileName = const Uuid().v4();
 
       try {
