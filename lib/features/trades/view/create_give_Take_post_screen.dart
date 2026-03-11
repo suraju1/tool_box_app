@@ -92,6 +92,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           _pickupAddress = locationController.address!;
           _latitude = locationController.latitude;
           _longitude = locationController.longitude;
+          _diameter = locationController.radius;
         });
       } else {
         setState(() {
@@ -360,7 +361,10 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           padding: EdgeInsets.zero,
           activeColor: context.primaryColor,
           inactiveColor: context.dividerColor,
-          onChanged: (val) => setState(() => _diameter = val),
+          onChanged: (val) {
+            setState(() => _diameter = val);
+            context.read<LocationController>().setRadius(val);
+          },
         ),
         SizedBox(height: 15.h),
         Text(
@@ -383,8 +387,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         Container(
           height: 45.h,
           decoration: BoxDecoration(
-            color:
-                context.isDarkMode ? Colors.white10 : const Color(0xFFF3F4F6),
+            color: context.isDarkMode
+                ? Colors.white10
+                : context.dividerColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(10.r),
           ),
           child: Row(

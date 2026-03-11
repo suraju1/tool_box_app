@@ -10,6 +10,7 @@ class LocationController extends ChangeNotifier {
   String? _city;
   bool _isLoading = false;
   String? _errorMessage;
+  double _radius = 5.0; // Default 5km
 
   // Saved addresses list
   List<Map<String, String>> _savedAddresses = [];
@@ -36,6 +37,7 @@ class LocationController extends ChangeNotifier {
   String? get city => _city;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  double get radius => _radius;
   bool get hasLocation => _latitude != null && _longitude != null;
   List<Map<String, String>> get savedAddresses => _savedAddresses;
 
@@ -125,10 +127,13 @@ class LocationController extends ChangeNotifier {
   }
 
   /// Set location manually
-  void setLocation(double lat, double lng, String address) {
+  void setLocation(double lat, double lng, String address, {double? radius}) {
     _latitude = lat;
     _longitude = lng;
     _address = address;
+    if (radius != null) {
+      _radius = radius;
+    }
 
     // Try to get city from manual address or coordinates
     LocationService.getCityFromCoordinates(lat, lng).then((cityName) {
@@ -138,6 +143,12 @@ class LocationController extends ChangeNotifier {
     });
 
     _persistCurrentLocation();
+    notifyListeners();
+  }
+
+  /// Update radius
+  void setRadius(double radius) {
+    _radius = radius;
     notifyListeners();
   }
 

@@ -101,7 +101,9 @@ class AppImagePickerBS extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(color: context.dividerColor),
             borderRadius: BorderRadius.circular(12.r),
-            color: context.isDarkMode ? Colors.white10 : Colors.grey.shade50,
+            color: context.isDarkMode
+                ? Colors.white10
+                : context.dividerColor.withOpacity(0.05),
           ),
           child: Column(
             children: [

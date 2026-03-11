@@ -397,8 +397,9 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
             width: double.infinity,
             height: 150.h,
             decoration: BoxDecoration(
-              color:
-                  context.isDarkMode ? Colors.white10 : const Color(0xFFF3F4F6),
+              color: context.isDarkMode
+                  ? Colors.white10
+                  : context.dividerColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
                   color: context.dividerColor, style: BorderStyle.solid),

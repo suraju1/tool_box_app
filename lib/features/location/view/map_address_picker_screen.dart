@@ -28,6 +28,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   final TextEditingController _areaController = TextEditingController();
   String _selectedLabel = 'Home';
   String _orderFor = 'Myself';
+  double _radius = 5.0; // km
 
   // State management for multistep flow
   bool _showFullForm = false;
@@ -47,8 +48,13 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
             LatLng(locationController.latitude!, locationController.longitude!);
         _currentAddress = locationController.address ?? "";
         _areaController.text = _currentAddress;
+        _radius = locationController.radius;
       });
+      _updateCameraZoom(_radius);
     } else {
+      setState(() {
+        _radius = locationController.radius;
+      });
       _getCurrentLocation();
     }
   }
@@ -71,12 +77,13 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   }
 
   Future<void> _moveCamera(LatLng position) async {
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newLatLngZoom(position, 16));
+    _updateCameraZoom(_radius);
   }
 
   Future<void> _onCameraMove(CameraPosition position) async {
-    _lastMapPosition = position.target;
+    setState(() {
+      _lastMapPosition = position.target;
+    });
   }
 
   Future<void> _onCameraIdle() async {
@@ -116,17 +123,124 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         children: [
           _buildMap(),
           _buildMarkerOverlay(),
-          _buildSearchOverlay(),
+          //not needed currently
+          // _buildSearchOverlay(),
           _buildUseCurrentLocationFloating(),
+          _buildRadiusSliderOverlay(),
           _buildBottomForm(),
         ],
       ),
     );
   }
 
+  Widget _buildRadiusSliderOverlay() {
+    if (_showFullForm) return const SizedBox.shrink();
+    return Positioned(
+      bottom: 240.h,
+      left: 16.w,
+      right: 16.w,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: context.onPrimaryColor.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: context.isDarkMode ? Colors.black45 : Colors.black12,
+              blurRadius: 10,
+            )
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Select Radius',
+                  style:
+                      TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '${_radius.toInt()} km',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: context.primaryColor,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 4.h,
+                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.r),
+                overlayShape: RoundSliderOverlayShape(overlayRadius: 16.r),
+              ),
+              child: Slider(
+                value: _radius,
+                min: 1,
+                max: 50,
+                activeColor: context.primaryColor,
+                inactiveColor: context.dividerColor,
+                onChanged: (val) {
+                  setState(() => _radius = val);
+                  _updateCameraZoom(val);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateCameraZoom(double radius) async {
+    final GoogleMapController controller = await _controller.future;
+
+    double zoom;
+    if (radius <= 1)
+      zoom = 15.5;
+    else if (radius <= 2)
+      zoom = 14.5;
+    else if (radius <= 5)
+      zoom = 13.2;
+    else if (radius <= 10)
+      zoom = 12.2;
+    else if (radius <= 20)
+      zoom = 11.2;
+    else if (radius <= 35)
+      zoom = 10.2;
+    else
+      zoom = 9.5;
+
+    controller
+        .animateCamera(CameraUpdate.newLatLngZoom(_lastMapPosition, zoom));
+  }
+
   Widget _buildMap() {
+    // Calculate initial zoom based on radius
+    double initialZoom = 15 - (_radius / 5);
+    if (_radius <= 2)
+      initialZoom = 15;
+    else if (_radius <= 5)
+      initialZoom = 13.5;
+    else if (_radius <= 10)
+      initialZoom = 12.5;
+    else if (_radius <= 20)
+      initialZoom = 11.5;
+    else
+      initialZoom = 10.5;
+
     return GoogleMap(
-      initialCameraPosition: CameraPosition(target: _lastMapPosition, zoom: 16),
+      initialCameraPosition:
+          CameraPosition(target: _lastMapPosition, zoom: initialZoom),
+      padding: EdgeInsets.only(
+        top: 70.h,
+        bottom: _showFullForm ? 0 : 350.h,
+      ),
       onMapCreated: (GoogleMapController controller) {
         _controller.complete(controller);
       },
@@ -136,31 +250,49 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
       mapToolbarEnabled: false,
+      circles: {
+        Circle(
+          circleId: const CircleId('radius_circle'),
+          center: _lastMapPosition,
+          radius: _radius * 1000, // Convert to meters
+          fillColor: Colors.black.withOpacity(0.3),
+          strokeColor: Colors.black,
+          strokeWidth: 2,
+        ),
+      },
     );
   }
 
   Widget _buildMarkerOverlay() {
-    return Center(
+    if (_showFullForm) return const SizedBox.shrink();
+    return IgnorePointer(
       child: Padding(
-        padding: EdgeInsets.only(bottom: 35.h), // Offset for pin height
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Text(
-                'Move the pin to adjust your location',
-                style:
-                    TextStyle(color: context.onPrimaryColor, fontSize: 10.sp),
-              ),
+        padding: EdgeInsets.only(top: 70.h, bottom: 350.h),
+        child: Align(
+          alignment: Alignment.center,
+          child: FractionalTranslation(
+            translation: const Offset(0, -0.5),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: context.textColor.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    'Move the pin to adjust your location',
+                    style: TextStyle(
+                        color: context.reverseTextColor, fontSize: 10.sp),
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Icon(Icons.location_on, color: Colors.black, size: 40.sp),
+              ],
             ),
-            SizedBox(height: 8.h),
-            Icon(Icons.location_on, color: context.textColor, size: 40.sp),
-          ],
+          ),
         ),
       ),
     );
@@ -190,7 +322,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
             Expanded(
               child: Text(
                 'Search for a new area, locality...',
-                style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                style: TextStyle(color: context.subTextColor, fontSize: 14.sp),
               ),
             ),
           ],
@@ -202,40 +334,36 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   Widget _buildUseCurrentLocationFloating() {
     if (_showFullForm) return const SizedBox.shrink();
     return Positioned(
-      bottom: 285.h, // Positioned above the bottom sheet
-      left: 0,
-      right: 0,
-      child: Center(
-        child: InkWell(
-          onTap: _getCurrentLocation,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: context.onPrimaryColor,
-              borderRadius: BorderRadius.circular(30.r),
-              border: Border.all(color: context.primaryColor.withOpacity(0.3)),
-              boxShadow: [
-                BoxShadow(
-                    color: context.isDarkMode ? Colors.black45 : Colors.black12,
-                    blurRadius: 4)
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.my_location,
-                    color: context.primaryColor, size: 20.sp),
-                SizedBox(width: 8.w),
-                Text(
-                  'Use current location',
-                  style: TextStyle(
-                    color: context.primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.sp,
-                  ),
-                ),
-              ],
-            ),
+      bottom: 335.h, // Positioned above the radius slider
+      right: 16.w,
+      child: InkWell(
+        onTap: _getCurrentLocation,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: context.onPrimaryColor,
+            borderRadius: BorderRadius.circular(30.r),
+            border: Border.all(color: context.primaryColor.withOpacity(0.3)),
+            boxShadow: [
+              BoxShadow(
+                  color: context.isDarkMode ? Colors.black45 : Colors.black12,
+                  blurRadius: 4)
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.my_location, color: context.primaryColor, size: 20.sp),
+              // SizedBox(width: 8.w),
+              // Text(
+              //   'Use current location',
+              //   style: TextStyle(
+              //     color: context.primaryColor,
+              //     fontWeight: FontWeight.bold,
+              //     fontSize: 14.sp,
+              //  ),
+              // ),
+            ],
           ),
         ),
       ),
@@ -282,9 +410,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
             color: context.onPrimaryColor,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: context.dividerColor),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)
-            ],
+            boxShadow: [BoxShadow(color: context.dividerColor, blurRadius: 5)],
           ),
           child: Row(
             children: [
@@ -303,7 +429,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                     ),
                     Text(
                       _currentAddress,
-                      style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                      style: TextStyle(
+                          fontSize: 12.sp, color: context.subTextColor),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -382,6 +509,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           _lastMapPosition.latitude,
           _lastMapPosition.longitude,
           _currentAddress,
+          radius: _radius,
         );
     Navigator.pop(context);
   }
@@ -406,7 +534,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         _buildSwitchOption(),
         SizedBox(height: 10.h),
         Text('Save address as *',
-            style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
+            style: TextStyle(fontSize: 14.sp, color: context.subTextColor)),
         SizedBox(height: 10.h),
         _buildLabelSelector(),
         SizedBox(height: 20.h),
@@ -514,7 +642,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(fontSize: 12.sp, color: Colors.grey),
+          labelStyle: TextStyle(fontSize: 12.sp, color: context.subTextColor),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
           contentPadding:
               EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
@@ -527,7 +655,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.white10 : Colors.grey[100],
+        color: context.isDarkMode
+            ? Colors.white10
+            : context.dividerColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: context.dividerColor),
       ),
@@ -538,7 +668,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Area / Sector / Locality *',
-                    style: TextStyle(fontSize: 10.sp, color: Colors.grey)),
+                    style: TextStyle(
+                        fontSize: 10.sp, color: context.subTextColor)),
                 Text(
                   _currentAddress,
                   style:
@@ -599,6 +730,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           _lastMapPosition.latitude,
           _lastMapPosition.longitude,
           fullAddress,
+          radius: _radius,
         );
 
     ToastService.showSuccessToast(context, 'Address saved successfully');
