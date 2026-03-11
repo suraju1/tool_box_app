@@ -233,15 +233,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               children: [
                 SizedBox(height: 40.h),
                 Container(
-                  width: 100.w,
-                  height: 100.h,
+                  width: 120.w,
+                  height: 120.h,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                   ),
                   child: ClipOval(
                     child: Image.asset(
-                      'assets/logo.png',
-                      fit: BoxFit.cover,
+                      'assets/logo_transperant.png',
+                      color: context.isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
                 ),
@@ -411,7 +411,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   builder: (context, authController, child) {
                     return SizedBox(
                       width: double.infinity,
-                      height: 52.h,
+                      height: 44.h,
                       child: ElevatedButton(
                         onPressed:
                             authController.isLoading ? null : _handleRegister,
@@ -419,9 +419,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           backgroundColor: context.primaryColor,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
+                            borderRadius: BorderRadius.circular(12.r),
                           ),
                           elevation: 4,
+                          shadowColor: context.primaryColor.withOpacity(0.4),
                           disabledBackgroundColor:
                               context.primaryColor.withOpacity(0.6),
                         ),
@@ -441,6 +442,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w700,
                                   fontFamily: FontFamily.openSans,
+                                  color: context.isDarkMode
+                                      ? Colors.black
+                                      : Colors.white,
                                 ),
                               ),
                       ),
@@ -489,6 +493,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           maxLength: maxLength,
           validator: validator,
           decoration: InputDecoration(
+            fillColor: context.surfaceColor,
+            filled: true,
             hintText: hint,
             hintStyle: TextStyle(
               fontSize: 14.sp,
@@ -498,27 +504,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
             prefixIcon: Icon(icon, color: context.subTextColor, size: 20.sp),
             suffixIcon: suffix,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: greyColor.withOpacity(0.5)),
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                  color: context.isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : greyColor.withOpacity(0.2)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: greyColor.withOpacity(0.5)),
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                  color: context.isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : greyColor.withOpacity(0.2)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: context.primaryColor),
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: context.primaryColor, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: Colors.red),
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: const BorderSide(color: Colors.red),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: Colors.red),
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: const BorderSide(color: Colors.red, width: 1.5),
             ),
             contentPadding:
-                EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             counterText: '', // Hide character counter
           ),
         ),

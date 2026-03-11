@@ -12,7 +12,7 @@ import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 
-class OtpScreen extends StatefulWidget { 
+class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
 
   @override
@@ -252,16 +252,29 @@ class _OtpScreenState extends State<OtpScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(6, (index) {
                   return Container(
-                    width: 50.w,
-                    height: 60.h,
+                    width: 45.w,
+                    height: 50.h,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
+                      color: context.surfaceColor,
                       border: Border.all(
                         color: _controllers[index].text.isNotEmpty
                             ? context.primaryColor
-                            : greyColor.withOpacity(0.5),
+                            : context.isDarkMode
+                                ? Colors.white.withOpacity(0.1)
+                                : greyColor.withOpacity(0.2),
+                        width: _controllers[index].text.isNotEmpty ? 1.5 : 1,
                       ),
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.circular(12.r),
+                      boxShadow: context.isDarkMode
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                     ),
                     child: KeyboardListener(
                       focusNode:
@@ -319,7 +332,7 @@ class _OtpScreenState extends State<OtpScreen> {
                           // Removed LengthLimitingTextInputFormatter to allow paste
                         ],
                         style: TextStyle(
-                          fontSize: 20.sp,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w700,
                           color: context.primaryColor,
                         ),
@@ -375,7 +388,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 builder: (context, authController, child) {
                   return SizedBox(
                     width: double.infinity,
-                    height: 52.h,
+                    height: 44.h,
                     child: ElevatedButton(
                       onPressed:
                           authController.isLoading ? null : _handleVerifyOtp,
@@ -383,11 +396,12 @@ class _OtpScreenState extends State<OtpScreen> {
                         backgroundColor: context.primaryColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.r),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
                         elevation: 4,
-                        shadowColor: context.primaryColor.withOpacity(0.5),
-                        disabledBackgroundColor: context.primaryColor.withOpacity(0.6),
+                        shadowColor: context.primaryColor.withOpacity(0.4),
+                        disabledBackgroundColor:
+                            context.primaryColor.withOpacity(0.6),
                       ),
                       child: authController.isLoading
                           ? SizedBox(
@@ -405,6 +419,9 @@ class _OtpScreenState extends State<OtpScreen> {
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w700,
                                 fontFamily: FontFamily.openSans,
+                                color: context.isDarkMode
+                                    ? Colors.black
+                                    : Colors.white,
                               ),
                             ),
                     ),

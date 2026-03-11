@@ -107,15 +107,15 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 // Logo
                 Container(
-                  width: 120.w,
-                  height: 120.h,
-                  decoration: const BoxDecoration(
+                  width: 140.w,
+                  height: 140.h,
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                   ),
                   child: ClipOval(
                     child: Image.asset(
-                      'assets/logo.png',
-                      fit: BoxFit.cover,
+                      'assets/logo_transperant.png',
+                      color: context.isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
                 ),
@@ -152,14 +152,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      height: 56.h,
+                      height: 48.h,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.r),
+                        color: context.surfaceColor,
+                        borderRadius: BorderRadius.circular(12.r),
                         border: Border.all(
                           color: _phoneError != null
                               ? Colors.red
-                              : greyColor.withOpacity(0.5),
+                              : context.isDarkMode
+                                  ? Colors.white.withOpacity(0.1)
+                                  : greyColor.withOpacity(0.2),
                         ),
+                        boxShadow: context.isDarkMode
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.03),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                       ),
                       child: Row(
                         children: [
@@ -177,7 +189,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             thickness: 1.w,
                             color: _phoneError != null
                                 ? Colors.red
-                                : greyColor.withOpacity(0.5),
+                                : context.isDarkMode
+                                    ? Colors.white10
+                                    : greyColor.withOpacity(0.2),
                           ),
                           SizedBox(width: 2.w),
                           Expanded(
@@ -193,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding:
-                                    EdgeInsets.symmetric(vertical: 16.h),
+                                    EdgeInsets.symmetric(vertical: 12.h),
                                 hintText: 'Phone Number',
                                 hintStyle: TextStyle(
                                   fontSize: 14.sp,
@@ -237,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   builder: (context, authController, child) {
                     return SizedBox(
                       width: double.infinity,
-                      height: 52.h,
+                      height: 44.h,
                       child: ElevatedButton(
                         onPressed:
                             authController.isLoading ? null : _handleGetOtp,
@@ -245,10 +259,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           backgroundColor: context.primaryColor,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
+                            borderRadius: BorderRadius.circular(12.r),
                           ),
                           elevation: 4,
-                          shadowColor: context.primaryColor.withOpacity(0.5),
+                          shadowColor: context.primaryColor.withOpacity(0.4),
                           disabledBackgroundColor:
                               context.primaryColor.withOpacity(0.6),
                         ),
@@ -268,6 +282,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w700,
                                   fontFamily: FontFamily.openSans,
+                                  color: context.isDarkMode
+                                      ? Colors.black
+                                      : Colors.white,
                                 ),
                               ),
                       ),

@@ -54,8 +54,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             ),
             child: ClipOval(
               child: Image.asset(
-                "assets/logo.png",
-                fit: BoxFit.cover,
+                'assets/logo_transperant.png',
+                color: context.isDarkMode ? Colors.white : Colors.black,
               ),
             ),
           ),

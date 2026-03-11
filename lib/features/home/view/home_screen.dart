@@ -175,17 +175,22 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 20.h,
+        top: MediaQuery.of(context).padding.top + 2,
         left: 16.w,
         right: 16.w,
-        bottom: 8.h,
+        bottom: 5.h,
       ),
       decoration: BoxDecoration(
         color: context.appBarColor,
       ),
       child: Column(
         children: [
-          SizedBox(height: 10.h),
+          Image.asset(
+            'assets/logo_transperant.png',
+            height: 40.h,
+            color: context.isDarkMode ? Colors.white : Colors.black,
+          ),
+          SizedBox(height: 6.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -313,7 +318,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          SizedBox(height: 4.h),
         ],
       ),
     );
@@ -324,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Consumer<TradeController>(
       builder: (context, controller, child) {
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 1.h),
           decoration: BoxDecoration(
             color: context.surfaceColor,
           ),

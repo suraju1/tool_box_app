@@ -81,8 +81,8 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   child: ClipOval(
                     child: Image.asset(
-                      'assets/logo.png',
-                      fit: BoxFit.cover,
+                      'assets/logo_transperant.png',
+                      color: context.isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
                 ),
