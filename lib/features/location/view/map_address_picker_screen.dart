@@ -201,9 +201,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     final GoogleMapController controller = await _controller.future;
 
     double zoom;
-    if (radius <= 1)
+    if (radius <= 1) {
       zoom = 15.5;
-    else if (radius <= 2)
+    } else if (radius <= 2)
       zoom = 14.5;
     else if (radius <= 5)
       zoom = 13.2;
@@ -223,9 +223,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   Widget _buildMap() {
     // Calculate initial zoom based on radius
     double initialZoom = 15 - (_radius / 5);
-    if (_radius <= 2)
+    if (_radius <= 2) {
       initialZoom = 15;
-    else if (_radius <= 5)
+    } else if (_radius <= 5)
       initialZoom = 13.5;
     else if (_radius <= 10)
       initialZoom = 12.5;
