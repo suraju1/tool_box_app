@@ -889,7 +889,15 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
-                child: const Text('OK'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.primaryColor,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r)),
+                ),
+                child: Text(
+                  'OK',
+                  style: TextStyle(color: context.onPrimaryColor),
+                ),
               ),
             ),
           ],
@@ -963,7 +971,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                           preference: _selectedMeetingPreference),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
-                            const Color(0xFF215BA3), // Specific blue from SS
+                            context.primaryColor, // Specific blue from SS
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.r)),

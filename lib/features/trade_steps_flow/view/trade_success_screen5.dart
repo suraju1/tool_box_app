@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -12,8 +13,14 @@ class TradeSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tradeController = context.watch<TradeController>();
+    final subscriptionController = context.watch<SubscriptionController>();
     final response = tradeController.selectedResponse;
     final posterName = response?.posterName ?? 'the owner';
+
+    final creditFee =
+        subscriptionController.mySubscription?.postPrice.split('.').first ??
+            tradeController.lastTradeCompletion?.amount.toString() ??
+            '5';
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
@@ -30,8 +37,8 @@ class TradeSuccessScreen extends StatelessWidget {
                   color: context.primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child:
-                    Icon(Icons.check_circle, color: context.primaryColor, size: 80.sp),
+                child: Icon(Icons.check_circle,
+                    color: context.primaryColor, size: 80.sp),
               ),
               SizedBox(height: 32.h),
               Text(
@@ -61,7 +68,8 @@ class TradeSuccessScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: context.primaryColor.withOpacity(0.3)),
+                    border: Border.all(
+                        color: context.primaryColor.withOpacity(0.3)),
                   ),
                   child: Column(
                     children: [
@@ -72,8 +80,8 @@ class TradeSuccessScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 8.h),
                       _buildDetailRow(
-                        'Amount',
-                        '${tradeController.lastTradeCompletion!.amount} Tickets',
+                        'Credit',
+                        '$creditFee Credits',
                         context,
                       ),
                     ],
@@ -113,8 +121,11 @@ class TradeSuccessScreen extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? context.primaryColor : context.surfaceColor,
-          side: isPrimary ? null : BorderSide(color: context.primaryColor, width: 1.5),
+          backgroundColor:
+              isPrimary ? context.primaryColor : context.surfaceColor,
+          side: isPrimary
+              ? null
+              : BorderSide(color: context.primaryColor, width: 1.5),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
           elevation: 0,

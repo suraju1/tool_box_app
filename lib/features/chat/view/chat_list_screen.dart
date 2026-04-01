@@ -161,6 +161,26 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               (id) => id != _currentUserId,
                               orElse: () => 'Unknown');
 
+                          // Determine if chat is disabled (72 hours from first message)
+                          final firstMsgAt =
+                              data['firstMessageAt'] as Timestamp?;
+                          final lastUpdatedAt = data['updatedAt'] as Timestamp?;
+                          bool isDisabled = false;
+
+                          if (firstMsgAt != null) {
+                            isDisabled = DateTime.now()
+                                    .difference(firstMsgAt.toDate())
+                                    .inHours >=
+                                72;
+                          } else if (lastUpdatedAt != null) {
+                            // Fallback for existing chats without firstMessageAt:
+                            // If even the LAST update is > 72 hours ago, the chat is definitely disabled.
+                            isDisabled = DateTime.now()
+                                    .difference(lastUpdatedAt.toDate())
+                                    .inHours >=
+                                72;
+                          }
+
                           // Fetch real user name from Firestore
                           return StreamBuilder<DocumentSnapshot>(
                             stream: FirebaseFirestore.instance
@@ -311,6 +331,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     '', // Actual profile image from Firestore
                                 otherUserId: otherUserId,
                                 tradeResponse: tradeResponse,
+                                isDisabled: isDisabled,
                               );
                             },
                           );
@@ -419,6 +440,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     String imagePath, {
     required String otherUserId,
     TradeResponseModel? tradeResponse,
+    bool isDisabled = false,
   }) {
     return GestureDetector(
       onTap: () {
@@ -438,92 +460,133 @@ class _ChatListScreenState extends State<ChatListScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
         decoration: BoxDecoration(
+          color: isDisabled
+              ? (context.isDarkMode ? Colors.white12 : Colors.grey.shade100)
+              : null,
           border: Border(bottom: BorderSide(color: context.dividerColor)),
         ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(30.r),
-              child: AppCachedImage(
-                imageUrl: imagePath,
-                userName: name,
-                width: 60.r,
-                height: 60.r,
-                radius: 30.r,
-                fit: BoxFit.cover,
-              ),
-            ),
-            SizedBox(width: 15.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Opacity(
+          opacity: isDisabled ? 0.6 : 1.0,
+          child: isDisabled
+              ? ColorFiltered(
+                  colorFilter: const ColorFilter.matrix([
+                    0.2126,
+                    0.7152,
+                    0.0722,
+                    0,
+                    0,
+                    0.2126,
+                    0.7152,
+                    0.0722,
+                    0,
+                    0,
+                    0.2126,
+                    0.7152,
+                    0.0722,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                  ]),
+                  child: _buildChatItemContent(name, imagePath, time,
+                      isDisabled, messageWidget, unreadCount),
+                )
+              : _buildChatItemContent(name, imagePath, time, isDisabled,
+                  messageWidget, unreadCount),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatItemContent(String name, String imagePath, String time,
+      bool isDisabled, Widget messageWidget, String unreadCount) {
+    return Row(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(30.r),
+          child: AppCachedImage(
+            imageUrl: imagePath,
+            userName: name,
+            width: 60.r,
+            height: 60.r,
+            radius: 30.r,
+            fit: BoxFit.cover,
+          ),
+        ),
+        SizedBox(width: 15.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                      color: context.textColor,
+                      fontFamily: FontFamily.openSans,
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w700,
-                          color: context.textColor,
-                          fontFamily: FontFamily.openSans,
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                time,
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: greenColor,
-                                  fontFamily: FontFamily.openSans,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            time,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              color: isDisabled ? Colors.grey : greenColor,
+                              fontFamily: FontFamily.openSans,
+                            ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  SizedBox(height: 5.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: messageWidget,
-                      ),
-                      if (unreadCount.isNotEmpty && unreadCount != '0')
-                        Container(
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 4.w, vertical: 2.h),
-                          margin: EdgeInsets.symmetric(horizontal: 8.w),
-                          decoration: BoxDecoration(
-                            color: context.primaryColor,
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          child: Text(
-                            unreadCount,
-                            style: TextStyle(
-                              color: context.onPrimaryColor,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: FontFamily.openSans,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
                 ],
               ),
-            ),
-          ],
+              SizedBox(height: 5.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: messageWidget,
+                  ),
+                  if (unreadCount.isNotEmpty &&
+                      unreadCount != '0' &&
+                      !isDisabled)
+                    Container(
+                      alignment: Alignment.center,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                      margin: EdgeInsets.symmetric(horizontal: 8.w),
+                      decoration: BoxDecoration(
+                        color: context.primaryColor,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Text(
+                        unreadCount,
+                        style: TextStyle(
+                          color: context.onPrimaryColor,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: FontFamily.openSans,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

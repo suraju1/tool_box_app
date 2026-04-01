@@ -8,6 +8,7 @@ import 'package:tool_bocs/features/chat/view/chat_screen.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 
 class TradeCompletionScreen extends StatefulWidget {
@@ -18,6 +19,14 @@ class TradeCompletionScreen extends StatefulWidget {
 }
 
 class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SubscriptionController>().fetchMySubscription();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final tradeController = context.watch<TradeController>();
@@ -434,6 +443,9 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
   }
 
   Widget _buildBottomAction(TradeController controller, bool isPaid) {
+    final subscription = context.watch<SubscriptionController>().mySubscription;
+    final creditFee = subscription?.postPrice.split('.').first ?? '5';
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -453,7 +465,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
             ? null
             : () {
                 if (!isPaid) {
-                  _showClosureConfirmation(context, controller);
+                  _showClosureConfirmation(context, controller, creditFee);
                 } else {
                   Navigator.pushNamed(context, AppRoutes.tradeDetails);
                 }
@@ -484,11 +496,11 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
   }
 
   void _showClosureConfirmation(
-      BuildContext context, TradeController controller) {
+      BuildContext context, TradeController controller, String creditFee) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
         title: Text(
@@ -497,7 +509,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
               fontWeight: FontWeight.w800, fontFamily: FontFamily.openSans),
         ),
         content: Text(
-          'A fee of 5 credits is required to close this trade. Do you wish to proceed?',
+          'A fee of $creditFee credits is required to close this trade. Do you wish to proceed?',
           style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
@@ -505,7 +517,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'No, Cancel',
               style: TextStyle(
@@ -514,7 +526,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               _handlePayment(context, controller);
             },
             style: ElevatedButton.styleFrom(

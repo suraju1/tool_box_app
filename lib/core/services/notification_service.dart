@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/routes/navigator_key.dart';
 import 'package:flutter/material.dart';
 import 'package:tool_bocs/features/chat/view/chat_screen.dart';
@@ -38,22 +40,7 @@ class NotificationService {
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         if (response.payload != null) {
-          final parts = response.payload!.split('|');
-          if (parts.length >= 2) {
-            final chatRoomId = parts[0];
-            final otherUserId = parts[1];
-            final otherUserName = parts.length >= 3 ? parts[2] : 'Chat';
-
-            navigatorKey.currentState?.push(
-              MaterialPageRoute(
-                builder: (context) => ChatScreen(
-                  chatRoomId: chatRoomId,
-                  otherUserId: otherUserId,
-                  otherUserName: otherUserName,
-                ),
-              ),
-            );
-          }
+          handleNotificationPayload(response.payload!);
         }
       },
     );
@@ -63,6 +50,82 @@ class NotificationService {
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
+    }
+  }
+
+  void handleNotificationPayload(String payload) {
+    debugPrint("Handling notification payload: $payload");
+    try {
+      // 1. Try to parse as JSON (FCM style)
+      try {
+        final Map<String, dynamic> data = jsonDecode(payload);
+
+        // Check for chat notification
+        if (data.containsKey('chatRoomId') || data['type'] == 'chat') {
+          final String chatRoomId = data['chatRoomId'] ?? '';
+          final String otherUserId = data['otherUserId']?.toString() ?? '';
+          final String otherUserName = data['otherUserName'] ?? 'Chat';
+
+          if (chatRoomId.isNotEmpty && otherUserId.isNotEmpty) {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => ChatScreen(
+                  chatRoomId: chatRoomId,
+                  otherUserId: otherUserId,
+                  otherUserName: otherUserName,
+                ),
+              ),
+            );
+            return;
+          }
+        }
+
+        // Check for post/response notification
+        final dynamic postIdRaw =
+            data['post_id'] ?? data['giveaway_id'] ?? data['postId'];
+        if (postIdRaw != null) {
+          final int? postId = int.tryParse(postIdRaw.toString());
+          if (postId != null) {
+            navigatorKey.currentState?.pushNamed(
+              AppRoutes.notifications,
+              arguments: postId,
+            );
+            return;
+          }
+        }
+
+        // Fallback for any other JSON data - just go to general notifications
+        navigatorKey.currentState?.pushNamed(AppRoutes.notifications);
+        return;
+      } catch (e) {
+        // Not JSON or parse failed, continue to legacy format
+        debugPrint("Payload is not JSON or failed to parse: $e");
+      }
+
+      // 2. Legacy pipe-separated format (roomId|senderId|senderName)
+      final parts = payload.split('|');
+      if (parts.length >= 2) {
+        final chatRoomId = parts[0];
+        final otherUserId = parts[1];
+        final otherUserName = parts.length >= 3 ? parts[2] : 'Chat';
+
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              chatRoomId: chatRoomId,
+              otherUserId: otherUserId,
+              otherUserName: otherUserName,
+            ),
+          ),
+        );
+      } else {
+        // Fallback: if there's any payload but doesn't match formats, just go to notifications
+        navigatorKey.currentState?.pushNamed(AppRoutes.notifications);
+      }
+    } catch (e) {
+      debugPrint("Error in handleNotificationPayload: $e");
+      // Last resort fallback
+      navigatorKey.currentState?.pushNamed(AppRoutes.notifications);
     }
   }
 

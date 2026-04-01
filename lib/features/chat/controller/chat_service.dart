@@ -100,6 +100,7 @@ class ChatService {
             receiverId: 1, // Initial count
             currentUserId: 0,
           },
+          'firstMessageAt': timestamp, // Set this once when the room is created
           if (tradeResponse != null) ...{
             'tradeId': tradeResponse.id,
             'tradeDetails': {
@@ -122,7 +123,8 @@ class ChatService {
       }
     } catch (e) {
       if (e is FirebaseException && e.code == 'permission-denied') {
-        debugPrint("sendMessage PERMISSION_DENIED: The user does not have permission to write to chat_rooms or messages. Please check Firestore rules.");
+        debugPrint(
+            "sendMessage PERMISSION_DENIED: The user does not have permission to write to chat_rooms or messages. Please check Firestore rules.");
       } else {
         debugPrint("sendMessage Error: $e");
       }
@@ -160,7 +162,8 @@ class ChatService {
       }
     } catch (e) {
       if (e is FirebaseException && e.code == 'permission-denied') {
-        debugPrint("markMessagesAsRead PERMISSION_DENIED: The user does not have permission to update chat_rooms. Please check Firestore rules.");
+        debugPrint(
+            "markMessagesAsRead PERMISSION_DENIED: The user does not have permission to update chat_rooms. Please check Firestore rules.");
       } else {
         debugPrint("markMessagesAsRead Error: $e");
       }
@@ -190,7 +193,8 @@ class ChatService {
     final firebaseUser = FirebaseAuth.instance.currentUser;
 
     if (firebaseUser == null) {
-      debugPrint("getChatRooms WARNING: Firebase Auth is NULL for user $userId. Firestore queries will likely fail.");
+      debugPrint(
+          "getChatRooms WARNING: Firebase Auth is NULL for user $userId. Firestore queries will likely fail.");
       // We could try to sign in here, but AuthController should handle it.
     } else {
       debugPrint("getChatRooms: Firebase Auth UID: ${firebaseUser.uid}");

@@ -59,8 +59,21 @@ class FirebaseNotificationService {
       // 4. Message Opened App Handler
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         debugPrint('A new onMessageOpenedApp event was published!');
-        // Navigation logic is handled in NotificationService.init() via onDidReceiveNotificationResponse
+        debugPrint('Message data: ${message.data}');
+
+        // Navigation logic
+        _notificationService
+            .handleNotificationPayload(jsonEncode(message.data));
       });
+
+      // 4.1. Get initial message if app was terminated
+      RemoteMessage? initialMessage =
+          await _firebaseMessaging.getInitialMessage();
+      if (initialMessage != null) {
+        debugPrint('App was opened from a terminated state via notification');
+        _notificationService
+            .handleNotificationPayload(jsonEncode(initialMessage.data));
+      }
 
       // 5. Get and Save Token
       await saveTokenToFirestore();

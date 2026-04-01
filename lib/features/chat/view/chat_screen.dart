@@ -160,7 +160,14 @@ class _ChatScreenState extends State<ChatScreen> {
           _buildTradeStatusBanner(),
           Expanded(
             child: _chatRoomId.isEmpty || _currentUserId == null
-                ? const Center(child: Text('Start a conversation'))
+                ? Column(
+                    children: [
+                      const Expanded(
+                        child: Center(child: Text('Start a conversation')),
+                      ),
+                      _buildInput(false),
+                    ],
+                  )
                 : StreamBuilder<QuerySnapshot>(
                     stream: _chatService.getMessages(_chatRoomId),
                     builder: (context, snapshot) {
@@ -173,6 +180,27 @@ class _ChatScreenState extends State<ChatScreen> {
 
                       final docs = snapshot.data?.docs ?? [];
 
+                      // Calculate if chat is disabled (72 hours from first message)
+                      bool isChatDisabled = false;
+                      if (docs.isNotEmpty) {
+                        try {
+                          final firstMsgData =
+                              docs.last.data() as Map<String, dynamic>;
+                          final Timestamp? firstMsgTimestamp =
+                              firstMsgData['timestamp'];
+                          if (firstMsgTimestamp != null) {
+                            final firstMsgTime = firstMsgTimestamp.toDate();
+                            final now = DateTime.now();
+                            final difference = now.difference(firstMsgTime);
+                            if (difference.inHours >= 72) {
+                              isChatDisabled = true;
+                            }
+                          }
+                        } catch (e) {
+                          debugPrint("Error calculating chat lockout: $e");
+                        }
+                      }
+
                       // Mark messages as read if we have data and we are the valid user
                       if (docs.isNotEmpty &&
                           _currentUserId != null &&
@@ -184,23 +212,27 @@ class _ChatScreenState extends State<ChatScreen> {
                         });
                       }
 
-                      return ListView.builder(
-                        reverse: true,
-                        padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 20.h),
-                        itemCount: docs.length,
-                        // Reverse if you want latest at bottom and ListView is reversed.
-                        // But here we ordered by timestamp ascending, so standard list view is fine if we scroll to bottom.
-                        // Typically chat uses reverse: true and desc timestamp.
-                        // Let's stick to standard for now and valid alignment.
-                        itemBuilder: (_, i) {
-                          final data = docs[i].data() as Map<String, dynamic>;
-                          return _buildMessageBubble(data);
-                        },
+                      return Column(
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                              reverse: true,
+                              padding:
+                                  EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 20.h),
+                              itemCount: docs.length,
+                              itemBuilder: (_, i) {
+                                final data =
+                                    docs[i].data() as Map<String, dynamic>;
+                                return _buildMessageBubble(data);
+                              },
+                            ),
+                          ),
+                          _buildInput(isChatDisabled),
+                        ],
                       );
                     },
                   ),
           ),
-          _buildInput(),
         ],
       ),
     );
@@ -247,7 +279,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '• This Chat stays on for next 48 hours.',
+                            '• This Chat stays on for next 72 hours.',
                             style: TextStyle(
                               color: context.textColor,
                               fontWeight: FontWeight.w500,
@@ -624,7 +656,47 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildInput() {
+  Widget _buildInput(bool isDisabled) {
+    if (isDisabled) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 32.h),
+        decoration: BoxDecoration(
+          color: context.isDarkMode ? Colors.white10 : const Color(0xFFF3F4F6),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'chat with ${otherUserName.toLowerCase()} is over',
+              style: TextStyle(
+                color: context.textColor,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                fontFamily: FontFamily.openSans,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              'you cant send or receive messages from ${otherUserName.toLowerCase()}',
+              style: TextStyle(
+                color: context.textColor,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                fontFamily: FontFamily.openSans,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 16, 8, 24),
       decoration: BoxDecoration(
