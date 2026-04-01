@@ -37,6 +37,7 @@ class ApiConstants {
   static const String tradeHistoryEndpoint = 'my-trades'; //get
   static const String getTradeDetailsById =
       'my-post-responses-by-id/{{id}}'; //get
+  static const String cancelTrade = 'cancel/{{id}}'; //put
   static const String getUserProfile = 'get_user_profile'; //get
   static const String getOtherProfile = 'get_other_profile/{{id}}'; //get
 
@@ -77,6 +78,7 @@ class ApiConstants {
   static const String notificationMarkRead =
       'notification_mark_read/{{id}}'; //put
   static const String notificationDelete = 'notifications_del/{{id}}'; //delete
+  static const String walletTransactions = 'wallet_transactions'; //get
 
 //-----------------------------------------------------------------------------//
   // Timeout durations

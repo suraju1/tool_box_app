@@ -81,7 +81,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
   Widget _buildTradeSummary() {
     final stats = context.watch<TradeController>().myTradeStats;
     return Padding(
-      padding: EdgeInsets.all(15.w),
+      padding: EdgeInsets.all(10.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -166,7 +166,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
 
   Widget _buildFilters() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 30.w),
+      padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -238,7 +238,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(10.w),
       itemCount: trades.length,
       itemBuilder: (context, index) {
         final trade = trades[index];
@@ -295,8 +295,8 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
             arguments: tradeId);
       },
       child: Container(
-        margin: EdgeInsets.only(bottom: 15.h),
-        padding: EdgeInsets.all(10.w),
+        margin: EdgeInsets.only(bottom: 10.h),
+        padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           color: context.surfaceColor,
           borderRadius: BorderRadius.circular(15.r),
@@ -441,7 +441,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
         children: [
           // Trade Summary Shimmer
           Padding(
-            padding: EdgeInsets.all(15.w),
+            padding: EdgeInsets.all(10.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -477,7 +477,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.all(20.w),
+            padding: EdgeInsets.all(10.w),
             itemCount: 4,
             itemBuilder: (context, index) => Padding(
               padding: EdgeInsets.only(bottom: 15.h),

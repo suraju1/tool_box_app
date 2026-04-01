@@ -441,4 +441,27 @@ class TradeService {
       return ApiResponse(success: false, message: e.toString());
     }
   }
+
+  Future<ApiResponse<dynamic>> cancelTrade(int id) async {
+    try {
+      final response = await _apiClient.put(
+        ApiConstants.cancelTrade.replaceAll('{{id}}', id.toString()),
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Trade cancelled',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
 }

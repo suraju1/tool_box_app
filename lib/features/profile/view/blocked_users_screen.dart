@@ -73,11 +73,10 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                           ),
                         )
                       : RefreshIndicator(
-                          onRefresh: () =>
-                              profileController.getBlockedUsers(),
+                          onRefresh: () => profileController.getBlockedUsers(),
                           child: ListView.builder(
                             padding: EdgeInsets.symmetric(
-                                horizontal: 20.w, vertical: 10.h),
+                                horizontal: 10.w, vertical: 8.h),
                             itemCount: blockedUsers.length,
                             itemBuilder: (context, index) =>
                                 _buildBlockedUserItem(
@@ -92,7 +91,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
 
   Widget _buildInfoBanner(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(20.w),
+      margin: EdgeInsets.all(10.w),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: context.isDarkMode
@@ -126,7 +125,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
 
   Widget _buildBlockedUserItem(BuildContext context, BlockedUserModel user) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
+      margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(16.r),
@@ -145,7 +144,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         onTap: () => ProfileController.navigateToUserProfile(context, user.id),
         borderRadius: BorderRadius.circular(16.r),
         child: Padding(
-          padding: EdgeInsets.all(12.w),
+          padding: EdgeInsets.all(8.w),
           child: Row(
             children: [
               Stack(

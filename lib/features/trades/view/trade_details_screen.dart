@@ -103,10 +103,81 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
               _buildSectionTitle('Trade Notes'),
               SizedBox(height: 8.h),
               _buildNotesCard(response),
+              SizedBox(height: 30.h),
+              _buildCancelButton(context, response),
               SizedBox(height: 20.h),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCancelButton(BuildContext context, TradeResponseModel response) {
+    final authController = context.read<AuthController>();
+    final currentUserId = authController.currentUser?.id;
+
+    // Only offer sender can cancel
+    final isOfferSender = currentUserId == response.responderId;
+    final isCancellable = response.status == 'pending' ||
+        response.status == 'accepted' ||
+        response.status == 'waiting_for_payment';
+
+    if (!isOfferSender || !isCancellable) return const SizedBox.shrink();
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: () => _showCancelConfirmation(context, response.id),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Colors.red),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+        ),
+        child: Text(
+          'Cancel Trade',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+            color: Colors.red,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCancelConfirmation(BuildContext context, int tradeId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Trade'),
+        content: const Text('Are you sure you want to cancel this trade?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success =
+                  await context.read<TradeController>().cancelTrade(tradeId);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success
+                        ? 'Trade cancelled successfully'
+                        : 'Failed to cancel trade'),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+              }
+            },
+            child:
+                const Text('Yes, Cancel', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

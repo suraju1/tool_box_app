@@ -88,6 +88,31 @@ class MyTradeModel {
     this.returnItemCondition,
   });
 
+  MyTradeModel copyWith({
+    String? status,
+  }) {
+    return MyTradeModel(
+      id: id,
+      giveawayId: giveawayId,
+      posterUserId: posterUserId,
+      responderUserId: responderUserId,
+      itemName: itemName,
+      itemImages: itemImages,
+      postType: postType,
+      status: status ?? this.status,
+      posterName: posterName,
+      responderName: responderName,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      flowId: flowId,
+      givingItemName: givingItemName,
+      givingItemCategory: givingItemCategory,
+      givingItemCondition: givingItemCondition,
+      returnItemName: returnItemName,
+      returnItemCondition: returnItemCondition,
+    );
+  }
+
   factory MyTradeModel.fromJson(Map<String, dynamic> json) {
     List<String> parseImages(dynamic images) {
       if (images == null) return [];

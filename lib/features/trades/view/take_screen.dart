@@ -139,11 +139,11 @@ class _TakeScreenState extends State<TakeScreen> {
                           : ListView.separated(
                               controller: _scrollController,
                               padding:
-                                  EdgeInsets.fromLTRB(10.w, 8.h, 10.w, 100.h),
+                                  EdgeInsets.fromLTRB(8.w, 4.h, 8.w, 100.h),
                               itemCount: controller.takePosts.length +
                                   (controller.isTakeLoadMoreRunning ? 1 : 0),
                               separatorBuilder: (context, index) =>
-                                  SizedBox(height: 8.h),
+                                  SizedBox(height: 6.h),
                               itemBuilder: (context, index) {
                                 if (index == controller.takePosts.length) {
                                   return const Center(
@@ -257,7 +257,7 @@ class _TakeScreenState extends State<TakeScreen> {
 
   Widget _buildResultHeader(BuildContext context, int count) {
     return Container(
-      padding: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.only(bottom: 6.h),
       child: Row(
         children: [
           Text(
@@ -285,7 +285,7 @@ class _TakeScreenState extends State<TakeScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(
-          10.w, MediaQuery.of(context).padding.top + 8.h, 10.w, 8.h),
+          8.w, MediaQuery.of(context).padding.top + 6.h, 8.w, 6.h),
       color: context.scaffoldBg,
       child: Column(
         children: [
@@ -441,7 +441,7 @@ class _TakeScreenState extends State<TakeScreen> {
         );
       },
       child: Container(
-        padding: EdgeInsets.all(10.w),
+        padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           color: context.surfaceColor,
           borderRadius: BorderRadius.circular(12.r),
@@ -672,7 +672,7 @@ class _TakeScreenState extends State<TakeScreen> {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.fromLTRB(10.w, 80.h, 10.w, 8.h),
+          padding: EdgeInsets.fromLTRB(8.w, 80.h, 8.w, 4.h),
           color: context.scaffoldBg,
           child: Row(
             children: [
@@ -686,12 +686,12 @@ class _TakeScreenState extends State<TakeScreen> {
         ),
         Expanded(
           child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
             itemCount: 4,
             itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.only(bottom: 8.h),
+              padding: EdgeInsets.only(bottom: 6.h),
               child: Container(
-                padding: EdgeInsets.all(10.w),
+                padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
                   color: context.surfaceColor,
                   borderRadius: BorderRadius.circular(12.r),

@@ -126,8 +126,8 @@ class _GiveScreenState extends State<GiveScreen> {
                                 )
                               : ListView.builder(
                                   controller: _scrollController,
-                                  padding: EdgeInsets.fromLTRB(
-                                      10.w, 8.h, 10.w, 100.h),
+                                  padding:
+                                      EdgeInsets.fromLTRB(8.w, 4.h, 8.w, 100.h),
                                   itemCount: tradeController.givePosts.length +
                                       1 +
                                       (tradeController.isGiveLoadMoreRunning
@@ -153,7 +153,7 @@ class _GiveScreenState extends State<GiveScreen> {
                                     final post =
                                         tradeController.givePosts[index - 1];
                                     return Padding(
-                                      padding: EdgeInsets.only(bottom: 8.h),
+                                      padding: EdgeInsets.only(bottom: 6.h),
                                       child: _buildProductCard(
                                         context,
                                         id: post.id,
@@ -265,7 +265,7 @@ class _GiveScreenState extends State<GiveScreen> {
 
   Widget _buildResultHeader(BuildContext context, int count) {
     return Container(
-      padding: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.only(bottom: 6.h),
       child: Row(
         children: [
           Text(
@@ -293,7 +293,7 @@ class _GiveScreenState extends State<GiveScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(
-          10.w, MediaQuery.of(context).padding.top + 8.h, 10.w, 8.h),
+          8.w, MediaQuery.of(context).padding.top + 6.h, 8.w, 6.h),
       color: context.scaffoldBg,
       child: Column(
         children: [
@@ -455,7 +455,7 @@ class _GiveScreenState extends State<GiveScreen> {
         Navigator.pushNamed(context, AppRoutes.productDetails, arguments: id);
       },
       child: Container(
-        padding: EdgeInsets.all(10.w),
+        padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           color: context.surfaceColor,
           borderRadius: BorderRadius.circular(12.r),
@@ -665,7 +665,7 @@ class _GiveScreenState extends State<GiveScreen> {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.fromLTRB(10.w, 80.h, 10.w, 8.h),
+          padding: EdgeInsets.fromLTRB(8.w, 80.h, 8.w, 4.h),
           color: context.scaffoldBg,
           child: Row(
             children: [
@@ -677,12 +677,12 @@ class _GiveScreenState extends State<GiveScreen> {
         ),
         Expanded(
           child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
             itemCount: 4,
             itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.only(bottom: 8.h),
+              padding: EdgeInsets.only(bottom: 6.h),
               child: Container(
-                padding: EdgeInsets.all(10.w),
+                padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
                   color: context.surfaceColor,
                   borderRadius: BorderRadius.circular(12.r),

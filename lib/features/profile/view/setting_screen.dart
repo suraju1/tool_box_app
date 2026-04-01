@@ -76,14 +76,15 @@ class _SettingScreenState extends State<SettingScreen> {
                     Navigator.pushNamed(context, AppRoutes.helpSupport),
               ),
               _buildDivider(),
-              _buildSettingItem(
-                context,
-                icon: Icons.palette_outlined,
-                label: 'Theme',
-                onTap: () =>
-                    Navigator.pushNamed(context, AppRoutes.themeChange),
-              ),
-              _buildDivider(),
+              //dont show theme option
+              // _buildSettingItem(
+              //   context,
+              //   icon: Icons.palette_outlined,
+              //   label: 'Theme',
+              //   onTap: () =>
+              //       Navigator.pushNamed(context, AppRoutes.themeChange),
+              // ),
+              // _buildDivider(),
               _buildSettingItem(
                 context,
                 icon: Icons.description_outlined,

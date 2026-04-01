@@ -87,16 +87,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       _buildHeader(context, profile),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        padding: EdgeInsets.symmetric(horizontal: 12.w),
                         child: Column(
                           children: [
-                            SizedBox(height: 15.h),
+                            SizedBox(height: 10.h),
                             _buildBioSection(profile),
-                            SizedBox(height: 15.h),
+                            SizedBox(height: 10.h),
                             _buildReviewsSection(profile),
-                            SizedBox(height: 15.h),
+                            SizedBox(height: 10.h),
                             _buildTradeHistoryStats(context, profile),
-                            SizedBox(height: 15.h),
+                            SizedBox(height: 10.h),
                             _buildSettingsList(context),
                             //SizedBox(height: 15.h),
                             // _logoutButton(context),
@@ -124,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 bottomRight: Radius.circular(30.r),
               ),
             ),
-            padding: EdgeInsets.fromLTRB(25.w, 50.h, 25.w, 40.h),
+            padding: EdgeInsets.fromLTRB(16.w, 50.h, 16.w, 30.h),
             child: Column(
               children: [
                 Row(
@@ -320,7 +320,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           bottom: BorderSide(color: context.dividerColor, width: 1.w),
         ),
       ),
-      padding: EdgeInsets.fromLTRB(25.w, 50.h, 20.w, 40.h),
+      padding: EdgeInsets.fromLTRB(16.w, 50.h, 16.w, 30.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

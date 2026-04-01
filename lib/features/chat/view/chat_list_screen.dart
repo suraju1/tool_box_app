@@ -373,7 +373,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         ),
         Container(
           color: context.appBarColor,
-          padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
+          padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
           child: ShimmerBox(height: 50.h, width: double.infinity, radius: 10.r),
         ),
         Expanded(
@@ -381,7 +381,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             padding: EdgeInsets.zero,
             itemCount: 8,
             itemBuilder: (context, index) => Container(
-              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: context.dividerColor)),
               ),
@@ -425,7 +425,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget _buildSearchBox(BuildContext context) {
     return Container(
       color: context.appBarColor,
-      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
+      padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w),
         height: 50.h,
@@ -477,7 +477,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         );
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: isDisabled
               ? (context.isDarkMode ? Colors.white12 : Colors.grey.shade100)

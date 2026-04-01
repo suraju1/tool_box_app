@@ -156,11 +156,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             : ListView.separated(
                                 controller: _scrollController,
                                 padding: EdgeInsets.symmetric(
-                                    horizontal: 12.w, vertical: 12.h),
+                                    horizontal: 8.w, vertical: 8.h),
                                 itemCount: controller.homePosts.length +
                                     (controller.isHomeLoadMoreRunning ? 1 : 0),
                                 separatorBuilder: (context, index) =>
-                                    SizedBox(height: 8.h),
+                                    SizedBox(height: 6.h),
                                 itemBuilder: (context, index) {
                                   if (index == controller.homePosts.length) {
                                     return const Center(
@@ -188,10 +188,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 2,
-        left: 16.w,
-        right: 16.w,
-        bottom: 5.h,
+        left: 10.w,
+        right: 10.w,
+        bottom: 4.h,
       ),
       decoration: BoxDecoration(
         color: context.appBarColor,
@@ -354,7 +353,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Consumer<TradeController>(
       builder: (context, controller, child) {
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 1.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
           decoration: BoxDecoration(
             color: context.surfaceColor,
           ),
@@ -461,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.all(10.w),
+              padding: EdgeInsets.all(8.w),
               child: Column(
                 children: [
                   Row(
@@ -555,7 +554,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(10.w),
+              padding: EdgeInsets.all(8.w),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -679,7 +678,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         // Distance Section Shimmer
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -703,16 +702,16 @@ class _HomeScreenState extends State<HomeScreen> {
         // Product Card Shimmers
         Expanded(
           child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
             itemCount: 3,
             itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
               child: Container(
                 decoration: BoxDecoration(
                   color: context.surfaceColor,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: context.dividerColor),
+                  borderRadius: BorderRadius.circular(15.r),
                 ),
+                padding: EdgeInsets.all(8.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

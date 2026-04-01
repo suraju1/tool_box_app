@@ -19,6 +19,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/address/controller/address_controller.dart';
 import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
 import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
+import 'package:tool_bocs/features/trades/controller/wallet_controller.dart';
 
 import 'app.dart';
 
@@ -69,9 +70,13 @@ void main() async {
           ChangeNotifierProvider(
               create: (_) => AddressController()), // Address controller
           ChangeNotifierProvider(
-              create: (_) => SubscriptionController()), // Subscription controller
+              create: (_) =>
+                  SubscriptionController()), // Subscription controller
           ChangeNotifierProvider(
-              create: (_) => NotificationController()), // Notification controller
+              create: (_) =>
+                  NotificationController()), // Notification controller
+          ChangeNotifierProvider(
+              create: (_) => WalletController()), // Wallet controller
         ],
         child: const ToolUcsApp(),
       ),

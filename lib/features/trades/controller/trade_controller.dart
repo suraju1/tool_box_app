@@ -815,4 +815,51 @@ class TradeController extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> cancelTrade(int id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.cancelTrade(id);
+      if (response.success) {
+        if (_selectedResponse != null && _selectedResponse!.id == id) {
+          _selectedResponse = _selectedResponse!.copyWith(status: 'cancelled');
+        }
+        // Update in lists
+        final incomingIndex = _postResponses.indexWhere((e) => e.id == id);
+        if (incomingIndex != -1) {
+          _postResponses[incomingIndex] =
+              _postResponses[incomingIndex].copyWith(status: 'cancelled');
+        }
+
+        final sentIndex = _sentResponses.indexWhere((e) => e.id == id);
+        if (sentIndex != -1) {
+          _sentResponses[sentIndex] =
+              _sentResponses[sentIndex].copyWith(status: 'cancelled');
+        }
+
+        final historyIndex = _myTrades.indexWhere((e) => e.id == id);
+        if (historyIndex != -1) {
+          _myTrades[historyIndex] =
+              _myTrades[historyIndex].copyWith(status: 'cancelled');
+        }
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
 }
