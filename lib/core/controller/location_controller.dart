@@ -13,8 +13,11 @@ class LocationController extends ChangeNotifier {
   String? _errorMessage;
   double _radius = 5.0; // Default 5km
 
-  // Saved addresses list
-
+  // Default location (Pune, India)
+  static const double _defaultLatitude = 18.5204;
+  static const double _defaultLongitude = 73.8567;
+  static const String _defaultAddress = "Pune, Maharashtra, India";
+  static const String _defaultCity = "Pune";
 
   // Getters
   double? get latitude => _latitude;
@@ -26,6 +29,16 @@ class LocationController extends ChangeNotifier {
   double get radius => _radius;
   bool get hasLocation => _latitude != null && _longitude != null;
 
+  /// Initialize with default location values
+  void _initializeWithDefaults() {
+    _latitude = _defaultLatitude;
+    _longitude = _defaultLongitude;
+    _address = _defaultAddress;
+    _city = _defaultCity;
+    _persistCurrentLocation();
+    notifyListeners();
+  }
+
   /// Fetch current location with address
   Future<bool> fetchLocation() async {
     _isLoading = true;
@@ -36,10 +49,11 @@ class LocationController extends ChangeNotifier {
       // 1. Check if location services are enabled
       bool serviceEnabled = await LocationService.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        _errorMessage = 'Location services are disabled. Please enable GPS.';
+        debugPrint('Location services are disabled. Falling back to defaults.');
+        _initializeWithDefaults();
         _isLoading = false;
         notifyListeners();
-        return false;
+        return true; // Return true as we have a valid (default) location now
       }
 
       // 2. Check/Request permissions
@@ -47,10 +61,12 @@ class LocationController extends ChangeNotifier {
       if (!hasPermission) {
         hasPermission = await LocationService.requestPermission();
         if (!hasPermission) {
-          _errorMessage = 'Location permissions are denied.';
+          debugPrint(
+              'Location permissions are denied. Falling back to defaults.');
+          _initializeWithDefaults();
           _isLoading = false;
           notifyListeners();
-          return false;
+          return true; // Return true as we have a valid (default) location now
         }
       }
 
@@ -77,22 +93,18 @@ class LocationController extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage =
-            'Unable to get location. Please check if your GPS is on and you have internet.';
+        debugPrint('Unable to get location. Falling back to defaults.');
+        _initializeWithDefaults();
         _isLoading = false;
         notifyListeners();
-        return false;
+        return true;
       }
     } catch (e) {
-      if (e.toString().contains('timeout')) {
-        _errorMessage =
-            'Location fetch timed out. Please try again in an open area.';
-      } else {
-        _errorMessage = 'Error: $e';
-      }
+      debugPrint('Error fetching location: $e. Falling back to defaults.');
+      _initializeWithDefaults();
       _isLoading = false;
       notifyListeners();
-      return false;
+      return true;
     }
   }
 
@@ -136,7 +148,6 @@ class LocationController extends ChangeNotifier {
     _radius = radius;
     notifyListeners();
   }
-
 
   void _persistCurrentLocation() {
     LocalLocationService.saveLastSelectedLocation({

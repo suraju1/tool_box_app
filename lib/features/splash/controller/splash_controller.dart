@@ -17,6 +17,10 @@ class SplashController extends ChangeNotifier {
     BuildContext context,
     AuthController authController,
   ) async {
+    // Request location permission on first launch
+    final locationController = context.read<LocationController>();
+    await locationController.fetchLocation();
+
     // Show splash for minimum 2 seconds
     await Future.delayed(const Duration(seconds: 2));
 
