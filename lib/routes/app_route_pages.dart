@@ -69,7 +69,13 @@ class AppPages {
     AppRoutes.tradeStep1: (_) => const TradeReturnSearchScreen(),
     AppRoutes.tradeCompletion: (_) => const TradeCompletionScreen(),
     AppRoutes.tradeSuccess: (_) => const TradeSuccessScreen(),
-    AppRoutes.tradeDetails: (_) => const TradeDetailsScreen(),
+    AppRoutes.tradeDetails: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is int) {
+        return TradeDetailsScreen(tradeId: args);
+      }
+      return const TradeDetailsScreen();
+    },
     AppRoutes.termsConditions: (_) => const TermsConditionsScreen(),
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
     AppRoutes.themeChange: (_) => const ThemeChangeScreen(),

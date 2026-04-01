@@ -34,12 +34,15 @@ class ApiConstants {
   static const String updateResponseStatus = 'update_response_status'; //post
   static const String processTradePayment = 'process_trade_payment'; //post
   static const String completeTrade = 'complete/{{id}}'; //post
+  static const String tradeHistoryEndpoint = 'my-trades'; //get
+  static const String getTradeDetailsById =
+      'my-post-responses-by-id/{{id}}'; //get
   static const String getUserProfile = 'get_user_profile'; //get
   static const String getOtherProfile = 'get_other_profile/{{id}}'; //get
 
   static const String submitUserReview = 'submit_user_review'; //post
   static const String updateProfile = 'update_profile'; //post
-  
+
   // 5. Address Management
   static const String saveAddress = 'save_address'; //post
   static const String myAddresses = 'my_addresses'; //get
@@ -62,16 +65,17 @@ class ApiConstants {
   static const String mySubscription = 'my_subscription'; //get
   static const String mySubscriptionHistory = 'my_subscription_history'; //get
   static const String viewSubscriptions = 'view_subscriptions'; //get
-  
+
   //settings
   static const String faqs = 'faqs'; //get
   static const String feedback = 'feedback'; //post
-  
+
   // Notifications
   static const String notifications = 'notifications'; //get
   static const String notificationUnread = 'notification_unread'; //get
   static const String notificationsReadAll = 'notifications_read_all'; //put
-  static const String notificationMarkRead = 'notification_mark_read/{{id}}'; //put
+  static const String notificationMarkRead =
+      'notification_mark_read/{{id}}'; //put
   static const String notificationDelete = 'notifications_del/{{id}}'; //delete
 
 //-----------------------------------------------------------------------------//

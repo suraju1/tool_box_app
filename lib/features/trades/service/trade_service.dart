@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:tool_bocs/core/api/api_client.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/features/trades/model/category_model.dart';
+import 'package:tool_bocs/features/trades/model/my_trade_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/features/trades/model/post_request_model.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
@@ -357,6 +358,77 @@ class TradeService {
           return ApiResponse(
             success: false,
             message: data['message'] ?? 'Failed to process payment',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<MyTradeResponseModel>> getMyTrades({
+    String postType = 'all',
+    String role = 'all',
+    String status = 'all',
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        ApiConstants.tradeHistoryEndpoint,
+        queryParameters: {
+          if (postType != 'all') 'post_type': postType,
+          // if (role != 'all') 'role': role,
+          // if (status != 'all') 'status': status,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true) {
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'My trades fetched',
+            data: MyTradeResponseModel.fromJson(data),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch my trades',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<TradeResponseModel>> getTradeHistoryDetails(int id) async {
+    try {
+      final response = await _apiClient.get(
+        ApiConstants.getTradeDetailsById.replaceAll('{{id}}', id.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true) {
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'Trade details fetched',
+            data: TradeResponseModel.fromJson(data['data']),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch trade details',
           );
         }
       } else {

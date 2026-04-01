@@ -3,9 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class TradeHistoryScreen extends StatefulWidget {
   const TradeHistoryScreen({super.key});
@@ -18,23 +20,38 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
   String selectedFilter = ' All ';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TradeController>().fetchMyTrades();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final shimmer = context.watch<ShimmerController>();
+    final tradeController = context.watch<TradeController>();
 
     return Scaffold(
       backgroundColor:
           context.isDarkMode ? Colors.black : const Color(0xFFF8F9FB),
       appBar: _buildAppBar(context),
-      body: shimmer.isLoading
+      body: (shimmer.isLoading || tradeController.isMyTradesLoading)
           ? _buildShimmer(context)
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTradeSummary(),
-                  _buildFilters(),
-                  _buildHistoryList(),
-                ],
+          : RefreshIndicator(
+              onRefresh: () async {
+                await tradeController.fetchMyTrades();
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTradeSummary(),
+                    _buildFilters(),
+                    _buildHistoryList(),
+                  ],
+                ),
               ),
             ),
     );
@@ -62,6 +79,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
   }
 
   Widget _buildTradeSummary() {
+    final stats = context.watch<TradeController>().myTradeStats;
     return Padding(
       padding: EdgeInsets.all(15.w),
       child: Column(
@@ -80,11 +98,12 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSummaryCard('35', 'Total Gives', '🎁', Colors.red.shade100),
-              _buildSummaryCard(
-                  '28', 'Total Takes', '📦', Colors.orange.shade100),
-              _buildSummaryCard(
-                  '63', 'Total Trades', '🤝', Colors.blue.shade100),
+              _buildSummaryCard('${stats?.totalGives ?? 0}', 'Total Gives',
+                  '🎁', Colors.red.shade100),
+              _buildSummaryCard('${stats?.totalTakes ?? 0}', 'Total Takes',
+                  '📦', Colors.orange.shade100),
+              _buildSummaryCard('${stats?.totalTrades ?? 0}', 'Total Trades',
+                  '🤝', Colors.blue.shade100),
             ],
           ),
           SizedBox(height: 4.h),
@@ -147,34 +166,13 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
 
   Widget _buildFilters() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.symmetric(horizontal: 30.w),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildFilterChip(' All '),
-          _buildFilterChip('Gives'),
-          _buildFilterChip('Takes'),
-          const Spacer(),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: context.dividerColor),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  'Newest',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: context.textColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Icon(Icons.keyboard_arrow_down, size: 18.sp),
-              ],
-            ),
-          ),
+          _buildFilterChip(' Gives '),
+          _buildFilterChip(' Takes '),
         ],
       ),
     );
@@ -183,7 +181,13 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
   Widget _buildFilterChip(String label) {
     bool isSelected = selectedFilter == label;
     return GestureDetector(
-      onTap: () => setState(() => selectedFilter = label),
+      onTap: () {
+        setState(() => selectedFilter = label);
+        String postType = 'all';
+        if (label.trim() == 'Gives') postType = 'give';
+        if (label.trim() == 'Takes') postType = 'take';
+        context.read<TradeController>().fetchMyTrades(postType: postType);
+      },
       child: Container(
         margin: EdgeInsets.only(right: 8.w),
         padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
@@ -206,31 +210,89 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
   }
 
   Widget _buildHistoryList() {
+    final trades = context.watch<TradeController>().myTrades;
+
+    if (trades.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 100.h),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.history_outlined, size: 50.sp, color: Colors.grey),
+              SizedBox(height: 10.h),
+              Text(
+                'No trade history found',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: context.subTextColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.all(20.w),
-      itemCount: 4,
+      itemCount: trades.length,
       itemBuilder: (context, index) {
-        bool isGive = index == 0;
+        final trade = trades[index];
+        bool isGive = trade.postType == 'give';
+
+        String otherUser = isGive
+            ? (trade.responderName ?? 'No responder yet')
+            : (trade.posterName ?? 'Unknown Giver');
+        String roleLabel = isGive ? 'Taker' : 'Giver';
+
+        String dateStr = trade.createdAt;
+        try {
+          final date = DateTime.parse(trade.createdAt);
+          dateStr = "${date.day} ${_getMonth(date.month)} ${date.year}";
+        } catch (_) {}
+
         return _buildHistoryItem(
-          'iPhone 12 (128GB)',
-          'With Riya (Taker)',
-          '12 Jan 2026, 14:30',
-          isGive ? 'Completed' : 'Pending',
+          trade.id,
+          trade.itemName,
+          'With $otherUser ($roleLabel)',
+          dateStr,
+          trade.status[0].toUpperCase() + trade.status.substring(1),
           isGive,
-          'assets/iphone.png',
+          trade.itemImages.isNotEmpty ? trade.itemImages[0] : '',
         );
       },
     );
   }
 
-  Widget _buildHistoryItem(String title, String user, String date,
+  String _getMonth(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    return months[month - 1];
+  }
+
+  Widget _buildHistoryItem(int tradeId, String title, String user, String date,
       String status, bool isGive, String imagePath) {
     bool isCompleted = status == 'Completed';
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, AppRoutes.tradeDetails);
+        Navigator.pushNamed(context, AppRoutes.tradeDetails,
+            arguments: tradeId);
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 15.h),
@@ -256,10 +318,31 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
               height: 100.w,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.r),
-                image: DecorationImage(
-                  image: AssetImage(imagePath),
-                  fit: BoxFit.cover,
-                ),
+                color: Colors.grey.shade200,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10.r),
+                child: imagePath.startsWith('http')
+                    ? CachedNetworkImage(
+                        imageUrl: imagePath,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.broken_image_outlined),
+                        placeholder: (context, url) => Center(
+                          child: SizedBox(
+                            width: 20.w,
+                            height: 20.w,
+                            child:
+                                const CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      )
+                    : Image.asset(
+                        imagePath.isNotEmpty ? imagePath : 'assets/iphone.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.broken_image_outlined),
+                      ),
               ),
             ),
             SizedBox(width: 15.w),
@@ -323,6 +406,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
                   SizedBox(height: 5.h),
                   Row(
                     children: [
+                      Spacer(),
                       Icon(
                         isCompleted
                             ? Icons.check_circle_outline
@@ -331,52 +415,12 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
                         color: isCompleted ? Colors.green : Colors.orange,
                       ),
                       SizedBox(width: 5.w),
-                      Flexible(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              status,
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w700,
-                                color:
-                                    isCompleted ? Colors.green : Colors.orange,
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 10.w,
-                                vertical: 4.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                border: Border.all(
-                                    color: context.dividerColor, width: 1.w),
-                                borderRadius: BorderRadius.circular(15.r),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.delete_outline,
-                                    size: 14.sp,
-                                    color: Colors.grey,
-                                  ),
-                                  SizedBox(width: 5.w),
-                                  Text(
-                                    "Remove",
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: context.isDarkMode
-                                          ? Colors.red.shade300
-                                          : greyColor, //redColor,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                      Text(
+                        status,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: isCompleted ? Colors.green : Colors.orange,
                         ),
                       ),
                     ],

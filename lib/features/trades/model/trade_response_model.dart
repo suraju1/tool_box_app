@@ -25,13 +25,29 @@ class TradeResponseModel {
   final String? returnItemName;
   final List<String> postItemImages;
   final String? postType;
-  final int? rejectedBy;
+  final String? rejectedBy;
   final String? rejectedReason;
   final String? posterName;
   final String? posterImage;
   final int? itemCategoryId;
   final String? posterMobile;
   final String? responderMobile;
+
+  // New fields from Trade History Details API
+  final String? meetingType;
+  final String? meetingLocation;
+  final String? meetingLatitude;
+  final String? meetingLongitude;
+  final String? meetingScheduledAt;
+  final double? offerPrice;
+  final String? givingItemName;
+  final String? givingItemCategory;
+  final String? givingItemCondition;
+  final List<String>? givingItemImages;
+  final String? returnItemCategory;
+  final String? returnItemCondition;
+  final String? postReturnType;
+  final String? paymentAmount;
 
   TradeResponseModel({
     required this.id,
@@ -65,6 +81,20 @@ class TradeResponseModel {
     this.itemCategoryId,
     this.posterMobile,
     this.responderMobile,
+    this.meetingType,
+    this.meetingLocation,
+    this.meetingLatitude,
+    this.meetingLongitude,
+    this.meetingScheduledAt,
+    this.offerPrice,
+    this.givingItemName,
+    this.givingItemCategory,
+    this.givingItemCondition,
+    this.givingItemImages,
+    this.returnItemCategory,
+    this.returnItemCondition,
+    this.postReturnType,
+    this.paymentAmount,
   });
 
   factory TradeResponseModel.fromJson(Map<String, dynamic> json) {
@@ -106,8 +136,12 @@ class TradeResponseModel {
           json['is_negotiable'] == 1 ||
           json['is_negotiable'] == true),
       itemName: (json['post_type'] == 'give' || json['post_type'] == 'giving')
-          ? (json['return_item_name'] ?? json['giving_item_name'])
-          : (json['giving_item_name'] ?? json['return_item_name']),
+          ? (json['return_item_name'] ??
+              json['giving_item_name'] ??
+              json['item_name'])
+          : (json['giving_item_name'] ??
+              json['return_item_name'] ??
+              json['item_name']),
       itemCategory: json['giving_item_category'] ?? json['category_name'],
       itemCondition: json['giving_item_condition'] ?? json['condition'],
       itemDescription: json['giving_item_note'] ?? json['description'],
@@ -129,9 +163,10 @@ class TradeResponseModel {
               ? json['giving_item_name']
               : json['return_item_name']),
       returnItemName: json['return_item_name'],
-      postItemImages: parseImages(json['post_item_images'] ?? json['post_images']),
+      postItemImages:
+          parseImages(json['post_item_images'] ?? json['post_images']),
       postType: json['post_type'],
-      rejectedBy: json['rejected_by'],
+      rejectedBy: json['rejected_by']?.toString(),
       rejectedReason: json['rejected_reason'],
       posterName: json['poster_name'],
       posterImage: json['poster_image'],
@@ -143,6 +178,20 @@ class TradeResponseModel {
       posterMobile: json['poster_mobile'] ?? json['poster_phone_number'],
       responderMobile:
           json['responder_mobile'] ?? json['responder_phone_number'],
+      meetingType: json['meeting_type'],
+      meetingLocation: json['meeting_location'],
+      meetingLatitude: json['meeting_latitude']?.toString(),
+      meetingLongitude: json['meeting_longitude']?.toString(),
+      meetingScheduledAt: json['meeting_scheduled_at'],
+      offerPrice: double.tryParse(json['offer_price']?.toString() ?? ''),
+      givingItemName: json['giving_item_name'],
+      givingItemCategory: json['giving_item_category'],
+      givingItemCondition: json['giving_item_condition'],
+      givingItemImages: parseImages(json['giving_item_images']),
+      returnItemCategory: json['return_item_category'],
+      returnItemCondition: json['return_item_condition'],
+      postReturnType: json['post_return_type'],
+      paymentAmount: json['payment_amount']?.toString(),
     );
   }
 
@@ -182,6 +231,20 @@ class TradeResponseModel {
       itemCategoryId: itemCategoryId,
       posterMobile: posterMobile,
       responderMobile: responderMobile,
+      meetingType: meetingType,
+      meetingLocation: meetingLocation,
+      meetingLatitude: meetingLatitude,
+      meetingLongitude: meetingLongitude,
+      meetingScheduledAt: meetingScheduledAt,
+      offerPrice: offerPrice,
+      givingItemName: givingItemName,
+      givingItemCategory: givingItemCategory,
+      givingItemCondition: givingItemCondition,
+      givingItemImages: givingItemImages,
+      returnItemCategory: returnItemCategory,
+      returnItemCondition: returnItemCondition,
+      postReturnType: postReturnType,
+      paymentAmount: paymentAmount,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:tool_bocs/features/trades/model/category_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/features/trades/model/post_request_model.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_request_model.dart';
+import 'package:tool_bocs/features/trades/model/my_trade_model.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/features/trades/model/trade_completion_model.dart';
 import 'package:tool_bocs/features/trades/service/trade_service.dart';
@@ -16,7 +17,16 @@ class TradeController extends ChangeNotifier {
   bool _isLoading = false;
   bool _isIncomingLoading = false;
   bool _isSentLoading = false;
+  bool _isMyTradesLoading = false;
   String? _errorMessage;
+
+  // --- My Trades State ---
+  List<MyTradeModel> _myTrades = [];
+  MyTradeStats? _myTradeStats;
+
+  List<MyTradeModel> get myTrades => _myTrades;
+  MyTradeStats? get myTradeStats => _myTradeStats;
+  bool get isMyTradesLoading => _isMyTradesLoading;
 
   // --- Filter State ---
   List<String> _selectedCategories = [];
@@ -747,6 +757,62 @@ class TradeController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<void> fetchMyTrades({
+    String postType = 'all',
+    String role = 'all',
+    String status = 'all',
+    bool isRefresh = true,
+  }) async {
+    if (isRefresh) {
+      _isMyTradesLoading = true;
+      _errorMessage = null;
+    }
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.getMyTrades(
+        postType: postType,
+        role: role,
+        status: status,
+      );
+
+      if (response.success) {
+        _myTrades = response.data?.data ?? [];
+        _myTradeStats = response.data?.tradeStats;
+      } else {
+        _errorMessage = response.message;
+      }
+    } catch (e) {
+      _errorMessage = 'An error occurred: $e';
+    } finally {
+      if (isRefresh) {
+        _isMyTradesLoading = false;
+      }
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchTradeHistoryDetails(int id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.getTradeHistoryDetails(id);
+
+      if (response.success) {
+        _selectedResponse = response.data;
+      } else {
+        _errorMessage = response.message;
+      }
+    } catch (e) {
+      _errorMessage = 'An error occurred: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 }
