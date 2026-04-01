@@ -195,71 +195,72 @@ class ChatService {
         .doc(chatRoomId)
         .collection('messages')
         .orderBy('timestamp', descending: true)
-        .snapshots();
+        .snapshots()
+        .asBroadcastStream(); // Firestore snapshots are broadcast-friendly
   }
 
   // Get chat rooms stream for current user
-  Stream<QuerySnapshot> getChatRooms() async* {
-    UserModel? currentUser = await getCurrentUser();
-    if (currentUser == null) {
-      debugPrint("getChatRooms: No local user data found.");
-      yield* const Stream.empty();
-      return;
-    }
+  Stream<QuerySnapshot> getChatRooms() {
+    return Stream.fromFuture(getCurrentUser())
+        .asyncExpand((currentUser) {
+          if (currentUser == null) {
+            debugPrint("getChatRooms: No local user data found.");
+            return const Stream.empty();
+          }
 
-    final String userId = currentUser.id.toString();
-    final firebaseUser = FirebaseAuth.instance.currentUser;
+          final String userId = currentUser.id.toString();
+          final firebaseUser = FirebaseAuth.instance.currentUser;
 
-    if (firebaseUser == null) {
-      debugPrint(
-          "getChatRooms WARNING: Firebase Auth is NULL for user $userId. Returning empty stream.");
-      yield* const Stream.empty();
-      return;
-    } else {
-      debugPrint("getChatRooms: Firebase Auth UID: ${firebaseUser.uid}");
-    }
+          if (firebaseUser == null) {
+            debugPrint(
+                "getChatRooms WARNING: Firebase Auth is NULL for user $userId. Returning empty stream.");
+            return const Stream.empty();
+          }
 
-    debugPrint("getChatRooms: Fetching rooms where 'users' contains $userId");
+          debugPrint(
+              "getChatRooms: Fetching rooms where 'users' contains $userId");
 
-    yield* _firestore
-        .collection('chat_rooms')
-        .where('users', arrayContains: userId)
-        .orderBy('updatedAt', descending: true)
-        .snapshots();
+          return _firestore
+              .collection('chat_rooms')
+              .where('users', arrayContains: userId)
+              .orderBy('updatedAt', descending: true)
+              .snapshots();
+        })
+        .cast<QuerySnapshot>()
+        .asBroadcastStream();
   }
 
   // Get total unread count stream
-  Stream<int> getTotalUnreadCount() async* {
-    UserModel? currentUser = await getCurrentUser();
-    if (currentUser == null) {
-      yield 0;
-      return;
-    }
-
-    final firebaseUser = FirebaseAuth.instance.currentUser;
-    if (firebaseUser == null) {
-      debugPrint("getTotalUnreadCount: No Firebase user. Yielding 0.");
-      yield 0;
-      return;
-    }
-
-    String currentUserId = currentUser.id.toString();
-
-    yield* _firestore
-        .collection('chat_rooms')
-        .where('users', arrayContains: currentUserId)
-        .snapshots()
-        .map((snapshot) {
-      int total = 0;
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        final unreadCounts = data['unreadCounts'] as Map<String, dynamic>?;
-        if (unreadCounts != null) {
-          total += (unreadCounts[currentUserId] as int? ?? 0);
-        }
+  Stream<int> getTotalUnreadCount() {
+    return Stream.fromFuture(getCurrentUser()).asyncExpand((currentUser) {
+      if (currentUser == null) {
+        return Stream.value(0);
       }
-      return total;
-    });
+
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser == null) {
+        debugPrint("getTotalUnreadCount: No Firebase user. Yielding 0.");
+        return Stream.value(0);
+      }
+
+      String currentUserId = currentUser.id.toString();
+
+      return _firestore
+          .collection('chat_rooms')
+          .where('users', arrayContains: currentUserId)
+          .snapshots()
+          .map((snapshot) {
+        int total = 0;
+        for (var doc in snapshot.docs) {
+          final data = doc.data();
+          final unreadCounts = data['unreadCounts'] as Map<String, dynamic>?;
+          if (unreadCounts != null) {
+            total += (unreadCounts[currentUserId] as int? ?? 0);
+          }
+        }
+        return total;
+      });
+    }).asBroadcastStream();
   }
 
   // Generate chat room ID (for 1-on-1 chat)
