@@ -135,6 +135,19 @@ class ChatService {
   Future<void> markMessagesAsRead(
       String chatRoomId, String currentUserId) async {
     try {
+      // 0. Check if there's anything to update to avoid redundant writes/looping
+      final roomDoc =
+          await _firestore.collection('chat_rooms').doc(chatRoomId).get();
+      if (roomDoc.exists) {
+        final data = roomDoc.data() as Map<String, dynamic>;
+        final unreadCounts = data['unreadCounts'] as Map<String, dynamic>?;
+        if (unreadCounts != null && unreadCounts[currentUserId] == 0) {
+          debugPrint(
+              "markMessagesAsRead: Count is already 0 for $currentUserId. Skipping update.");
+          return;
+        }
+      }
+
       debugPrint(
           "markMessagesAsRead: Resetting count for $currentUserId in $chatRoomId");
       // 1. Reset unread count for current user
@@ -172,6 +185,11 @@ class ChatService {
 
   // Get messages stream
   Stream<QuerySnapshot> getMessages(String chatRoomId) {
+    if (FirebaseAuth.instance.currentUser == null) {
+      debugPrint(
+          "getMessages: No Firebase user signed in. Returning empty stream.");
+      return const Stream.empty();
+    }
     return _firestore
         .collection('chat_rooms')
         .doc(chatRoomId)
@@ -194,8 +212,9 @@ class ChatService {
 
     if (firebaseUser == null) {
       debugPrint(
-          "getChatRooms WARNING: Firebase Auth is NULL for user $userId. Firestore queries will likely fail.");
-      // We could try to sign in here, but AuthController should handle it.
+          "getChatRooms WARNING: Firebase Auth is NULL for user $userId. Returning empty stream.");
+      yield* const Stream.empty();
+      return;
     } else {
       debugPrint("getChatRooms: Firebase Auth UID: ${firebaseUser.uid}");
     }
@@ -216,6 +235,14 @@ class ChatService {
       yield 0;
       return;
     }
+
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser == null) {
+      debugPrint("getTotalUnreadCount: No Firebase user. Yielding 0.");
+      yield 0;
+      return;
+    }
+
     String currentUserId = currentUser.id.toString();
 
     yield* _firestore

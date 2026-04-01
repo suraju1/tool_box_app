@@ -45,6 +45,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final ChatService _chatService = ChatService();
   String? _currentUserId;
   String _chatRoomId = '';
+  Stream<QuerySnapshot>? _messagesStream;
 
   // For simplicity, we'll initialize these. In a real app, handle loading states.
   late String otherUserName;
@@ -77,6 +78,10 @@ class _ChatScreenState extends State<ChatScreen> {
             widget.otherUserId!,
             tradeId: widget.tradeResponse?.id,
           );
+        }
+
+        if (_chatRoomId.isNotEmpty) {
+          _messagesStream = _chatService.getMessages(_chatRoomId);
         }
       });
 
@@ -169,7 +174,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ],
                   )
                 : StreamBuilder<QuerySnapshot>(
-                    stream: _chatService.getMessages(_chatRoomId),
+                    stream: _messagesStream,
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));

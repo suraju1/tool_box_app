@@ -9,6 +9,7 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/address/controller/address_controller.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 
 class SplashController extends ChangeNotifier {
   /// Decide navigation based on authentication state
@@ -72,9 +73,15 @@ class SplashController extends ChangeNotifier {
 
         // Check if profile is complete
         if (user != null && user.isProfileComplete == 1) {
+          // Reset Bottom Navigation Bar state to Home
+          context.read<BottomNavBarController>().reset();
+
           // Profile complete → Navigate to home
           Navigator.pushReplacementNamed(context, AppRoutes.bottomNavBar);
         } else {
+          // Reset Bottom Navigation Bar state to Home
+          context.read<BottomNavBarController>().reset();
+
           // Profile incomplete → Navigate to complete profile (could be signup or profile edit)
           // For now, navigate to home anyway since profile is completed during signup
           Navigator.pushReplacementNamed(context, AppRoutes.bottomNavBar);

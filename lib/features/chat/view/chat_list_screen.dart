@@ -26,6 +26,7 @@ class ChatListScreen extends StatefulWidget {
 class _ChatListScreenState extends State<ChatListScreen> {
   final ChatService _chatService = ChatService();
   String? _currentUserId;
+  Stream<QuerySnapshot>? _chatRoomsStream;
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       final user = UserModel.fromJson(jsonDecode(userData));
       setState(() {
         _currentUserId = user.id.toString();
+        _chatRoomsStream = _chatService.getChatRooms();
       });
     }
   }
@@ -79,9 +81,26 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 _buildSearchBox(context),
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
-                    stream: _chatService.getChatRooms(),
+                    stream: _chatRoomsStream,
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
+                        final error = snapshot.error.toString();
+                        if (error.contains('permission-denied')) {
+                          return Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(24.w),
+                              child: Text(
+                                'Your chats will appear here once you are logged in.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: context.subTextColor,
+                                  fontSize: 16.sp,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
                         return Center(child: Text('Error: ${snapshot.error}'));
                       }
 
