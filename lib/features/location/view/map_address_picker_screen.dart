@@ -7,10 +7,14 @@ import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/services/location_service.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/address/controller/address_controller.dart';
+import 'package:tool_bocs/features/address/model/address_model.dart';
 
 class MapAddressPickerScreen extends StatefulWidget {
   final bool isPickOnly;
-  const MapAddressPickerScreen({super.key, this.isPickOnly = false});
+  final AddressModel? editAddress;
+  const MapAddressPickerScreen(
+      {super.key, this.isPickOnly = false, this.editAddress});
 
   @override
   State<MapAddressPickerScreen> createState() => _MapAddressPickerScreenState();
@@ -19,7 +23,7 @@ class MapAddressPickerScreen extends StatefulWidget {
 class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   final Completer<GoogleMapController> _controller = Completer();
   LatLng _lastMapPosition = const LatLng(18.5204, 73.8567); // Default Pune
-  String _currentAddress = "Loading address...";
+  String _currentAddress = "Loading address..."; 
   bool _isReverseGeocoding = false;
 
   // Form controllers
@@ -32,11 +36,37 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
 
   // State management for multistep flow
   bool _showFullForm = false;
+  bool _isDefault = false;
 
   @override
   void initState() {
     super.initState();
-    _initLocation();
+    _isDefault = widget.editAddress?.isDefault == 1;
+    if (widget.editAddress != null) {
+      _initEditAddress();
+    } else {
+      _initLocation();
+    }
+  }
+
+  void _initEditAddress() {
+    final addr = widget.editAddress!;
+    _lastMapPosition = LatLng(addr.latitude, addr.longitude);
+    _currentAddress = addr.address;
+    _areaController.text = addr.address;
+    _selectedLabel = addr.label;
+
+    // Try to parse house/floor if they were saved in the address string
+    // This is simple logic, might not be perfect depending on how it was saved
+    final parts = addr.address.split(', ');
+    if (parts.length >= 2) {
+      _houseController.text = parts[0];
+      if (parts.length >= 3) {
+        _floorController.text = parts[1];
+      }
+    }
+
+    _moveCamera(_lastMapPosition);
   }
 
   Future<void> _initLocation() async {
@@ -541,9 +571,21 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         _buildTextField('Flat / House no / Building name *', _houseController),
         _buildTextField('Floor (optional)', _floorController),
         _buildLocationDetails(),
-        SizedBox(height: 20.h),
+        SizedBox(height: 10.h),
+        _buildDefaultToggle(),
+        SizedBox(height: 10.h),
         _buildSaveButton(),
       ],
+    );
+  }
+
+  Widget _buildDefaultToggle() {
+    return SwitchListTile(
+      title: Text('Set as default address', style: TextStyle(fontSize: 14.sp)),
+      value: _isDefault,
+      activeColor: context.primaryColor,
+      onChanged: (val) => setState(() => _isDefault = val),
+      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -719,21 +761,62 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     final fullAddress =
         "${_houseController.text}, ${_floorController.text.isNotEmpty ? "${_floorController.text}, " : ""}$_currentAddress";
 
-    context.read<LocationController>().saveAddress(
-          _selectedLabel,
-          fullAddress,
-          _lastMapPosition.latitude,
-          _lastMapPosition.longitude,
-        );
+    // Create/Update address model
+    final addressController = context.read<AddressController>();
 
-    context.read<LocationController>().setLocation(
-          _lastMapPosition.latitude,
-          _lastMapPosition.longitude,
-          fullAddress,
-          radius: _radius,
-        );
+    if (widget.editAddress != null) {
+      // Update existing address
+      final updatedAddress = AddressModel(
+        id: widget.editAddress!.id,
+        label: _selectedLabel,
+        address: fullAddress,
+        latitude: _lastMapPosition.latitude,
+        longitude: _lastMapPosition.longitude,
+        isDefault: _isDefault ? 1 : 0,
+      );
 
-    ToastService.showSuccessToast(context, 'Address saved successfully');
-    Navigator.pop(context);
+      addressController.updateAddress(updatedAddress.id!, updatedAddress).then((response) {
+        if (response.success) {
+          context.read<LocationController>().setLocation(
+                _lastMapPosition.latitude,
+                _lastMapPosition.longitude,
+                fullAddress,
+                radius: _radius,
+              );
+
+          ToastService.showSuccessToast(context, 'Address updated successfully');
+          Navigator.pop(context);
+        } else {
+          ToastService.showErrorToast(context, response.message);
+        }
+      });
+    } else {
+      // Save new address
+      final newAddress = AddressModel(
+        label: _selectedLabel,
+        address: fullAddress,
+        latitude: _lastMapPosition.latitude,
+        longitude: _lastMapPosition.longitude,
+        isDefault: _isDefault
+            ? 1
+            : (addressController.addresses.isEmpty ? 1 : 0),
+      );
+
+      addressController.saveAddress(newAddress).then((response) {
+        if (response.success) {
+          context.read<LocationController>().setLocation(
+                _lastMapPosition.latitude,
+                _lastMapPosition.longitude,
+                fullAddress,
+                radius: _radius,
+              );
+
+          ToastService.showSuccessToast(context, 'Address saved successfully');
+          Navigator.pop(context);
+        } else {
+          ToastService.showErrorToast(context, response.message);
+        }
+      });
+    }
   }
 }

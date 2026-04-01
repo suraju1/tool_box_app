@@ -38,10 +38,22 @@ class AppCachedImage extends StatelessWidget {
   /// Helper to get the correct absolute URL from a path
   static String getFormattedUrl(String? url) {
     if (url == null || url.isEmpty) return '';
-    if (url.startsWith('http')) return url;
-    // Remove leading slash if present to avoid double slashes
-    final path = url.startsWith('/') ? url.substring(1) : url;
-    return '${ApiConstants.baseUrl2}$path';
+
+    String formattedUrl;
+    if (url.startsWith('http')) {
+      formattedUrl = url;
+    } else {
+      // Remove leading slash if present to avoid double slashes
+      final path = url.startsWith('/') ? url.substring(1) : url;
+      formattedUrl = '${ApiConstants.baseUrl2}$path';
+    }
+
+    // Attempt to parse the URL. If it succeeds, it will automatically encode spaces.
+    try {
+      return Uri.parse(formattedUrl).toString();
+    } catch (e) {
+      return Uri.encodeFull(formattedUrl);
+    }
   }
 
   @override

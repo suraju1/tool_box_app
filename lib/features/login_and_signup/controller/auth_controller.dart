@@ -10,6 +10,8 @@ import 'package:tool_bocs/features/login_and_signup/services/auth_service.dart';
 import 'package:tool_bocs/core/services/chat_listener.dart';
 import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
+import 'package:tool_bocs/routes/navigator_key.dart';
 
 /// Controller for authentication state management
 class AuthController extends ChangeNotifier {
@@ -66,16 +68,20 @@ class AuthController extends ChangeNotifier {
 
         // Save user data and token
         _currentUser = response.data!.user;
-        _authToken = response.data!.token;
+        if (response.data!.token.isNotEmpty) { _authToken = response.data!.token; }
 
         // Persist to storage
         await _saveAuthData(response.data!);
 
         // Set auth token in API client
-        _apiClient.setAuthToken(_authToken!);
+        if (_authToken != null && _authToken!.isNotEmpty) { _apiClient.setAuthToken(_authToken!); }
 
         // Start Chat Listener
         try {
+          // If backend provides a custom firebase token, use it
+          // Otherwise fallback to anonymous for now
+          // Note: response.data.firebaseToken is assumed to be the field if added to backend
+          // For now, it will likely still be null until backend is updated
           await FirebaseAuth.instance.signInAnonymously();
           debugPrint("Signed in to Firebase Anonymously");
         } catch (e) {
@@ -172,17 +178,19 @@ class AuthController extends ChangeNotifier {
 
         // Save user data and token
         _currentUser = response.data!.user;
-        _authToken = response.data!.token;
+        if (response.data!.token.isNotEmpty) { _authToken = response.data!.token; }
 
         // Persist to storage
         await _saveAuthData(response.data!);
 
         // Set auth token in API client
-        _apiClient.setAuthToken(_authToken!);
+        if (_authToken != null && _authToken!.isNotEmpty) { _apiClient.setAuthToken(_authToken!); }
 
         // Start Chat Listener only if profile is complete (meaning fully logged in)
         if (response.data!.isProfileComplete) {
           try {
+            // Future-proofing: check for custom token from backend
+            // await FirebaseAuth.instance.signInWithCustomToken(customToken);
             await FirebaseAuth.instance.signInAnonymously();
             debugPrint("Signed in to Firebase Anonymously");
           } catch (e) {
@@ -220,7 +228,9 @@ class AuthController extends ChangeNotifier {
 
   /// Save authentication data to storage
   Future<void> _saveAuthData(AuthResponse authResponse) async {
-    await StorageService.saveAuthToken(authResponse.token);
+    if (authResponse.token.isNotEmpty) {
+      await StorageService.saveAuthToken(authResponse.token);
+    }
     await StorageService.saveUserData(jsonEncode(authResponse.user.toJson()));
     await StorageService.setLoggedIn(true);
   }
@@ -256,10 +266,25 @@ class AuthController extends ChangeNotifier {
 
   /// Logout user
   Future<void> logout() async {
+    try {
+      await _authService.logout();
+    } catch (e) {
+      debugPrint("API Logout Failed: $e");
+    }
+
+    // Stop Chat Listener
+    ChatListener().stopListening();
+
     _currentUser = null;
     _authToken = null;
     _apiClient.removeAuthToken();
     await StorageService.clearAuthData();
     notifyListeners();
+
+    // Navigate to login screen and clear navigation stack from root
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      AppRoutes.login,
+      (route) => false,
+    );
   }
 }

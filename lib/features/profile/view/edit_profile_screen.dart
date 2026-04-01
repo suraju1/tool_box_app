@@ -26,10 +26,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _emailController;
   late final TextEditingController _mobileController;
   late final TextEditingController _bioController;
+  late final TextEditingController _dobController;
 
+  String? _selectedGender;
+  DateTime? _selectedDate;
   bool _profileVisibility = true;
   bool _showTradeHistory = false;
   File? _selectedImage;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -40,7 +44,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController = TextEditingController(text: profile?.email ?? '');
     _mobileController = TextEditingController(text: profile?.phoneNumber ?? '');
     _bioController = TextEditingController(text: profile?.bio ?? '');
+    _dobController = TextEditingController(text: profile?.dateOfBirth ?? '');
     _profileVisibility = profile?.profileVisibility == 1;
+    _showTradeHistory = profile?.showTradeHistory == 1;
+    _selectedGender = profile?.gender;
+    if (profile?.dateOfBirth != null && profile!.dateOfBirth!.isNotEmpty) {
+      try {
+        _selectedDate = DateTime.parse(profile.dateOfBirth!);
+        _dobController.text = "${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}";
+      } catch (e) {
+        debugPrint('Error parsing DOB: $e');
+        _dobController.text = profile.dateOfBirth!;
+      }
+    }
+    _isInitialized = profile != null;
+
+    // Special handling for bio character count display
+    _bioController.addListener(() {
+      setState(() {});
+    });
   }
 
   Future<void> _pickImage() async {
@@ -66,6 +88,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<ProfileController>();
+    final profile = controller.ownProfile?.userDetails;
+
+    // Reactive pre-filling if data arrives after initState
+    if (profile != null && !_isInitialized) {
+      _nameController.text = profile.fullName;
+      _locationController.text = profile.location ?? '';
+      _emailController.text = profile.email ?? '';
+      _mobileController.text = profile.phoneNumber ?? '';
+      _bioController.text = profile.bio ?? '';
+      _dobController.text = profile.dateOfBirth ?? '';
+      _profileVisibility = profile.profileVisibility == 1;
+      _showTradeHistory = profile.showTradeHistory == 1;
+      _selectedGender = profile.gender;
+      if (profile.dateOfBirth != null && profile.dateOfBirth!.isNotEmpty) {
+        try {
+          _selectedDate = DateTime.parse(profile.dateOfBirth!);
+          _dobController.text = "${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}";
+        } catch (e) {
+          _dobController.text = profile.dateOfBirth!;
+        }
+      }
+      _isInitialized = true;
+    }
+
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       appBar: _buildAppBar(context),
@@ -99,6 +145,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     icon: Icons.phone_android_outlined,
                     helperText: 'Verified mobile number',
                     readOnly: true),
+                _buildTextField(
+                  'Date of Birth',
+                  _dobController,
+                  icon: Icons.calendar_today_outlined,
+                  readOnly: true,
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate ??
+                          DateTime.now().subtract(const Duration(days: 6570)),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      setState(() {
+                        _selectedDate = pickedDate;
+                        _dobController.text =
+                            "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+                      });
+                    }
+                  },
+                ),
+                SizedBox(height: 10.h),
+                _buildSectionTitle('Gender'),
+                Row(
+                  children: [
+                    _buildGenderRadio('Male'),
+                    _buildGenderRadio('Female'),
+                    _buildGenderRadio('Other'),
+                  ],
+                ),
                 SizedBox(height: 10.h),
                 _buildSectionTitle('Bio'),
                 SizedBox(height: 10.h),
@@ -145,20 +222,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     'Your trade history is hidden from others.',
                     _showTradeHistory,
                     (val) => setState(() => _showTradeHistory = val)),
-                SizedBox(height: 20.h),
-                _buildSectionTitle('Wallet'),
-                SizedBox(height: 10.h),
-                _buildWalletCard(),
-                SizedBox(height: 15.h),
-                _buildSectionTitle('Account Actions'),
-                SizedBox(height: 10.h),
-                _buildActionText(
-                    'Deactivate Account',
-                    context.isDarkMode
-                        ? Colors.grey.shade400
-                        : Colors.grey.shade700),
-                _buildActionText('Delete Account', Colors.red),
-                SizedBox(height: 100.h),
+
+                SizedBox(height: 50.h),
               ],
             ),
           ),
@@ -409,67 +474,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildWalletCard() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: context.dividerColor),
-        boxShadow: context.isDarkMode
-            ? []
-            : [
-                BoxShadow(
-                    color: greyColorWithOpacity0_4,
-                    blurRadius: 10,
-                    offset: const Offset(0, 4))
-              ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.account_balance_wallet_outlined,
-                  color: context.primaryColor, size: 25.sp),
-              SizedBox(width: 8.w),
-              Text(
-                'Wallet Balance',
-                style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            '₹120.00',
-            style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.w800,
-                color: context.textColor),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'Wallet balance cannot be edited',
-            style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade400),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionText(String text, Color color) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 30.w),
-      child: Text(
-        text,
-        style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: color,
-            fontFamily: FontFamily.openSans),
-      ),
-    );
-  }
 
   Widget _buildSaveButton(ProfileController controller) {
     return Positioned(
@@ -480,6 +484,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ? const Center(child: CircularProgressIndicator())
           : ElevatedButton(
               onPressed: () async {
+                final locationController = context.read<LocationController>();
                 final response = await controller.updateProfile(
                   fullName: _nameController.text.isNotEmpty
                       ? _nameController.text
@@ -497,6 +502,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ? _bioController.text
                       : null,
                   profileVisibility: _profileVisibility ? 1 : 0,
+                  showTradeHistory: _showTradeHistory ? 1 : 0,
+                  gender: _selectedGender,
+                  dateOfBirth: _selectedDate != null
+                      ? "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}"
+                      : null,
+                  latitude: locationController.latitude,
+                  longitude: locationController.longitude,
+                  termsAccepted: true,
                   profileImage: _selectedImage,
                 );
 
@@ -533,6 +546,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     fontFamily: FontFamily.openSans),
               ),
             ),
+    );
+  }
+
+  Widget _buildGenderRadio(String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Radio<String>(
+          value: label,
+          groupValue: _selectedGender,
+          activeColor: context.primaryColor,
+          onChanged: (v) => setState(() => _selectedGender = v),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+              fontSize: 14.sp,
+              color: context.textColor,
+              fontFamily: FontFamily.openSans),
+        ),
+      ],
     );
   }
 }

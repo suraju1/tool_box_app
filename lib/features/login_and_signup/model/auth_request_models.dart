@@ -69,10 +69,12 @@ class LoginRequest {
 class VerifyOtpRequest {
   final String phoneNumber;
   final String otpCode;
+  final String fcmToken;
 
   VerifyOtpRequest({
     required this.phoneNumber,
     required this.otpCode,
+    required this.fcmToken,
   });
 
   /// Convert to JSON for API request
@@ -80,11 +82,12 @@ class VerifyOtpRequest {
     return {
       'phone_number': phoneNumber,
       'otp_code': otpCode,
+      'fcm_token': fcmToken,
     };
   }
 
   @override
   String toString() {
-    return 'VerifyOtpRequest(phoneNumber: $phoneNumber, otpCode: $otpCode)';
+    return 'VerifyOtpRequest(phoneNumber: $phoneNumber, otpCode: $otpCode, fcmToken: $fcmToken)';
   }
 }

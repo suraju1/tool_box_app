@@ -5,11 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
-import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -85,69 +86,70 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             );
           },
         ),
-        actions: [
-          //report and block
-          PopupMenuButton<String>(
-            padding: EdgeInsets.zero,
-            onSelected: (value) {
-              // Handle selection
-            },
-            offset: const Offset(0, 55),
-            shape: PopupMenuArrowShape(borderRadius: 10.r),
-            color: context.surfaceColor,
-            elevation: 4,
-            itemBuilder: (context) => [
-              PopupMenuItem<String>(
-                // padding: EdgeInsets.zero,
-                value: 'block',
-                height: 40.h,
-                child: Center(
-                  child: Text(
-                    'Block',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: context.textColor,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: FontFamily.openSans,
-                    ),
-                  ),
-                ),
-              ),
-              PopupMenuDivider(height: 1),
-              PopupMenuItem<String>(
-                value: 'report',
-                height: 40.h,
-                child: Center(
-                  child: Text(
-                    'Report',
-                    style: TextStyle(
-                      color: context.textColor,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: FontFamily.openSans,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            child: Padding(
-              padding: EdgeInsets.only(right: 15.w),
-              child: Icon(
-                Icons.more_vert,
-                color: context.textColor,
-                size: 28.sp,
-              ),
-            ),
-          ),
-        ],
+        // not need to show here
+        // actions: [
+        //   //report and block
+        //   PopupMenuButton<String>(
+        //     padding: EdgeInsets.zero,
+        //     onSelected: (value) {
+        //       // Handle selection
+        //     },
+        //     offset: const Offset(0, 55),
+        //     shape: PopupMenuArrowShape(borderRadius: 10.r),
+        //     color: context.surfaceColor,
+        //     elevation: 4,
+        //     itemBuilder: (context) => [
+        //       PopupMenuItem<String>(
+        //         // padding: EdgeInsets.zero,
+        //         value: 'block',
+        //         height: 40.h,
+        //         child: Center(
+        //           child: Text(
+        //             'Block',
+        //             textAlign: TextAlign.center,
+        //             style: TextStyle(
+        //               color: context.textColor,
+        //               fontSize: 14.sp,
+        //               fontWeight: FontWeight.w600,
+        //               fontFamily: FontFamily.openSans,
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //       PopupMenuDivider(height: 1),
+        //       PopupMenuItem<String>(
+        //         value: 'report',
+        //         height: 40.h,
+        //         child: Center(
+        //           child: Text(
+        //             'Report',
+        //             style: TextStyle(
+        //               color: context.textColor,
+        //               fontSize: 14.sp,
+        //               fontWeight: FontWeight.w600,
+        //               fontFamily: FontFamily.openSans,
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //     child: Padding(
+        //       padding: EdgeInsets.only(right: 15.w),
+        //       child: Icon(
+        //         Icons.more_vert,
+        //         color: context.textColor,
+        //         size: 28.sp,
+        //       ),
+        //     ),
+        //   ),
+        // ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(10),
           child: Divider(height: 1, color: context.dividerColor),
         ),
       ),
-      body: Consumer<TradeController>(
-        builder: (context, controller, child) {
+      body: Consumer2<TradeController, LocationController>(
+        builder: (context, controller, locationController, child) {
           if (controller.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -225,7 +227,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             ),
                           ),
                           SizedBox(height: 15.h),
-                          _buildLocationDisplay(post.pickupArea),
+                          _buildLocationDisplay(post, locationController),
                         ],
                       ),
                       SizedBox(height: 10.h),
@@ -266,6 +268,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               post.returnType,
                               Icons.keyboard_return_rounded,
                             ),
+                            SizedBox(height: 8.h),
+                            _buildDetailRow(
+                              'Item Source',
+                              post.itemSource,
+                              Icons.source_outlined,
+                            ),
                             if (post.returnType == 'Price') ...[
                               SizedBox(height: 8.h),
                               _buildDetailRow(
@@ -288,31 +296,56 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               SizedBox(height: 8.h),
                               if (post.returnItemImages.isNotEmpty) ...[
                                 SizedBox(
-                                  height: 100.h,
+                                  height: 120.h,
                                   child: ListView.separated(
                                     scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
                                     itemCount: post.returnItemImages.length,
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 4.w),
                                     separatorBuilder: (_, __) =>
-                                        SizedBox(width: 8.w),
+                                        SizedBox(width: 12.w),
                                     itemBuilder: (context, index) {
                                       final imageUrl = post
                                               .returnItemImages[index]
                                               .startsWith('http')
                                           ? post.returnItemImages[index]
                                           : '${ApiConstants.baseUrl2}${post.returnItemImages[index]}';
-                                      return AppCachedImage(
-                                        imageUrl: imageUrl,
-                                        height: 100.h,
-                                        width: 100.h,
-                                        fit: BoxFit.cover,
-                                        radius: 8.r,
-                                        errorWidget: Container(
-                                          height: 100.h,
-                                          width: 100.h,
-                                          color: Colors.grey[200],
-                                          child: Icon(
-                                            Icons.image_not_supported,
-                                            color: Colors.grey,
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(12.r),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black
+                                                  .withOpacity(0.05),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: AppCachedImage(
+                                          imageUrl: imageUrl,
+                                          height: 120.h,
+                                          width: 120.h,
+                                          fit: BoxFit.cover,
+                                          radius: 12.r,
+                                          errorWidget: Container(
+                                            height: 120.h,
+                                            width: 120.h,
+                                            decoration: BoxDecoration(
+                                              color: context.isDarkMode
+                                                  ? Colors.white10
+                                                  : Colors.grey[100],
+                                              borderRadius:
+                                                  BorderRadius.circular(12.r),
+                                            ),
+                                            child: Icon(
+                                              Icons
+                                                  .image_not_supported_outlined,
+                                              color: Colors.grey,
+                                              size: 30.sp,
+                                            ),
                                           ),
                                         ),
                                       );
@@ -338,6 +371,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 _buildDetailRow(
                                   'Condition',
                                   post.returnItemCondition!,
+                                ),
+                              ],
+                              if (post.returnItemSource != null) ...[
+                                SizedBox(height: 8.h),
+                                _buildDetailRow(
+                                  'Item Source',
+                                  post.returnItemSource!,
                                 ),
                               ],
                               if (post.returnItemDescription != null &&
@@ -566,7 +606,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildLocationDisplay(String location) {
+  Widget _buildLocationDisplay(
+      PostModel post, LocationController locationController) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
@@ -579,14 +620,49 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           Icon(Icons.location_on_rounded,
               color: context.primaryColor, size: 18.sp),
           SizedBox(width: 8.w),
-          Expanded(
+          //keep commented for now
+
+          /*Expanded(
             child: Text(
-              location,
+              post.distanceKm != null
+                  ? '${post.distanceKm!.toStringAsFixed(1)} km away from ${post.pickupArea}'
+                  : post.pickupArea,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: context.textColor,
                 fontFamily: FontFamily.openSans,
+              ),
+            ),
+          ), */
+
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  if (post.distanceKm != null) ...[
+                    TextSpan(
+                      text: '${post.distanceKm!.toStringAsFixed(1)} km ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        color: context.textColor,
+                      ),
+                    ),
+                    TextSpan(
+                      text:
+                          'away from ${locationController.address ?? 'Current Location'}',
+                    ),
+                  ] else
+                    TextSpan(
+                      text: post.pickupArea,
+                    ),
+                ],
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w400,
+                  color: context.textColor,
+                  fontFamily: FontFamily.openSans,
+                ),
               ),
             ),
           ),
@@ -738,30 +814,30 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   SizedBox(height: 6.h),
                   Row(
                     children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 6.w, vertical: 2.h),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.star_rounded,
-                                color: Colors.amber, size: 14.sp),
-                            SizedBox(width: 2.w),
-                            Text(
-                              post.userRating?.toString() ?? '4.8',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w700,
-                                color: context.textColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
+                      // Container(
+                      //   padding: EdgeInsets.symmetric(
+                      //       horizontal: 6.w, vertical: 2.h),
+                      //   decoration: BoxDecoration(
+                      //     color: Colors.amber.withOpacity(0.1),
+                      //     borderRadius: BorderRadius.circular(4.r),
+                      //   ),
+                      //   child: Row(
+                      //     children: [
+                      //       Icon(Icons.star_rounded,
+                      //           color: Colors.amber, size: 14.sp),
+                      //       SizedBox(width: 2.w),
+                      //       Text(
+                      //         post.userRating?.toString() ?? '4.8',
+                      //         style: TextStyle(
+                      //           fontSize: 12.sp,
+                      //           fontWeight: FontWeight.w700,
+                      //           color: context.textColor,
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      // SizedBox(width: 8.w),
                       Text(
                         'Verified User',
                         style: TextStyle(

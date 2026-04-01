@@ -6,6 +6,10 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 
 import 'package:tool_bocs/features/location/view/map_address_picker_screen.dart';
+import 'package:tool_bocs/features/address/controller/address_controller.dart';
+import 'package:tool_bocs/features/address/model/address_model.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/login_and_signup/model/user_model.dart';
 
 class LocationSelectionSheet extends StatefulWidget {
   const LocationSelectionSheet({super.key});
@@ -25,6 +29,14 @@ class LocationSelectionSheet extends StatefulWidget {
 
 class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AddressController>().fetchAddresses();
+    });
+  }
 
   @override
   void dispose() {
@@ -81,10 +93,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                 //   onTap: () {},
                 // ),
                 SizedBox(height: 20.h),
-                if (context
-                    .watch<LocationController>()
-                    .savedAddresses
-                    .isNotEmpty) ...[
+                if (context.watch<AddressController>().addresses.isNotEmpty) ...[
                   Text(
                     'Saved Addresses',
                     style: TextStyle(
@@ -95,9 +104,22 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                   ),
                   SizedBox(height: 10.h),
                   ...context
-                      .watch<LocationController>()
-                      .savedAddresses
+                      .watch<AddressController>()
+                      .addresses
                       .map((addr) => _buildSavedAddressItem(addr)),
+                ] else if (context.watch<AuthController>().currentUser?.location != null &&
+                    context.watch<AuthController>().currentUser!.location.isNotEmpty) ...[
+                  Text(
+                    'Profile Address',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  _buildProfileAddressItem(
+                      context.watch<AuthController>().currentUser!),
                 ],
               ],
             ),
@@ -258,24 +280,27 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
     );
   }
 
-  Widget _buildSavedAddressItem(Map<String, String> addr) {
+  Widget _buildSavedAddressItem(AddressModel addr) {
     final locationController = context.watch<LocationController>();
-    final isSelected = locationController.address == addr['address'];
+    final isSelected = locationController.address == addr.address;
 
     return InkWell(
       onTap: () {
-        context.read<LocationController>().setLocation(
-              double.parse(addr['lat']!),
-              double.parse(addr['lng']!),
-              addr['address']!,
-            );
+        context.read<LocationController>().updateFromAddressModel(addr);
         Navigator.pop(context);
       },
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 10.h),
         child: Row(
           children: [
-            Icon(Icons.home_outlined, color: Colors.grey, size: 24.sp),
+            Icon(
+                addr.label.toLowerCase() == 'home'
+                    ? Icons.home_outlined
+                    : addr.label.toLowerCase() == 'work'
+                        ? Icons.work_outline
+                        : Icons.location_on_outlined,
+                color: Colors.grey,
+                size: 24.sp),
             SizedBox(width: 12.w),
             Expanded(
               child: Column(
@@ -284,7 +309,147 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                   Row(
                     children: [
                       Text(
-                        addr['label']!,
+                        addr.label,
+                        style: TextStyle(
+                            fontSize: 14.sp, fontWeight: FontWeight.bold),
+                      ),
+                      if (addr.isDefault == 1) ...[
+                        SizedBox(width: 8.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: context.primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            'Default',
+                            style: TextStyle(
+                                fontSize: 10.sp,
+                                color: context.primaryColor,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                      if (isSelected) ...[
+                        SizedBox(width: 8.w),
+                        Container(
+                          width: 8.w,
+                          height: 8.w,
+                          decoration: BoxDecoration(
+                            color: context.primaryColor,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  Text(
+                    addr.address,
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (addr.isDefault == 1)
+              Icon(Icons.star, size: 20.sp, color: Colors.orange)
+            else
+              IconButton(
+                icon: Icon(Icons.star_border, size: 20.sp, color: Colors.orange),
+                onPressed: () {
+                  context
+                      .read<AddressController>()
+                      .setAsDefault(addr.id!)
+                      .then((response) {
+                    if (response.success) {
+                      ToastService.showSuccessToast(context, 'Set as default');
+                    } else {
+                      ToastService.showErrorToast(context, response.message);
+                    }
+                  });
+                },
+              ),
+            IconButton(
+              icon: Icon(Icons.edit_outlined, size: 20.sp, color: Colors.blue),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        MapAddressPickerScreen(editAddress: addr),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.delete_outline, size: 20.sp, color: Colors.red),
+              onPressed: () => _handleDeleteAddress(addr),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleDeleteAddress(AddressModel addr) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Address'),
+        content: const Text('Are you sure you want to delete this address?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<AddressController>().deleteAddress(addr.id!).then((response) {
+                if (response.success) {
+                  ToastService.showSuccessToast(context, 'Address deleted');
+                } else {
+                  ToastService.showErrorToast(context, response.message);
+                }
+              });
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileAddressItem(UserModel user) {
+    final locationController = context.watch<LocationController>();
+    final isSelected = locationController.address == user.location;
+
+    return InkWell(
+      onTap: () {
+        context.read<LocationController>().updateFromUserData(
+              lat: user.latitude,
+              lng: user.longitude,
+              address: user.location,
+            );
+        Navigator.pop(context);
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10.h),
+        child: Row(
+          children: [
+            Icon(Icons.person_pin_circle_outlined, color: Colors.grey, size: 24.sp),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Home (from Profile)',
                         style: TextStyle(
                             fontSize: 14.sp, fontWeight: FontWeight.bold),
                       ),
@@ -302,7 +467,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                     ],
                   ),
                   Text(
-                    addr['address']!,
+                    user.location,
                     style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

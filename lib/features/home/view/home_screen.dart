@@ -6,12 +6,15 @@ import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/features/location/view/location_selection_sheet.dart';
 import 'package:tool_bocs/features/notifications/view/notifications_screen.dart';
+import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/services/storage_service.dart';
+import 'package:tool_bocs/core/widgets/theme_selection_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +24,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  double distance = 5.0;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -30,6 +32,12 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final locationController = context.read<LocationController>();
       final tradeController = context.read<TradeController>();
+
+      // Check for first-time user to show theme selection
+      final firstUser = await StorageService.getFirstuser();
+      if (firstUser == null && mounted) {
+        ThemeSelectionBottomSheet.show(context);
+      }
 
       // Reset filters when navigating to this screen
       tradeController.resetFilters();
@@ -41,6 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       tradeController.fetchHomePosts();
+
+      // Fetch unread notification count
+      if (mounted) {
+        context.read<NotificationController>().fetchUnreadCount();
+      }
     });
     _scrollController.addListener(_onScroll);
   }
@@ -185,12 +198,14 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Column(
         children: [
-          Image.asset(
-            'assets/logo_transperant.png',
-            height: 40.h,
-            color: context.isDarkMode ? Colors.white : Colors.black,
-          ),
-          SizedBox(height: 6.h),
+          // dont shgow logo here
+          // Image.asset(
+          //   'assets/logo_transperant.png',
+          //   height: 40.h,
+          //   color: context.isDarkMode ? Colors.white : Colors.black,
+          // ),
+          //SizedBox(height: 6.h),
+          SizedBox(height: 16.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -274,47 +289,58 @@ class _HomeScreenState extends State<HomeScreen> {
               //   ),
               // ),
               //SizedBox(width: 1.w),
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationsScreen(),
+              Consumer<NotificationController>(
+                builder: (context, notificationController, child) {
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationsScreen(),
+                        ),
+                      );
+                    },
+                    child: Stack(
+                      children: [
+                        Icon(
+                          Icons.notifications_none_outlined,
+                          color: context.textColor,
+                          size: 28.sp,
+                        ),
+                        if (notificationController.unreadCount > 0)
+                          Positioned(
+                            right: 0.w,
+                            top: 2.h,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.w, vertical: 2.h),
+                              constraints: BoxConstraints(
+                                minWidth: 16.w,
+                                minHeight: 16.h,
+                              ),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              child: Text(
+                                notificationController.unreadCount > 99
+                                    ? '99+'
+                                    : notificationController.unreadCount
+                                        .toString(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8.sp,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   );
                 },
-                child: Stack(
-                  children: [
-                    Icon(
-                      Icons.notifications_none_outlined,
-                      color: context.textColor,
-                      size: 28.sp,
-                    ),
-                    Positioned(
-                      right: 0.w,
-                      top: 2.h,
-                      child: Container(
-                        width: 15.w,
-                        height: 15.h,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.all(2.w),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(15.r),
-                        ),
-                        child: Text(
-                          '1',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8.sp,
-                            fontWeight: FontWeight.w900,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
@@ -368,7 +394,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(width: 10.w),
                   Text(
                     '${controller.distanceKm.round()} km',
-                    style: TextStyle(color: context.textColor),
+                    style: TextStyle(
+                      color: context.textColor,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -432,46 +462,73 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Padding(
               padding: EdgeInsets.all(10.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "${post.userName}'s ${isTake ? 'Taking' : 'Giving'}",
-                          style: TextStyle(color: Colors.grey, fontSize: 11.sp),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          post.itemName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.sp,
-                            color: context.primaryColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        color: Colors.grey,
-                        size: 14.sp,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "${post.userName}'s ${isTake ? 'Taking' : 'Giving'}",
+                              style: TextStyle(
+                                  color: Colors.grey, fontSize: 11.sp),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              post.itemName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.sp,
+                                color: context.primaryColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: 1.h),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.label_outline,
+                                  color: Colors.grey,
+                                  size: 13.sp,
+                                ),
+                                SizedBox(width: 4.w),
+                                Text(
+                                  "${post.itemCategory}",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 10.sp,
+                                    color: Colors.grey,
+                                    fontFamily: FontFamily.openSans,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        post.distanceKm != null
-                            ? '${post.distanceKm!.toStringAsFixed(1)} km away'
-                            : '- km away',
-                        style: TextStyle(color: Colors.grey, fontSize: 11.sp),
+                      SizedBox(width: 8.w),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            color: Colors.grey,
+                            size: 14.sp,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            post.distanceKm != null
+                                ? '${post.distanceKm!.toStringAsFixed(1)} km away'
+                                : '- km away',
+                            style:
+                                TextStyle(color: Colors.grey, fontSize: 11.sp),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -526,7 +583,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(width: 6.w),
                             Expanded(
                               child: Text(
-                                "${post.userName}  •  ${post.itemCategory}",
+                                "${post.userName}",
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w500,
@@ -537,36 +594,38 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 4.h),
-                        Row(
-                          children: [
-                            Text(
-                              "${post.userRating ?? 4.8} ", // Real rating or fallback
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12.sp,
-                                color: context.textColor,
-                              ),
-                            ),
-                            SizedBox(width: 4.w),
-                            ...List.generate(
-                              5,
-                              (index) => Icon(
-                                Icons.star,
-                                color: amberColor,
-                                size: 13.sp,
-                              ),
-                            ),
-                            SizedBox(width: 4.w),
-                            Text(
-                              "(Person rating)",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 11.sp,
-                              ),
-                            ),
-                          ],
-                        ),
+
+                        // dont show the rating
+                        // SizedBox(height: 4.h),
+                        // Row(
+                        //   children: [
+                        //     Text(
+                        //       "${post.userRating ?? 4.8} ", // Real rating or fallback
+                        //       style: TextStyle(
+                        //         fontWeight: FontWeight.bold,
+                        //         fontSize: 12.sp,
+                        //         color: context.textColor,
+                        //       ),
+                        //     ),
+                        //     SizedBox(width: 4.w),
+                        //     ...List.generate(
+                        //       5,
+                        //       (index) => Icon(
+                        //         Icons.star,
+                        //         color: amberColor,
+                        //         size: 13.sp,
+                        //       ),
+                        //     ),
+                        //     SizedBox(width: 4.w),
+                        //     Text(
+                        //       "(Person rating)",
+                        //       style: TextStyle(
+                        //         color: Colors.grey,
+                        //         fontSize: 11.sp,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                   ),

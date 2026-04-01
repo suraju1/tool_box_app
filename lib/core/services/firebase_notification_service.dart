@@ -151,4 +151,14 @@ class FirebaseNotificationService {
       debugPrint("Error syncing profile data to Firestore: $e");
     }
   }
+
+  /// Get current FCM token
+  static Future<String?> getFcmToken() async {
+    try {
+      return await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      debugPrint("Error getting FCM token: $e");
+      return null;
+    }
+  }
 }

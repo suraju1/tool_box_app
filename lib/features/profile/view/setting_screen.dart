@@ -99,6 +99,14 @@ class _SettingScreenState extends State<SettingScreen> {
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.privacyPolicy),
               ),
+              // _buildDivider(),
+              // _buildSettingItem(
+              //   context,
+              //   icon: Icons.block_outlined,
+              //   label: 'Blocked Users',
+              //   onTap: () =>
+              //       Navigator.pushNamed(context, AppRoutes.blockedUsers),
+              // ),
             ],
           ),
         ),

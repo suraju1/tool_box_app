@@ -1,10 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
+import 'package:tool_bocs/features/subscription/model/subscription_history_model.dart';
+import 'package:tool_bocs/features/subscription/model/subscription_model.dart';
+import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 
-class MySubscriptionsListScreen extends StatelessWidget {
+class MySubscriptionsListScreen extends StatefulWidget {
   const MySubscriptionsListScreen({super.key});
+
+  @override
+  State<MySubscriptionsListScreen> createState() => _MySubscriptionsListScreenState();
+}
+
+class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = context.read<SubscriptionController>();
+      controller.fetchSubscriptionHistory();
+      if (controller.mySubscription == null) {
+        controller.fetchMySubscription();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,82 +56,85 @@ class MySubscriptionsListScreen extends StatelessWidget {
           child: Divider(height: 1, color: context.dividerColor),
         ),
       ),
-      body: Column(
-        children: [
-          _buildActivePlanHeader(context),
-          SizedBox(height: 12.h),
-          _buildYearFilter(context),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
-              children: [
-                _buildInvoiceCard(
-                  context,
-                  title: 'Pro Monthly',
-                  invoiceNumber: 'TB-8892',
-                  status: 'Completed',
-                  period: '12 Jan - 12 Feb 2025',
-                  paymentMethod: 'UPI toolucs@axis',
-                  credits: '400',
-                  statusColor: const Color(0xFF4CAF50),
-                ),
-                SizedBox(height: 20.h),
-                _buildInvoiceCard(
-                  context,
-                  title: 'Basic Monthly',
-                  invoiceNumber: 'TB-8892',
-                  status: 'Expired',
-                  period: '12 Jan - 12 Feb 2025',
-                  paymentMethod: 'UPI toolucs@axis',
-                  credits: '400',
-                  statusColor: Colors.grey,
-                ),
-                SizedBox(height: 20.h),
-                _buildInvoiceCard(
-                  context,
-                  title: 'Basic Monthly',
-                  invoiceNumber: 'TB-8892',
-                  status: 'Expired',
-                  period: '12 Jan - 12 Feb 2025',
-                  paymentMethod: 'UPI toolucs@axis',
-                  credits: '400',
-                  statusColor: Colors.grey,
-                ),
-                SizedBox(height: 100.h),
-              ],
-            ),
-          ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
-        child: SizedBox(
-          width: double.infinity,
-          height: 55.h,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
+      body: Consumer<SubscriptionController>(
+        builder: (context, controller, child) {
+          final subscription = controller.mySubscription;
+          final history = controller.history;
+
+          return Column(
+            children: [
+              if (subscription != null) _buildActivePlanHeader(context, subscription),
+              SizedBox(height: 12.h),
+              _buildYearFilter(context),
+              Expanded(
+                child: controller.isHistoryLoading
+                    ? _buildLoadingList()
+                    : history.isEmpty
+                        ? _buildEmptyState(context, controller)
+                        : ListView.separated(
+                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
+                            itemCount: history.length,
+                            separatorBuilder: (context, index) => SizedBox(height: 20.h),
+                            itemBuilder: (context, index) {
+                              final item = history[index];
+                              return _buildInvoiceCard(
+                                context,
+                                item: item,
+                              );
+                            },
+                          ),
               ),
-            ),
-            child: Text(
-              'Upgrade to Annual Plan',
-              style: TextStyle(
-                color: context.onPrimaryColor,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildActivePlanHeader(BuildContext context) {
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: EdgeInsets.all(10.w),
+      itemCount: 4,
+      separatorBuilder: (context, index) => SizedBox(height: 20.h),
+      itemBuilder: (context, index) => ShimmerBox(height: 180.h, width: double.infinity, radius: 20.r),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, SubscriptionController controller) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.history_outlined, size: 64.sp, color: context.subTextColor),
+          SizedBox(height: 16.h),
+          Text(
+            'No Subscription History',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'You haven\'t made any subscription payments yet.',
+            style: TextStyle(color: context.subTextColor),
+          ),
+          SizedBox(height: 12.h),
+          TextButton(
+            onPressed: () => controller.fetchSubscriptionHistory(),
+            child: Text('Retry', style: TextStyle(color: context.primaryColor)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivePlanHeader(BuildContext context, MySubscriptionData subscription) {
+    final expiryDate = subscription.endDate.isNotEmpty 
+        ? DateFormat('dd MMM yyyy').format(DateTime.parse(subscription.endDate))
+        : 'N/A';
+
     return Container(
       width: double.infinity,
       margin: EdgeInsets.all(10.w),
@@ -131,7 +157,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
             child: Container(
               height: 150.r,
               width: 150.r,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white12,
                 shape: BoxShape.circle,
               ),
@@ -161,7 +187,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
-                        'ACTIVE',
+                        subscription.status.toUpperCase(),
                         style: TextStyle(
                           color: context.onPrimaryColor,
                           fontSize: 10.sp,
@@ -173,7 +199,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Toolucs Pro',
+                  subscription.name,
                   style: TextStyle(
                     color: context.onPrimaryColor,
                     fontSize: 32.sp,
@@ -182,7 +208,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 12.h),
                 Text(
-                  'Next renewal on 12 Mar 2025',
+                  'Expires on $expiryDate',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 14.sp,
@@ -198,50 +224,62 @@ class MySubscriptionsListScreen extends StatelessWidget {
   }
 
   Widget _buildYearFilter(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: 10.w),
-      child: Container(
+    final controller = context.watch<SubscriptionController>();
+    final currentYear = DateTime.now().year;
+    final years = List.generate(5, (index) => currentYear - index);
+
+    return Container(
+      height: 45.h,
+      margin: EdgeInsets.only(bottom: 12.h),
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: 10.w),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          spacing: 20.w,
-          children: [
-            _buildFilterChip(context, 'All Years', isActive: true),
-            _buildFilterChip(context, '2025', isActive: false),
-            _buildFilterChip(context, '2024', isActive: false),
-          ],
-        ),
+        itemCount: years.length,
+        separatorBuilder: (context, index) => SizedBox(width: 12.w),
+        itemBuilder: (context, index) {
+          final year = years[index];
+          final isActive = controller.selectedYear == year;
+          return _buildFilterChip(
+            context,
+            year.toString(),
+            isActive: isActive,
+            onTap: () => controller.setSelectedYear(year),
+          );
+        },
       ),
     );
   }
 
   Widget _buildFilterChip(BuildContext context, String label,
-      {required bool isActive}) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: isActive ? context.primaryColor : Colors.white,
-        borderRadius: BorderRadius.circular(15.r),
-        border: Border.all(
-            color:
-                isActive ? context.primaryColor : Colors.grey.withOpacity(0.2)),
-        boxShadow: isActive
-            ? [
-                BoxShadow(
-                  color: context.primaryColor.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                )
-              ]
-            : [],
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.grey.shade600,
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w700,
+      {required bool isActive, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isActive ? context.primaryColor : context.surfaceColor,
+          borderRadius: BorderRadius.circular(15.r),
+          border: Border.all(
+              color:
+                  isActive ? context.primaryColor : context.dividerColor),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: context.primaryColor.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isActive ? Colors.white : context.subTextColor,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -249,14 +287,18 @@ class MySubscriptionsListScreen extends StatelessWidget {
 
   Widget _buildInvoiceCard(
     BuildContext context, {
-    required String title,
-    required String invoiceNumber,
-    required String status,
-    required String period,
-    required String paymentMethod,
-    required String credits,
-    required Color statusColor,
+    required SubscriptionHistoryItem item,
   }) {
+    final statusColor = item.status.toLowerCase() == 'active' ? Colors.green : Colors.grey;
+    
+    final startDate = item.startDate.isNotEmpty 
+        ? DateFormat('dd MMM').format(DateTime.parse(item.startDate))
+        : '';
+    final endDate = item.endDate.isNotEmpty 
+        ? DateFormat('dd MMM yyyy').format(DateTime.parse(item.endDate))
+        : '';
+    final period = '$startDate - $endDate';
+
     return Container(
       decoration: BoxDecoration(
         color: context.surfaceColor,
@@ -283,7 +325,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title,
+                          item.name,
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
@@ -291,7 +333,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Invoice #$invoiceNumber',
+                          'ID #${item.id}',
                           style: TextStyle(
                             fontSize: 12.sp,
                             color: context.subTextColor,
@@ -307,7 +349,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10.r),
                       ),
                       child: Text(
-                        status,
+                        item.status.toUpperCase(),
                         style: TextStyle(
                           color: statusColor,
                           fontSize: 12.sp,
@@ -325,7 +367,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                     ),
                     Expanded(
                       child: _buildInfoItem(
-                          context, 'PAYMENT METHOD', paymentMethod),
+                          context, 'AMOUNT', '₹${item.totalAmount}'),
                     ),
                   ],
                 ),
@@ -343,7 +385,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                     Icon(Icons.stars, color: context.primaryColor, size: 20.sp),
                     SizedBox(width: 8.w),
                     Text(
-                      credits,
+                      item.remainingCredit.split('.').first,
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w800,
@@ -352,7 +394,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      'Credits',
+                      'Credits Remaining',
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: context.primaryColor,
@@ -361,14 +403,7 @@ class MySubscriptionsListScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                Text(
-                  status == 'Completed' ? 'View Receipt' : 'Archive',
-                  style: TextStyle(
-                    color: context.primaryColor,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                Icon(Icons.chevron_right, color: context.subTextColor),
               ],
             ),
           ),

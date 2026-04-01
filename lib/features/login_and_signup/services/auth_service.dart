@@ -55,4 +55,14 @@ class AuthService {
       (data) => AuthResponse.fromJson(data),
     );
   }
+
+  /// Logout user
+  Future<ApiResponse<void>> logout() async {
+    final response = await _apiClient.post(ApiConstants.logout);
+
+    return ApiResponse.fromJson(
+      response.data,
+      null, // No data expected for logout
+    );
+  }
 }

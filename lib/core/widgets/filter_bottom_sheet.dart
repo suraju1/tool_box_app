@@ -41,54 +41,47 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   String selectedRating = 'All';
   String returnType = 'All';
   String selectedPostType = 'all';
-  String selectedSort = 'Nearest First';
+  String selectedSort = 'Newest First';
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.77,
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(35.r)),
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      child: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.only(
-              bottom: 90.h,
-              left: 20.w,
-              right: 20.w,
-              top: 12.h,
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(35.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+              child: _buildHeader(),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                Divider(color: context.dividerColor, thickness: 1),
-                _buildCategorySection(),
-                SizedBox(height: 12.h),
-                // _buildPostTypeSection(),
-                // SizedBox(height: 12.h),
-                _buildDistanceSection(),
-                SizedBox(height: 12.h),
-                _buildRatingSection(),
-                SizedBox(height: 12.h),
-                _buildReturnTypeSection(),
-                SizedBox(height: 25.h),
-                // _buildActionButtons(),
-                // SizedBox(height: 20.h),
-              ],
+            Divider(color: context.dividerColor, thickness: 1),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCategorySection(),
+                    SizedBox(height: 12.h),
+                    _buildDistanceSection(),
+                    SizedBox(height: 12.h),
+                    _buildReturnTypeSection(),
+                    SizedBox(height: 25.h),
+                  ],
+                ),
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 1.h,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 80.h,
+            Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 20.h),
               decoration: BoxDecoration(
                 color: context.surfaceColor,
                 boxShadow: [
@@ -103,8 +96,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ),
               child: _buildActionButtons(),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -384,7 +377,32 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              final controller = context.read<TradeController>();
+
+              // 1. Update distance in controller
+              controller.setDistance(distance);
+
+              // 2. Update other filters
+              controller.updateFilters(
+                categories: selectedCategories,
+                rating: selectedRating,
+                returnType: returnType,
+                postType: selectedPostType,
+                sort: selectedSort,
+              );
+
+              // 3. Trigger fetch based on current screen context
+              if (widget.initialPostType == 'give') {
+                controller.fetchGivePosts(refresh: true);
+              } else if (widget.initialPostType == 'take') {
+                controller.fetchTakePosts(refresh: true);
+              } else {
+                controller.fetchHomePosts(refresh: true);
+              }
+
+              Navigator.pop(context);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.primaryColor,
               shape: RoundedRectangleBorder(
@@ -430,6 +448,55 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700),
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPostTypeSection() {
+    final types = ['All', 'Give', 'Take'];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Post Type', style: _sectionTitleStyle()),
+        SizedBox(height: 10.h),
+        Row(
+          children: types.map((type) {
+            bool isSelected =
+                selectedPostType.toLowerCase() == type.toLowerCase();
+            return Expanded(
+              child: GestureDetector(
+                onTap: () =>
+                    setState(() => selectedPostType = type.toLowerCase()),
+                child: Container(
+                  margin: EdgeInsets.only(right: type == 'Take' ? 0 : 10.w),
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? context.primaryColor
+                        : context.surfaceColor,
+                    borderRadius: BorderRadius.circular(22.r),
+                    border: Border.all(
+                      color: isSelected
+                          ? context.primaryColor
+                          : context.dividerColor,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    type,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: isSelected
+                          ? context.onPrimaryColor
+                          : context.subTextColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );

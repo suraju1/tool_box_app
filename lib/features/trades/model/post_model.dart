@@ -29,6 +29,7 @@ class PostModel {
   final String status;
   final String createdAt;
   final String updatedAt;
+  final int? flowId;
   final String userName;
   final String? userImage;
   final double? userRating;
@@ -67,6 +68,7 @@ class PostModel {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.flowId,
     required this.userName,
     this.userImage,
     this.userRating,
@@ -118,6 +120,7 @@ class PostModel {
       status: json['status']?.toString() ?? '',
       createdAt: json['created_at']?.toString() ?? '',
       updatedAt: json['updated_at']?.toString() ?? '',
+      flowId: json['flow_id'],
       userName: json['user_name']?.toString() ?? '',
       userImage: json['user_image']?.toString(),
       userRating: double.tryParse(json['user_rating']?.toString() ?? ''),

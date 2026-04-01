@@ -5,14 +5,48 @@ import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/api/api_response.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/features/profile/model/user_review_request_model.dart';
+import '../model/blocked_user_model.dart';
+
+import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
+import 'package:tool_bocs/features/profile/model/faq_model.dart';
 
 class ProfileService {
   final ApiClient _apiClient = ApiClient();
 
-  Future<ApiResponse<UserProfileModel>> fetchUserProfile(int userId) async {
+  Future<ApiResponse<UserProfileModel>> fetchOwnProfile() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.getUserProfile);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'Profile fetched successfully',
+            data: UserProfileModel.fromJson(data['data']),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message:
+                data['error'] ?? data['message'] ?? 'Failed to fetch profile',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<UserProfileModel>> fetchOtherProfile(int userId) async {
     try {
       final response = await _apiClient.get(
-        ApiConstants.getUserProfile.replaceAll('{{id}}', userId.toString()),
+        ApiConstants.getOtherProfile.replaceFirst('{{id}}', userId.toString()),
       );
 
       if (response.statusCode == 200) {
@@ -40,6 +74,7 @@ class ProfileService {
       return ApiResponse(success: false, message: e.toString());
     }
   }
+
 
   Future<ApiResponse<dynamic>> submitUserReview(
       UserReviewRequestModel request) async {
@@ -70,27 +105,263 @@ class ProfileService {
     }
   }
 
-  Future<ApiResponse<dynamic>> updateUserProfile(
-      Map<String, dynamic> data, File? imageFile) async {
+  Future<ApiResponse<dynamic>> updateGeneralProfile(
+      Map<String, dynamic> data) async {
     try {
-      final formData = FormData.fromMap(data);
+      final response = await _apiClient.post(
+        ApiConstants.completeProfile,
+        data: data,
+      );
 
-      if (imageFile != null) {
-        String fileName = imageFile.path.split('/').last;
-        formData.files.add(MapEntry('profile_image',
-            await MultipartFile.fromFile(imageFile.path, filename: fileName)));
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        return ApiResponse(
+          success: resData['success'] ?? false,
+          message: resData['message'] ?? 'Profile updated successfully',
+          data: resData['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
       }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> updateProfileImage(File imageFile) async {
+    try {
+      final formData = FormData();
+      String fileName = imageFile.path.split('/').last;
+      formData.files.add(MapEntry(
+          'profile_image',
+          await MultipartFile.fromFile(imageFile.path, filename: fileName)));
 
       final response = await _apiClient.post(
         ApiConstants.updateProfile,
         data: formData,
+        options: Options(
+          contentType: 'multipart/form-data; boundary=${formData.boundary}',
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        return ApiResponse(
+          success: resData['success'] ?? false,
+          message: resData['message'] ?? 'Profile image updated successfully',
+          data: resData['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> blockUser(int userId) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.blockUser.replaceFirst('{{id}}', userId.toString()),
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
         return ApiResponse(
           success: data['success'] ?? false,
-          message: data['message'] ?? 'Profile updated successfully',
+          message: data['message'] ?? 'User blocked successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> unblockUser(int userId) async {
+    try {
+      final response = await _apiClient.delete(
+        ApiConstants.unblockUser.replaceFirst('{{id}}', userId.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'User unblocked successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<List<BlockedUserModel>>> fetchBlockedUsers() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.listBlockedUser);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final List<dynamic> blockedData = data['data'];
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'Blocked users fetched successfully',
+            data: blockedData.map((e) => BlockedUserModel.fromJson(e)).toList(),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch blocked users',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> saveUser(int userId) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.userSave.replaceFirst('{{id}}', userId.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'User saved successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> unsaveUser(int userId) async {
+    try {
+      final response = await _apiClient.delete(
+        ApiConstants.unsaveUser.replaceFirst('{{id}}', userId.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'User unsaved successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<List<SavedUserModel>>> fetchSavedUsers() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.listSaveUser);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final List<dynamic> savedData = data['data'];
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'Saved users fetched successfully',
+            data: savedData.map((e) => SavedUserModel.fromJson(e)).toList(),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch saved users',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+  Future<ApiResponse<List<FaqModel>>> fetchFaqs() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.faqs);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final List<dynamic> faqData = data['data'];
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'FAQs fetched successfully',
+            data: faqData.map((e) => FaqModel.fromJson(e)).toList(),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch FAQs',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> submitFeedback(String message) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.feedback,
+        data: {'message': message},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Feedback submitted successfully',
           data: data['data'],
         );
       } else {

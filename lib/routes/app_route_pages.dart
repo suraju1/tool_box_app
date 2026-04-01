@@ -10,6 +10,7 @@ import 'package:tool_bocs/features/splash/view/onbording_screen.dart';
 import 'package:tool_bocs/features/splash/view/splash_screen.dart';
 import 'package:tool_bocs/features/notifications/view/notifications_screen.dart';
 import 'package:tool_bocs/features/profile/view/edit_profile_screen.dart';
+import 'package:tool_bocs/features/subscription/view/my_subscriptions_list_screen.dart';
 import 'package:tool_bocs/features/trades/view/create_give_Take_post_screen.dart';
 import 'package:tool_bocs/features/trades/view/trade_history_screen.dart';
 import 'package:tool_bocs/features/profile/view/blocked_users_screen.dart';
@@ -26,8 +27,8 @@ import 'package:tool_bocs/features/profile/view/privacy_policy_screen.dart';
 import 'package:tool_bocs/features/profile/view/theme_change_screen.dart';
 import 'package:tool_bocs/features/network_connectivity/view/no_internet_screen.dart';
 import 'package:tool_bocs/features/subscription/view/my_subscription_status_screen.dart';
-import 'package:tool_bocs/features/subscription/view/my_subscriptions_list_screen.dart';
 import 'package:tool_bocs/features/subscription/view/choose_plan_screen.dart';
+import 'package:tool_bocs/features/profile/view/saved_users_screen.dart';
 
 import 'app_routes.dart';
 
@@ -66,7 +67,7 @@ class AppPages {
     AppRoutes.tradeStart: (_) => const TradeStartScreen(),
     AppRoutes.tradeOffer: (_) => const TradeOfferScreen(),
     AppRoutes.tradeStep1: (_) => const TradeReturnSearchScreen(),
-    AppRoutes.tradeCompletion: (_) => TradeCompletionScreen(),
+    AppRoutes.tradeCompletion: (_) => const TradeCompletionScreen(),
     AppRoutes.tradeSuccess: (_) => const TradeSuccessScreen(),
     AppRoutes.tradeDetails: (_) => const TradeDetailsScreen(),
     AppRoutes.termsConditions: (_) => const TermsConditionsScreen(),
@@ -76,5 +77,6 @@ class AppPages {
     AppRoutes.mySubscription: (_) => const MySubscriptionStatusScreen(),
     AppRoutes.subscriptionHistory: (_) => const MySubscriptionsListScreen(),
     AppRoutes.choosePlan: (_) => const ChoosePlanScreen(),
+    AppRoutes.savedUsers: (_) => const SavedUsersScreen(),
   };
 }

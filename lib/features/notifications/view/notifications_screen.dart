@@ -12,6 +12,9 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/chat/view/chat_screen.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
+import 'package:tool_bocs/features/notifications/model/notification_model.dart';
+import 'package:intl/intl.dart';
 
 class NotificationsScreen extends StatefulWidget {
   final int? postId;
@@ -27,11 +30,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final tradeController = context.read<TradeController>();
+      final notificationController = context.read<NotificationController>();
+      
       if (widget.postId != null) {
         tradeController.fetchPostResponses(widget.postId!);
       } else {
         tradeController.fetchAllPostResponses();
         tradeController.fetchSentResponses();
+        notificationController.fetchNotifications(isRefresh: true);
       }
     });
   }
@@ -116,12 +122,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: context.scaffoldBg,
         appBar: _buildAppBar(context),
         body: TabBarView(
           children: [
+            _buildGeneralNotificationsView(context),
             _buildResponsesListView(context, isIncoming: true),
             _buildResponsesListView(context, isIncoming: false),
           ],
@@ -146,7 +153,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ? tradeController.postResponses
         : tradeController.sentResponses;
 
-    if (shimmer.isLoading || tradeController.isLoading) {
+    final isLoading = isIncoming
+        ? tradeController.isIncomingLoading
+        : tradeController.isSentLoading;
+
+    if (shimmer.isLoading || isLoading) {
       return _buildShimmer(context);
     }
 
@@ -386,9 +397,39 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 fontWeight: FontWeight.w700,
                 fontFamily: FontFamily.openSans,
               ),
-              tabs: const [
-                Tab(text: 'My Items'),
-                Tab(text: 'My Offers'),
+              tabs: [
+                context.watch<NotificationController>().unreadCount > 0
+                    ? Tab(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('General'),
+                            SizedBox(width: 4.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 6.w, vertical: 2.h),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              child: Text(
+                                context
+                                    .watch<NotificationController>()
+                                    .unreadCount
+                                    .toString(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const Tab(text: 'General'),
+                const Tab(text: 'My Items'),
+                const Tab(text: 'My Offers'),
               ],
             )
           : PreferredSize(
@@ -546,6 +587,227 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildGeneralNotificationsView(BuildContext context) {
+    final notificationController = context.watch<NotificationController>();
+
+    if (notificationController.isLoading) {
+      return _buildShimmer(context);
+    }
+
+    if (notificationController.notifications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.notifications_none,
+                size: 64.sp, color: context.subTextColor),
+            SizedBox(height: 16.h),
+            Text(
+              'No notifications found',
+              style: TextStyle(
+                color: context.subTextColor,
+                fontSize: 16.sp,
+                fontFamily: FontFamily.openSans,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => notificationController.fetchNotifications(isRefresh: true),
+      child: Column(
+        children: [
+          if (notificationController.notifications.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => notificationController.markAllAsRead(),
+                    icon: Icon(Icons.done_all, size: 18.sp, color: context.primaryColor),
+                    label: Text(
+                      'Mark all as read',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: context.primaryColor,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.only(bottom: 20.h),
+              itemCount: notificationController.notifications.length +
+                  (notificationController.hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == notificationController.notifications.length) {
+                  notificationController.loadMore();
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final notification = notificationController.notifications[index];
+                return _buildGeneralNotificationCard(context, notification);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGeneralNotificationCard(
+      BuildContext context, NotificationModel notification) {
+    final notificationController = context.read<NotificationController>();
+    final isUnread = notification.isRead == 0;
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: context.isDarkMode
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12.r),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Unread indicator line
+              if (isUnread)
+                Container(
+                  width: 4.w,
+                  color: context.primaryColor,
+                ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(6.r),
+                                  decoration: BoxDecoration(
+                                    color: isUnread 
+                                        ? context.primaryColor.withOpacity(0.1)
+                                        : context.dividerColor.withOpacity(0.05),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isUnread ? Icons.notifications_active : Icons.notifications_none,
+                                    color: isUnread ? context.primaryColor : context.subTextColor,
+                                    size: 16.sp,
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: Text(
+                                    notification.notificationTitle,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: isUnread ? FontWeight.w800 : FontWeight.w700,
+                                      color: context.textColor,
+                                      fontFamily: FontFamily.openSans,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Delete icon
+                          GestureDetector(
+                            onTap: () => notificationController.deleteNotification(notification.id),
+                            child: Icon(Icons.close, size: 18.sp, color: context.subTextColor.withOpacity(0.5)),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 6.h),
+                      Text(
+                        notification.notificationMessage,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: isUnread ? context.textColor : context.subTextColor,
+                          fontFamily: FontFamily.openSans,
+                          height: 1.4,
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            notification.createdAt != null 
+                                ? _formatDate(notification.createdAt!)
+                                : '',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: context.subTextColor,
+                              fontFamily: FontFamily.openSans,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (isUnread)
+                            InkWell(
+                              onTap: () => notificationController.markAsRead(notification.id),
+                              child: Text(
+                                'Mark as read',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: context.primaryColor,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return DateFormat.jm().format(date);
+    } else if (difference.inDays < 7) {
+      return DateFormat.E().format(date);
+    } else {
+      return DateFormat.yMMMd().format(date);
+    }
   }
 
   Widget _buildShimmer(BuildContext context) {

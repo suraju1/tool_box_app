@@ -1,10 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
+import 'package:tool_bocs/features/subscription/model/subscription_model.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
+import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 
-class ChoosePlanScreen extends StatelessWidget {
+class ChoosePlanScreen extends StatefulWidget {
   const ChoosePlanScreen({super.key});
+
+  @override
+  State<ChoosePlanScreen> createState() => _ChoosePlanScreenState();
+}
+
+class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SubscriptionController>().fetchAvailablePlans();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,88 +51,164 @@ class ChoosePlanScreen extends StatelessWidget {
           child: Divider(height: 1, color: context.dividerColor),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
+      body: Consumer<SubscriptionController>(
+        builder: (context, controller, child) {
+          if (controller.isPlansLoading) {
+            return _buildLoadingState(context);
+          }
+
+          final plans = controller.availablePlans;
+
+          if (plans.isEmpty && controller.errorMessage != null) {
+            return _buildErrorState(context, controller);
+          }
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Column(
+              children: [
+                SizedBox(height: 12.h),
+                Text(
+                  'Choose Your Plan',
+                  style: TextStyle(
+                    fontSize: 26.sp,
+                    fontWeight: FontWeight.w800,
+                    color: context.textColor,
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                Text(
+                  'Unlock premium features and scale your productivity with TOOLUCS.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: context.subTextColor,
+                    height: 1.5,
+                  ),
+                ),
+                SizedBox(height: 30.h),
+                if (plans.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: 50.h),
+                    child: Text(
+                      'No subscription plans available at the moment.',
+                      style: TextStyle(color: context.subTextColor),
+                    ),
+                  )
+                else
+                  ...plans.map((plan) => Padding(
+                        padding: EdgeInsets.only(bottom: 15.h),
+                        child: _buildPlanCard(
+                          context,
+                          plan: plan,
+                          isLoading: controller.isActivating,
+                        ),
+                      )),
+                SizedBox(height: 40.h),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 10.w),
+      child: Column(
+        children: [
+          SizedBox(height: 50.h),
+          ShimmerBox(height: 30.h, width: 200.w),
+          SizedBox(height: 20.h),
+          ShimmerBox(height: 40.h, width: double.infinity),
+          SizedBox(height: 40.h),
+          ...List.generate(3, (index) => Padding(
+            padding: EdgeInsets.only(bottom: 20.h),
+            child: ShimmerBox(height: 250.h, width: double.infinity, radius: 25.r),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, SubscriptionController controller) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(20.w),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 12.h),
+            Icon(Icons.error_outline, size: 64.sp, color: Colors.red),
+            SizedBox(height: 16.h),
             Text(
-              'Choose Your Plan',
-              style: TextStyle(
-                fontSize: 26.sp,
-                fontWeight: FontWeight.w800,
-                color: context.textColor,
-              ),
+              'Oops! Something went wrong',
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: 8.h),
             Text(
-              'Unlock premium features and scale your productivity with TOOLUCS.',
+              controller.errorMessage ?? 'Failed to load plans.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: context.subTextColor,
-                height: 1.5,
-              ),
+              style: TextStyle(color: context.subTextColor),
             ),
-            SizedBox(height: 30.h),
-            _buildPlanCard(
-              context,
-              title: 'Basic',
-              price: '199',
-              credits: '50 Credits Included',
-              features: [
-                'Standard visibility',
-                '10 chats per day',
-                'Basic email support',
-              ],
-              buttonLabel: 'Get Started',
-              isPopular: false,
+            SizedBox(height: 24.h),
+            ElevatedButton(
+              onPressed: () => controller.fetchAvailablePlans(),
+              child: const Text('Try Again'),
             ),
-            SizedBox(height: 15.h),
-            _buildPlanCard(
-              context,
-              title: 'Pro',
-              price: '499',
-              credits: '200 Credits Included',
-              features: [
-                'Priority visibility',
-                'Unlimited chats',
-                'Advanced analytics',
-                '24/7 Priority support',
-              ],
-              buttonLabel: 'Subscribe Now',
-              isPopular: true,
-            ),
-            SizedBox(height: 15.h),
-            _buildPlanCard(
-              context,
-              title: 'Enterprise',
-              price: '999',
-              credits: '500 Credits Included',
-              features: [
-                'White-labeling options',
-                'Dedicated account manager',
-                'Custom API integrations',
-              ],
-              buttonLabel: 'Get Started',
-              isPopular: false,
-            ),
-            SizedBox(height: 40.h),
           ],
         ),
       ),
     );
   }
 
+  void _onSubscribe(BuildContext context, int id) async {
+    final controller = context.read<SubscriptionController>();
+    final success = await controller.activateSubscription(id);
+
+    if (context.mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(controller.successMessage ?? 'Subscription activated!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Navigate to status screen
+        Navigator.pushReplacementNamed(context, AppRoutes.mySubscription);
+      } else if (controller.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(controller.errorMessage!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildPlanCard(
     BuildContext context, {
-    required String title,
-    required String price,
-    required String credits,
-    required List<String> features,
-    required String buttonLabel,
-    required bool isPopular,
+    required AvailablePlan plan,
+    required bool isLoading,
   }) {
+    final controller = context.read<SubscriptionController>();
+    // Plan is activating if general loading is true AND this specific id matches
+    final isThisPlanLoading = controller.isActivating && controller.activatingPlanId == plan.id;
+    
+    // Pro label logic (based on plan name)
+    final bool isPopular = plan.name.toLowerCase().contains('pro');
+    
+    // Parse features from description: Split by newline OR comma
+    List<String> features = plan.description
+        .split(RegExp(r'[\n,]'))
+        .where((e) => e.trim().isNotEmpty)
+        .toList();
+        
+    if (features.isEmpty && plan.description.isNotEmpty) {
+      features = [plan.description];
+    }
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -163,7 +257,7 @@ class ChoosePlanScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  plan.name,
                   style: TextStyle(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.w800,
@@ -176,7 +270,7 @@ class ChoosePlanScreen extends StatelessWidget {
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      '₹$price',
+                      '₹${plan.price.split('.').first}',
                       style: TextStyle(
                         fontSize: 32.sp,
                         fontWeight: FontWeight.w800,
@@ -184,7 +278,7 @@ class ChoosePlanScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      ' /month',
+                      ' /${plan.days} days',
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: context.subTextColor,
@@ -199,7 +293,7 @@ class ChoosePlanScreen extends StatelessWidget {
                     Icon(Icons.stars, color: context.primaryColor, size: 20.sp),
                     SizedBox(width: 8.w),
                     Text(
-                      credits,
+                      '${plan.creditBalance} Credits Included',
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
@@ -209,30 +303,42 @@ class ChoosePlanScreen extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 20.h),
-                ...features.map((f) => Padding(
-                      padding: EdgeInsets.only(bottom: 12.h),
-                      child: Row(
-                        children: [
-                          Icon(Icons.check_circle,
-                              color: Colors.green, size: 18.sp),
-                          SizedBox(width: 12.w),
-                          Text(
-                            f,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: context.textColor,
-                              fontWeight: FontWeight.w500,
+                if (features.isNotEmpty)
+                  ...features.map((f) => Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.check_circle,
+                                color: Colors.green, size: 18.sp),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Text(
+                                f.trim(),
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: context.textColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    )),
+                          ],
+                        ),
+                      ))
+                else
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 12.h),
+                    child: Text(
+                      'Enjoy full access to ${plan.name} features.',
+                      style: TextStyle(color: context.subTextColor),
+                    ),
+                  ),
                 SizedBox(height: 15.h),
                 SizedBox(
                   width: double.infinity,
                   height: 50.h,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: isLoading ? null : () => _onSubscribe(context, plan.id),
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
                           isPopular ? context.primaryColor : const Color(0xFFE8F1FF),
@@ -241,14 +347,25 @@ class ChoosePlanScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                     ),
-                    child: Text(
-                      buttonLabel,
-                      style: TextStyle(
-                        color: isPopular ? Colors.white : context.primaryColor,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    child: isThisPlanLoading
+                        ? SizedBox(
+                            height: 20.h,
+                            width: 20.h,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                isPopular ? Colors.white : context.primaryColor,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            'Get Started',
+                            style: TextStyle(
+                              color: isPopular ? Colors.white : context.primaryColor,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
                 ),
               ],

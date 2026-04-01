@@ -11,6 +11,7 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
+import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
@@ -105,10 +106,14 @@ class _OtpScreenState extends State<OtpScreen> {
     // Clear previous errors
     context.read<AuthController>().clearError();
 
+    // Get FCM token
+    final fcmToken = await FirebaseNotificationService.getFcmToken() ?? '';
+
     // Create verify OTP request
     final request = VerifyOtpRequest(
       phoneNumber: _phoneNumber!,
       otpCode: _getOtpCode(),
+      fcmToken: fcmToken,
     );
 
     // Call verify OTP API

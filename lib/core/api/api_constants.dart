@@ -1,24 +1,30 @@
 class ApiConstants {
   // Base URL
-  static const String baseUrl = 'https://toolbocs.apluscrm.in/api/';
-  static const String baseUrl2 = 'https://toolbocs.apluscrm.in/';
+// //old
+//   static const String baseUrl = 'https://toolbocs.apluscrm.in/api/';
+//   static const String baseUrl2 = 'https://toolbocs.apluscrm.in/';
+
+  //new
+  static const String baseUrl = 'https://updatedtoolbocs.onrender.com/api/';
+  static const String baseUrl2 = 'https://updatedtoolbocs.onrender.com/';
 
 //----------------------------------API Endpoints-------------------------------------//
 
-  //1. Auth/login/complete-profile/verify-otp
+  //1. Auth/login/complete-profile/verify-otp/logout
   static const String completeProfile = 'complete-profile'; //post
   static const String login = 'login'; //post
   static const String verifyOtp = 'verify-otp'; //post
+  static const String logout = 'logout'; //post
 
   //2. Categories types
   static const String getCategoryTypes = 'get_categories'; //get
 
-  //3. give post- getAll/getbyid/create/update/delete
-  static const String createGiveTakePost = 'create_post'; //post
-  static const String getAllGiveTakePost = 'get_posts'; //post
+  // 3. give post - getAll/getbyid/create/update/delete
+  static const String createGiveTakePost = 'create_post'; // post
+  static const String getAllGiveTakePost = 'get_posts'; // get
   static const String getGiveTakePostById = 'get_post_by_id/{{postid}}'; //get
-  static const String updateGiveTakePost = 'update_post/{{postid}}'; //put
-  static const String deleteGiveTakePost = 'delete_post/{{postid}}'; //delete
+  static const String updateGiveTakePost = 'update_post/{{postid}}'; // put
+  static const String deleteGiveTakePost = 'delete_post/{{postid}}'; // put
 
   // 4-Step Trade Flow
   static const String respondToPost = 'respond/{{postid}}'; //post
@@ -28,9 +34,45 @@ class ApiConstants {
   static const String updateResponseStatus = 'update_response_status'; //post
   static const String processTradePayment = 'process_trade_payment'; //post
   static const String completeTrade = 'complete/{{id}}'; //post
-  static const String getUserProfile = 'get_user_profile/{{id}}'; //get
+  static const String getUserProfile = 'get_user_profile'; //get
+  static const String getOtherProfile = 'get_other_profile/{{id}}'; //get
+
   static const String submitUserReview = 'submit_user_review'; //post
   static const String updateProfile = 'update_profile'; //post
+  
+  // 5. Address Management
+  static const String saveAddress = 'save_address'; //post
+  static const String myAddresses = 'my_addresses'; //get
+  static const String editAddress = 'edit_address/{{id}}'; //put
+  static const String deleteAddress = 'del_address/{{id}}'; //delete
+  static const String getAddress = 'address/{{id}}'; //get
+
+  // Block/Unblock
+  static const String blockUser = 'user_blocked/{{id}}'; //post
+  static const String unblockUser = 'unblocked_user/{{id}}'; //delete
+  static const String listBlockedUser = 'list_blocked_user'; //get
+
+  // Saved Users
+  static const String userSave = 'user_save/{{id}}'; //post
+  static const String unsaveUser = 'unsave_user/{{id}}'; //delete
+  static const String listSaveUser = 'list_save_user'; //get
+
+  // Subscription
+  static const String subscribe = 'subscribe'; //post
+  static const String mySubscription = 'my_subscription'; //get
+  static const String mySubscriptionHistory = 'my_subscription_history'; //get
+  static const String viewSubscriptions = 'view_subscriptions'; //get
+  
+  //settings
+  static const String faqs = 'faqs'; //get
+  static const String feedback = 'feedback'; //post
+  
+  // Notifications
+  static const String notifications = 'notifications'; //get
+  static const String notificationUnread = 'notification_unread'; //get
+  static const String notificationsReadAll = 'notifications_read_all'; //put
+  static const String notificationMarkRead = 'notification_mark_read/{{id}}'; //put
+  static const String notificationDelete = 'notifications_del/{{id}}'; //delete
 
 //-----------------------------------------------------------------------------//
   // Timeout durations

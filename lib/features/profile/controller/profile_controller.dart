@@ -2,32 +2,145 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/api/api_response.dart';
-import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/features/profile/model/user_review_request_model.dart';
+import '../model/blocked_user_model.dart';
 import 'package:tool_bocs/features/profile/service/profile_service.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/firebase_notification_service.dart';
+import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
+import 'package:tool_bocs/features/profile/model/faq_model.dart';
 
 class ProfileController extends ChangeNotifier {
   final ProfileService _profileService = ProfileService();
 
   UserProfileModel? _ownProfile;
   UserProfileModel? _viewedProfile;
+  List<BlockedUserModel> _blockedUsers = [];
+  List<SavedUserModel> _savedUsers = [];
+  List<FaqModel> _faqs = [];
   bool _isLoading = false;
   String? _errorMessage;
 
   UserProfileModel? get ownProfile => _ownProfile;
   UserProfileModel? get viewedProfile => _viewedProfile;
+  List<BlockedUserModel> get blockedUsers => _blockedUsers;
+  List<SavedUserModel> get savedUsers => _savedUsers;
+  List<FaqModel> get faqs => _faqs;
   UserProfileModel? get userProfile =>
       _viewedProfile ??
       _ownProfile; // Keep for backward compatibility if needed, but preferably use specific ones
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<bool> getUserProfile(int userId, {bool isOwnProfile = true}) async {
+  Future<void> getBlockedUsers() async {
+    _isLoading = true;
+    notifyListeners();
+
+    final response = await _profileService.fetchBlockedUsers();
+
+    if (response.success) {
+      _blockedUsers = response.data ?? [];
+    } else {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> getSavedUsers() async {
+    _isLoading = true;
+    notifyListeners();
+
+    final response = await _profileService.fetchSavedUsers();
+
+    if (response.success) {
+      _savedUsers = response.data ?? [];
+    } else {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<ApiResponse<dynamic>> toggleSaveUser(int userId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    // Determine current status
+    bool currentlySaved = false;
+    if (_viewedProfile?.userDetails.id == userId) {
+      currentlySaved = _viewedProfile?.isSaved ?? false;
+    } else {
+      currentlySaved = _savedUsers.any((u) => u.id == userId);
+    }
+
+    final response = currentlySaved
+        ? await _profileService.unsaveUser(userId)
+        : await _profileService.saveUser(userId);
+
+    if (response.success) {
+      // Update local state for viewed profile
+      if (_viewedProfile?.userDetails.id == userId) {
+        _viewedProfile = UserProfileModel(
+          userDetails: _viewedProfile!.userDetails,
+          tradeStats: _viewedProfile!.tradeStats,
+          reviews: _viewedProfile!.reviews,
+          isSaved: !currentlySaved,
+        );
+      }
+      // Refresh saved list if we are on the saved users screen or need it up to date
+      await getSavedUsers();
+    } else {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return response;
+  }
+
+  Future<ApiResponse<dynamic>> blockUser(int userId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final response = await _profileService.blockUser(userId);
+
+    if (response.success) {
+      // Refresh blocked list
+      await getBlockedUsers();
+    } else {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return response;
+  }
+
+  Future<ApiResponse<dynamic>> unblockUser(int userId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final response = await _profileService.unblockUser(userId);
+
+    if (response.success) {
+      // Refresh blocked list
+      await getBlockedUsers();
+    } else {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return response;
+  }
+
+  Future<bool> getUserProfile(int? userId, {bool isOwnProfile = true}) async {
     _isLoading = true;
     _errorMessage = null;
     if (!isOwnProfile) {
@@ -35,7 +148,9 @@ class ProfileController extends ChangeNotifier {
     }
     notifyListeners();
 
-    final response = await _profileService.fetchUserProfile(userId);
+    final response = isOwnProfile
+        ? await _profileService.fetchOwnProfile()
+        : await _profileService.fetchOtherProfile(userId ?? 0);
 
     bool success = false;
     if (response.success) {
@@ -54,6 +169,7 @@ class ProfileController extends ChangeNotifier {
     notifyListeners();
     return success;
   }
+
 
   Future<ApiResponse<dynamic>> submitReview({
     required int userId,
@@ -122,23 +238,46 @@ class ProfileController extends ChangeNotifier {
     String? mobile,
     String? bio,
     dynamic profileVisibility,
+    int? showTradeHistory,
+    String? gender,
+    String? dateOfBirth,
+    double? latitude,
+    double? longitude,
+    bool? termsAccepted,
     File? profileImage,
   }) async {
     _isLoading = true;
     notifyListeners();
 
-    final Map<String, dynamic> requestData = {};
-    if (fullName != null) requestData['full_name'] = fullName;
-    if (location != null) requestData['location'] = location;
-    if (email != null) requestData['email'] = email;
-    if (mobile != null) requestData['phone_number'] = mobile;
-    if (bio != null) requestData['bio'] = bio;
-    if (profileVisibility != null) {
-      requestData['profile_visibility'] = profileVisibility;
+    final Map<String, dynamic> requestData = {
+      'user_id': _ownProfile?.userDetails.id,
+      'full_name': fullName ?? _ownProfile?.userDetails.fullName,
+      'email': email ?? _ownProfile?.userDetails.email,
+      'phone_number': mobile ?? _ownProfile?.userDetails.phoneNumber,
+      'location': location ?? _ownProfile?.userDetails.location,
+      'latitude': latitude ?? _ownProfile?.userDetails.latitude,
+      'longitude': longitude ?? _ownProfile?.userDetails.longitude,
+      'date_of_birth': dateOfBirth ?? _ownProfile?.userDetails.dateOfBirth,
+      'gender': gender ?? _ownProfile?.userDetails.gender,
+      'bio': bio ?? _ownProfile?.userDetails.bio,
+      'profile_visibility': profileVisibility ?? _ownProfile?.userDetails.profileVisibility,
+      'show_trade_history': showTradeHistory ?? _ownProfile?.userDetails.showTradeHistory,
+      'terms_accepted': termsAccepted ?? _ownProfile?.userDetails.termsAccepted,
+    };
+
+    // 1. Update Profile Image if provided
+    if (profileImage != null) {
+      final imageResponse = await _profileService.updateProfileImage(profileImage);
+      if (!imageResponse.success) {
+        _isLoading = false;
+        _errorMessage = imageResponse.message;
+        notifyListeners();
+        return imageResponse;
+      }
     }
 
-    final response =
-        await _profileService.updateUserProfile(requestData, profileImage);
+    // 2. Update General Profile Data
+    final response = await _profileService.updateGeneralProfile(requestData);
 
     _isLoading = false;
     notifyListeners();
@@ -163,9 +302,7 @@ class ProfileController extends ChangeNotifier {
   }
 
   /// Global helper to navigate to user profile with privacy guard
-  static Future<void> navigateToUserProfile(
-      BuildContext context, int userId) async {
-    final controller = context.read<ProfileController>();
+  static void navigateToUserProfile(BuildContext context, int userId) {
     final authController = context.read<AuthController>();
 
     // If it's own profile, just go to profile tab
@@ -175,23 +312,45 @@ class ProfileController extends ChangeNotifier {
       return;
     }
 
-    // Show loading? or just fetch.
-    // Let's use a subtle check.
-    final success =
-        await controller.getUserProfile(userId, isOwnProfile: false);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserProfileScreen(userId: userId.toString()),
+      ),
+    );
+  }
+  Future<void> getFaqs() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
-    if (success) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UserProfileScreen(userId: userId.toString()),
-        ),
-      );
-    } else if (controller.errorMessage == "This profile is private") {
-      ToastService.showErrorToast(context, controller.errorMessage!);
+    final response = await _profileService.fetchFaqs();
+
+    if (response.success) {
+      _faqs = response.data ?? [];
+      // Sort by sequence number
+      _faqs.sort((a, b) => a.sequenceNo.compareTo(b.sequenceNo));
     } else {
-      ToastService.showErrorToast(
-          context, controller.errorMessage ?? "Failed to load profile");
+      _errorMessage = response.message;
     }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<ApiResponse<dynamic>> submitFeedback(String message) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final response = await _profileService.submitFeedback(message);
+
+    if (!response.success) {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return response;
   }
 }

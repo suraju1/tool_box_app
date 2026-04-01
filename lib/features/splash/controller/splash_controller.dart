@@ -7,6 +7,8 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/address/controller/address_controller.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 
 class SplashController extends ChangeNotifier {
   /// Decide navigation based on authentication state
@@ -32,14 +34,40 @@ class SplashController extends ChangeNotifier {
           ApiClient().setAuthToken(token);
         }
 
-        // Sync location data if available in user profile
+        // Fetch addresses from API and set default
+        final addressController = context.read<AddressController>();
+        await addressController.fetchAddresses();
+        final defaultAddress = addressController.defaultAddress;
         final user = authController.currentUser;
-        if (user != null) {
-          context.read<LocationController>().updateFromUserData(
-                lat: user.latitude,
-                lng: user.longitude,
-                address: user.location,
-              );
+
+        if (defaultAddress != null) {
+          context
+              .read<LocationController>()
+              .updateFromAddressModel(defaultAddress);
+        } else {
+          // Sync location data if available in user profile as fallback
+          if (user != null) {
+            final profileController = context.read<ProfileController>();
+            // Fetch latest profile to get current location
+            await profileController.getUserProfile(user.id, isOwnProfile: true);
+
+            final profileLocation =
+                profileController.ownProfile?.userDetails.location;
+
+            if (profileLocation != null && profileLocation.isNotEmpty) {
+              context.read<LocationController>().updateFromUserData(
+                    lat: user.latitude,
+                    lng: user.longitude,
+                    address: profileLocation,
+                  );
+            } else {
+              context.read<LocationController>().updateFromUserData(
+                    lat: user.latitude,
+                    lng: user.longitude,
+                    address: user.location,
+                  );
+            }
+          }
         }
 
         // Check if profile is complete

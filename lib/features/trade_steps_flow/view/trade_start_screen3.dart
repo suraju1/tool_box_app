@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,7 @@ import 'package:tool_bocs/features/chat/view/chat_screen.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 
 class TradeStartScreen extends StatefulWidget {
@@ -263,14 +265,34 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
                                 fontWeight: FontWeight.w800,
                                 color: context.textColor,
                                 fontSize: 15.sp),
+                            recognizer: isOwner
+                                ? (TapGestureRecognizer()
+                                  ..onTap = () =>
+                                      ProfileController.navigateToUserProfile(
+                                          context, response.responderId))
+                                : null,
                           ),
                           TextSpan(
-                              text: isOwner
-                                  ? 'responded to your post :\n'
-                                  : 'responded to ${response.posterName ?? 'the owner'}\'s post :\n',
+                            text: isOwner
+                                ? 'responded to your post :\n'
+                                : 'responded to ',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                          if (!isOwner)
+                            TextSpan(
+                              text:
+                                  '${response.posterName ?? 'the owner'}\'s post :\n',
                               style: TextStyle(
-                                fontSize: 14.sp,
-                              )),
+                                  fontWeight: FontWeight.w800,
+                                  color: context.textColor,
+                                  fontSize: 14.sp),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () =>
+                                    ProfileController.navigateToUserProfile(
+                                        context, response.posterUserId),
+                            ),
                           if (isGivePost) ...[
                             TextSpan(text: offeringText),
                             const TextSpan(text: ' -\nTaking '),

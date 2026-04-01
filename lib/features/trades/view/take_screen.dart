@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
+import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
@@ -291,7 +293,8 @@ class _TakeScreenState extends State<TakeScreen> {
             children: [
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  height: 45.h,
+                  padding: EdgeInsets.symmetric(horizontal: 2.w),
                   decoration: BoxDecoration(
                     color: context.isDarkMode
                         ? Colors.white.withOpacity(0.05)
@@ -313,7 +316,7 @@ class _TakeScreenState extends State<TakeScreen> {
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-                      hintText: 'Search any Product..',
+                      hintText: 'Search what you want to take',
                       hintStyle: TextStyle(
                         color: context.subTextColor,
                         fontSize: 14.sp,
@@ -325,6 +328,65 @@ class _TakeScreenState extends State<TakeScreen> {
                       ),
                       border: InputBorder.none,
                     ),
+                  ),
+                ),
+              ),
+              PopupMenuButton<void>(
+                offset: const Offset(-200, 50),
+                shape: PopupMenuArrowShape(borderRadius: 12.r),
+                color: Colors.white,
+                elevation: 4,
+                itemBuilder: (context) => [
+                  PopupMenuItem<void>(
+                    enabled: false,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          '• See what people are giving around you',
+                          '• See existing posts by givers around you',
+                          '• Respond to posts, Mention what you can offer in return',
+                        ]
+                            .map((text) => Padding(
+                                  padding: EdgeInsets.only(bottom: 8.h),
+                                  child: Text(
+                                    text,
+                                    style: TextStyle(
+                                      color: const Color(0xFF111311),
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: FontFamily.openSans,
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  ),
+                ],
+                child: Container(
+                  margin: EdgeInsets.only(left: 8.w),
+                  height: 45.h,
+                  width: 45.h,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: context.isDarkMode
+                        ? Colors.white.withOpacity(0.05)
+                        : const Color(0xFFF5F7F9),
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
+                      color: context.isDarkMode
+                          ? Colors.white24
+                          : Colors.grey.shade300,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.info_outline,
+                    color: context.primaryColor,
+                    size: 22.sp,
                   ),
                 ),
               ),
@@ -348,6 +410,7 @@ class _TakeScreenState extends State<TakeScreen> {
   Widget _buildFilterButton(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
+      height: 45.h,
       margin: EdgeInsets.only(left: 8.w),
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       decoration: BoxDecoration(
@@ -470,6 +533,23 @@ class _TakeScreenState extends State<TakeScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  SizedBox(height: 1.h),
+                  Row(
+                    children: [
+                      Icon(Icons.label_outline,
+                          size: 13.sp, color: context.subTextColor),
+                      SizedBox(width: 4.w),
+                      Text(
+                        post.itemCategory,
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: context.subTextColor,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: FontFamily.openSans,
+                        ),
+                      ),
+                    ],
+                  ),
                   if (post.itemNote.isNotEmpty) ...[
                     SizedBox(height: 2.h),
                     Text(
@@ -491,29 +571,13 @@ class _TakeScreenState extends State<TakeScreen> {
                           color: context.primaryColor, size: 16.sp),
                       SizedBox(width: 4.w),
                       Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "${post.userName} ",
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: context.textColor,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: FontFamily.openSans,
-                                ),
-                              ),
-                              WidgetSpan(child: SizedBox(width: 4.w)),
-                              TextSpan(
-                                text: "\u2022 ${post.itemCategory}",
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  color: context.textColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: FontFamily.openSans,
-                                ),
-                              ),
-                            ],
+                        child: Text(
+                          post.userName,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: context.textColor,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: FontFamily.openSans,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -521,30 +585,31 @@ class _TakeScreenState extends State<TakeScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 2.h),
-                  Row(
-                    children: [
-                      Text(
-                        '4.8', // Placeholder rating
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: FontFamily.openSans,
-                          color: context.textColor,
-                        ),
-                      ),
-                      SizedBox(width: 4.w),
-                      Row(
-                        children: List.generate(5, (index) {
-                          return Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                            size: 16.sp,
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
+                  //dont show rating
+                  // SizedBox(height: 2.h),
+                  // Row(
+                  //   children: [
+                  //     Text(
+                  //       post.userRating?.toString() ?? '4.8',
+                  //       style: TextStyle(
+                  //         fontSize: 12.sp,
+                  //         fontWeight: FontWeight.w600,
+                  //         fontFamily: FontFamily.openSans,
+                  //         color: context.textColor,
+                  //       ),
+                  //     ),
+                  //     SizedBox(width: 4.w),
+                  //     Row(
+                  //       children: List.generate(5, (index) {
+                  //         return Icon(
+                  //           Icons.star,
+                  //           color: Colors.amber,
+                  //           size: 16.sp,
+                  //         );
+                  //       }),
+                  //     ),
+                  //   ],
+                  // ),
                   SizedBox(height: 3.h),
                   (() {
                     final authController = context.read<AuthController>();

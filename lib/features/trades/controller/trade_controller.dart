@@ -14,6 +14,8 @@ class TradeController extends ChangeNotifier {
 
   List<CategoryModel> _categories = [];
   bool _isLoading = false;
+  bool _isIncomingLoading = false;
+  bool _isSentLoading = false;
   String? _errorMessage;
 
   // --- Filter State ---
@@ -31,6 +33,8 @@ class TradeController extends ChangeNotifier {
 
   List<CategoryModel> get categories => _categories;
   bool get isLoading => _isLoading;
+  bool get isIncomingLoading => _isIncomingLoading;
+  bool get isSentLoading => _isSentLoading;
   String? get errorMessage => _errorMessage;
   void clearErrorMessage() {
     if (_errorMessage == null) return;
@@ -49,7 +53,8 @@ class TradeController extends ChangeNotifier {
       final response = await _tradeService.fetchCategories();
 
       if (response.success) {
-        _categories = response.data ?? [];
+        _categories =
+            (response.data ?? []).where((cat) => cat.status == 1).toList();
       } else {
         _errorMessage = response.message;
       }
@@ -155,15 +160,15 @@ class TradeController extends ChangeNotifier {
   String get takeSearchQuery => _takeSearchQuery;
   String get homeSearchQuery => _homeSearchQuery;
 
-  double? _distanceKm; // Null means no distance filter applied
+  double _distanceKm = 10.0; // Default distance
   double? _latitude;
   double? _longitude;
 
-  double get distanceKm => _distanceKm ?? 10.0; // UI fallback
+  double get distanceKm => _distanceKm;
   double? get latitude => _latitude;
   double? get longitude => _longitude;
   bool get hasLocation => _latitude != null && _longitude != null;
-  bool get isDistanceFilterActive => _distanceKm != null && hasLocation;
+  bool get isDistanceFilterActive => hasLocation;
 
   void setDistance(double value,
       {bool triggerFetch = false, String fetchType = 'all'}) {
@@ -243,9 +248,7 @@ class TradeController extends ChangeNotifier {
     _selectedReturnType = 'All';
     _selectedSort = 'Nearest First';
     _selectedPostType = 'all';
-    // _distanceKm = null; // Don't reset distance by default if user deliberately set it?
-    // User preference usually stays. But for "reset filters" we might want to keep it null.
-    _distanceKm = null;
+    _distanceKm = 10.0; // Reset to default
     _giveSearchQuery = '';
     _takeSearchQuery = '';
     _homeSearchQuery = '';
@@ -257,9 +260,16 @@ class TradeController extends ChangeNotifier {
 
     // 1. Filter by Post Type (only for Home posts usually, but safe here)
     if (_selectedPostType != 'all') {
-      filtered = filtered
-          .where((p) => p.postType.toLowerCase() == _selectedPostType)
-          .toList();
+      filtered = filtered.where((p) {
+        final type = p.postType.toLowerCase();
+        final selected = _selectedPostType.toLowerCase();
+        if (selected == 'give') {
+          return type == 'give' || type == 'giving' || type == 'give_away';
+        } else if (selected == 'take') {
+          return type == 'take' || type == 'taking';
+        }
+        return type == selected;
+      }).toList();
     }
 
     // 2. Filter by Category
@@ -454,8 +464,7 @@ class TradeController extends ChangeNotifier {
 
     try {
       // Only include distance if we have valid location data
-      final bool includeDistance =
-          distanceKm != null && latitude != null && longitude != null;
+      final bool includeDistance = latitude != null && longitude != null;
 
       final response = await _tradeService.getAllPosts(
         type: type,
@@ -463,7 +472,7 @@ class TradeController extends ChangeNotifier {
         limit: _limit,
         latitude: latitude,
         longitude: longitude,
-        distanceKm: includeDistance ? distanceKm : null,
+        distanceKm: includeDistance ? _distanceKm : null,
         search: search,
       );
 
@@ -479,7 +488,7 @@ class TradeController extends ChangeNotifier {
         }
         onSuccess(newPosts, next, nextPage);
       } else {
-        onError(response.message ?? 'Failed to fetch posts');
+        onError(response.message);
       }
     } catch (e) {
       onError('An error occurred: $e');
@@ -598,7 +607,7 @@ class TradeController extends ChangeNotifier {
   }
 
   Future<void> fetchAllPostResponses() async {
-    _isLoading = true;
+    _isIncomingLoading = true;
     _errorMessage = null;
     _postResponses = [];
     _responsesPost = null;
@@ -614,13 +623,13 @@ class TradeController extends ChangeNotifier {
     } catch (e) {
       _errorMessage = 'An error occurred: $e';
     } finally {
-      _isLoading = false;
+      _isIncomingLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> fetchSentResponses() async {
-    _isLoading = true;
+    _isSentLoading = true;
     _errorMessage = null;
     _sentResponses = [];
     notifyListeners();
@@ -635,7 +644,7 @@ class TradeController extends ChangeNotifier {
     } catch (e) {
       _errorMessage = 'An error occurred: $e';
     } finally {
-      _isLoading = false;
+      _isSentLoading = false;
       notifyListeners();
     }
   }

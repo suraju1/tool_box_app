@@ -11,6 +11,7 @@ import 'package:tool_bocs/util/font_family.dart'; // Import for ScrollDirection
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
+import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 
 class GiveScreen extends StatefulWidget {
@@ -165,7 +166,8 @@ class _GiveScreenState extends State<GiveScreen> {
                                         distance: post.distanceKm != null
                                             ? '${post.distanceKm!.toStringAsFixed(1)} km away'
                                             : '- km away',
-                                        rating: '4.5',
+                                        rating: post.userRating?.toString() ??
+                                            '4.8',
                                         actionLabel:
                                             post.postType.toLowerCase() ==
                                                     'give'
@@ -299,7 +301,8 @@ class _GiveScreenState extends State<GiveScreen> {
             children: [
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w),
+                  height: 45.h,
+                  padding: EdgeInsets.symmetric(horizontal: 2.w),
                   decoration: BoxDecoration(
                     color: context.isDarkMode
                         ? Colors.white.withOpacity(0.05)
@@ -320,14 +323,73 @@ class _GiveScreenState extends State<GiveScreen> {
                     },
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 8.h),
-                      hintText: 'Search any Product..',
+                      contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                      hintText: 'Search what you want to give',
                       hintStyle: TextStyle(
                           color: context.subTextColor, fontSize: 14.sp),
                       prefixIcon: Icon(Icons.search,
                           color: context.subTextColor, size: 20.sp),
                       border: InputBorder.none,
                     ),
+                  ),
+                ),
+              ),
+              PopupMenuButton<void>(
+                offset: const Offset(-200, 50),
+                shape: PopupMenuArrowShape(borderRadius: 12.r),
+                color: Colors.white,
+                elevation: 4,
+                itemBuilder: (context) => [
+                  PopupMenuItem<void>(
+                    enabled: false,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          '• See what people want around you',
+                          '• See existing posts by takers around you',
+                          '• Respond to posts, Mention what you want in return',
+                        ]
+                            .map((text) => Padding(
+                                  padding: EdgeInsets.only(bottom: 8.h),
+                                  child: Text(
+                                    text,
+                                    style: TextStyle(
+                                      color: const Color(0xFF111311),
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: FontFamily.openSans,
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  ),
+                ],
+                child: Container(
+                  margin: EdgeInsets.only(left: 8.w),
+                  height: 45.h,
+                  width: 45.h,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: context.isDarkMode
+                        ? Colors.white.withOpacity(0.05)
+                        : const Color(0xFFF5F7F9),
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
+                      color: context.isDarkMode
+                          ? Colors.white24
+                          : Colors.grey.shade300,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.info_outline,
+                    color: context.primaryColor,
+                    size: 22.sp,
                   ),
                 ),
               ),
@@ -351,6 +413,7 @@ class _GiveScreenState extends State<GiveScreen> {
   Widget _buildFilterButton(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
+      height: 45.h,
       margin: EdgeInsets.only(left: 8.w),
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       decoration: BoxDecoration(
@@ -479,6 +542,23 @@ class _GiveScreenState extends State<GiveScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  SizedBox(height: 1.h),
+                  Row(
+                    children: [
+                      Icon(Icons.label_outline,
+                          size: 13.sp, color: context.subTextColor),
+                      SizedBox(width: 4.w),
+                      Text(
+                        category,
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: context.subTextColor,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: FontFamily.openSans,
+                        ),
+                      ),
+                    ],
+                  ),
                   if (description != null) ...[
                     SizedBox(height: 2.h),
                     Text(
@@ -500,31 +580,13 @@ class _GiveScreenState extends State<GiveScreen> {
                           color: context.primaryColor, size: 16.sp),
                       SizedBox(width: 4.w),
                       Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "$owner ",
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: context.textColor,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: FontFamily.openSans,
-                                ),
-                              ),
-                              WidgetSpan(
-                                child: SizedBox(width: 4.w),
-                              ),
-                              TextSpan(
-                                text: "\u2022 $category",
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  color: context.textColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: FontFamily.openSans,
-                                ),
-                              ),
-                            ],
+                        child: Text(
+                          owner,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: context.textColor,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: FontFamily.openSans,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -533,26 +595,26 @@ class _GiveScreenState extends State<GiveScreen> {
                     ],
                   ),
                   SizedBox(height: 2.h),
-                  Row(
-                    children: [
-                      Text(
-                        rating,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: FontFamily.openSans,
-                          color: context.textColor,
-                        ),
-                      ),
-                      SizedBox(width: 4.w),
-                      Row(
-                        children: List.generate(5, (index) {
-                          return Icon(Icons.star,
-                              color: Colors.amber, size: 16.sp);
-                        }),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     Text(
+                  //       rating,
+                  //       style: TextStyle(
+                  //         fontSize: 12.sp,
+                  //         fontWeight: FontWeight.w600,
+                  //         fontFamily: FontFamily.openSans,
+                  //         color: context.textColor,
+                  //       ),
+                  //     ),
+                  //     SizedBox(width: 4.w),
+                  //     Row(
+                  //       children: List.generate(5, (index) {
+                  //         return Icon(Icons.star,
+                  //             color: Colors.amber, size: 16.sp);
+                  //       }),
+                  //     ),
+                  //   ],
+                  // ),
                   SizedBox(height: 3.h),
                   InkWell(
                     onTap: () {

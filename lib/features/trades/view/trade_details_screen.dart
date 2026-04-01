@@ -255,25 +255,26 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
                     color: context.subTextColor,
                   ),
                 ),
-                Row(
-                  children: [
-                    Row(
-                      children: List.generate(
-                          5,
-                          (index) =>
-                              Icon(Icons.star, color: amberColor, size: 16.sp)),
-                    ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      '4.8',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: context.textColor,
-                      ),
-                    ),
-                  ],
-                ),
+                //dont show rating
+                // Row(
+                //   children: [
+                //     Row(
+                //       children: List.generate(
+                //           5,
+                //           (index) =>
+                //               Icon(Icons.star, color: amberColor, size: 16.sp)),
+                //     ),
+                //     SizedBox(width: 4.w),
+                //     Text(
+                //       '4.8',
+                //       style: TextStyle(
+                //         fontSize: 13.sp,
+                //         fontWeight: FontWeight.w600,
+                //         color: context.textColor,
+                //       ),
+                //     ),
+                //   ],
+                // ),
               ],
             ),
           ),

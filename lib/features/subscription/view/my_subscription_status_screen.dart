@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
+import 'package:tool_bocs/features/subscription/model/subscription_model.dart';
+import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 
-class MySubscriptionStatusScreen extends StatelessWidget {
+class MySubscriptionStatusScreen extends StatefulWidget {
   const MySubscriptionStatusScreen({super.key});
+
+  @override
+  State<MySubscriptionStatusScreen> createState() =>
+      _MySubscriptionStatusScreenState();
+}
+
+class _MySubscriptionStatusScreenState
+    extends State<MySubscriptionStatusScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SubscriptionController>().fetchMySubscription();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,53 +61,140 @@ class MySubscriptionStatusScreen extends StatelessWidget {
           child: Divider(height: 1, color: context.dividerColor),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
+      body: Consumer<SubscriptionController>(
+        builder: (context, controller, child) {
+          if (controller.isLoading) {
+            return _buildLoadingState(context);
+          }
+
+          final subscription = controller.mySubscription;
+
+          if (subscription == null) {
+            return _buildEmptyState(context, controller);
+          }
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 12.h),
+                _buildCurrentPlanCard(context, subscription),
+                SizedBox(height: 20.h),
+                _buildCreditStatusCard(context, subscription),
+                SizedBox(height: 20.h),
+                Text(
+                  'INCLUDED BENEFITS',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: context.subTextColor,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                SizedBox(height: 15.h),
+                _buildBenefitItem(
+                    context, 'Post Visibility: ${subscription.status}'),
+                _buildBenefitItem(
+                    context, 'Remaining Days: ${subscription.remainingDays}'),
+                _buildBenefitItem(
+                    context, 'Post Price: ₹${subscription.postPrice}'),
+                _buildBenefitItem(context,
+                    'Total Allocation: ${subscription.creditBalance} Credits'),
+                SizedBox(height: 20.h),
+                _buildActionButton(
+                  context,
+                  label: 'Change Plan',
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.choosePlan),
+                  isPrimary: true,
+                ),
+                SizedBox(height: 40.h),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(16.w),
+      child: Column(
+        children: [
+          ShimmerBox(height: 200.h, width: double.infinity, radius: 20.r),
+          SizedBox(height: 20.h),
+          ShimmerBox(height: 100.h, width: double.infinity, radius: 16.r),
+          SizedBox(height: 30.h),
+          ...List.generate(
+              4,
+              (index) => Padding(
+                    padding: EdgeInsets.only(bottom: 12.h),
+                    child: ShimmerBox(
+                        height: 50.h, width: double.infinity, radius: 12.r),
+                  )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(
+      BuildContext context, SubscriptionController controller) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(20.w),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 12.h),
-            _buildCurrentPlanCard(context),
-            SizedBox(height: 20.h),
-            _buildCreditStatusCard(context),
-            SizedBox(height: 20.h),
+            Icon(Icons.subscriptions_outlined,
+                size: 64.sp, color: context.subTextColor),
+            SizedBox(height: 16.h),
             Text(
-              'INCLUDED BENEFITS',
+              'No Active Subscription',
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
-                color: context.subTextColor,
-                letterSpacing: 1.2,
+                color: context.textColor,
               ),
             ),
-            SizedBox(height: 15.h),
-            _buildBenefitItem(context, 'Unlimited Workspace Projects'),
-            _buildBenefitItem(context, 'Advanced Real-time Analytics'),
-            _buildBenefitItem(context, 'Priority 24/7 Support'),
-            _buildBenefitItem(context, '100GB Cloud Storage'),
-            SizedBox(height: 20.h),
+            SizedBox(height: 8.h),
+            Text(
+              controller.errorMessage ??
+                  'You don\'t have any active subscription plan.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: context.subTextColor,
+              ),
+            ),
+            SizedBox(height: 24.h),
             _buildActionButton(
               context,
-              label: 'Upgrade Plan',
+              label: 'View Plans',
               onPressed: () =>
                   Navigator.pushNamed(context, AppRoutes.choosePlan),
               isPrimary: true,
             ),
-            SizedBox(height: 15.h),
-            _buildActionButton(
-              context,
-              label: 'Manage Payment Method',
-              onPressed: () {},
-              isPrimary: false,
+            SizedBox(height: 12.h),
+            TextButton(
+              onPressed: () => controller.fetchMySubscription(),
+              child:
+                  Text('Retry', style: TextStyle(color: context.primaryColor)),
             ),
-            SizedBox(height: 40.h),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCurrentPlanCard(BuildContext context) {
+  Widget _buildCurrentPlanCard(
+      BuildContext context, MySubscriptionData subscription) {
+    final expiryDate = subscription.endDate.isNotEmpty
+        ? DateFormat('dd MMMM yyyy')
+            .format(DateTime.parse(subscription.endDate))
+        : 'N/A';
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -112,13 +219,17 @@ class MySubscriptionStatusScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8F1FF),
+                  color: subscription.status.toLowerCase() == 'active'
+                      ? const Color(0xFFE8F1FF)
+                      : Colors.orange.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
-                  'ACTIVE',
+                  subscription.status.toUpperCase(),
                   style: TextStyle(
-                    color: context.primaryColor,
+                    color: subscription.status.toLowerCase() == 'active'
+                        ? context.primaryColor
+                        : Colors.orange,
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
@@ -130,16 +241,16 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '₹999\n',
+                      text: '${subscription.name}\n',
                       style: TextStyle(
                         color: context.primaryColor,
-                        fontSize: 28.sp,
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.w700,
                         fontFamily: FontFamily.openSans,
                       ),
                     ),
                     TextSpan(
-                      text: 'Per month',
+                      text: '${subscription.days} Days Plan',
                       style: TextStyle(
                         color: context.subTextColor,
                         fontSize: 12.sp,
@@ -154,7 +265,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
           ),
           SizedBox(height: 5.h),
           Text(
-            'Pro Plan',
+            '${subscription.name} Plan',
             style: TextStyle(
               fontSize: 24.sp,
               fontWeight: FontWeight.w800,
@@ -171,14 +282,15 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                   color: const Color(0xFFF2F7FF),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(Icons.sync, color: context.primaryColor, size: 24.sp),
+                child: Icon(Icons.calendar_today,
+                    color: context.primaryColor, size: 24.sp),
               ),
               SizedBox(width: 15.w),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Next Renewal Date',
+                    'Expiry Date',
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: context.subTextColor,
@@ -187,7 +299,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    '12 February 2026',
+                    expiryDate,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -198,46 +310,19 @@ class MySubscriptionStatusScreen extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 10.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color:
-                  context.isDarkMode ? Colors.white10 : const Color(0xFFF9FAFB),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: context.dividerColor),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.account_balance_wallet_outlined,
-                    color: Colors.orange, size: 20.sp),
-                SizedBox(width: 12.w),
-                Text(
-                  'Wallet Balance',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: context.textColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '₹120.00',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w800,
-                    color: context.textColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildCreditStatusCard(BuildContext context) {
+  Widget _buildCreditStatusCard(
+      BuildContext context, MySubscriptionData subscription) {
+    double usage = 0;
+    if (subscription.creditBalance > 0) {
+      usage = (double.tryParse(subscription.remainingCredit) ?? 0) /
+          subscription.creditBalance;
+    }
+
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -262,7 +347,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Credit Status',
+                    'Remaining Credits',
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -271,7 +356,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'Monthly allocation Usage',
+                    'Usage: ${subscription.usedPosts} posts used',
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: context.subTextColor,
@@ -283,7 +368,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '420',
+                      text: subscription.remainingCredit.split('.').first,
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w800,
@@ -291,7 +376,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: '/500',
+                      text: '/${subscription.creditBalance}',
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: context.subTextColor,
@@ -315,7 +400,7 @@ class MySubscriptionStatusScreen extends StatelessWidget {
               ),
               Container(
                 height: 8.h,
-                width: 1.sw * 0.5, // 420/500 usage
+                width: 1.sw * (usage > 1 ? 1 : usage),
                 decoration: BoxDecoration(
                   color: context.primaryColor,
                   borderRadius: BorderRadius.circular(10.r),
@@ -372,7 +457,8 @@ class MySubscriptionStatusScreen extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? context.primaryColor : context.surfaceColor,
+          backgroundColor:
+              isPrimary ? context.primaryColor : context.surfaceColor,
           elevation: isPrimary ? 2 : 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),

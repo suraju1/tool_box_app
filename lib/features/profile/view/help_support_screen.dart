@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -13,6 +16,15 @@ class HelpSupportScreen extends StatefulWidget {
 class _HelpSupportScreenState extends State<HelpSupportScreen> {
   final TextEditingController _feedbackController = TextEditingController();
   bool _showFeedbackField = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch FAQs when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileController>().getFaqs();
+    });
+  }
 
   @override
   void dispose() {
@@ -47,45 +59,43 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           child: Divider(height: 1, color: context.dividerColor),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          children: [
-            _buildFAQItem(
-              context,
-              question: 'How does Give & Take work?',
-              answer:
-                  'You can give items you no longer need or take items offered by others. You can exchange items for price or another item based on mutual agreement.',
-              initiallyExpanded: true,
+      body: Consumer<ProfileController>(
+        builder: (context, controller, child) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(20.w),
+            child: Column(
+              children: [
+                if (controller.isLoading && controller.faqs.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40.h),
+                    child: const Center(child: CircularProgressIndicator()),
+                  )
+                else if (controller.faqs.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                    child: Text(
+                      'No FAQs available at the moment.',
+                      style: TextStyle(
+                        color: context.subTextColor,
+                        fontSize: 14.sp,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                  )
+                else
+                  ...controller.faqs.map((faq) => _buildFAQItem(
+                        context,
+                        question: faq.question,
+                        answer: faq.answer,
+                        initiallyExpanded: controller.faqs.indexOf(faq) == 0,
+                      )),
+                
+                SizedBox(height: 30.h),
+                _buildFeedbackSection(controller),
+              ],
             ),
-            _buildFAQItem(
-              context,
-              question: 'How do I create a new post?',
-              answer:
-                  'To create a new post, navigate to the "Give" tab and click on the "Make a New Post" button at the bottom of the screen.',
-            ),
-            _buildFAQItem(
-              context,
-              question: 'Is it safe to trade with other users?',
-              answer:
-                  'We encourage users to review profiles and ratings before trading. Always meet in safe, public places for physical exchanges.',
-            ),
-            _buildFAQItem(
-              context,
-              question: 'How do ratings and reviews work?',
-              answer:
-                  'After a trade is completed, both parties can rate each other and leave a review based on their experience.',
-            ),
-            _buildFAQItem(
-              context,
-              question: 'What happens if I face a problem during a trade?',
-              answer:
-                  'If you encounter any issues, you can report the user through their profile or contact our support team for assistance.',
-            ),
-            SizedBox(height: 30.h),
-            _buildFeedbackSection(),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -158,7 +168,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     );
   }
 
-  Widget _buildFeedbackSection() {
+  Widget _buildFeedbackSection(ProfileController controller) {
     return Column(
       children: [
         Container(
@@ -250,21 +260,25 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                // Submit logic here
+              onPressed: controller.isLoading 
+                ? null 
+                : () async {
                 if (_feedbackController.text.isNotEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Feedback submitted successfully')),
-                  );
-                  setState(() {
-                    _showFeedbackField = false;
-                    _feedbackController.clear();
-                  });
+                  final response = await controller.submitFeedback(_feedbackController.text);
+                  
+                  if (mounted) {
+                    if (response.success) {
+                      ToastService.showSuccessToast(context, response.message);
+                      setState(() {
+                        _showFeedbackField = false;
+                        _feedbackController.clear();
+                      });
+                    } else {
+                      ToastService.showErrorToast(context, response.message);
+                    }
+                  }
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter some feedback')),
-                  );
+                  ToastService.showErrorToast(context, 'Please enter some feedback');
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -275,14 +289,23 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 ),
                 elevation: 0,
               ),
-              child: Text(
-                'Submit',
-                style: TextStyle(
-                  color: context.onPrimaryColor,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: controller.isLoading 
+                ? SizedBox(
+                    height: 20.h,
+                    width: 20.h,
+                    child: CircularProgressIndicator(
+                      color: context.onPrimaryColor,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'Submit',
+                    style: TextStyle(
+                      color: context.onPrimaryColor,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
             ),
           ),
         ],

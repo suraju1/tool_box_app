@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
 import 'package:tool_bocs/features/login_and_signup/model/user_model.dart';
 import 'package:flutter/foundation.dart';
@@ -120,7 +121,11 @@ class ChatService {
         debugPrint("sendMessage: SET complete");
       }
     } catch (e) {
-      debugPrint("sendMessage Error: $e");
+      if (e is FirebaseException && e.code == 'permission-denied') {
+        debugPrint("sendMessage PERMISSION_DENIED: The user does not have permission to write to chat_rooms or messages. Please check Firestore rules.");
+      } else {
+        debugPrint("sendMessage Error: $e");
+      }
     }
   }
 
@@ -154,7 +159,11 @@ class ChatService {
             "markMessagesAsRead: Marked ${snapshot.docs.length} messages as read");
       }
     } catch (e) {
-      debugPrint("markMessagesAsRead Error: $e");
+      if (e is FirebaseException && e.code == 'permission-denied') {
+        debugPrint("markMessagesAsRead PERMISSION_DENIED: The user does not have permission to update chat_rooms. Please check Firestore rules.");
+      } else {
+        debugPrint("markMessagesAsRead Error: $e");
+      }
     }
   }
 
@@ -171,11 +180,27 @@ class ChatService {
   // Get chat rooms stream for current user
   Stream<QuerySnapshot> getChatRooms() async* {
     UserModel? currentUser = await getCurrentUser();
-    if (currentUser == null) yield* const Stream.empty();
+    if (currentUser == null) {
+      debugPrint("getChatRooms: No local user data found.");
+      yield* const Stream.empty();
+      return;
+    }
+
+    final String userId = currentUser.id.toString();
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+
+    if (firebaseUser == null) {
+      debugPrint("getChatRooms WARNING: Firebase Auth is NULL for user $userId. Firestore queries will likely fail.");
+      // We could try to sign in here, but AuthController should handle it.
+    } else {
+      debugPrint("getChatRooms: Firebase Auth UID: ${firebaseUser.uid}");
+    }
+
+    debugPrint("getChatRooms: Fetching rooms where 'users' contains $userId");
 
     yield* _firestore
         .collection('chat_rooms')
-        .where('users', arrayContains: currentUser!.id.toString())
+        .where('users', arrayContains: userId)
         .orderBy('updatedAt', descending: true)
         .snapshots();
   }

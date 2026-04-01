@@ -80,9 +80,9 @@ class TradeService {
     String? search,
   }) async {
     try {
-      final response = await _apiClient.post(
+      final response = await _apiClient.get(
         ApiConstants.getAllGiveTakePost,
-        data: {
+        queryParameters: {
           "type": type,
           "page": page,
           "limit": limit,
@@ -237,9 +237,14 @@ class TradeService {
       if (response.statusCode == 200) {
         final data = response.data;
         if (data['success'] == true) {
-          final List<TradeResponseModel> responses = (data['data'] as List)
-              .map((e) => TradeResponseModel.fromJson(e))
-              .toList();
+          final List<TradeResponseModel> responses = [];
+          for (var e in (data['data'] as List)) {
+            try {
+              responses.add(TradeResponseModel.fromJson(e));
+            } catch (err) {
+              print('Error parsing incoming response: $err for data: $e');
+            }
+          }
           return ApiResponse(
             success: true,
             message: data['message'] ?? 'All responses fetched',
@@ -269,9 +274,14 @@ class TradeService {
       if (response.statusCode == 200) {
         final data = response.data;
         if (data['success'] == true) {
-          final List<TradeResponseModel> responses = (data['data'] as List)
-              .map((e) => TradeResponseModel.fromJson(e))
-              .toList();
+          final List<TradeResponseModel> responses = [];
+          for (var e in (data['data'] as List)) {
+            try {
+              responses.add(TradeResponseModel.fromJson(e));
+            } catch (err) {
+              print('Error parsing sent response: $err for data: $e');
+            }
+          }
           return ApiResponse(
             success: true,
             message: data['message'] ?? 'Sent offers fetched successfully',

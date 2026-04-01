@@ -14,6 +14,7 @@ import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 
 class CreateGivePostScreen extends StatefulWidget {
   const CreateGivePostScreen({super.key});
@@ -1368,6 +1369,65 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
                 fontFamily: FontFamily.openSans,
+              ),
+            ),
+          ),
+          const Spacer(),
+          PopupMenuButton<void>(
+            offset: const Offset(-200, 45),
+            shape: PopupMenuArrowShape(borderRadius: 12.r),
+            color: Colors.white,
+            elevation: 4,
+            itemBuilder: (context) => [
+              PopupMenuItem<void>(
+                enabled: false,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      '• Ask someone to take something, by creating a post',
+                      '• This post will be visible to the "takers" around you',
+                      '• In your selected area i.e >10 mtrs / <5kms',
+                    ]
+                        .map((text) => Padding(
+                              padding: EdgeInsets.only(bottom: 8.h),
+                              child: Text(
+                                text,
+                                style: TextStyle(
+                                  color: const Color(0xFF111311),
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ),
+            ],
+            child: Container(
+              margin: EdgeInsets.only(right: 8.w),
+              height: 40.h,
+              width: 40.h,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: context.isDarkMode
+                    ? Colors.white.withOpacity(0.05)
+                    : const Color(0xFFF5F7F9),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(
+                  color: context.isDarkMode
+                      ? Colors.white24
+                      : Colors.grey.shade300,
+                ),
+              ),
+              child: Icon(
+                Icons.info_outline,
+                color: context.primaryColor,
+                size: 22.sp,
               ),
             ),
           ),

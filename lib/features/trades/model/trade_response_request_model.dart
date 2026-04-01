@@ -37,10 +37,14 @@ class TradeResponseRequestModel {
     final sanitizedDescription = StringUtil.sanitizeForSql(description);
     final sanitizedCondition = StringUtil.sanitizeForSql(condition);
 
+    final processedReturnType =
+        returnType.toLowerCase() == 'item' ? 'Item' : returnType.toLowerCase();
+
     final Map<String, dynamic> data = {
-      'return_type': returnType,
-      if (itemName != null) ...{
-        'item_name': sanitizedName,
+      'return_type': processedReturnType,
+      if (itemName != null || returnType.toLowerCase() == 'item') ...{
+        'Item_name': sanitizedName,
+        'item_name': sanitizedName, // Keep lowercase for safety
         'giving_item_name': sanitizedName, // Alias for server-side mapping
         'return_item_name': sanitizedName, // Alias for server-side mapping
       },
@@ -65,7 +69,12 @@ class TradeResponseRequestModel {
       for (var path in images!) {
         if (path.isNotEmpty) {
           formData.files.add(MapEntry(
-            'images', // Note: Postman shows 'images' without brackets for respond API
+            'Images', // Note: Case sensitive for some backend versions
+            await MultipartFile.fromFile(path),
+          ));
+          // Adding lowercase as well for compatibility
+          formData.files.add(MapEntry(
+            'images',
             await MultipartFile.fromFile(path),
           ));
         }

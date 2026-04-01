@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
-import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
-import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 
 class LogoutDialog extends StatelessWidget {
   const LogoutDialog({super.key});
@@ -87,23 +85,8 @@ class LogoutDialog extends StatelessWidget {
                     // Close dialog
                     Navigator.pop(context);
 
-                    // Call logout from AuthController
-                    final authController = context.read<AuthController>();
-                    await authController.logout();
-
-                    // Reset Bottom Navigation Bar to Home
-                    if (context.mounted) {
-                      context.read<BottomNavBarController>().reset();
-                    }
-
-                    // Navigate to login screen and clear navigation stack
-                    if (context.mounted) {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        AppRoutes.login,
-                        (route) => false,
-                      );
-                    }
+                    // Call logout from AuthController (handles navigation internally)
+                    await context.read<AuthController>().logout();
                   },
                   child: Container(
                     height: 45.h,

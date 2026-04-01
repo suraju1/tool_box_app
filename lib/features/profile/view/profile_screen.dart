@@ -421,8 +421,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     SizedBox(height: 5.h),
                     Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      padding: EdgeInsets.symmetric(vertical: 6.h),
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                         borderRadius: BorderRadius.circular(10.r),
@@ -435,19 +434,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Icon(Icons.wallet, color: Colors.orange, size: 16.sp),
                           SizedBox(width: 4.w),
                           Text(
-                            'Wallet Balance ',
+                            'Credit Balance : ',
                             style: TextStyle(
                               color: context.textColor,
-                              fontSize: 10.sp,
+                              fontSize: 12.sp,
                               fontFamily: FontFamily.openSans,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           Text(
-                            '₹120.00',
+                            user.remainingBalance ?? '0.00',
                             style: TextStyle(
                               color: context.textColor,
-                              fontSize: 12.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w900,
                               fontFamily: FontFamily.openSans,
                             ),
@@ -589,7 +588,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: EdgeInsets.symmetric(vertical: 5.h),
       child: InkWell(
         onTap: () {
-          ProfileController.navigateToUserProfile(context, review.reviewerId);
+          if (review.reviewerId != null) {
+            ProfileController.navigateToUserProfile(
+                context, review.reviewerId!);
+          }
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -618,7 +620,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    review.reviewerName,
+                    review.reviewerName ?? 'User',
                     style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
@@ -826,7 +828,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             context,
             icon: Icons.bookmark_border,
             label: 'Saved Profiles',
-            onTap: () {},
+            onTap: () => Navigator.pushNamed(context, AppRoutes.savedUsers),
           ),
           _buildDivider(),
           _buildProfileSettingItem(

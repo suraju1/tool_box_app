@@ -11,6 +11,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String? userId;
@@ -26,6 +27,8 @@ class UserProfileScreen extends StatefulWidget {
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isUserSaved = false;
+  UserProfileModel? _userProfile;
+  bool _isLocalLoading = false;
 
   @override
   void initState() {
@@ -39,15 +42,35 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         targetUserId = context.read<AuthController>().currentUser?.id;
       }
 
+      final currentUserId = context.read<AuthController>().currentUser?.id;
+      final isOwnProfile = targetUserId == currentUserId;
+
       if (targetUserId != null) {
+        setState(() => _isLocalLoading = true);
         context
             .read<ProfileController>()
-            .getUserProfile(targetUserId, isOwnProfile: false)
+            .getUserProfile(targetUserId, isOwnProfile: isOwnProfile)
             .then((success) {
-          if (!success &&
-              context.read<ProfileController>().errorMessage ==
-                  "This profile is private") {
-            Navigator.of(context).pop();
+          if (success) {
+            final profile = context.read<ProfileController>().userProfile;
+            if (profile != null) {
+              setState(() {
+                _userProfile = profile;
+                _isUserSaved = profile.isSaved ?? false;
+              });
+            }
+          }
+          if (!success) {
+            final error = context.read<ProfileController>().errorMessage;
+            if (error != null && error.toLowerCase().contains("private")) {
+              if (mounted) {
+                ToastService.showErrorToast(context, error);
+                Navigator.of(context).pop();
+              }
+            }
+          }
+          if (mounted) {
+            setState(() => _isLocalLoading = false);
           }
         });
       }
@@ -58,12 +81,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     final shimmer = context.watch<ShimmerController>();
     final profileController = context.watch<ProfileController>();
-    final userProfile = profileController.viewedProfile;
+    final userProfile = _userProfile;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       body: (shimmer.isLoading ||
-              profileController.isLoading ||
+              _isLocalLoading ||
               (userProfile == null && profileController.errorMessage == null))
           ? _buildShimmer(context)
           : userProfile == null
@@ -83,14 +106,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         children: [
                           SizedBox(height: 15.h),
                           _buildBioSection(userProfile),
-                          SizedBox(height: 15.h),
-                          //rate this person now button
-                          _buildRateThisPersonButton(context, userProfile),
+                          if (userProfile.isRated != true) ...[
+                            SizedBox(height: 15.h),
+                            //rate this person now button
+                            _buildRateThisPersonButton(context, userProfile),
+                          ],
 
                           SizedBox(height: 15.h),
                           _buildReviewsSection(userProfile),
-                          SizedBox(height: 15.h),
-                          _buildTradeHistoryStats(context, userProfile),
+                          if (userProfile.showTradeHistory != 0) ...[
+                            SizedBox(height: 15.h),
+                            _buildTradeHistoryStats(context, userProfile),
+                          ],
                           SizedBox(height: 20.h),
                           // _buildSettingsList(context),
                           _saveUserButton(context),
@@ -335,8 +362,66 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               //report and block
               PopupMenuButton<String>(
                 padding: EdgeInsets.zero,
-                onSelected: (value) {
-                  // Handle selection
+                onSelected: (value) async {
+                  if (value == 'block') {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: context.surfaceColor,
+                        title: Text(
+                          'Block User',
+                          style: TextStyle(
+                            color: context.textColor,
+                            fontFamily: FontFamily.openSans,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        content: Text(
+                          'Are you sure you want to block ${details.fullName}?',
+                          style: TextStyle(
+                            color: context.textColor,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(color: context.subTextColor),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text(
+                              'Block',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm == true) {
+                      final response = await context
+                          .read<ProfileController>()
+                          .blockUser(details.id);
+                      if (response.success) {
+                        if (context.mounted) {
+                          ToastService.showSuccessToast(
+                              context, response.message);
+                          Navigator.pop(context); // Go back after blocking
+                        }
+                      } else {
+                        if (context.mounted) {
+                          ToastService.showErrorToast(
+                              context, response.message);
+                        }
+                      }
+                    }
+                  } else if (value == 'report') {
+                    // Handle report
+                  }
                 },
                 offset: const Offset(0, 55),
                 shape: PopupMenuArrowShape(
@@ -566,7 +651,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       padding: EdgeInsets.symmetric(vertical: 5.h),
       child: InkWell(
         onTap: () {
-          ProfileController.navigateToUserProfile(context, review.reviewerId);
+          if (review.reviewerId != null) {
+            ProfileController.navigateToUserProfile(context, review.reviewerId!);
+          }
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -595,7 +682,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    review.reviewerName,
+                    review.reviewerName ?? 'User',
                     style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
@@ -743,12 +830,32 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Widget _saveUserButton(BuildContext context) {
+    final profileController = context.watch<ProfileController>();
+    final isSaving = profileController.isLoading;
+
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isUserSaved = !_isUserSaved;
-        });
-      },
+      onTap: isSaving
+          ? null
+          : () async {
+              if (_userProfile != null) {
+                final response = await context
+                    .read<ProfileController>()
+                    .toggleSaveUser(_userProfile!.userDetails.id);
+
+                if (response.success) {
+                  if (mounted) {
+                    setState(() {
+                      _isUserSaved = !_isUserSaved;
+                    });
+                    ToastService.showSuccessToast(context, response.message);
+                  }
+                } else {
+                  if (mounted) {
+                    ToastService.showErrorToast(context, response.message);
+                  }
+                }
+              }
+            },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 60.w),
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
@@ -757,16 +864,25 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         decoration: BoxDecoration(
           color: context.primaryColor,
           borderRadius: BorderRadius.circular(8.r),
-          //border: Border.all(color: greyColor.withOpacity(0.2)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              _isUserSaved ? Icons.bookmark : Icons.bookmark_border,
-              size: 25.sp,
-              color: context.onPrimaryColor,
-            ),
+            if (isSaving)
+              SizedBox(
+                height: 20.r,
+                width: 20.r,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: context.onPrimaryColor,
+                ),
+              )
+            else
+              Icon(
+                _isUserSaved ? Icons.bookmark : Icons.bookmark_border,
+                size: 25.sp,
+                color: context.onPrimaryColor,
+              ),
             SizedBox(width: 8.w),
             Text(
               _isUserSaved ? 'Saved' : 'Save User',

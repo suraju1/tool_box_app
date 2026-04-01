@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class TradeResponseModel {
   final int id;
   final int postId;
@@ -66,11 +68,30 @@ class TradeResponseModel {
   });
 
   factory TradeResponseModel.fromJson(Map<String, dynamic> json) {
+    // Helper function to handle mixed type image fields
+    List<String> parseImages(dynamic images) {
+      if (images == null) return [];
+      if (images is List) return images.map((e) => e.toString()).toList();
+      if (images is String) {
+        if (images.isEmpty || images == "[]") return [];
+        try {
+          final decoded = jsonDecode(images);
+          if (decoded is List) return decoded.map((e) => e.toString()).toList();
+        } catch (_) {}
+      }
+      return [];
+    }
+
     return TradeResponseModel(
-      id: json['id'] ?? 0,
-      postId: json['giveaway_id'] ?? json['post_id'] ?? 0,
-      responderId: json['responder_user_id'] ?? json['user_id'] ?? 0,
-      posterUserId: json['poster_user_id'] ?? 0,
+      id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      postId: int.tryParse(
+              (json['giveaway_id'] ?? json['post_id'])?.toString() ?? '') ??
+          0,
+      responderId: int.tryParse(
+              (json['responder_user_id'] ?? json['user_id'])?.toString() ??
+                  '') ??
+          0,
+      posterUserId: int.tryParse(json['poster_user_id']?.toString() ?? '') ?? 0,
       responderName: json['responder_name'] ?? json['user_name'] ?? 'User',
       responderImage: json['responder_image'] ?? json['user_image'],
       responseType: json['post_return_type'] ??
@@ -84,7 +105,7 @@ class TradeResponseModel {
           json['offer_is_negotiable'] == true ||
           json['is_negotiable'] == 1 ||
           json['is_negotiable'] == true),
-      itemName: json['post_type'] == 'give'
+      itemName: (json['post_type'] == 'give' || json['post_type'] == 'giving')
           ? (json['return_item_name'] ?? json['giving_item_name'])
           : (json['giving_item_name'] ?? json['return_item_name']),
       itemCategory: json['giving_item_category'] ?? json['category_name'],
@@ -98,31 +119,27 @@ class TradeResponseModel {
           json['giving_is_store_bought'] == true ||
           json['is_store_bought'] == 1 ||
           json['is_store_bought'] == true),
-      itemImages: (json['giving_item_images'] as List?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          (json['images'] as List?)?.map((e) => e.toString()).toList() ??
-          [],
-      status: json['status'] ?? 'pending',
+      itemImages: parseImages(json['giving_item_images'] ?? json['images']),
+      status: json['status']?.toString().toLowerCase() ?? 'pending',
       paymentStatus: json['payment_status'] ?? 'unpaid',
       createdAt: json['created_at'] ?? '',
-      postItemName: json['post_type'] == 'give'
-          ? (json['giving_item_name'] ??
-              json['post_item_name'] ??
-              json['item_name'])
-          : (json['post_item_name'] ?? json['item_name']),
+      postItemName: json['post_item_name'] ??
+          json['item_name'] ??
+          ((json['post_type'] == 'give' || json['post_type'] == 'giving')
+              ? json['giving_item_name']
+              : json['return_item_name']),
       returnItemName: json['return_item_name'],
-      postItemImages: (json['post_item_images'] as List?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
+      postItemImages: parseImages(json['post_item_images'] ?? json['post_images']),
       postType: json['post_type'],
       rejectedBy: json['rejected_by'],
       rejectedReason: json['rejected_reason'],
       posterName: json['poster_name'],
       posterImage: json['poster_image'],
-      itemCategoryId:
-          json['giving_item_category_id'] ?? json['item_category_id'],
+      itemCategoryId: int.tryParse(
+              (json['giving_item_category_id'] ?? json['item_category_id'])
+                      ?.toString() ??
+                  '') ??
+          0,
       posterMobile: json['poster_mobile'] ?? json['poster_phone_number'],
       responderMobile:
           json['responder_mobile'] ?? json['responder_phone_number'],

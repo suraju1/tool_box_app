@@ -2,11 +2,17 @@ class UserProfileModel {
   final UserDetails userDetails;
   final TradeStats tradeStats;
   final List<Review> reviews;
+  final bool? isSaved;
+  final bool? isRated;
+  final int showTradeHistory;
 
   UserProfileModel({
     required this.userDetails,
     required this.tradeStats,
     required this.reviews,
+    this.isSaved,
+    this.isRated,
+    this.showTradeHistory = 1,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
@@ -16,6 +22,9 @@ class UserProfileModel {
       reviews:
           (json['reviews'] as List?)?.map((e) => Review.fromJson(e)).toList() ??
               [],
+      isSaved: json['isSaved'],
+      isRated: json['isRated'],
+      showTradeHistory: json['show_trade_history'] ?? 1,
     );
   }
 }
@@ -29,8 +38,15 @@ class UserDetails {
   final String? email;
   final String? phoneNumber;
   final int profileVisibility;
+  final int showTradeHistory;
+  final String? gender;
+  final String? dateOfBirth;
+  final dynamic latitude;
+  final dynamic longitude;
   final String averageRating;
   final int totalReviews;
+  final String? remainingBalance;
+  final bool termsAccepted;
 
   UserDetails({
     required this.id,
@@ -41,8 +57,15 @@ class UserDetails {
     this.email,
     this.phoneNumber,
     this.profileVisibility = 1,
+    this.showTradeHistory = 1,
+    this.gender,
+    this.dateOfBirth,
+    this.latitude,
+    this.longitude,
     required this.averageRating,
     required this.totalReviews,
+    this.remainingBalance,
+    this.termsAccepted = true,
   });
 
   factory UserDetails.fromJson(Map<String, dynamic> json) {
@@ -55,8 +78,16 @@ class UserDetails {
       email: json['email'],
       phoneNumber: json['phone_number'],
       profileVisibility: json['profile_visibility'] ?? 1,
+      showTradeHistory: json['show_trade_history'] ?? 1,
+      gender: json['gender'],
+      dateOfBirth: json['date_of_birth'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
       averageRating: json['average_rating']?.toString() ?? '0.0',
       totalReviews: json['total_reviews'] ?? 0,
+      remainingBalance: json['remaining_balance']?.toString(),
+      termsAccepted:
+          json['terms_accepted'] == 1 || json['terms_accepted'] == true,
     );
   }
 }
@@ -83,9 +114,9 @@ class TradeStats {
 
 class Review {
   final int id;
-  final int userId;
-  final int reviewerId;
-  final String reviewerName;
+  final int? userId;
+  final int? reviewerId;
+  final String? reviewerName;
   final String? reviewerImage;
   final dynamic rating;
   final String? feedbackLabel;
@@ -94,9 +125,9 @@ class Review {
 
   Review({
     required this.id,
-    required this.userId,
-    required this.reviewerId,
-    required this.reviewerName,
+    this.userId,
+    this.reviewerId,
+    this.reviewerName,
     this.reviewerImage,
     required this.rating,
     this.feedbackLabel,
@@ -107,9 +138,9 @@ class Review {
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
       id: json['id'] ?? 0,
-      userId: json['user_id'] ?? 0,
-      reviewerId: json['reviewer_id'] ?? 0,
-      reviewerName: json['reviewer_name'] ?? 'User',
+      userId: json['user_id'],
+      reviewerId: json['reviewer_id'],
+      reviewerName: json['reviewer_name'],
       reviewerImage: json['reviewer_image'],
       rating: json['rating'] ?? 0,
       feedbackLabel: json['feedback_label'],

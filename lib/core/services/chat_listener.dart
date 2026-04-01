@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tool_bocs/core/services/notification_service.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
 import 'package:tool_bocs/features/login_and_signup/model/user_model.dart';
@@ -13,6 +15,7 @@ class ChatListener {
   bool _isFirstLoad = true;
   final Map<String, Timestamp> _lastMessageTimestamps = {};
   String? _currentUserId;
+  StreamSubscription? _chatSubscription;
 
   static String? currentChatRoomId;
 
@@ -30,12 +33,19 @@ class ChatListener {
     }
 
     if (_currentUserId == null) return;
+    
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser == null) {
+      debugPrint("ChatListener WARNING: Firebase Auth is NULL for user $_currentUserId. Listening will likely fail.");
+    } else {
+      debugPrint("ChatListener: Firebase Auth UID: ${firebaseUser.uid}");
+    }
 
     // 2. Initialize Notification Service
     await NotificationService().init();
 
     // 3. Listen to Chat Rooms
-    FirebaseFirestore.instance
+    _chatSubscription = FirebaseFirestore.instance
         .collection('chat_rooms')
         .where('users', arrayContains: _currentUserId)
         .snapshots()
@@ -147,5 +157,15 @@ class ChatListener {
       body: body.isNotEmpty ? body : '...',
       payload: '$roomId|$senderId|$senderName',
     );
+  }
+
+  /// Stop listening to chat rooms
+  Future<void> stopListening() async {
+    await _chatSubscription?.cancel();
+    _chatSubscription = null;
+    _isFirstLoad = true;
+    _lastMessageTimestamps.clear();
+    _currentUserId = null;
+    debugPrint('ChatListener: Stopped listening and cleared state.');
   }
 }

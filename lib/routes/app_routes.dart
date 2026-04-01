@@ -28,4 +28,5 @@ class AppRoutes {
   static const mySubscription = '/mySubscription';
   static const subscriptionHistory = '/subscriptionHistory';
   static const choosePlan = '/choosePlan';
+  static const savedUsers = '/savedUsers';
 }

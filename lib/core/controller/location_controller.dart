@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tool_bocs/core/services/location_service.dart';
 import 'package:tool_bocs/core/services/local_location_service.dart';
+import 'package:tool_bocs/features/address/model/address_model.dart';
 
 /// Controller for managing location state
 class LocationController extends ChangeNotifier {
@@ -13,22 +14,7 @@ class LocationController extends ChangeNotifier {
   double _radius = 5.0; // Default 5km
 
   // Saved addresses list
-  List<Map<String, String>> _savedAddresses = [];
 
-  LocationController() {
-    _loadSavedData();
-  }
-
-  void _loadSavedData() {
-    _savedAddresses = LocalLocationService.loadAddresses();
-    final lastLoc = LocalLocationService.loadLastSelectedLocation();
-    if (lastLoc != null) {
-      _latitude = double.tryParse(lastLoc['lat'] ?? '');
-      _longitude = double.tryParse(lastLoc['lng'] ?? '');
-      _address = lastLoc['address'];
-      _city = lastLoc['city'];
-    }
-  }
 
   // Getters
   double? get latitude => _latitude;
@@ -39,7 +25,6 @@ class LocationController extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   double get radius => _radius;
   bool get hasLocation => _latitude != null && _longitude != null;
-  List<Map<String, String>> get savedAddresses => _savedAddresses;
 
   /// Fetch current location with address
   Future<bool> fetchLocation() async {
@@ -152,17 +137,6 @@ class LocationController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Save an address (Home, Work, etc.)
-  void saveAddress(String label, String fullAddress, double lat, double lng) {
-    _savedAddresses.add({
-      'label': label,
-      'address': fullAddress,
-      'lat': lat.toString(),
-      'lng': lng.toString(),
-    });
-    LocalLocationService.saveAddresses(_savedAddresses);
-    notifyListeners();
-  }
 
   void _persistCurrentLocation() {
     LocalLocationService.saveLastSelectedLocation({
@@ -198,6 +172,28 @@ class LocationController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error updating location from user data: $e');
+    }
+  }
+
+  /// Update location from AddressModel (API response)
+  Future<void> updateFromAddressModel(AddressModel addressModel) async {
+    try {
+      _latitude = addressModel.latitude;
+      _longitude = addressModel.longitude;
+      _address = addressModel.address;
+
+      // Also try to get city if coordinates are valid
+      if (_latitude != null && _longitude != null) {
+        _city = await LocationService.getCityFromCoordinates(
+          _latitude!,
+          _longitude!,
+        );
+        _persistCurrentLocation();
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error updating location from address model: $e');
     }
   }
 }
