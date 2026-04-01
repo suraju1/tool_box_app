@@ -77,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: context.scaffoldBg,
       body: Column(
         children: [
+          SizedBox(height: 25.h),
           _buildHeader(context),
           Expanded(
             child: Consumer<TradeController>(

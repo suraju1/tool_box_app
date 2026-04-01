@@ -88,6 +88,7 @@ class _GiveScreenState extends State<GiveScreen> {
                 children: [
                   Column(
                     children: [
+                      SizedBox(height: 15.h),
                       _buildHeader(context),
                       Divider(
                         color: context.dividerColor,
