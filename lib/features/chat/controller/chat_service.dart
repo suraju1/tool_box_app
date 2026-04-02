@@ -201,30 +201,30 @@ class ChatService {
 
   // Get chat rooms stream for current user
   Stream<QuerySnapshot> getChatRooms() {
-    return Stream.fromFuture(getCurrentUser())
-        .asyncExpand((currentUser) {
-          if (currentUser == null) {
-            debugPrint("getChatRooms: No local user data found.");
-            return const Stream.empty();
-          }
-
-          final String userId = currentUser.id.toString();
-          final firebaseUser = FirebaseAuth.instance.currentUser;
-
+    return FirebaseAuth.instance
+        .authStateChanges()
+        .asyncExpand((firebaseUser) {
           if (firebaseUser == null) {
-            debugPrint(
-                "getChatRooms WARNING: Firebase Auth is NULL for user $userId. Returning empty stream.");
+            debugPrint("getChatRooms: No Firebase user signed in.");
             return const Stream.empty();
           }
 
-          debugPrint(
-              "getChatRooms: Fetching rooms where 'users' contains $userId");
+          return Stream.fromFuture(getCurrentUser()).asyncExpand((currentUser) {
+            if (currentUser == null) {
+              debugPrint("getChatRooms: No local user data found.");
+              return const Stream.empty();
+            }
 
-          return _firestore
-              .collection('chat_rooms')
-              .where('users', arrayContains: userId)
-              .orderBy('updatedAt', descending: true)
-              .snapshots();
+            final String userId = currentUser.id.toString();
+            debugPrint(
+                "getChatRooms: Auth ready. Fetching rooms where 'users' contains $userId");
+
+            return _firestore
+                .collection('chat_rooms')
+                .where('users', arrayContains: userId)
+                .orderBy('updatedAt', descending: true)
+                .snapshots();
+          });
         })
         .cast<QuerySnapshot>()
         .asBroadcastStream();

@@ -7,6 +7,7 @@ import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
 import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/core/widgets/skeleton_widgets.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
@@ -661,48 +662,7 @@ class _TakeScreenState extends State<TakeScreen> {
             itemCount: 4,
             itemBuilder: (context, index) => Padding(
               padding: EdgeInsets.only(bottom: 6.h),
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: context.surfaceColor,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: context.dividerColor),
-                ),
-                child: Row(
-                  children: [
-                    ShimmerBox(height: 154.w, width: 136.w, radius: 12.r),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              ShimmerBox(height: 10.h, width: 60.w),
-                              ShimmerBox(height: 10.h, width: 50.w),
-                            ],
-                          ),
-                          SizedBox(height: 8.h),
-                          ShimmerBox(height: 18.h, width: 120.w),
-                          SizedBox(height: 8.h),
-                          ShimmerBox(height: 12.h, width: 100.w),
-                          SizedBox(height: 12.h),
-                          ShimmerBox(height: 15.h, width: 130.w),
-                          SizedBox(height: 8.h),
-                          ShimmerBox(height: 15.h, width: 80.w),
-                          SizedBox(height: 12.h),
-                          ShimmerBox(
-                            height: 30.h,
-                            width: double.infinity,
-                            radius: 4.r,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              child: const HorizontalProductCardSkeleton(),
             ),
           ),
         ),

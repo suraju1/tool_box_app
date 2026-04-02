@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/features/chat/controller/chat_service.dart';
 import 'package:tool_bocs/features/chat/view/chat_screen.dart';
@@ -15,6 +14,7 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'dart:convert';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/core/widgets/skeleton_widgets.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -62,305 +62,286 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final shimmer = context.watch<ShimmerController>();
-
-    if (_currentUserId == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: shimmer.isLoading
-          ? _buildShimmer(context)
-          : Column(
-              children: [
-                Container(
-                  height: 65.h,
-                  color: context.appBarColor,
-                ),
-                _buildSearchBox(context),
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: _chatRoomsStream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        final error = snapshot.error.toString();
-                        if (error.contains('permission-denied')) {
-                          return Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(24.w),
-                              child: Text(
-                                'Your chats will appear here once you are logged in.',
-                                textAlign: TextAlign.center,
+      body: Column(
+        children: [
+          Container(
+            height: 65.h,
+            color: context.appBarColor,
+          ),
+          _buildSearchBox(context),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _chatRoomsStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  final error = snapshot.error.toString();
+                  if (error.contains('permission-denied')) {
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.w),
+                        child: Text(
+                          'Your chats will appear here once you are logged in.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: context.subTextColor,
+                            fontSize: 16.sp,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (_currentUserId == null ||
+                    snapshot.connectionState == ConnectionState.waiting) {
+                  return _buildShimmer(context);
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+
+                if (docs.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No chats yet',
+                      style: TextStyle(
+                        color: context.textColor,
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    final lastMessage =
+                        data['lastMessage'] as Map<String, dynamic>?;
+
+                    if (lastMessage == null) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final timestamp = lastMessage['timestamp'] as Timestamp?;
+                    final timeString = timestamp != null
+                        ? _formatMessageTime(timestamp.toDate())
+                        : '';
+
+                    String text = lastMessage['text'] as String? ?? '';
+                    if (lastMessage['senderId'] == _currentUserId) {
+                      text = "You: $text";
+                    }
+
+                    final isRead = lastMessage['isRead'] as bool? ??
+                        true; // Default to true if not present for logic sake
+                    // Get unread count
+                    final unreadCounts =
+                        data['unreadCounts'] as Map<String, dynamic>?;
+                    int unreadCountInt = 0;
+                    if (unreadCounts != null && _currentUserId != null) {
+                      debugPrint("UnreadCounts Map: $unreadCounts");
+                      debugPrint("Current User ID: $_currentUserId");
+                      debugPrint(
+                          "Value for Key: ${unreadCounts[_currentUserId]}");
+                      unreadCountInt = unreadCounts[_currentUserId] ?? 0;
+                    } else {
+                      debugPrint(
+                          "UnreadCounts is null or Current User ID is null");
+                      debugPrint("Data: $data");
+                    }
+
+                    String unreadCountStr = '';
+                    if (unreadCountInt > 0) {
+                      unreadCountStr = unreadCountInt.toString();
+                    } else if (unreadCounts == null &&
+                        !isRead &&
+                        lastMessage['senderId'] != _currentUserId) {
+                      // Fallback for old messages ONLY if unreadCounts doesn't exist
+                      unreadCountStr = '1';
+                    }
+
+                    // Determine other user ID (simple implementation assumes 2 users)
+                    final users = List<String>.from(data['users'] ?? []);
+                    final otherUserId = users.firstWhere(
+                        (id) => id != _currentUserId,
+                        orElse: () => 'Unknown');
+
+                    // Determine if chat is disabled (72 hours from first message)
+                    final firstMsgAt = data['firstMessageAt'] as Timestamp?;
+                    final lastUpdatedAt = data['updatedAt'] as Timestamp?;
+                    bool isDisabled = false;
+
+                    if (firstMsgAt != null) {
+                      isDisabled = DateTime.now()
+                              .difference(firstMsgAt.toDate())
+                              .inHours >=
+                          72;
+                    } else if (lastUpdatedAt != null) {
+                      // Fallback for existing chats without firstMessageAt:
+                      // If even the LAST update is > 72 hours ago, the chat is definitely disabled.
+                      isDisabled = DateTime.now()
+                              .difference(lastUpdatedAt.toDate())
+                              .inHours >=
+                          72;
+                    }
+
+                    // Fetch real user name from Firestore
+                    return StreamBuilder<DocumentSnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(otherUserId)
+                          .snapshots(),
+                      builder: (context, userSnapshot) {
+                        String displayName = "User $otherUserId";
+                        String? otherUserImage;
+                        if (userSnapshot.hasData && userSnapshot.data!.exists) {
+                          final userData = userSnapshot.data!.data()
+                              as Map<String, dynamic>?;
+                          if (userData != null &&
+                              userData.containsKey('fullName')) {
+                            displayName = userData['fullName'];
+                          }
+                          if (userData != null &&
+                              userData.containsKey('profileImage')) {
+                            otherUserImage =
+                                userData['profileImage'] as String?;
+                          }
+                        }
+
+                        final tradeDetails =
+                            data['tradeDetails'] as Map<String, dynamic>?;
+                        TradeResponseModel? tradeResponse;
+                        if (tradeDetails != null && data['tradeId'] != null) {
+                          tradeResponse = TradeResponseModel(
+                            id: data['tradeId'],
+                            postId: tradeDetails['postId'] ?? 0,
+                            responderId: tradeDetails['responderId'] ?? 0,
+                            posterUserId: tradeDetails['posterUserId'] ?? 0,
+                            responderName: tradeDetails['responderName'] ?? '',
+                            responseType:
+                                tradeDetails['responseType'] ?? 'item',
+                            priceRangeStart:
+                                tradeDetails['priceRangeStart']?.toDouble(),
+                            priceRangeEnd:
+                                tradeDetails['priceRangeEnd']?.toDouble(),
+                            itemName: tradeDetails['itemName'],
+                            postItemName: tradeDetails['postItemName'],
+                            posterName: tradeDetails['posterName'],
+                            createdAt:
+                                '', // Not stored in details but required by model
+                            status:
+                                'accepted', // Assume accepted if they are chatting
+                            posterMobile: tradeDetails['posterMobile'],
+                            responderMobile: tradeDetails['responderMobile'],
+                            postType: tradeDetails['postType'],
+                          );
+                        }
+
+                        Widget? subtitleWidget;
+                        if (tradeResponse != null) {
+                          final isOwner =
+                              context.read<AuthController>().currentUser?.id ==
+                                  tradeResponse.posterUserId;
+                          final isGivePost =
+                              tradeResponse.postType?.toLowerCase() == 'give' ||
+                                  tradeResponse.postType?.toLowerCase() ==
+                                      'giving';
+
+                          final myItem = isOwner
+                              ? (isGivePost
+                                  ? tradeResponse.postItemName
+                                  : (tradeResponse.itemName ?? 'Price'))
+                              : (isGivePost
+                                  ? (tradeResponse.itemName ?? 'Price')
+                                  : tradeResponse.postItemName);
+                          final theirItem = isOwner
+                              ? (isGivePost
+                                  ? (tradeResponse.itemName ?? 'Price')
+                                  : tradeResponse.postItemName)
+                              : (isGivePost
+                                  ? tradeResponse.postItemName
+                                  : (tradeResponse.itemName ?? 'Price'));
+
+                          subtitleWidget = Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    const TextSpan(text: "Trade: "),
+                                    TextSpan(
+                                      text: myItem,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    const TextSpan(text: " for "),
+                                    TextSpan(
+                                      text: theirItem,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
                                 style: TextStyle(
+                                  fontSize: 13.sp,
                                   color: context.subTextColor,
-                                  fontSize: 16.sp,
-                                  fontFamily: FontFamily.openSans,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                text,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: context.subTextColor,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
+                            ],
+                          );
+                        } else {
+                          subtitleWidget = Text(
+                            text,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: context.subTextColor,
+                              fontWeight: FontWeight.w600,
                             ),
                           );
                         }
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      }
 
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return _buildShimmer(context);
-                      }
-
-                      final docs = snapshot.data?.docs ?? [];
-
-                      if (docs.isEmpty) {
-                        return Center(
-                          child: Text(
-                            'No chats yet',
-                            style: TextStyle(
-                              color: context.textColor,
-                              fontSize: 16.sp,
-                            ),
-                          ),
+                        return _buildChatItem(
+                          context,
+                          docs[index].id, // Pass chatRoomId
+                          displayName,
+                          subtitleWidget,
+                          timeString,
+                          unreadCountStr,
+                          false, // Online status not implemented
+                          otherUserImage ??
+                              '', // Actual profile image from Firestore
+                          otherUserId: otherUserId,
+                          tradeResponse: tradeResponse,
+                          isDisabled: isDisabled,
                         );
-                      }
-
-                      return ListView.builder(
-                        padding: EdgeInsets.zero,
-                        itemCount: docs.length,
-                        itemBuilder: (context, index) {
-                          final data =
-                              docs[index].data() as Map<String, dynamic>;
-                          final lastMessage =
-                              data['lastMessage'] as Map<String, dynamic>?;
-
-                          if (lastMessage == null) {
-                            return const SizedBox.shrink();
-                          }
-
-                          final timestamp =
-                              lastMessage['timestamp'] as Timestamp?;
-                          final timeString = timestamp != null
-                              ? _formatMessageTime(timestamp.toDate())
-                              : '';
-
-                          String text = lastMessage['text'] as String? ?? '';
-                          if (lastMessage['senderId'] == _currentUserId) {
-                            text = "You: $text";
-                          }
-
-                          final isRead = lastMessage['isRead'] as bool? ??
-                              true; // Default to true if not present for logic sake
-                          // Get unread count
-                          final unreadCounts =
-                              data['unreadCounts'] as Map<String, dynamic>?;
-                          int unreadCountInt = 0;
-                          if (unreadCounts != null && _currentUserId != null) {
-                            debugPrint("UnreadCounts Map: $unreadCounts");
-                            debugPrint("Current User ID: $_currentUserId");
-                            debugPrint(
-                                "Value for Key: ${unreadCounts[_currentUserId]}");
-                            unreadCountInt = unreadCounts[_currentUserId] ?? 0;
-                          } else {
-                            debugPrint(
-                                "UnreadCounts is null or Current User ID is null");
-                            debugPrint("Data: $data");
-                          }
-
-                          String unreadCountStr = '';
-                          if (unreadCountInt > 0) {
-                            unreadCountStr = unreadCountInt.toString();
-                          } else if (unreadCounts == null &&
-                              !isRead &&
-                              lastMessage['senderId'] != _currentUserId) {
-                            // Fallback for old messages ONLY if unreadCounts doesn't exist
-                            unreadCountStr = '1';
-                          }
-
-                          // Determine other user ID (simple implementation assumes 2 users)
-                          final users = List<String>.from(data['users'] ?? []);
-                          final otherUserId = users.firstWhere(
-                              (id) => id != _currentUserId,
-                              orElse: () => 'Unknown');
-
-                          // Determine if chat is disabled (72 hours from first message)
-                          final firstMsgAt =
-                              data['firstMessageAt'] as Timestamp?;
-                          final lastUpdatedAt = data['updatedAt'] as Timestamp?;
-                          bool isDisabled = false;
-
-                          if (firstMsgAt != null) {
-                            isDisabled = DateTime.now()
-                                    .difference(firstMsgAt.toDate())
-                                    .inHours >=
-                                72;
-                          } else if (lastUpdatedAt != null) {
-                            // Fallback for existing chats without firstMessageAt:
-                            // If even the LAST update is > 72 hours ago, the chat is definitely disabled.
-                            isDisabled = DateTime.now()
-                                    .difference(lastUpdatedAt.toDate())
-                                    .inHours >=
-                                72;
-                          }
-
-                          // Fetch real user name from Firestore
-                          return StreamBuilder<DocumentSnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(otherUserId)
-                                .snapshots(),
-                            builder: (context, userSnapshot) {
-                              String displayName = "User $otherUserId";
-                              String? otherUserImage;
-                              if (userSnapshot.hasData &&
-                                  userSnapshot.data!.exists) {
-                                final userData = userSnapshot.data!.data()
-                                    as Map<String, dynamic>?;
-                                if (userData != null &&
-                                    userData.containsKey('fullName')) {
-                                  displayName = userData['fullName'];
-                                }
-                                if (userData != null &&
-                                    userData.containsKey('profileImage')) {
-                                  otherUserImage =
-                                      userData['profileImage'] as String?;
-                                }
-                              }
-
-                              final tradeDetails =
-                                  data['tradeDetails'] as Map<String, dynamic>?;
-                              TradeResponseModel? tradeResponse;
-                              if (tradeDetails != null &&
-                                  data['tradeId'] != null) {
-                                tradeResponse = TradeResponseModel(
-                                  id: data['tradeId'],
-                                  postId: tradeDetails['postId'] ?? 0,
-                                  responderId: tradeDetails['responderId'] ?? 0,
-                                  posterUserId:
-                                      tradeDetails['posterUserId'] ?? 0,
-                                  responderName:
-                                      tradeDetails['responderName'] ?? '',
-                                  responseType:
-                                      tradeDetails['responseType'] ?? 'item',
-                                  priceRangeStart:
-                                      tradeDetails['priceRangeStart']
-                                          ?.toDouble(),
-                                  priceRangeEnd:
-                                      tradeDetails['priceRangeEnd']?.toDouble(),
-                                  itemName: tradeDetails['itemName'],
-                                  postItemName: tradeDetails['postItemName'],
-                                  posterName: tradeDetails['posterName'],
-                                  createdAt:
-                                      '', // Not stored in details but required by model
-                                  status:
-                                      'accepted', // Assume accepted if they are chatting
-                                  posterMobile: tradeDetails['posterMobile'],
-                                  responderMobile:
-                                      tradeDetails['responderMobile'],
-                                  postType: tradeDetails['postType'],
-                                );
-                              }
-
-                              Widget? subtitleWidget;
-                              if (tradeResponse != null) {
-                                final isOwner = context
-                                        .read<AuthController>()
-                                        .currentUser
-                                        ?.id ==
-                                    tradeResponse.posterUserId;
-                                final isGivePost =
-                                    tradeResponse.postType?.toLowerCase() ==
-                                            'give' ||
-                                        tradeResponse.postType?.toLowerCase() ==
-                                            'giving';
-
-                                final myItem = isOwner
-                                    ? (isGivePost
-                                        ? tradeResponse.postItemName
-                                        : (tradeResponse.itemName ?? 'Price'))
-                                    : (isGivePost
-                                        ? (tradeResponse.itemName ?? 'Price')
-                                        : tradeResponse.postItemName);
-                                final theirItem = isOwner
-                                    ? (isGivePost
-                                        ? (tradeResponse.itemName ?? 'Price')
-                                        : tradeResponse.postItemName)
-                                    : (isGivePost
-                                        ? tradeResponse.postItemName
-                                        : (tradeResponse.itemName ?? 'Price'));
-
-                                subtitleWidget = Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text.rich(
-                                      TextSpan(
-                                        children: [
-                                          const TextSpan(text: "Trade: "),
-                                          TextSpan(
-                                            text: myItem,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          const TextSpan(text: " for "),
-                                          TextSpan(
-                                            text: theirItem,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        color: context.subTextColor,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      text,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        color: context.subTextColor,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              } else {
-                                subtitleWidget = Text(
-                                  text,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: context.subTextColor,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                );
-                              }
-
-                              return _buildChatItem(
-                                context,
-                                docs[index].id, // Pass chatRoomId
-                                displayName,
-                                subtitleWidget,
-                                timeString,
-                                unreadCountStr,
-                                false, // Online status not implemented
-                                otherUserImage ??
-                                    '', // Actual profile image from Firestore
-                                otherUserId: otherUserId,
-                                tradeResponse: tradeResponse,
-                                isDisabled: isDisabled,
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
+                      },
+                    );
+                  },
+                );
+              },
             ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -380,42 +361,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           child: ListView.builder(
             padding: EdgeInsets.zero,
             itemCount: 8,
-            itemBuilder: (context, index) => Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: context.dividerColor)),
-              ),
-              child: Row(
-                children: [
-                  ShimmerBox(height: 60.r, width: 60.r, radius: 30.r),
-                  SizedBox(width: 15.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ShimmerBox(height: 20.h, width: 120.w),
-                            ShimmerBox(height: 14.h, width: 40.w),
-                          ],
-                        ),
-                        SizedBox(height: 8.h),
-                        Row(
-                          children: [
-                            Expanded(
-                                child: ShimmerBox(
-                                    height: 16.h, width: double.infinity)),
-                            SizedBox(width: 8.w),
-                            ShimmerBox(height: 18.h, width: 18.w, radius: 6.r),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            itemBuilder: (context, index) => const ListTileSkeleton(),
           ),
         ),
       ],
