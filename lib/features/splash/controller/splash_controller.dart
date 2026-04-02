@@ -12,7 +12,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 
 class SplashController extends ChangeNotifier {
-  /// Decide navigation based on authentication state
+  // Decide navigation based on authentication state
   Future<void> decideNavigation(
     BuildContext context,
     AuthController authController,

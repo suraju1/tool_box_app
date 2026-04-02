@@ -185,6 +185,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       location: _locationController.text.trim(),
       latitude: latitude,
       longitude: longitude,
+      
       termsAccepted: _agreeToTerms,
     );
 

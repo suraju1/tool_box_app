@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
@@ -187,77 +186,6 @@ class _GiveScreenState extends State<GiveScreen> {
                       ),
                     ],
                   ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 80.h,
-                      width: double.infinity,
-                      padding: EdgeInsets.only(bottom: 15.h),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30.r),
-                          topRight: Radius.circular(30.r),
-                        ),
-                        color: Colors.transparent,
-                        // color: context.surfaceColor,
-                        // boxShadow: [
-                        //   BoxShadow(
-                        //     color: greyColorWithOpacity0_4,
-                        //     offset: const Offset(0, -2),
-                        //     blurRadius: 4,
-                        //   ),
-                        // ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 16.h),
-                          Container(
-                            width: 180.w,
-                            height: 45.h,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12.r),
-                              color: context.primaryColor,
-                            ),
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.createGivePost,
-                                  arguments: "Create Give Post",
-                                ).then((_) {
-                                  // Refresh logic handled by controller's optimistic update
-                                });
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 8.w, vertical: 6.h),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.add,
-                                        color: context.onPrimaryColor,
-                                        size: 28.sp),
-                                    Text(
-                                      "Make a New Post",
-                                      style: TextStyle(
-                                        color: context.onPrimaryColor,
-                                        fontSize: 14.sp,
-                                        fontFamily: FontFamily.openSans,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               );
       }),
@@ -395,40 +323,83 @@ class _GiveScreenState extends State<GiveScreen> {
                 ),
               ),
               InkWell(
-                onTap: () => showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) =>
-                      const FilterBottomSheet(initialPostType: 'give'),
-                ),
-                child: _buildFilterButton(context),
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.createGivePost,
+                    arguments: "Create Give Post",
+                  );
+                },
+                child: _buildAddPostButton(context),
               ),
             ],
+          ),
+          SizedBox(height: 8.h),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: InkWell(
+              onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) =>
+                    const FilterBottomSheet(initialPostType: 'give'),
+              ),
+              child: _buildFilterButton(context),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterButton(BuildContext context) {
+  Widget _buildAddPostButton(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
       height: 45.h,
+      width: 45.h,
       margin: EdgeInsets.only(left: 8.w),
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: context.primaryColor,
         borderRadius: BorderRadius.circular(8.r),
       ),
-      child: SvgPicture.asset(
-        'assets/filter_icon.svg',
-        width: 24.w,
-        height: 24.h,
-        colorFilter: ColorFilter.mode(
-          context.onPrimaryColor,
-          BlendMode.srcIn,
-        ),
+      child: Icon(
+        Icons.add,
+        color: context.onPrimaryColor,
+        size: 24.sp,
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(BuildContext context) {
+    return Container(
+      height: 42.h,
+      margin: EdgeInsets.only(left: 8.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: context.primaryColor,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.filter_alt_outlined,
+            color: context.onPrimaryColor,
+            size: 20.sp,
+          ),
+          SizedBox(width: 8.w),
+          Text(
+            "Filter",
+            style: TextStyle(
+              color: context.onPrimaryColor,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              fontFamily: FontFamily.openSans,
+            ),
+          ),
+        ],
       ),
     );
   }
