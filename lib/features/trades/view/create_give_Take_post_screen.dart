@@ -11,6 +11,7 @@ import 'package:tool_bocs/features/trades/model/category_model.dart';
 import 'package:tool_bocs/features/trades/model/post_request_model.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
 import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
@@ -75,6 +76,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TradeController>().fetchCategories();
+      context.read<SubscriptionController>().fetchMySubscription();
       _initLocation();
     });
   }
@@ -935,13 +937,11 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
             color: context.surfaceColor,
-            // borderRadius: BorderRadius.circular(12.r),
-            // border: Border.all(color: Colors.grey.shade100),
             boxShadow: [
               BoxShadow(
                 color: greyColorWithOpacity0_4,
                 blurRadius: 10,
-                offset: Offset(0, 2),
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -950,15 +950,35 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
             children: [
               Text('Wallet', style: _labelStyle(size: 14)),
               SizedBox(height: 8.h),
-              Row(
-                children: [
-                  Icon(Icons.account_balance_wallet_outlined,
-                      color: context.primaryColor, size: 18.sp),
-                  SizedBox(width: 8.w),
-                  Text('5 rs per trade',
-                      style: TextStyle(
-                          fontSize: 13.sp, fontWeight: FontWeight.w600)),
-                ],
+              Consumer<SubscriptionController>(
+                builder: (context, subscriptionController, child) {
+                  final subscription = subscriptionController.mySubscription;
+                  final remainingCredit =
+                      subscription?.remainingCredit.split('.').first ?? '0';
+                  final postPrice = subscription?.postPrice ?? '0';
+
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.account_balance_wallet_outlined,
+                              color: context.primaryColor, size: 18.sp),
+                          SizedBox(width: 8.w),
+                          Text('$postPrice Credits per trade',
+                              style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600)),
+                          const Spacer(),
+                          Text('Credits: $remainingCredit',
+                              style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.primaryColor)),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
               SizedBox(height: 20.h),
               Text('Notification Settings', style: _labelStyle(size: 14)),
@@ -1103,7 +1123,13 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       priceMin: _isPriceSelected ? _priceRange.start : null,
       priceMax: _isPriceSelected ? _priceRange.end : null,
       isNegotiable: _isNegotiable,
-      walletCredits: 5,
+      walletCredits: (double.tryParse(context
+                      .read<SubscriptionController>()
+                      .mySubscription
+                      ?.postPrice ??
+                  '0') ??
+              0)
+          .toInt(),
       notifyPartnersOnly: _notifyPartnersOnly,
       postType: postType,
       itemImages: _itemImages.map((e) => e.path).toList(),
