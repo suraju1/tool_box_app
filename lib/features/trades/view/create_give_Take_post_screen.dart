@@ -980,7 +980,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   );
                 },
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 6.h),
+              Divider(color: context.dividerColor),
+              SizedBox(height: 6.h),
               Text('Notification Settings', style: _labelStyle(size: 14)),
               SizedBox(height: 12.h),
               Row(
