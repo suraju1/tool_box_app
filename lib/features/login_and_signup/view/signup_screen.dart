@@ -8,6 +8,7 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -203,6 +204,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await Future.delayed(Duration(milliseconds: 500));
 
       if (!mounted) return;
+
+      // Reset Bottom Navigation Bar state to Home
+      context.read<BottomNavBarController>().reset();
 
       // Navigate to Home
       Navigator.pushNamedAndRemoveUntil(

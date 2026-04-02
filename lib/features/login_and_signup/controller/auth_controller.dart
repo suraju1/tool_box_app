@@ -12,6 +12,8 @@ import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/routes/navigator_key.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 
 /// Controller for authentication state management
 class AuthController extends ChangeNotifier {
@@ -68,13 +70,17 @@ class AuthController extends ChangeNotifier {
 
         // Save user data and token
         _currentUser = response.data!.user;
-        if (response.data!.token.isNotEmpty) { _authToken = response.data!.token; }
+        if (response.data!.token.isNotEmpty) {
+          _authToken = response.data!.token;
+        }
 
         // Persist to storage
         await _saveAuthData(response.data!);
 
         // Set auth token in API client
-        if (_authToken != null && _authToken!.isNotEmpty) { _apiClient.setAuthToken(_authToken!); }
+        if (_authToken != null && _authToken!.isNotEmpty) {
+          _apiClient.setAuthToken(_authToken!);
+        }
 
         // Start Chat Listener
         try {
@@ -178,13 +184,17 @@ class AuthController extends ChangeNotifier {
 
         // Save user data and token
         _currentUser = response.data!.user;
-        if (response.data!.token.isNotEmpty) { _authToken = response.data!.token; }
+        if (response.data!.token.isNotEmpty) {
+          _authToken = response.data!.token;
+        }
 
         // Persist to storage
         await _saveAuthData(response.data!);
 
         // Set auth token in API client
-        if (_authToken != null && _authToken!.isNotEmpty) { _apiClient.setAuthToken(_authToken!); }
+        if (_authToken != null && _authToken!.isNotEmpty) {
+          _apiClient.setAuthToken(_authToken!);
+        }
 
         // Start Chat Listener only if profile is complete (meaning fully logged in)
         if (response.data!.isProfileComplete) {
@@ -279,6 +289,13 @@ class AuthController extends ChangeNotifier {
     _authToken = null;
     _apiClient.removeAuthToken();
     await StorageService.clearAuthData();
+
+    // Reset Bottom Navigation Bar index to 0
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      Provider.of<BottomNavBarController>(context, listen: false).reset();
+    }
+
     notifyListeners();
 
     // Navigate to login screen and clear navigation stack from root

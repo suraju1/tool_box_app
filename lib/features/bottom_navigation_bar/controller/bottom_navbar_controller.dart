@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class BottomNavBarController extends ChangeNotifier {
   int _currentIndex = 0;
-  final PageController _pageController = PageController();
+  PageController _pageController = PageController();
 
   int get currentIndex => _currentIndex;
   PageController get pageController => _pageController;
@@ -10,11 +10,13 @@ class BottomNavBarController extends ChangeNotifier {
   void setIndex(int index) {
     if (_currentIndex == index) return;
     _currentIndex = index;
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
     notifyListeners();
   }
 
@@ -25,9 +27,10 @@ class BottomNavBarController extends ChangeNotifier {
 
   void reset() {
     _currentIndex = 0;
-    if (_pageController.hasClients) {
-      _pageController.jumpToPage(0);
-    }
+    // Always recreate PageController to ensure initialPage is 0
+    // regardless of whether it has clients or not.
+    _pageController.dispose();
+    _pageController = PageController(initialPage: 0);
     notifyListeners();
   }
 
