@@ -29,6 +29,7 @@ import 'package:tool_bocs/features/network_connectivity/view/no_internet_screen.
 import 'package:tool_bocs/features/subscription/view/my_subscription_status_screen.dart';
 import 'package:tool_bocs/features/subscription/view/choose_plan_screen.dart';
 import 'package:tool_bocs/features/profile/view/saved_users_screen.dart';
+import 'package:tool_bocs/features/shimmer_test/view/shimmer_test_screen.dart';
 
 import 'app_routes.dart';
 
@@ -84,5 +85,6 @@ class AppPages {
     AppRoutes.subscriptionHistory: (_) => const MySubscriptionsListScreen(),
     AppRoutes.choosePlan: (_) => const ChoosePlanScreen(),
     AppRoutes.savedUsers: (_) => const SavedUsersScreen(),
+    AppRoutes.shimmerTest: (_) => const ShimmerTestScreen(),
   };
 }

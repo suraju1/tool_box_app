@@ -158,7 +158,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //app bar here
-              SizedBox(height: 20.h),
+              SizedBox(height: 6.h),
               _buildAppBar(),
               Divider(
                 color: context.dividerColor,
@@ -1382,7 +1382,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
               PopupMenuItem<void>(
                 enabled: false,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,

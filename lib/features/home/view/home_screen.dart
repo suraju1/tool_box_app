@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/core/widgets/skeleton_widgets.dart';
 import 'package:tool_bocs/features/location/view/location_selection_sheet.dart';
 import 'package:tool_bocs/features/notifications/view/notifications_screen.dart';
 import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
@@ -707,60 +708,7 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: 3,
             itemBuilder: (context, index) => Padding(
               padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: context.surfaceColor,
-                  borderRadius: BorderRadius.circular(15.r),
-                ),
-                padding: EdgeInsets.all(8.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(12.w),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ShimmerBox(height: 11.h, width: 80.w),
-                              SizedBox(height: 4.h),
-                              ShimmerBox(height: 16.h, width: 150.w),
-                            ],
-                          ),
-                          ShimmerBox(height: 14.h, width: 60.w),
-                        ],
-                      ),
-                    ),
-                    AspectRatio(
-                      aspectRatio: 14 / 9,
-                      child: ShimmerBox(
-                        height: double.infinity,
-                        width: double.infinity,
-                        radius: 0,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(12.w),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ShimmerBox(height: 16.h, width: 120.w),
-                              SizedBox(height: 4.h),
-                              ShimmerBox(height: 16.h, width: 100.w),
-                            ],
-                          ),
-                          ShimmerBox(height: 35.h, width: 100.w, radius: 6.r),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              child: const ProductCardSkeleton(),
             ),
           ),
         ),

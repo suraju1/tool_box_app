@@ -68,7 +68,7 @@ extension ThemeColors on BuildContext {
       (isDarkMode ? Colors.white10 : greyColor.withOpacity(0.4));
 
   Color get shimmerBaseColor =>
-      isDarkMode ? Colors.grey.shade900 : Colors.grey.shade300;
+      isDarkMode ? const Color(0xFF212121) : const Color(0xFFE0E0E0);
   Color get shimmerHighlightColor =>
-      isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
+      isDarkMode ? const Color(0xFF303030) : const Color(0xFFF5F5F5);
 }
