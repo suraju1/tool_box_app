@@ -185,7 +185,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       location: _locationController.text.trim(),
       latitude: latitude,
       longitude: longitude,
-      
       termsAccepted: _agreeToTerms,
     );
 
@@ -382,7 +381,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           _agreeToTerms = value!;
                         });
                       },
-                      activeColor: context.primaryColor,
+                      activeColor: Colors.green,
                     ),
                     Expanded(
                       child: RichText(

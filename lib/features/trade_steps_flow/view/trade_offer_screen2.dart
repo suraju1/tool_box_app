@@ -201,8 +201,8 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.r)),
                 ),
-                child:  Text('OK',
-                    style: TextStyle(color: context.onPrimaryColor)),
+                child:
+                    Text('OK', style: TextStyle(color: context.onPrimaryColor)),
               ),
             ),
           ],
@@ -899,7 +899,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
               scale: 0.8,
               child: Switch(
                 value: _isNegotiable,
-                activeColor: context.primaryColor,
+                activeColor: Colors.green,
                 onChanged: (val) => setState(() => _isNegotiable = val),
               ),
             ),
@@ -1071,7 +1071,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
           height: 24.w,
           child: Checkbox(
             value: value,
-            activeColor: context.primaryColor,
+            activeColor: Colors.green,
             onChanged: onChanged,
           ),
         ),

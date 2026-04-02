@@ -30,7 +30,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
   bool _isPriceSelected = true;
   RangeValues _priceRange = const RangeValues(10, 50000);
   bool _isNegotiable = false;
-  bool _notifyPartnersOnly = true;
+  bool _notifyPartnersOnly = false;
   bool _isHomemade = false;
   bool _isStoreBought = false;
   String _returnSelectedCondition = 'New';
@@ -537,7 +537,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isHomemade,
-                    activeColor: context.primaryColor,
+                    activeColor: Colors.green,
                     onChanged: (val) {
                       setState(() {
                         _isHomemade = val ?? false;
@@ -565,7 +565,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isStoreBought,
-                    activeColor: context.primaryColor,
+                    activeColor: Colors.green,
                     onChanged: (val) {
                       setState(() {
                         _isStoreBought = val ?? false;
@@ -656,7 +656,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                       height: 24,
                       child: Switch(
                         value: _isNegotiable,
-                        activeColor: context.primaryColor,
+                        activeColor: Colors.green,
                         onChanged: (val) => setState(() => _isNegotiable = val),
                       ),
                     ),
@@ -840,7 +840,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isReturnHomemade,
-                    activeColor: context.primaryColor,
+                    activeColor: Colors.green,
                     onChanged: (val) {
                       setState(() {
                         _isReturnHomemade = val ?? false;
@@ -868,7 +868,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isReturnStoreBought,
-                    activeColor: context.primaryColor,
+                    activeColor: Colors.green,
                     onChanged: (val) {
                       setState(() {
                         _isReturnStoreBought = val ?? false;
@@ -983,7 +983,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   ),
                   Switch(
                     value: _notifyPartnersOnly,
-                    activeColor: context.primaryColor,
+                    activeColor: Colors.green,
                     padding: EdgeInsets.all(8.w),
                     onChanged: (val) =>
                         setState(() => _notifyPartnersOnly = val),

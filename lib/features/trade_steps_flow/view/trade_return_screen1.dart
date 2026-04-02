@@ -211,7 +211,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                       height: 24,
                       child: Switch(
                         value: _isNegotiable,
-                        activeColor: context.primaryColor,
+                        activeColor: Colors.green,
                         onChanged: (val) => setState(() => _isNegotiable = val),
                       ),
                     ),
@@ -269,7 +269,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isReturnHomemade,
-                    activeColor: context.primaryColor,
+                    activeColor: Colors.green,
                     onChanged: (val) {
                       setState(() {
                         _isReturnHomemade = val ?? false;
@@ -297,7 +297,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                   width: 24.w,
                   child: Checkbox(
                     value: _isReturnStoreBought,
-                    activeColor: context.primaryColor,
+                    activeColor: Colors.green,
                     onChanged: (val) {
                       setState(() {
                         _isReturnStoreBought = val ?? false;
