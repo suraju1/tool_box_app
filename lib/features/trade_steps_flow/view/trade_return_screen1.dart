@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -30,14 +31,22 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
   final List<XFile> _returnItemImages = [];
 
   Future<void> _pickImage() async {
-    final List<XFile>? images =
-        await AppImagePickerBS.show(context, allowMultiple: true);
+    final int remaining = 5 - _returnItemImages.length;
+    if (remaining <= 0) {
+      ToastService.showErrorToast(context, 'Max 5 images allowed');
+      return;
+    }
+
+    final List<XFile>? images = await AppImagePickerBS.show(context,
+        allowMultiple: true, limit: remaining);
+
     if (images != null && images.isNotEmpty) {
       setState(() {
         if (_returnItemImages.length + images.length > 5) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Max 5 images allowed')),
-          );
+          final int toTake = 5 - _returnItemImages.length;
+          _returnItemImages.addAll(images.take(toTake));
+          ToastService.showErrorToast(
+              context, 'Only first $toTake images added (Max 5 allowed)');
         } else {
           _returnItemImages.addAll(images);
         }
@@ -392,7 +401,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
         Text('Add Photos', style: _labelStyle(context, size: 14)),
         SizedBox(height: 15.h),
         GestureDetector(
-          onTap: _pickImage,
+          onTap: _returnItemImages.length >= 5 ? null : _pickImage,
           child: Container(
             width: double.infinity,
             height: 150.h,
@@ -402,18 +411,29 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                   : context.dividerColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                  color: context.dividerColor, style: BorderStyle.solid),
+                  color: _returnItemImages.length >= 5
+                      ? Colors.grey.withOpacity(0.3)
+                      : context.dividerColor,
+                  style: BorderStyle.solid),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.camera_alt_outlined,
-                    color: context.subTextColor, size: 30.sp),
+                    color: _returnItemImages.length >= 5
+                        ? Colors.grey
+                        : context.subTextColor,
+                    size: 30.sp),
                 SizedBox(height: 8.h),
                 Text(
-                  'Add up to 5 photos',
-                  style:
-                      TextStyle(color: context.subTextColor, fontSize: 12.sp),
+                  _returnItemImages.length >= 5
+                      ? 'Max 5 photos reached'
+                      : 'Add up to 5 photos',
+                  style: TextStyle(
+                      color: _returnItemImages.length >= 5
+                          ? Colors.grey
+                          : context.subTextColor,
+                      fontSize: 12.sp),
                 ),
               ],
             ),

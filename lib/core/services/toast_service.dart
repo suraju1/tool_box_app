@@ -28,6 +28,16 @@ class ToastService {
     );
   }
 
+  /// Show an info toast
+  static void showInfoToast(BuildContext context, String message) {
+    _showToast(
+      context,
+      message: message,
+      backgroundColor: Colors.blue.shade600,
+      icon: Icons.info_outline,
+    );
+  }
+
   /// Base toast implementation using Overlay
   static void _showToast(
     BuildContext context, {
@@ -56,7 +66,7 @@ class ToastService {
               return Opacity(
                 opacity: value,
                 child: Transform.translate(
-                  offset: Offset(0, (1 - value) * -20), 
+                  offset: Offset(0, (1 - value) * -20),
                   child: child,
                 ),
               );

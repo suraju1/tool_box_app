@@ -499,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 SizedBox(width: 4.w),
                                 Text(
-                                  "${post.itemCategory}",
+                                  post.itemCategory,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
@@ -584,7 +584,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(width: 6.w),
                             Expanded(
                               child: Text(
-                                "${post.userName}",
+                                post.userName,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w500,

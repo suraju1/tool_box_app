@@ -6,14 +6,16 @@ import 'package:tool_bocs/util/font_family.dart';
 
 class AppImagePickerBS extends StatelessWidget {
   final bool allowMultiple;
-  const AppImagePickerBS({super.key, this.allowMultiple = false});
+  final int? limit;
+  const AppImagePickerBS({super.key, this.allowMultiple = false, this.limit});
 
   static Future<List<XFile>?> show(BuildContext context,
-      {bool allowMultiple = false}) async {
+      {bool allowMultiple = false, int? limit}) async {
     return await showModalBottomSheet<List<XFile>>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => AppImagePickerBS(allowMultiple: allowMultiple),
+      builder: (context) =>
+          AppImagePickerBS(allowMultiple: allowMultiple, limit: limit),
     );
   }
 
@@ -63,7 +65,8 @@ class AppImagePickerBS extends StatelessWidget {
                   onTap: () async {
                     final picker = ImagePicker();
                     if (allowMultiple) {
-                      final List<XFile> images = await picker.pickMultiImage();
+                      final List<XFile> images =
+                          await picker.pickMultiImage(limit: limit);
                       if (context.mounted) {
                         Navigator.pop(
                             context, images.isNotEmpty ? images : null);

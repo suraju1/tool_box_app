@@ -106,20 +106,35 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
   }
 
   Future<void> _pickImage(bool isReturnItem) async {
-    final List<XFile>? images =
-        await AppImagePickerBS.show(context, allowMultiple: true);
+    final int currentCount =
+        isReturnItem ? _returnItemImages.length : _itemImages.length;
+    final int remaining = 5 - currentCount;
+
+    if (remaining <= 0) {
+      ToastService.showErrorToast(context, 'Max 5 images allowed');
+      return;
+    }
+
+    final List<XFile>? images = await AppImagePickerBS.show(context,
+        allowMultiple: true, limit: remaining);
 
     if (images != null && images.isNotEmpty) {
       setState(() {
         if (isReturnItem) {
           if (_returnItemImages.length + images.length > 5) {
-            ToastService.showErrorToast(context, 'Max 5 images allowed');
+            final int toTake = 5 - _returnItemImages.length;
+            _returnItemImages.addAll(images.take(toTake));
+            ToastService.showErrorToast(
+                context, 'Only first $toTake images added (Max 5 allowed)');
           } else {
             _returnItemImages.addAll(images);
           }
         } else {
           if (_itemImages.length + images.length > 5) {
-            ToastService.showErrorToast(context, 'Max 5 images allowed');
+            final int toTake = 5 - _itemImages.length;
+            _itemImages.addAll(images.take(toTake));
+            ToastService.showErrorToast(
+                context, 'Only first $toTake images added (Max 5 allowed)');
           } else {
             _itemImages.addAll(images);
           }
@@ -417,7 +432,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         Text('Add Photos', style: _labelStyle(size: 14)),
         SizedBox(height: 15.h),
         GestureDetector(
-          onTap: () => _pickImage(false),
+          onTap: _itemImages.length >= 5 ? null : () => _pickImage(false),
           child: Container(
             width: double.infinity,
             height: 150.h,
@@ -426,21 +441,34 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   context.isDarkMode ? Colors.white10 : const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                  color: _showImageError ? Colors.red : context.dividerColor,
+                  color: _showImageError
+                      ? Colors.red
+                      : (_itemImages.length >= 5
+                          ? Colors.grey.withOpacity(0.3)
+                          : context.dividerColor),
                   style: BorderStyle.solid),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.camera_alt_outlined,
-                    color: _showImageError ? Colors.red : Colors.grey,
+                    color: _showImageError
+                        ? Colors.red
+                        : (_itemImages.length >= 5 ? Colors.grey : Colors.grey),
                     size: 30.sp),
                 SizedBox(height: 8.h),
                 Text(
-                  _showImageError ? 'Photo required' : 'Add up to 5 photos',
+                  _showImageError
+                      ? 'Photo required'
+                      : (_itemImages.length >= 5
+                          ? 'Max 5 photos reached'
+                          : 'Add up to 5 photos'),
                   style: TextStyle(
-                      color:
-                          _showImageError ? Colors.red : context.subTextColor,
+                      color: _showImageError
+                          ? Colors.red
+                          : (_itemImages.length >= 5
+                              ? Colors.grey
+                              : context.subTextColor),
                       fontSize: 12.sp),
                 ),
               ],
@@ -696,7 +724,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
             Text('Add Photos', style: _labelStyle(size: 14)),
             SizedBox(height: 15.h),
             GestureDetector(
-              onTap: () => _pickImage(true),
+              onTap:
+                  _returnItemImages.length >= 5 ? null : () => _pickImage(true),
               child: Container(
                 width: double.infinity,
                 height: 150.h,
@@ -706,24 +735,34 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   border: Border.all(
                       color: _showReturnImageError
                           ? Colors.red
-                          : context.dividerColor,
+                          : (_returnItemImages.length >= 5
+                              ? Colors.grey.withOpacity(0.3)
+                              : context.dividerColor),
                       style: BorderStyle.solid),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.camera_alt_outlined,
-                        color: _showReturnImageError ? Colors.red : Colors.grey,
+                        color: _showReturnImageError
+                            ? Colors.red
+                            : (_returnItemImages.length >= 5
+                                ? Colors.grey
+                                : Colors.grey),
                         size: 30.sp),
                     SizedBox(height: 8.h),
                     Text(
                       _showReturnImageError
                           ? 'Photo required'
-                          : 'Add up to 5 photos',
+                          : (_returnItemImages.length >= 5
+                              ? 'Max 5 photos reached'
+                              : 'Add up to 5 photos'),
                       style: TextStyle(
                           color: _showReturnImageError
                               ? Colors.red
-                              : context.subTextColor,
+                              : (_returnItemImages.length >= 5
+                                  ? Colors.grey
+                                  : context.subTextColor),
                           fontSize: 12.sp),
                     ),
                   ],
