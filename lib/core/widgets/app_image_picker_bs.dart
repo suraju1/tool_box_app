@@ -64,7 +64,7 @@ class AppImagePickerBS extends StatelessWidget {
                   label: 'Gallery',
                   onTap: () async {
                     final picker = ImagePicker();
-                    if (allowMultiple) {
+                    if (allowMultiple) {     
                       final List<XFile> images =
                           await picker.pickMultiImage(limit: limit);
                       if (context.mounted) {

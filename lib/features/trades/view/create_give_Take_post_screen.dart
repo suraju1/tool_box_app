@@ -13,8 +13,10 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
 import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/widgets/app_price_range_selector.dart';
 import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 
 class CreateGivePostScreen extends StatefulWidget {
@@ -664,19 +666,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Desired Price Range : ₹${_priceRange.start.toInt()} - ₹${_priceRange.end.toInt()}',
-                  style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
-                ),
-                SizedBox(height: 15.h),
-                RangeSlider(
-                  values: _priceRange,
-                  min: 0,
-                  max: 200000,
-                  padding: EdgeInsets.zero,
-                  activeColor: context.primaryColor,
-                  inactiveColor: context.dividerColor,
+                AppPriceRangeSelector(
+                  initialValues: _priceRange,
                   onChanged: (val) => setState(() => _priceRange = val),
                 ),
                 SizedBox(height: 25.h),
@@ -1065,14 +1056,21 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           width: double.infinity,
           height: 50.h,
           child: ElevatedButton(
-            onPressed: tradeController.isLoading ? null : _onPost,
+            onPressed: tradeController.isPostCreating ? null : _onPost,
             style: ElevatedButton.styleFrom(
               backgroundColor: context.primaryColor,
               shape: RoundedRectangleManager.roundedRadius(10.r),
               elevation: 0,
             ),
-            child: tradeController.isLoading
-                ? CircularProgressIndicator(color: context.onPrimaryColor)
+            child: tradeController.isPostCreating
+                ? SizedBox(
+                    height: 20.h,
+                    width: 20.h,
+                    child: CircularProgressIndicator(
+                      color: context.onPrimaryColor,
+                      strokeWidth: 2,
+                    ),
+                  )
                 : Text(
                     'Post Item',
                     style: TextStyle(
@@ -1206,11 +1204,87 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       ToastService.showSuccessToast(context, 'Giveaway created successfully!');
       Navigator.pop(context);
     } else if (mounted) {
-      ToastService.showErrorToast(
-          context,
-          context.read<TradeController>().errorMessage ??
-              "Failed to create post");
+      if (context.read<TradeController>().isNoSubscriptionError) {
+        _showNoSubscriptionDialog();
+      } else {
+        ToastService.showErrorToast(
+            context,
+            context.read<TradeController>().errorMessage ??
+                "Failed to create post");
+      }
     }
+  }
+
+  void _showNoSubscriptionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        backgroundColor: context.surfaceColor,
+        title: Row(
+          children: [
+            Icon(Icons.stars, color: context.primaryColor, size: 22.sp),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                'Active Subscription Required',
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: context.textColor,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'You do not have any active subscription or credits to create this post. Please buy or activate a new subscription to continue.',
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: context.subTextColor,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: context.subTextColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, AppRoutes.choosePlan).then((_) {
+                // Refresh subscription status when returning
+                if (mounted) {
+                  context.read<SubscriptionController>().fetchMySubscription();
+                }
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.primaryColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r)),
+            ),
+            child: Text(
+              'Buy Subscription',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildTextField(String hint,
@@ -1270,7 +1344,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           );
         }
 
-        if (tradeController.errorMessage != null) {
+        if (tradeController.categoryErrorMessage != null) {
           return Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
@@ -1282,7 +1356,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    tradeController.errorMessage!,
+                    tradeController.categoryErrorMessage!,
                     style: TextStyle(color: Colors.red, fontSize: 13.sp),
                   ),
                 ),

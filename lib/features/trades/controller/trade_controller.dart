@@ -15,10 +15,13 @@ class TradeController extends ChangeNotifier {
 
   List<CategoryModel> _categories = [];
   bool _isLoading = false;
+  bool _isPostCreating = false;
   bool _isIncomingLoading = false;
   bool _isSentLoading = false;
   bool _isMyTradesLoading = false;
   String? _errorMessage;
+  String? _categoryErrorMessage;
+  bool _noSubscriptionError = false;
 
   // --- My Trades State ---
   List<MyTradeModel> _myTrades = [];
@@ -43,12 +46,19 @@ class TradeController extends ChangeNotifier {
 
   List<CategoryModel> get categories => _categories;
   bool get isLoading => _isLoading;
+  bool get isPostCreating => _isPostCreating;
   bool get isIncomingLoading => _isIncomingLoading;
   bool get isSentLoading => _isSentLoading;
   String? get errorMessage => _errorMessage;
+  String? get categoryErrorMessage => _categoryErrorMessage;
+  bool get isNoSubscriptionError => _noSubscriptionError;
   void clearErrorMessage() {
-    if (_errorMessage == null) return;
+    if (_errorMessage == null &&
+        _categoryErrorMessage == null &&
+        !_noSubscriptionError) return;
     _errorMessage = null;
+    _categoryErrorMessage = null;
+    _noSubscriptionError = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
@@ -56,7 +66,7 @@ class TradeController extends ChangeNotifier {
 
   Future<void> fetchCategories() async {
     _isLoading = true;
-    _errorMessage = null;
+    _categoryErrorMessage = null;
     notifyListeners();
 
     try {
@@ -66,10 +76,10 @@ class TradeController extends ChangeNotifier {
         _categories =
             (response.data ?? []).where((cat) => cat.status == 1).toList();
       } else {
-        _errorMessage = response.message;
+        _categoryErrorMessage = response.message;
       }
     } catch (e) {
-      _errorMessage = 'An error occurred: $e';
+      _categoryErrorMessage = 'An error occurred: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -77,8 +87,9 @@ class TradeController extends ChangeNotifier {
   }
 
   Future<bool> createPost(PostRequestModel request) async {
-    _isLoading = true;
+    _isPostCreating = true;
     _errorMessage = null;
+    _noSubscriptionError = false;
     notifyListeners();
 
     try {
@@ -105,18 +116,21 @@ class TradeController extends ChangeNotifier {
           }
         }
 
-        _isLoading = false;
+        _isPostCreating = false;
         notifyListeners();
         return true;
       } else {
         _errorMessage = response.message;
-        _isLoading = false;
+        final msg = _errorMessage?.toLowerCase() ?? '';
+        _noSubscriptionError = msg.contains('active subscription') ||
+            msg.contains('purchase subscription');
+        _isPostCreating = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
       _errorMessage = e.toString();
-      _isLoading = false;
+      _isPostCreating = false;
       notifyListeners();
       return false;
     }

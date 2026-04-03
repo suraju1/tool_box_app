@@ -1,0 +1,184 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
+import 'package:tool_bocs/util/colors.dart';
+import 'package:tool_bocs/util/font_family.dart';
+
+class AppPriceRangeSelector extends StatefulWidget {
+  final RangeValues initialValues;
+  final double min;
+  final double max;
+  final ValueChanged<RangeValues> onChanged;
+  final String label;
+
+  const AppPriceRangeSelector({
+    super.key,
+    required this.initialValues,
+    this.min = 0,
+    this.max = 200000,
+    required this.onChanged,
+    this.label = 'Desired Price Range',
+  });
+
+  @override
+  State<AppPriceRangeSelector> createState() => _AppPriceRangeSelectorState();
+}
+
+class _AppPriceRangeSelectorState extends State<AppPriceRangeSelector> {
+  late RangeValues _currentRange;
+  late TextEditingController _minController;
+  late TextEditingController _maxController;
+  final NumberFormat _formatter = NumberFormat('#,##,###');
+
+  @override
+  void initState() {
+    super.initState();
+    _currentRange = widget.initialValues;
+    _minController =
+        TextEditingController(text: _currentRange.start.toInt().toString());
+    _maxController =
+        TextEditingController(text: _currentRange.end.toInt().toString());
+  }
+
+  @override
+  void dispose() {
+    _minController.dispose();
+    _maxController.dispose();
+    super.dispose();
+  }
+
+  void _updateFromSlider(RangeValues values) {
+    setState(() {
+      _currentRange = values;
+      // Using value.toString() to avoid formatting inside the text field during editing
+      _minController.text = values.start.toInt().toString();
+      _maxController.text = values.end.toInt().toString();
+    });
+    widget.onChanged(values);
+  }
+
+  void _updateFromMinText(String value) {
+    if (value.isEmpty) return;
+    double? newValue = double.tryParse(value);
+    if (newValue != null) {
+      // Allow user to type, but clamp for the RangeValues
+      double clampedValue = newValue.clamp(widget.min, _currentRange.end);
+
+      setState(() {
+        _currentRange = RangeValues(clampedValue, _currentRange.end);
+      });
+      widget.onChanged(_currentRange);
+    }
+  }
+
+  void _updateFromMaxText(String value) {
+    if (value.isEmpty) return;
+    double? newValue = double.tryParse(value);
+    if (newValue != null) {
+      // Allow user to type, but clamp for the RangeValues
+      double clampedValue = newValue.clamp(_currentRange.start, widget.max);
+
+      setState(() {
+        _currentRange = RangeValues(_currentRange.start, clampedValue);
+      });
+      widget.onChanged(_currentRange);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${widget.label} : ₹${_formatter.format(_currentRange.start.toInt())} - ₹${_formatter.format(_currentRange.end.toInt())}',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 13.sp,
+            color: context.textColor,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        SizedBox(height: 10.h),
+        RangeSlider(
+          values: _currentRange,
+          min: widget.min,
+          max: widget.max,
+          padding: EdgeInsets.zero,
+          activeColor: context.primaryColor,
+          inactiveColor: context.dividerColor,
+          onChanged: _updateFromSlider,
+        ),
+        SizedBox(height: 15.h),
+        Row(
+          children: [
+            Expanded(
+                child: _buildPriceField(
+                    'Min Price', _minController, _updateFromMinText)),
+            SizedBox(width: 15.w),
+            Expanded(
+                child: _buildPriceField(
+                    'Max Price', _maxController, _updateFromMaxText)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriceField(String label, TextEditingController controller,
+      Function(String) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: TextStyle(
+                color: context.subTextColor,
+                fontSize: 11.sp,
+                fontWeight: FontWeight.normal)),
+        SizedBox(height: 6.h),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          onChanged: onChanged,
+          style: TextStyle(
+              fontSize: 14.sp,
+              color: context.textColor,
+              fontWeight: FontWeight.w600),
+          decoration: InputDecoration(
+            prefixIcon: Padding(
+              padding: EdgeInsets.only(left: 12.w, right: 4.w),
+              child: Text('₹',
+                  style: TextStyle(
+                      color: context.subTextColor,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold)),
+            ),
+            prefixIconConstraints:
+                const BoxConstraints(minWidth: 0, minHeight: 0),
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            isDense: true,
+            filled: true,
+            fillColor: context.isDarkMode
+                ? Colors.white.withOpacity(0.05)
+                : const Color(0xFFF3F4F6),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(color: context.dividerColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(color: context.dividerColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(color: context.primaryColor),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

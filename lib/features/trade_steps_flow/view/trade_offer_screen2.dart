@@ -11,6 +11,7 @@ import 'package:tool_bocs/features/trades/model/category_model.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_request_model.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/widgets/app_price_range_selector.dart';
 
 enum ReturnType { existing, customItem, money, free }
 
@@ -870,26 +871,9 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 16.h),
-        Text(
-          isGivePost
-              ? 'Your Price Offer : ₹${_priceRange.start.toInt()} - ₹${_priceRange.end.toInt()}'
-              : 'Desired Price Range : ₹${_priceRange.start.toInt()} - ₹${_priceRange.end.toInt()}',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w700,
-            fontFamily: FontFamily.openSans,
-            color: context.textColor,
-          ),
-        ),
-        SizedBox(height: 12.h),
-        RangeSlider(
-          values: _priceRange,
-          min: 0,
-          max: 200000,
-          divisions: 1000,
-          padding: EdgeInsets.zero,
-          activeColor: context.primaryColor,
-          inactiveColor: context.dividerColor,
+        AppPriceRangeSelector(
+          initialValues: _priceRange,
+          label: isGivePost ? 'Your Price Offer' : 'Desired Price Range',
           onChanged: (val) => setState(() => _priceRange = val),
         ),
         SizedBox(height: 12.h),

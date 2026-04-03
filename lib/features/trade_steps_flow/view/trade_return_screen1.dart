@@ -8,6 +8,7 @@ import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
+import 'package:tool_bocs/core/widgets/app_price_range_selector.dart';
 
 class TradeReturnSearchScreen extends StatefulWidget {
   const TradeReturnSearchScreen({super.key});
@@ -196,21 +197,8 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Desired Price Range : ₹${_priceRange.start.toInt()} - ₹${_priceRange.end.toInt()}',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13.sp,
-                      color: context.textColor),
-                ),
-                SizedBox(height: 15.h),
-                RangeSlider(
-                  values: _priceRange,
-                  min: 0,
-                  max: 200000,
-                  padding: EdgeInsets.zero,
-                  activeColor: context.primaryColor,
-                  inactiveColor: context.dividerColor,
+                AppPriceRangeSelector(
+                  initialValues: _priceRange,
                   onChanged: (val) => setState(() => _priceRange = val),
                 ),
                 SizedBox(height: 25.h),
