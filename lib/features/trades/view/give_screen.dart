@@ -13,6 +13,7 @@ import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/util/date_util.dart';
 
 class GiveScreen extends StatefulWidget {
   const GiveScreen({super.key});
@@ -179,6 +180,7 @@ class _GiveScreenState extends State<GiveScreen> {
                                             ? post.itemImages.first
                                             : null,
                                         postType: post.postType,
+                                        createdAt: post.createdAt,
                                       ),
                                     );
                                   },
@@ -418,6 +420,7 @@ class _GiveScreenState extends State<GiveScreen> {
     String? description,
     String? imagePath,
     String? postType,
+    required String createdAt,
   }) {
     final authController = context.read<AuthController>();
     final isOwner = authController.currentUser?.id == userId;
@@ -553,16 +556,30 @@ class _GiveScreenState extends State<GiveScreen> {
                           color: context.primaryColor, size: 16.sp),
                       SizedBox(width: 4.w),
                       Expanded(
-                        child: Text(
-                          owner,
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: context.textColor,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                owner,
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: context.textColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Spacer(),
+                            Text(
+                              "• ${DateUtil.formatTimeAgo(createdAt)}",
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

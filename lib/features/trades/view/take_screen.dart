@@ -14,6 +14,7 @@ import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/util/date_util.dart';
 
 class TakeScreen extends StatefulWidget {
   const TakeScreen({super.key});
@@ -543,16 +544,30 @@ class _TakeScreenState extends State<TakeScreen> {
                           color: context.primaryColor, size: 16.sp),
                       SizedBox(width: 4.w),
                       Expanded(
-                        child: Text(
-                          post.userName,
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: context.textColor,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                post.userName,
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: context.textColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Spacer(),
+                            Text(
+                              "• ${DateUtil.formatTimeAgo(post.createdAt)}",
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

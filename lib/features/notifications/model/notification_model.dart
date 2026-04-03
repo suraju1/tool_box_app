@@ -23,7 +23,8 @@ class NotificationResponseModel {
         data: json["data"] == null
             ? []
             : List<NotificationModel>.from(
-                json["data"].map((x) => NotificationModel.fromJson(x))),
+                json["data"].map((x) => NotificationModel.fromJson(x)),
+              ),
       );
 }
 
@@ -33,6 +34,9 @@ class NotificationModel {
   final String notificationTitle;
   final String notificationMessage;
   final int isRead;
+  final String? type;
+  final int? referenceId;
+  final int? createdBy;
   final DateTime? readAt;
   final DateTime? createdAt;
 
@@ -42,16 +46,25 @@ class NotificationModel {
     required this.notificationTitle,
     required this.notificationMessage,
     required this.isRead,
+    this.type,
+    this.referenceId,
+    this.createdBy,
     this.readAt,
     this.createdAt,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     debugPrint("Notification JSON mapping: $json");
-    final dynamic rawId =
-        json["notification_id"] ?? json["id"] ?? json["user_id"];
-    final int parsedId =
-        rawId is int ? rawId : int.tryParse(rawId?.toString() ?? "") ?? 0;
+    // Use the explicit ID field from the API.
+    final dynamic rawId = json["id"] ?? json["notification_id"];
+
+    // Use hashing as a last resort fallback only.
+    final int parsedId = (rawId != null)
+        ? (rawId is int ? rawId : int.tryParse(rawId.toString()) ?? 0)
+        : (json["notification_title"].toString() +
+                  json["notification_message"].toString() +
+                  json["created_at"].toString())
+              .hashCode;
 
     return NotificationModel(
       id: parsedId,
@@ -59,6 +72,13 @@ class NotificationModel {
       notificationTitle: json["notification_title"] ?? "",
       notificationMessage: json["notification_message"] ?? "",
       isRead: json["is_read"] ?? 0,
+      type: json["type"],
+      referenceId: json["reference_id"] != null
+          ? int.tryParse(json["reference_id"].toString())
+          : null,
+      createdBy: json["created_by"] != null
+          ? int.tryParse(json["created_by"].toString())
+          : null,
       readAt: json["read_at"] == null ? null : DateTime.parse(json["read_at"]),
       createdAt: json["created_at"] == null
           ? null
@@ -85,11 +105,11 @@ class Pagination {
   });
 
   factory Pagination.fromJson(Map<String, dynamic> json) => Pagination(
-        total: json["total"] ?? 0,
-        page: json["page"] ?? 1,
-        limit: json["limit"] ?? 10,
-        totalPages: json["totalPages"] ?? 0,
-        hasNext: json["hasNext"] ?? false,
-        hasPrev: json["hasPrev"] ?? false,
-      );
+    total: json["total"] ?? 0,
+    page: json["page"] ?? 1,
+    limit: json["limit"] ?? 10,
+    totalPages: json["totalPages"] ?? 0,
+    hasNext: json["hasNext"] ?? false,
+    hasPrev: json["hasPrev"] ?? false,
+  );
 }

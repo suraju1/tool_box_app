@@ -16,6 +16,7 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
 import 'package:tool_bocs/core/widgets/theme_selection_bottom_sheet.dart';
+import 'package:tool_bocs/util/date_util.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -583,14 +584,28 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             SizedBox(width: 6.w),
                             Expanded(
-                              child: Text(
-                                post.userName,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12.sp,
-                                  color: context.textColor,
-                                ),
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      post.userName,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12.sp,
+                                        color: context.textColor,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Text(
+                                    "• ${DateUtil.formatTimeAgo(post.createdAt)}",
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],

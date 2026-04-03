@@ -12,6 +12,7 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/util/date_util.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final int postId;
@@ -760,7 +761,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             SizedBox(width: 15.w),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,  
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -848,6 +849,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                       SizedBox(width: 4.w),
                       Icon(Icons.verified, color: Colors.blue, size: 14.sp),
+                      const Spacer(),
+                      Text(
+                        DateUtil.formatTimeAgo(post.createdAt),
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: context.subTextColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ),
                 ],

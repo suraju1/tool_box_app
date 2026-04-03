@@ -15,6 +15,8 @@ import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
 import 'package:tool_bocs/features/notifications/model/notification_model.dart';
 import 'package:intl/intl.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/features/profile/view/profile_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   final int? postId;
@@ -31,7 +33,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final tradeController = context.read<TradeController>();
       final notificationController = context.read<NotificationController>();
-      
+
       if (widget.postId != null) {
         tradeController.fetchPostResponses(widget.postId!);
       } else {
@@ -386,6 +388,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           fontFamily: FontFamily.openSans,
         ),
       ),
+      // actions: [
+      //   if (widget.postId == null)
+      //     Consumer<NotificationController>(
+      //       builder: (context, controller, child) {
+      //         if (controller.unreadCount > 0) {
+      //           return TextButton(
+      //             onPressed: () => controller.markAllAsRead(),
+      //             child: Text(
+      //               'Mark all as read',
+      //               style: TextStyle(
+      //                 color: context.primaryColor,
+      //                 fontSize: 12.sp,
+      //                 fontWeight: FontWeight.w600,
+      //               ),
+      //             ),
+      //           );
+      //         }
+      //         return const SizedBox.shrink();
+      //       },
+      //     ),
+      //],
       bottom: widget.postId == null
           ? TabBar(
               dividerColor: Colors.transparent,
@@ -618,7 +641,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     return RefreshIndicator(
-      onRefresh: () => notificationController.fetchNotifications(isRefresh: true),
+      onRefresh: () =>
+          notificationController.fetchNotifications(isRefresh: true),
       child: Column(
         children: [
           if (notificationController.notifications.isNotEmpty)
@@ -629,7 +653,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 children: [
                   TextButton.icon(
                     onPressed: () => notificationController.markAllAsRead(),
-                    icon: Icon(Icons.done_all, size: 18.sp, color: context.primaryColor),
+                    icon: Icon(Icons.done_all,
+                        size: 18.sp, color: context.primaryColor),
                     label: Text(
                       'Mark all as read',
                       style: TextStyle(
@@ -653,7 +678,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final notification = notificationController.notifications[index];
+                final notification =
+                    notificationController.notifications[index];
                 return _buildGeneralNotificationCard(context, notification);
               },
             ),
@@ -668,129 +694,256 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final notificationController = context.read<NotificationController>();
     final isUnread = notification.isRead == 0;
 
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: context.isDarkMode
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.r),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Unread indicator line
-              if (isUnread)
-                Container(
-                  width: 4.w,
-                  color: context.primaryColor,
-                ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(12.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(6.r),
-                                  decoration: BoxDecoration(
-                                    color: isUnread 
-                                        ? context.primaryColor.withOpacity(0.1)
-                                        : context.dividerColor.withOpacity(0.05),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    isUnread ? Icons.notifications_active : Icons.notifications_none,
-                                    color: isUnread ? context.primaryColor : context.subTextColor,
-                                    size: 16.sp,
-                                  ),
-                                ),
-                                SizedBox(width: 8.w),
-                                Expanded(
-                                  child: Text(
-                                    notification.notificationTitle,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: isUnread ? FontWeight.w800 : FontWeight.w700,
-                                      color: context.textColor,
-                                      fontFamily: FontFamily.openSans,
+    return InkWell(
+      onTap: () {
+        // Mark as read when clicked
+        if (isUnread) {
+          notificationController.markAsRead(notification.id);
+        }
+
+        final type = notification.type?.toLowerCase() ?? '';
+        final refId = notification.referenceId;
+        final createdBy = notification.createdBy;
+
+        debugPrint(
+            "Notification Tapped: Type=$type, RefId=$refId, CreatedBy=$createdBy");
+
+        switch (type) {
+          case 'giveaway':
+            if (refId != null) {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.productDetails,
+                arguments: refId,
+              );
+            }
+            break;
+          case 'response':
+            if (refId != null) {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.tradeDetails,
+                arguments: refId,
+              );
+            }
+            break;
+          case 'review':
+            // user says : createdBy = other user's id
+            final userId = createdBy ?? refId;
+            if (userId != null) {
+              ProfileController.navigateToUserProfile(context, userId);
+            }
+            break;
+          case 'subscription':
+            Navigator.pushNamed(context, AppRoutes.subscriptionHistory);
+            break;
+          case 'wallet_giveaway':
+          case 'wallet_trade':
+            Navigator.pushNamed(context, AppRoutes.transactionHistory);
+            break;
+          case 'profile':
+            // open my profile screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+            break;
+          case 'system':
+            // just open notification detail / show message
+            _showSystemNotificationDialog(context, notification);
+            break;
+          default:
+            // Fallback for types not explicitly handled
+            if (refId != null) {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.productDetails,
+                arguments: refId,
+              );
+            }
+        }
+      },
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: isUnread
+              ? context.primaryColor.withOpacity(0.06)
+              : context.surfaceColor,
+          borderRadius: BorderRadius.circular(12.r),
+          border: isUnread
+              ? Border.all(
+                  color: context.primaryColor.withOpacity(0.1), width: 1)
+              : Border.all(color: Colors.transparent, width: 1),
+          boxShadow: context.isDarkMode
+              ? []
+              : [
+                  BoxShadow(
+                    color: isUnread
+                        ? context.primaryColor.withOpacity(0.05)
+                        : Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12.r),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Unread indicator line
+                if (isUnread)
+                  Container(
+                    width: 5.w,
+                    color: context.primaryColor,
+                  ),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(12.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(6.r),
+                                    decoration: BoxDecoration(
+                                      color: isUnread
+                                          ? context.primaryColor
+                                              .withOpacity(0.15)
+                                          : context.dividerColor
+                                              .withOpacity(0.05),
+                                      shape: BoxShape.circle,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                    child: Icon(
+                                      isUnread
+                                          ? Icons.notifications_active
+                                          : Icons.notifications_none,
+                                      color: isUnread
+                                          ? context.primaryColor
+                                          : context.subTextColor,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          notification.notificationTitle,
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: isUnread
+                                                ? FontWeight.w800
+                                                : FontWeight.w600,
+                                            color: context.textColor,
+                                            fontFamily: FontFamily.openSans,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (isUnread)
+                                          Container(
+                                            margin: EdgeInsets.only(top: 2.h),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 6.w, vertical: 1.h),
+                                            decoration: BoxDecoration(
+                                              color: context.primaryColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(4.r),
+                                            ),
+                                            child: Text(
+                                              'NEW',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 8.sp,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Delete icon
+                            GestureDetector(
+                              onTap: () => notificationController
+                                  .deleteNotification(notification.id),
+                              child: Container(
+                                padding: EdgeInsets.all(4.r),
+                                child: Icon(Icons.close,
+                                    size: 16.sp,
+                                    color:
+                                        context.subTextColor.withOpacity(0.4)),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          notification.notificationMessage,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            color: isUnread
+                                ? context.textColor
+                                : context.subTextColor.withOpacity(0.8),
+                            fontFamily: FontFamily.openSans,
+                            fontWeight:
+                                isUnread ? FontWeight.w500 : FontWeight.normal,
+                            height: 1.4,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.access_time,
+                                    size: 10.sp, color: context.subTextColor),
+                                SizedBox(width: 4.w),
+                                Text(
+                                  notification.createdAt != null
+                                      ? _formatDate(notification.createdAt!)
+                                      : '',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: context.subTextColor,
+                                    fontFamily: FontFamily.openSans,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          // Delete icon
-                          GestureDetector(
-                            onTap: () => notificationController.deleteNotification(notification.id),
-                            child: Icon(Icons.close, size: 18.sp, color: context.subTextColor.withOpacity(0.5)),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 6.h),
-                      Text(
-                        notification.notificationMessage,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: isUnread ? context.textColor : context.subTextColor,
-                          fontFamily: FontFamily.openSans,
-                          height: 1.4,
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            notification.createdAt != null 
-                                ? _formatDate(notification.createdAt!)
-                                : '',
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              color: context.subTextColor,
-                              fontFamily: FontFamily.openSans,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          if (isUnread)
-                            InkWell(
-                              onTap: () => notificationController.markAsRead(notification.id),
-                              child: Text(
-                                'Mark as read',
+                            if (isUnread)
+                              Text(
+                                'Tap to read',
                                 style: TextStyle(
-                                  fontSize: 12.sp,
+                                  fontSize: 11.sp,
                                   color: context.primaryColor,
                                   fontWeight: FontWeight.w700,
                                   fontFamily: FontFamily.openSans,
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -871,6 +1024,39 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSystemNotificationDialog(
+      BuildContext context, NotificationModel notification) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        title: Text(
+          notification.notificationTitle,
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        content: Text(
+          notification.notificationMessage,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
           ),
         ],
       ),
