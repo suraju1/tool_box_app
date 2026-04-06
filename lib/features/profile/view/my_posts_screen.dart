@@ -11,7 +11,8 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/util/date_util.dart';
 
 class MyPostsScreen extends StatefulWidget {
-  const MyPostsScreen({super.key});
+  final String? initialFilter;
+  const MyPostsScreen({super.key, this.initialFilter});
 
   @override
   State<MyPostsScreen> createState() => _MyPostsScreenState();
@@ -22,7 +23,14 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProfileController>().getMyPosts();
+      if (widget.initialFilter != null) {
+        context.read<ProfileController>().getMyPosts(
+              postType: _getPostTypeFromLabel(widget.initialFilter!),
+              label: widget.initialFilter!,
+            );
+      } else {
+        context.read<ProfileController>().getMyPosts();
+      }
     });
   }
 

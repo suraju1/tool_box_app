@@ -1,10 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-class TermsConditionsScreen extends StatelessWidget {
+class TermsConditionsScreen extends StatefulWidget {
   const TermsConditionsScreen({super.key});
+
+  @override
+  State<TermsConditionsScreen> createState() => _TermsConditionsScreenState();
+}
+
+class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {
+            setState(() {
+              _isLoading = true;
+            });
+          },
+          onPageFinished: (String url) {
+            setState(() {
+              _isLoading = false;
+            });
+          },
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(ApiConstants.termsConditionsUrl));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,108 +73,16 @@ class TermsConditionsScreen extends StatelessWidget {
           child: Divider(height: 1, color: context.dividerColor),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
-        child: Container(
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: context.dividerColor),
-            boxShadow: context.isDarkMode
-                ? []
-                : [
-                    BoxShadow(
-                      color: greyColorWithOpacity0_4,
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle(context, '1. Acceptance of Terms'),
-              _buildSectionContent(
-                context,
-                'By accessing and using TOOLUCS, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use the application.',
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_isLoading)
+            Center(
+              child: CircularProgressIndicator(
+                color: context.primaryColor,
               ),
-              SizedBox(height: 20.h),
-              _buildSectionTitle(context, '2. User Responsibilities'),
-              SizedBox(height: 10.h),
-              Text(
-                'Users must provide accurate information during registration. You are responsible for maintaining the confidentiality of your account credentials.',
-                style: TextStyle(
-                    fontSize: 14.sp, color: context.textColor.withOpacity(0.7)),
-              ),
-              SizedBox(height: 20.h),
-              _buildSectionTitle(context, '3. Risk of Trading'),
-              SizedBox(height: 10.h),
-              Text(
-                'TOOLUCS facilitates the exchange of items. Users are responsible for the accuracy of item descriptions and the safe handover of items.',
-                style: TextStyle(
-                    fontSize: 14.sp, color: context.textColor.withOpacity(0.7)),
-              ),
-              SizedBox(height: 20.h),
-              _buildSectionTitle(context, '4. Prohibited Items'),
-              _buildSectionContent(
-                context,
-                'Users may not list illegal, hazardous, or prohibited items as defined by local laws and our community guidelines.',
-              ),
-              SizedBox(height: 20.h),
-              _buildSectionTitle(context, '5. Limitation of Liability'),
-              _buildSectionContent(
-                context,
-                'TOOLUCS is not responsible for the quality, safety, or legality of items exchanged. Users trade at their own risk.',
-              ),
-              SizedBox(height: 20.h),
-              _buildSectionTitle(context, '6. Modifications to Terms'),
-              _buildSectionContent(
-                context,
-                'We reserve the right to modify these terms at any time. Continued use of the app constitutes acceptance of the updated terms.',
-              ),
-              SizedBox(height: 20.h),
-              Center(
-                child: Text(
-                  'Last Updated: February 2026',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: context.subTextColor,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w700,
-          color: context.textColor,
-          fontFamily: FontFamily.openSans,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionContent(BuildContext context, String content) {
-    return Text(
-      content,
-      textAlign: TextAlign.justify,
-      style: TextStyle(
-        fontSize: 14.sp,
-        color: context.textColor.withOpacity(0.7),
-        height: 1.5,
-        fontFamily: FontFamily.openSans,
+            ),
+        ],
       ),
     );
   }

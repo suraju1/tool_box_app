@@ -86,7 +86,13 @@ class AppPages {
     AppRoutes.subscriptionHistory: (_) => const MySubscriptionsListScreen(),
     AppRoutes.choosePlan: (_) => const ChoosePlanScreen(),
     AppRoutes.savedUsers: (_) => const SavedUsersScreen(),
-    AppRoutes.myPosts: (_) => const MyPostsScreen(),
+    AppRoutes.myPosts: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map<String, dynamic> && args.containsKey('initialFilter')) {
+        return MyPostsScreen(initialFilter: args['initialFilter']);
+      }
+      return const MyPostsScreen();
+    },
     AppRoutes.shimmerTest: (_) => const ShimmerTestScreen(),
   };
 }

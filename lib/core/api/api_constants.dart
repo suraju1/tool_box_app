@@ -7,6 +7,8 @@ class ApiConstants {
   //new
   static const String baseUrl = 'https://updatedtoolbocs.onrender.com/api/';
   static const String baseUrl2 = 'https://updatedtoolbocs.onrender.com/';
+  static const String termsConditionsUrl = '${baseUrl2}terms-conditions';
+  static const String privacyPolicyUrl = '${baseUrl2}privacy-policy';
 
 //----------------------------------API Endpoints-------------------------------------//
 

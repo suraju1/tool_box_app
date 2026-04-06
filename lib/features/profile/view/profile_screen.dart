@@ -695,26 +695,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Expanded(
                 child: _buildStatCard(
-                    'Total Gives',
-                    stats.totalGives.toString(),
-                    Colors.red,
-                    Icons.card_giftcard),
+                  'Total Gives',
+                  stats.totalGives.toString(),
+                  Colors.red,
+                  Icons.card_giftcard,
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.myPosts,
+                    arguments: {'initialFilter': ' Gives '},
+                  ),
+                ),
               ),
               SizedBox(width: 16.w),
               Expanded(
                 child: _buildStatCard(
-                    'Total Takes',
-                    stats.totalTakes.toString(),
-                    Colors.orange,
-                    Icons.redeem_outlined),
+                  'Total Takes',
+                  stats.totalTakes.toString(),
+                  Colors.orange,
+                  Icons.redeem_outlined,
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.myPosts,
+                    arguments: {'initialFilter': ' Takes '},
+                  ),
+                ),
               ),
               SizedBox(width: 16.w),
               Expanded(
                 child: _buildStatCard(
-                    'Total Trades',
-                    stats.totalTrades.toString(),
-                    Colors.orange,
-                    Icons.handshake),
+                  'Total Trades',
+                  stats.totalTrades.toString(),
+                  Colors.orange,
+                  Icons.handshake,
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.tradeHistory),
+                ),
               ),
             ],
           ),
@@ -748,36 +762,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildStatCard(
-      String label, String value, Color color, IconData icon) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 10.w),
-      decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.white10 : greyColor.withOpacity(0.1),
-        border: Border.all(color: context.dividerColor),
-        borderRadius: BorderRadius.circular(10.r),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 28.sp),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-              color: context.primaryColor,
-              fontFamily: FontFamily.openSans,
+      String label, String value, Color color, IconData icon,
+      {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 10.w),
+        decoration: BoxDecoration(
+          color:
+              context.isDarkMode ? Colors.white10 : greyColor.withOpacity(0.1),
+          border: Border.all(color: context.dividerColor),
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28.sp),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w800,
+                color: context.primaryColor,
+                fontFamily: FontFamily.openSans,
+              ),
             ),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10.sp,
-              color: context.textColor,
-              fontWeight: FontWeight.w500,
-              fontFamily: FontFamily.openSans,
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10.sp,
+                color: context.textColor,
+                fontWeight: FontWeight.w500,
+                fontFamily: FontFamily.openSans,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
