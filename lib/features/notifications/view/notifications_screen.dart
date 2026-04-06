@@ -44,6 +44,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     });
   }
 
+  void _navigateToChat(TradeResponseModel response) {
+    final authController = context.read<AuthController>();
+    final isOwner = authController.currentUser?.id == response.posterUserId;
+
+    final otherUserId = isOwner
+        ? response.responderId.toString()
+        : response.posterUserId.toString();
+    final otherUserName =
+        isOwner ? response.responderName : (response.posterName ?? 'User');
+    final otherUserImage =
+        isOwner ? response.responderImage : response.posterImage;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatScreen(
+          otherUserId: otherUserId,
+          otherUserName: otherUserName,
+          otherUserImage: otherUserImage,
+          tradeResponse: response,
+        ),
+      ),
+    );
+  }
+
   void _onResponseTap(TradeResponseModel response) async {
     final tradeController = context.read<TradeController>();
 
@@ -88,16 +113,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             if (response.paymentStatus == 'paid' ||
                 response.status == 'paid' ||
                 response.status == 'completed') {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatScreen(
-                    otherUserId: response.responderId.toString(),
-                    otherUserName: response.responderName,
-                    tradeResponse: response,
-                  ),
-                ),
-              );
+              _navigateToChat(response);
             } else {
               ToastService.showErrorToast(
                 context,
@@ -105,7 +121,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               );
             }
           } else {
-            Navigator.pushNamed(context, AppRoutes.tradeCompletion);
+            if (response.status == 'completed') {
+              Navigator.pushNamed(context, AppRoutes.tradeDetails,
+                  arguments: response.id);
+            } else {
+              Navigator.pushNamed(context, AppRoutes.tradeCompletion);
+            }
           }
         }
       }
@@ -321,6 +342,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       actions: [
         _buildActionButton(actionLabel, actionColor, context.onPrimaryColor,
             () => _onResponseTap(response)),
+        if (response.status == 'completed') ...[
+          SizedBox(width: 8.w),
+          _buildActionButton(' Chat ', context.primaryColor,
+              context.onPrimaryColor, () => _navigateToChat(response)),
+        ],
       ],
       onTap: () => _onResponseTap(response),
     );

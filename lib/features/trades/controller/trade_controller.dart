@@ -55,7 +55,9 @@ class TradeController extends ChangeNotifier {
   void clearErrorMessage() {
     if (_errorMessage == null &&
         _categoryErrorMessage == null &&
-        !_noSubscriptionError) return;
+        !_noSubscriptionError) {
+      return;
+    }
     _errorMessage = null;
     _categoryErrorMessage = null;
     _noSubscriptionError = false;

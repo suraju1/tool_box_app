@@ -761,7 +761,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             SizedBox(width: 15.w),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,  
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
