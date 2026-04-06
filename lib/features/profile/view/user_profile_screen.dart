@@ -620,14 +620,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
               ),
             )
-          else
-            ...reviews.take(3).map((review) => Column(
-                  children: [
-                    _buildReviewItem(review),
-                    if (review != reviews.take(3).last)
-                      Divider(color: context.dividerColor),
-                  ],
-                )),
+          else ...[
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 300.h),
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: reviews.length,
+                separatorBuilder: (_, __) => Divider(color: context.dividerColor),
+                itemBuilder: (context, index) => _buildReviewItem(reviews[index]),
+              ),
+            ),
+          ],
           if (reviews.length > 3)
             TextButton(
               onPressed: () {},

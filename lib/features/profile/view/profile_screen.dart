@@ -551,14 +551,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             )
           else ...[
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount:
-                  profile.reviews.length > 3 ? 3 : profile.reviews.length,
-              separatorBuilder: (_, __) => const Divider(),
-              itemBuilder: (context, index) =>
-                  _buildReviewItem(profile.reviews[index]),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 300.h),
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: profile.reviews.length,
+                separatorBuilder: (_, __) => const Divider(),
+                itemBuilder: (context, index) =>
+                    _buildReviewItem(profile.reviews[index]),
+              ),
             ),
             if (profile.reviews.length > 3) ...[
               SizedBox(height: 5.h),
@@ -727,7 +729,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   stats.totalTrades.toString(),
                   Colors.orange,
                   Icons.handshake,
-                  onTap: () => Navigator.pushNamed(context, AppRoutes.tradeHistory),
+                  onTap: () =>
+                      Navigator.pushNamed(context, AppRoutes.tradeHistory),
                 ),
               ),
             ],
@@ -761,8 +764,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStatCard(
-      String label, String value, Color color, IconData icon,
+  Widget _buildStatCard(String label, String value, Color color, IconData icon,
       {VoidCallback? onTap}) {
     return InkWell(
       onTap: onTap,
