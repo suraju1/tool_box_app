@@ -12,6 +12,7 @@ import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
 import 'package:tool_bocs/features/profile/model/faq_model.dart';
+import 'package:tool_bocs/features/trades/model/post_model.dart';
 
 class ProfileController extends ChangeNotifier {
   final ProfileService _profileService = ProfileService();
@@ -21,6 +22,7 @@ class ProfileController extends ChangeNotifier {
   List<BlockedUserModel> _blockedUsers = [];
   List<SavedUserModel> _savedUsers = [];
   List<FaqModel> _faqs = [];
+  List<PostModel> _myPosts = [];
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -29,6 +31,7 @@ class ProfileController extends ChangeNotifier {
   List<BlockedUserModel> get blockedUsers => _blockedUsers;
   List<SavedUserModel> get savedUsers => _savedUsers;
   List<FaqModel> get faqs => _faqs;
+  List<PostModel> get myPosts => _myPosts;
   UserProfileModel? get userProfile =>
       _viewedProfile ??
       _ownProfile; // Keep for backward compatibility if needed, but preferably use specific ones
@@ -352,5 +355,22 @@ class ProfileController extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
     return response;
+  }
+
+  Future<void> getMyPosts() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final response = await _profileService.fetchMyPosts();
+
+    if (response.success) {
+      _myPosts = response.data ?? [];
+    } else {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
   }
 }

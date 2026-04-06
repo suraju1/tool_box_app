@@ -9,6 +9,7 @@ import '../model/blocked_user_model.dart';
 
 import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
 import 'package:tool_bocs/features/profile/model/faq_model.dart';
+import 'package:tool_bocs/features/trades/model/post_model.dart';
 
 class ProfileService {
   final ApiClient _apiClient = ApiClient();
@@ -364,6 +365,36 @@ class ProfileService {
           message: data['message'] ?? 'Feedback submitted successfully',
           data: data['data'],
         );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<List<PostModel>>> fetchMyPosts() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.getMyPosts);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final List<dynamic> postsData = data['data'];
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'My posts fetched successfully',
+            data: postsData.map((e) => PostModel.fromJson(e)).toList(),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch my posts',
+          );
+        }
       } else {
         return ApiResponse(
           success: false,

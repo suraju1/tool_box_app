@@ -160,6 +160,7 @@ class TradeService {
         ApiConstants.respondToPost
             .replaceAll('{{postid}}', request.giveawayId.toString()),
         data: formData,
+        queryParameters: {'return_type': request.returnType.toLowerCase()},
         options: Options(
           contentType: 'multipart/form-data; boundary=${formData.boundary}',
         ),

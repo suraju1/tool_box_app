@@ -25,6 +25,7 @@ class ApiConstants {
   static const String getGiveTakePostById = 'get_post_by_id/{{postid}}'; //get
   static const String updateGiveTakePost = 'update_post/{{postid}}'; // put
   static const String deleteGiveTakePost = 'delete_post/{{postid}}'; // put
+  static const String getMyPosts = 'get_my_posts'; //get
 
   // 4-Step Trade Flow
   static const String respondToPost = 'respond/{{postid}}'; //post

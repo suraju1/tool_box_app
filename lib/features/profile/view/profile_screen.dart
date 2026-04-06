@@ -811,6 +811,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildDivider(),
           _buildProfileSettingItem(
             context,
+            icon: Icons.post_add_outlined,
+            label: 'My Posts',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.myPosts),
+          ),
+          _buildDivider(),
+          _buildProfileSettingItem(
+            context,
             icon: Icons.card_membership_outlined,
             label: 'My Subscription',
             onTap: () => Navigator.pushNamed(context, AppRoutes.mySubscription),

@@ -252,20 +252,42 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   tradeResponse.postType?.toLowerCase() ==
                                       'giving';
 
-                          final myItem = isOwner
-                              ? (isGivePost
-                                  ? tradeResponse.postItemName
-                                  : (tradeResponse.itemName ?? 'Price'))
-                              : (isGivePost
-                                  ? (tradeResponse.itemName ?? 'Price')
-                                  : tradeResponse.postItemName);
-                          final theirItem = isOwner
-                              ? (isGivePost
-                                  ? (tradeResponse.itemName ?? 'Price')
-                                  : tradeResponse.postItemName)
-                              : (isGivePost
-                                  ? tradeResponse.postItemName
-                                  : (tradeResponse.itemName ?? 'Price'));
+                          String givingItem = '';
+                          String takingItem = '';
+
+                          if (isOwner) {
+                            if (isGivePost) {
+                              givingItem = tradeResponse.postItemName ?? 'Item';
+                              takingItem = tradeResponse.responseType
+                                          .toLowerCase() ==
+                                      'price'
+                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                  : (tradeResponse.itemName ?? 'Item');
+                            } else {
+                              givingItem = tradeResponse.responseType
+                                          .toLowerCase() ==
+                                      'price'
+                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                  : (tradeResponse.itemName ?? 'Item');
+                              takingItem = tradeResponse.postItemName ?? 'Item';
+                            }
+                          } else {
+                            if (isGivePost) {
+                              givingItem = tradeResponse.responseType
+                                          .toLowerCase() ==
+                                      'price'
+                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                  : (tradeResponse.itemName ?? 'Item');
+                              takingItem = tradeResponse.postItemName ?? 'Item';
+                            } else {
+                              givingItem = tradeResponse.postItemName ?? 'Item';
+                              takingItem = tradeResponse.responseType
+                                          .toLowerCase() ==
+                                      'price'
+                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                  : (tradeResponse.itemName ?? 'Item');
+                            }
+                          }
 
                           subtitleWidget = Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,13 +297,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   children: [
                                     const TextSpan(text: "Trade: "),
                                     TextSpan(
-                                      text: myItem,
+                                      text: givingItem,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
                                     const TextSpan(text: " for "),
                                     TextSpan(
-                                      text: theirItem,
+                                      text: takingItem,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),

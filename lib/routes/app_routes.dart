@@ -29,5 +29,6 @@ class AppRoutes {
   static const subscriptionHistory = '/subscriptionHistory';
   static const choosePlan = '/choosePlan';
   static const savedUsers = '/savedUsers';
+  static const myPosts = '/myPosts';
   static const shimmerTest = '/shimmerTest';
 }

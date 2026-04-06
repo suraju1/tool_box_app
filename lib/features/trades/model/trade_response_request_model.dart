@@ -37,42 +37,54 @@ class TradeResponseRequestModel {
     final sanitizedDescription = StringUtil.sanitizeForSql(description);
     final sanitizedCondition = StringUtil.sanitizeForSql(condition);
 
-    final processedReturnType =
-        returnType.toLowerCase() == 'item' ? 'Item' : returnType.toLowerCase();
+    final processedReturnType = returnType.toLowerCase();
 
-    final Map<String, dynamic> data = {
-      'return_type': processedReturnType,
-      if (itemName != null || returnType.toLowerCase() == 'item') ...{
-        'Item_name': sanitizedName,
-        'item_name': sanitizedName, // Keep lowercase for safety
-        'giving_item_name': sanitizedName, // Alias for server-side mapping
-        'return_item_name': sanitizedName, // Alias for server-side mapping
-      },
-      if (categoryId != null) 'category_id': categoryId,
-      if (condition != null) 'condition': sanitizedCondition,
-      if (description != null) ...{
-        'description': sanitizedDescription,
-        'giving_item_description': sanitizedDescription, // Alias
-        'return_item_description': sanitizedDescription, // Alias
-      },
-      if (isHomemade != null) 'is_homemade': isHomemade!.toString(),
-      if (isStoreBought != null) 'is_store_bought': isStoreBought!.toString(),
-      if (notifyPoster != null) 'notify_poster': notifyPoster!.toString(),
-      if (priceRangeStart != null) 'price_range_start': priceRangeStart,
-      if (priceRangeEnd != null) 'price_range_end': priceRangeEnd,
-      if (isNegotiable != null) 'is_negotiable': isNegotiable!.toString(),
-    };
+    final formData = FormData();
 
-    final formData = FormData.fromMap(data);
+    // 1. Mandatory Fields at the beginning
+    formData.fields.add(MapEntry('return_type', processedReturnType));
+
+    // 2. Conditional return item fields
+    if (itemName != null || returnType.toLowerCase() == 'item') {
+      formData.fields.add(MapEntry('item_name', sanitizedName));
+    }
+
+    if (categoryId != null) {
+      formData.fields.add(MapEntry('category_id', categoryId.toString()));
+    }
+
+    if (condition != null) {
+      formData.fields.add(MapEntry('condition', sanitizedCondition));
+    }
+
+    if (description != null) {
+      formData.fields.add(MapEntry('description', sanitizedDescription));
+    }
+
+    // 3. Other boolean/numeric fields
+    if (isHomemade != null) {
+      formData.fields.add(MapEntry('is_homemade', isHomemade!.toString()));
+    }
+    if (isStoreBought != null) {
+      formData.fields.add(MapEntry('is_store_bought', isStoreBought!.toString()));
+    }
+    if (notifyPoster != null) {
+      formData.fields.add(MapEntry('notify_poster', notifyPoster!.toString()));
+    }
+
+    if (priceRangeStart != null) {
+      formData.fields.add(MapEntry('price_range_start', priceRangeStart.toString()));
+    }
+    if (priceRangeEnd != null) {
+      formData.fields.add(MapEntry('price_range_end', priceRangeEnd.toString()));
+    }
+    if (isNegotiable != null) {
+      formData.fields.add(MapEntry('is_negotiable', isNegotiable!.toString()));
+    }
 
     if (images != null && images!.isNotEmpty) {
       for (var path in images!) {
         if (path.isNotEmpty) {
-          formData.files.add(MapEntry(
-            'Images', // Note: Case sensitive for some backend versions
-            await MultipartFile.fromFile(path),
-          ));
-          // Adding lowercase as well for compatibility
           formData.files.add(MapEntry(
             'images',
             await MultipartFile.fromFile(path),
