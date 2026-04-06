@@ -1,3 +1,33 @@
+import 'package:tool_bocs/core/models/pagination_model.dart';
+
+class PostResponseModel {
+  final bool success;
+  final String message;
+  final Pagination? pagination;
+  final List<PostModel> data;
+
+  PostResponseModel({
+    required this.success,
+    required this.message,
+    this.pagination,
+    required this.data,
+  });
+
+  factory PostResponseModel.fromJson(Map<String, dynamic> json) =>
+      PostResponseModel(
+        success: json["success"] ?? false,
+        message: json["message"] ?? "",
+        pagination: json["pagination"] == null
+            ? null
+            : Pagination.fromJson(json["pagination"]),
+        data: json["data"] == null
+            ? []
+            : List<PostModel>.from(
+                json["data"].map((x) => PostModel.fromJson(x)),
+              ),
+      );
+}
+
 class PostModel {
   final int id;
   final int userId;

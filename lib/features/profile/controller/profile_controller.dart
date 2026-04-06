@@ -13,6 +13,7 @@ import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
 import 'package:tool_bocs/features/profile/model/faq_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
+import 'package:tool_bocs/core/models/pagination_model.dart';
 
 class ProfileController extends ChangeNotifier {
   final ProfileService _profileService = ProfileService();
@@ -28,7 +29,10 @@ class ProfileController extends ChangeNotifier {
   int _totalMyTakesCount = 0;
   String _selectedMyPostsFilter = ' All ';
   bool _isLoading = false;
+  bool _isPaginationLoading = false;
   String? _errorMessage;
+  Pagination? _myPostsPagination;
+  int _currentMyPostsPage = 1;
 
   UserProfileModel? get ownProfile => _ownProfile;
   UserProfileModel? get viewedProfile => _viewedProfile;
@@ -44,7 +48,9 @@ class ProfileController extends ChangeNotifier {
       _viewedProfile ??
       _ownProfile; // Keep for backward compatibility if needed, but preferably use specific ones
   bool get isLoading => _isLoading;
+  bool get isPaginationLoading => _isPaginationLoading;
   String? get errorMessage => _errorMessage;
+  bool get hasMoreMyPosts => _myPostsPagination?.hasNext ?? false;
 
   Future<void> getBlockedUsers() async {
     _isLoading = true;
@@ -365,28 +371,72 @@ class ProfileController extends ChangeNotifier {
     return response;
   }
 
-  Future<void> getMyPosts({String postType = 'all', String label = ' All '}) async {
-    _isLoading = true;
+  Future<void> getMyPosts(
+      {String postType = 'all',
+      String label = ' All ',
+      bool isRefresh = true}) async {
+    if (isRefresh) {
+      _myPosts = [];
+      _currentMyPostsPage = 1;
+      _isLoading = true;
+    } else {
+      _isPaginationLoading = true;
+    }
+
     _errorMessage = null;
     _selectedMyPostsFilter = label;
     notifyListeners();
 
-    final response = await _profileService.fetchMyPosts(postType: postType);
+    final response = await _profileService.fetchMyPosts(
+      postType: postType,
+      page: _currentMyPostsPage,
+      limit: 10,
+    );
 
-    if (response.success) {
-      _myPosts = response.data ?? [];
-      
-      // Update stats only when fetching 'all' to avoid overwriting them during filtering
+    if (response.success && response.data != null) {
+      final newPosts = response.data!.data;
+      if (isRefresh) {
+        _myPosts = newPosts;
+      } else {
+        _myPosts.addAll(newPosts);
+      }
+
+      _myPostsPagination = response.data!.pagination;
+      if (_myPostsPagination != null) {
+        _currentMyPostsPage = _myPostsPagination!.page + 1;
+      }
+
+      // Update counts based on pagination total if available
+      final totalFromApi = _myPostsPagination?.total ?? _myPosts.length;
       if (postType == 'all') {
-        _totalMyPostsCount = _myPosts.length;
-        _totalMyGivesCount = _myPosts.where((p) => p.postType.toLowerCase() == 'give').length;
-        _totalMyTakesCount = _myPosts.where((p) => p.postType.toLowerCase() == 'take').length;
+        _totalMyPostsCount = totalFromApi;
+        // fallback calculation for gives/takes if we have the full list
+        if (_myPostsPagination?.totalPages == 1) {
+           _totalMyGivesCount = _myPosts.where((p) => p.postType.toLowerCase() == 'give').length;
+           _totalMyTakesCount = _myPosts.where((p) => p.postType.toLowerCase() == 'take').length;
+        }
+      } else if (postType == 'give') {
+        _totalMyGivesCount = totalFromApi;
+      } else if (postType == 'take') {
+        _totalMyTakesCount = totalFromApi;
       }
     } else {
       _errorMessage = response.message;
     }
 
     _isLoading = false;
+    _isPaginationLoading = false;
     notifyListeners();
+  }
+
+  Future<void> loadMoreMyPosts() async {
+    if (!hasMoreMyPosts || _isPaginationLoading) return;
+
+    String postType = 'all';
+    if (_selectedMyPostsFilter.trim() == 'Gives') postType = 'give';
+    if (_selectedMyPostsFilter.trim() == 'Takes') postType = 'take';
+
+    await getMyPosts(
+        postType: postType, label: _selectedMyPostsFilter, isRefresh: false);
   }
 }

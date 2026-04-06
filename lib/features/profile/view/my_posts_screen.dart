@@ -19,9 +19,12 @@ class MyPostsScreen extends StatefulWidget {
 }
 
 class _MyPostsScreenState extends State<MyPostsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.initialFilter != null) {
         context.read<ProfileController>().getMyPosts(
@@ -32,6 +35,19 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         context.read<ProfileController>().getMyPosts();
       }
     });
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<ProfileController>().loadMoreMyPosts();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -72,19 +88,24 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
               postType: _getPostTypeFromLabel(controller.selectedMyPostsFilter),
               label: controller.selectedMyPostsFilter,
             ),
-            child: SingleChildScrollView(
+            child: ListView(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildPostSummary(controller),
-                  _buildFilters(controller),
-                  if (controller.myPosts.isEmpty)
-                    _buildEmptyState()
-                  else
-                    _buildPostList(controller),
+              children: [
+                _buildPostSummary(controller),
+                _buildFilters(controller),
+                if (controller.myPosts.isEmpty)
+                  _buildEmptyState()
+                else ...[
+                  _buildPostList(controller),
+                  if (controller.isPaginationLoading)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                  SizedBox(height: 20.h),
                 ],
-              ),
+              ],
             ),
           );
         },
@@ -194,6 +215,9 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
     bool isSelected = controller.selectedMyPostsFilter == label;
     return GestureDetector(
       onTap: () {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(0);
+        }
         controller.getMyPosts(
           postType: _getPostTypeFromLabel(label),
           label: label,

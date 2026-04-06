@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tool_bocs/features/notifications/model/notification_model.dart';
 import 'package:tool_bocs/features/notifications/service/notification_service.dart';
+import 'package:tool_bocs/core/models/pagination_model.dart';
 
 class NotificationController extends ChangeNotifier {
   final NotificationService _service = NotificationService();

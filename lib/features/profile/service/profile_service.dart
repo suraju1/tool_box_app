@@ -376,13 +376,16 @@ class ProfileService {
     }
   }
 
-  Future<ApiResponse<List<PostModel>>> fetchMyPosts({String postType = 'all'}) async {
+  Future<ApiResponse<PostResponseModel>> fetchMyPosts(
+      {String postType = 'all', int page = 1, int limit = 10}) async {
     try {
       final Map<String, dynamic> queryParameters = {};
-      
+
       if (postType != 'all') {
-        queryParameters['post_type'] = postType;
+        queryParameters['type'] = postType;
       }
+      queryParameters['page'] = page;
+      queryParameters['limit'] = limit;
 
       final response = await _apiClient.get(
         ApiConstants.getMyPosts,
@@ -392,11 +395,10 @@ class ProfileService {
       if (response.statusCode == 200) {
         final data = response.data;
         if (data['success'] == true && data['data'] != null) {
-          final List<dynamic> postsData = data['data'];
           return ApiResponse(
             success: true,
             message: data['message'] ?? 'My posts fetched successfully',
-            data: postsData.map((e) => PostModel.fromJson(e)).toList(),
+            data: PostResponseModel.fromJson(data),
           );
         } else {
           return ApiResponse(
