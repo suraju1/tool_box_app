@@ -110,9 +110,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               authController.currentUser?.id == response.posterUserId;
 
           if (isOwner) {
-            if (response.paymentStatus == 'paid' ||
-                response.status == 'paid' ||
-                response.status == 'completed') {
+            if (response.status == 'completed') {
+              Navigator.pushNamed(context, AppRoutes.tradeDetails,
+                  arguments: response.id);
+            } else if (response.paymentStatus == 'paid' ||
+                response.status == 'paid') {
               _navigateToChat(response);
             } else {
               ToastService.showErrorToast(
