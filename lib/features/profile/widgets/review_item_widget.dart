@@ -1,0 +1,118 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
+import 'package:tool_bocs/util/colors.dart';
+
+class ReviewItemWidget extends StatelessWidget {
+  final Review review;
+  const ReviewItemWidget({super.key, required this.review});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: InkWell(
+        onTap: () {
+          if (review.reviewerId != null) {
+            ProfileController.navigateToUserProfile(context, review.reviewerId!);
+          }
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: context.primaryColor.withOpacity(0.1), width: 1),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(25.r),
+                child: AppCachedImage(
+                  imageUrl: review.reviewerImage ?? '',
+                  userName: review.reviewerName,
+                  width: 50.r,
+                  height: 50.r,
+                  fit: BoxFit.cover,
+                  radius: 25.r,
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    review.reviewerName ?? 'User',
+                    style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: context.textColor),
+                  ),
+                  Row(
+                    children: [
+                      Row(
+                        children: List.generate(
+                          5,
+                          (index) {
+                            final ratingValue = review.rating is int
+                                ? review.rating
+                                : int.tryParse(review.rating.toString()) ?? 0;
+                            return Icon(
+                              index < ratingValue ? Icons.star : Icons.star_border,
+                              color: index < ratingValue ? Colors.amber : greyColor,
+                              size: 14.sp,
+                            );
+                          },
+                        ),
+                      ),
+                      if (review.feedbackLabel != null) ...[
+                        SizedBox(width: 8.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: context.primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            review.feedbackLabel!,
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: context.primaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  SizedBox(height: 4.h),
+                  if (review.comment != null && review.comment!.isNotEmpty)
+                    Text(
+                      review.comment!,
+                      style: TextStyle(
+                          fontSize: 12.sp, color: context.subTextColor),
+                    ),
+                  SizedBox(height: 4.h),
+                  Row(
+                    children: [
+                      Icon(Icons.thumb_up_outlined,
+                          size: 14.sp, color: greyColor),
+                      SizedBox(width: 12.w),
+                      Icon(Icons.thumb_down_outlined,
+                          size: 14.sp, color: greyColor),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -8,6 +8,7 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/features/profile/view/setting_screen.dart';
+import 'package:tool_bocs/features/profile/widgets/review_item_widget.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
@@ -508,7 +509,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildReviewsSection(UserProfileModel profile) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(15.r),
@@ -552,117 +553,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
             )
           else ...[
             ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 300.h),
+              constraints: BoxConstraints(maxHeight: 200.h),
               child: ListView.separated(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 itemCount: profile.reviews.length,
                 separatorBuilder: (_, __) => const Divider(),
                 itemBuilder: (context, index) =>
-                    _buildReviewItem(profile.reviews[index]),
+                    ReviewItemWidget(review: profile.reviews[index]),
               ),
             ),
             if (profile.reviews.length > 3) ...[
-              SizedBox(height: 5.h),
+              //SizedBox(height: 2.h),
               TextButton(
                 onPressed: () {
-                  // TODO: Navigate to full reviews screen if needed
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.allReviews,
+                    arguments: profile,
+                  );
                 },
-                child: Text(
-                  'View All Reviews',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14.sp,
-                    fontFamily: FontFamily.openSans,
-                    color: context.primaryColor,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w),
+                  child: Text(
+                    'View All Reviews',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14.sp,
+                      fontFamily: FontFamily.openSans,
+                      color: context.primaryColor,
+                    ),
                   ),
                 ),
               ),
             ],
           ],
         ],
-      ),
-    );
-  }
-
-  Widget _buildReviewItem(Review review) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 5.h),
-      child: InkWell(
-        onTap: () {
-          if (review.reviewerId != null) {
-            ProfileController.navigateToUserProfile(
-                context, review.reviewerId!);
-          }
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: context.primaryColor.withOpacity(0.1), width: 1),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25.r),
-                child: AppCachedImage(
-                  imageUrl: review.reviewerImage ?? '',
-                  userName: review.reviewerName,
-                  width: 50.r,
-                  height: 50.r,
-                  fit: BoxFit.cover,
-                  radius: 25.r,
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    review.reviewerName ?? 'User',
-                    style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: context.textColor),
-                  ),
-                  Row(
-                    children: List.generate(
-                      5,
-                      (index) {
-                        final ratingValue = review.rating is int
-                            ? review.rating
-                            : int.tryParse(review.rating.toString()) ?? 0;
-                        return Icon(
-                          index < ratingValue ? Icons.star : Icons.star_border,
-                          color: index < ratingValue ? Colors.amber : greyColor,
-                          size: 14.sp,
-                        );
-                      },
-                    ),
-                  ),
-                  if (review.comment != null)
-                    Text(
-                      review.comment!,
-                      style: TextStyle(fontSize: 12.sp, color: greyColor),
-                    ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      Icon(Icons.thumb_up_outlined,
-                          size: 14.sp, color: greyColor),
-                      SizedBox(width: 12.w),
-                      Icon(Icons.thumb_down_outlined,
-                          size: 14.sp, color: greyColor),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -9,6 +9,8 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
+import 'package:tool_bocs/features/profile/widgets/review_item_widget.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
@@ -628,13 +630,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 shrinkWrap: true,
                 itemCount: reviews.length,
                 separatorBuilder: (_, __) => Divider(color: context.dividerColor),
-                itemBuilder: (context, index) => _buildReviewItem(reviews[index]),
+                itemBuilder: (context, index) => ReviewItemWidget(review: reviews[index]),
               ),
             ),
           ],
           if (reviews.length > 3)
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.allReviews,
+                  arguments: profile,
+                );
+              },
               child: Text(
                 'View All Reviews',
                 style: TextStyle(
@@ -646,98 +654,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
             ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildReviewItem(Review review) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 5.h),
-      child: InkWell(
-        onTap: () {
-          if (review.reviewerId != null) {
-            ProfileController.navigateToUserProfile(context, review.reviewerId!);
-          }
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: context.primaryColor.withOpacity(0.1), width: 1),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25.r),
-                child: AppCachedImage(
-                  imageUrl: review.reviewerImage ?? '',
-                  userName: review.reviewerName,
-                  width: 50.r,
-                  height: 50.r,
-                  fit: BoxFit.cover,
-                  radius: 25.r,
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    review.reviewerName ?? 'User',
-                    style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: context.textColor),
-                  ),
-                  Row(
-                    children: [
-                      Row(
-                        children: List.generate(
-                            5,
-                            (index) => Icon(
-                                  Icons.star,
-                                  color: index < (review.rating as num).toInt()
-                                      ? Colors.amber
-                                      : Colors.grey.withOpacity(0.3),
-                                  size: 14.sp,
-                                )),
-                      ),
-                      if (review.feedbackLabel != null) ...[
-                        SizedBox(width: 8.w),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 6.w, vertical: 2.h),
-                          decoration: BoxDecoration(
-                            color: context.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4.r),
-                          ),
-                          child: Text(
-                            review.feedbackLabel!,
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              color: context.primaryColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  SizedBox(height: 4.h),
-                  if (review.comment != null && review.comment!.isNotEmpty)
-                    Text(
-                      review.comment!,
-                      style: TextStyle(
-                          fontSize: 12.sp, color: context.subTextColor),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

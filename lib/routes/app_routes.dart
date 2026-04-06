@@ -30,5 +30,6 @@ class AppRoutes {
   static const choosePlan = '/choosePlan';
   static const savedUsers = '/savedUsers';
   static const myPosts = '/myPosts';
+  static const allReviews = '/allReviews';
   static const shimmerTest = '/shimmerTest';
 }

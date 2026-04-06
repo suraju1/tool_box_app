@@ -30,8 +30,9 @@ import 'package:tool_bocs/features/subscription/view/my_subscription_status_scre
 import 'package:tool_bocs/features/subscription/view/choose_plan_screen.dart';
 import 'package:tool_bocs/features/profile/view/saved_users_screen.dart';
 import 'package:tool_bocs/features/profile/view/my_posts_screen.dart';
+import 'package:tool_bocs/features/profile/view/all_reviews_screen.dart';
+import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/features/shimmer_test/view/shimmer_test_screen.dart';
-
 import 'app_routes.dart';
 
 class AppPages {
@@ -92,6 +93,15 @@ class AppPages {
         return MyPostsScreen(initialFilter: args['initialFilter']);
       }
       return const MyPostsScreen();
+    },
+    AppRoutes.allReviews: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is UserProfileModel) {
+        return AllReviewsScreen(profile: args);
+      }
+      return const Scaffold(
+        body: Center(child: Text('Error: No profile data provided')),
+      );
     },
     AppRoutes.shimmerTest: (_) => const ShimmerTestScreen(),
   };
