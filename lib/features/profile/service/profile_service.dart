@@ -376,9 +376,18 @@ class ProfileService {
     }
   }
 
-  Future<ApiResponse<List<PostModel>>> fetchMyPosts() async {
+  Future<ApiResponse<List<PostModel>>> fetchMyPosts({String postType = 'all'}) async {
     try {
-      final response = await _apiClient.get(ApiConstants.getMyPosts);
+      final Map<String, dynamic> queryParameters = {};
+      
+      if (postType != 'all') {
+        queryParameters['post_type'] = postType;
+      }
+
+      final response = await _apiClient.get(
+        ApiConstants.getMyPosts,
+        queryParameters: queryParameters,
+      );
 
       if (response.statusCode == 200) {
         final data = response.data;

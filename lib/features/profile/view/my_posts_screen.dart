@@ -59,23 +59,176 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
             return _buildErrorState(controller.errorMessage!);
           }
 
-          if (controller.myPosts.isEmpty) {
-            return _buildEmptyState();
-          }
-
           return RefreshIndicator(
-            onRefresh: () => controller.getMyPosts(),
-            child: ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-              itemCount: controller.myPosts.length,
-              separatorBuilder: (context, index) => SizedBox(height: 6.h),
-              itemBuilder: (context, index) {
-                return _buildPostCard(context, controller.myPosts[index]);
-              },
+            onRefresh: () => controller.getMyPosts(
+              postType: _getPostTypeFromLabel(controller.selectedMyPostsFilter),
+              label: controller.selectedMyPostsFilter,
+            ),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildPostSummary(controller),
+                  _buildFilters(controller),
+                  if (controller.myPosts.isEmpty)
+                    _buildEmptyState()
+                  else
+                    _buildPostList(controller),
+                ],
+              ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildPostSummary(ProfileController controller) {
+    return Padding(
+      padding: EdgeInsets.all(10.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Post Summary',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+              fontFamily: FontFamily.openSans,
+            ),
+          ),
+          SizedBox(height: 10.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildSummaryCard('${controller.totalMyGivesCount}',
+                  'Total Gives', '🎁', Colors.red.shade100),
+              _buildSummaryCard('${controller.totalMyTakesCount}',
+                  'Total Takes', '📦', Colors.orange.shade100),
+              _buildSummaryCard('${controller.totalMyPostsCount}',
+                  'Total Posts', '📜', Colors.blue.shade100),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(
+      String count, String label, String emoji, Color bgColor) {
+    return Container(
+      width: 115.w,
+      padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 10.w),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(15.r),
+        border: Border.all(color: context.dividerColor),
+        boxShadow: context.isDarkMode
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(emoji, style: TextStyle(fontSize: 16.sp)),
+              SizedBox(width: 5.w),
+              Text(
+                count,
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w700,
+                  color: context.primaryColor,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 5.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: context.subTextColor,
+              fontWeight: FontWeight.w600,
+              fontFamily: FontFamily.openSans,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilters(ProfileController controller) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildFilterChip(' All ', controller),
+          _buildFilterChip(' Gives ', controller),
+          _buildFilterChip(' Takes ', controller),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, ProfileController controller) {
+    bool isSelected = controller.selectedMyPostsFilter == label;
+    return GestureDetector(
+      onTap: () {
+        controller.getMyPosts(
+          postType: _getPostTypeFromLabel(label),
+          label: label,
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.only(right: 8.w),
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? context.primaryColor : context.surfaceColor,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected ? context.primaryColor : context.dividerColor,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: isSelected ? context.onPrimaryColor : context.subTextColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getPostTypeFromLabel(String label) {
+    if (label.trim() == 'Gives') return 'give';
+    if (label.trim() == 'Takes') return 'take';
+    return 'all';
+  }
+
+  Widget _buildPostList(ProfileController controller) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+      itemCount: controller.myPosts.length,
+      separatorBuilder: (context, index) => SizedBox(height: 6.h),
+      itemBuilder: (context, index) {
+        return _buildPostCard(context, controller.myPosts[index]);
+      },
     );
   }
 
@@ -113,45 +266,48 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.post_add, size: 80.sp, color: Colors.grey),
-          SizedBox(height: 16.h),
-          Text(
-            'You haven\'t created any posts yet',
-            style: TextStyle(
-              color: context.subTextColor,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            'Create a post to start trading!',
-            style: TextStyle(
-              color: greyColor,
-              fontSize: 14.sp,
-            ),
-          ),
-          SizedBox(height: 24.h),
-          ElevatedButton(
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.createGivePost),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.primaryColor,
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r)),
-            ),
-            child: Text(
-              'Create Post',
+    return Padding(
+      padding: EdgeInsets.only(top: 50.h),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.post_add, size: 80.sp, color: Colors.grey),
+            SizedBox(height: 16.h),
+            Text(
+              'No posts found',
               style: TextStyle(
-                  color: context.onPrimaryColor, fontWeight: FontWeight.bold),
+                color: context.subTextColor,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: 12.h),
+            Text(
+              'Try changing the filter or create a new post!',
+              style: TextStyle(
+                color: greyColor,
+                fontSize: 14.sp,
+              ),
+            ),
+            SizedBox(height: 24.h),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.createGivePost),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.primaryColor,
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r)),
+              ),
+              child: Text(
+                'Create Post',
+                style: TextStyle(
+                    color: context.onPrimaryColor, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -178,7 +334,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
               ? []
               : [
                   BoxShadow(
-                    color: greyColor.withOpacity(0.2),
+                    color: Colors.grey.withOpacity(0.2),
                     blurRadius: 8.r,
                     offset: Offset(0, 4.h),
                   ),

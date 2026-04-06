@@ -23,6 +23,10 @@ class ProfileController extends ChangeNotifier {
   List<SavedUserModel> _savedUsers = [];
   List<FaqModel> _faqs = [];
   List<PostModel> _myPosts = [];
+  int _totalMyPostsCount = 0;
+  int _totalMyGivesCount = 0;
+  int _totalMyTakesCount = 0;
+  String _selectedMyPostsFilter = ' All ';
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -32,6 +36,10 @@ class ProfileController extends ChangeNotifier {
   List<SavedUserModel> get savedUsers => _savedUsers;
   List<FaqModel> get faqs => _faqs;
   List<PostModel> get myPosts => _myPosts;
+  int get totalMyPostsCount => _totalMyPostsCount;
+  int get totalMyGivesCount => _totalMyGivesCount;
+  int get totalMyTakesCount => _totalMyTakesCount;
+  String get selectedMyPostsFilter => _selectedMyPostsFilter;
   UserProfileModel? get userProfile =>
       _viewedProfile ??
       _ownProfile; // Keep for backward compatibility if needed, but preferably use specific ones
@@ -357,15 +365,23 @@ class ProfileController extends ChangeNotifier {
     return response;
   }
 
-  Future<void> getMyPosts() async {
+  Future<void> getMyPosts({String postType = 'all', String label = ' All '}) async {
     _isLoading = true;
     _errorMessage = null;
+    _selectedMyPostsFilter = label;
     notifyListeners();
 
-    final response = await _profileService.fetchMyPosts();
+    final response = await _profileService.fetchMyPosts(postType: postType);
 
     if (response.success) {
       _myPosts = response.data ?? [];
+      
+      // Update stats only when fetching 'all' to avoid overwriting them during filtering
+      if (postType == 'all') {
+        _totalMyPostsCount = _myPosts.length;
+        _totalMyGivesCount = _myPosts.where((p) => p.postType.toLowerCase() == 'give').length;
+        _totalMyTakesCount = _myPosts.where((p) => p.postType.toLowerCase() == 'take').length;
+      }
     } else {
       _errorMessage = response.message;
     }
