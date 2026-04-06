@@ -1037,7 +1037,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? whiteColor : context.subTextColor,
+            color: isSelected ? context.onPrimaryColor : context.subTextColor,
             fontWeight: FontWeight.bold,
             fontSize: 13.sp,
           ),
