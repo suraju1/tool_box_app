@@ -46,10 +46,24 @@ class NotificationService {
     );
 
     if (!kIsWeb && Platform.isAndroid) {
-      await flutterLocalNotificationsPlugin
+      final androidPlugin = flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.requestNotificationsPermission();
+              AndroidFlutterLocalNotificationsPlugin>();
+      
+      await androidPlugin?.requestNotificationsPermission();
+
+      // Create high priority channel explicitly
+      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+        'chat_channel',
+        'Chat Notifications',
+        description: 'Notifications for new messages',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+        showBadge: true,
+      );
+
+      await androidPlugin?.createNotificationChannel(channel);
     }
   }
 

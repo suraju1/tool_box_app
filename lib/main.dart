@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,6 +38,9 @@ void main() async {
     );
     debugPrint(
         "FIREBASE INIT SUCCESS. Project ID: ${Firebase.app().options.projectId}");
+    
+    // Register background handler BEFORE any other notification initialization
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   } catch (e) {
     debugPrint("Firebase initialization failed: $e");
     debugPrint(

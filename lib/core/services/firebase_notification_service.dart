@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:tool_bocs/firebase_options.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tool_bocs/core/services/notification_service.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
@@ -8,10 +10,47 @@ import 'package:tool_bocs/features/login_and_signup/model/user_model.dart';
 
 // Top-level function for background handling
 @pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you need to access other Firebase services in the background,
-  // ensure you call `Firebase.initializeApp()` in main.dart before this.
-  debugPrint("Handling a background message: ${message.messageId}");
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // 1. Initialize Firebase if needed (crucial for background isolates)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint("Firebase already initialized or failed in background: $e");
+  }
+
+  debugPrint("--- Background Message Received ---");
+  debugPrint("Message ID: ${message.messageId}");
+  debugPrint("Data: ${message.data}");
+  debugPrint("Notification: ${message.notification?.title} - ${message.notification?.body}");
+
+  // 2. Show local notification
+  // We show it if it has a notification block OR a data block (for chat)
+  if (message.notification != null || message.data.isNotEmpty) {
+    final notificationService = NotificationService();
+    // We must re-init local notifications in the background isolate
+    await notificationService.init();
+
+    // Map common chat fields from data if notification is null
+    String title = message.notification?.title ?? 
+                   message.data['title'] ?? 
+                   message.data['otherUserName'] ?? 
+                   'New Message';
+    
+    String body = message.notification?.body ?? 
+                  message.data['body'] ?? 
+                  message.data['content'] ?? 
+                  message.data['message'] ?? 
+                  'You have a new message';
+
+    await notificationService.showNotification(
+      id: message.messageId.hashCode,
+      title: title,
+      body: body,
+      payload: jsonEncode(message.data),
+    );
+  }
 }
 
 class FirebaseNotificationService {
@@ -33,9 +72,8 @@ class FirebaseNotificationService {
     debugPrint('User granted permission: ${settings.authorizationStatus}');
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      // 2. Background Message Handler
-      FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler);
+      // 2. Background Message Handler (Registered in main.dart)
+      // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
       // 3. Foreground Message Handler
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
