@@ -10,7 +10,7 @@ class ApiConstants {
   static const String termsConditionsUrl = '${baseUrl2}terms-conditions';
   static const String privacyPolicyUrl = '${baseUrl2}privacy-policy';
 
-//----------------------------------API Endpoints-------------------------------------//
+//-------------------------------- API Endpoints -----------------------------------//
 
   //1. Auth/login/complete-profile/verify-otp/logout
   static const String completeProfile = 'complete-profile'; //post

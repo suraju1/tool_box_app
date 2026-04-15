@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOOLUCS - Open in App</title>
+
+    <!-- Open Graph Meta Tags for link previews in WhatsApp, Telegram, etc. -->
+    <meta property="og:title" content="Check this out on TOOLUCS!" />
+    <meta property="og:description" content="Trade, give, and take items with people nearby. Open in the TOOLUCS app to view this post." />
+    <meta property="og:image" content="https://updatedtoolbocs.onrender.com/logo.png" />
+    <meta property="og:url" content="" id="og-url" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TOOLUCS" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Check this out on TOOLUCS!" />
+    <meta name="twitter:description" content="Trade, give, and take items with people nearby." />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px 24px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .status {
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 24px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .btn-primary {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #d63851;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(233,69,96,0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .buttons {
+            display: none;
+        }
+
+        .loading-state .spinner,
+        .loading-state .status {
+            display: block;
+        }
+
+        .loading-state .buttons {
+            display: none;
+        }
+
+        .fallback-state .spinner {
+            display: none;
+        }
+
+        .fallback-state .buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .fallback-state .status {
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .divider::before { margin-right: 12px; }
+        .divider::after { margin-left: 12px; }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container loading-state" id="main-container">
+        <div class="logo">🛍️</div>
+        <h1>TOOLUCS</h1>
+        <p class="subtitle">Opening post in the TOOLUCS app...</p>
+
+        <div class="spinner"></div>
+        <p class="status" id="status-text">Redirecting to app...</p>
+
+        <div class="buttons">
+            <a class="btn btn-primary" id="store-btn" href="#">
+                📲 Download TOOLUCS
+            </a>
+            <div class="divider">or</div>
+            <a class="btn btn-secondary" id="open-app-btn" href="#">
+                🔄 Try opening in app
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>TOOLUCS — Trade, Give & Take nearby</p>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Parse post ID from the URL path
+            // Supports: /post/{id}, /app/post/{id}
+            var path = window.location.pathname;
+            var postId = null;
+            var match = path.match(/\/(?:app\/)?post\/(\d+)/);
+            if (match) {
+                postId = match[1];
+            }
+
+            // Set the OG URL
+            var ogUrl = document.getElementById('og-url');
+            if (ogUrl) ogUrl.setAttribute('content', window.location.href);
+
+            // App custom scheme deep link
+            var appLink = postId ? 'toolucs://post/' + postId : 'toolucs://';
+
+            // Store links (update these with your actual Play Store / App Store URLs)
+            var playStoreUrl = 'https://play.google.com/store/apps/details?id=com.example.toolucs';
+            var appStoreUrl = 'https://apps.apple.com/app/toolucs/id000000000'; // Update with real App Store ID
+
+            // Detect platform
+            var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            var isAndroid = /android/i.test(userAgent);
+            var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+
+            // Get the right store URL
+            var storeUrl = isAndroid ? playStoreUrl : (isIOS ? appStoreUrl : playStoreUrl);
+
+            // Set button links
+            var storeBtn = document.getElementById('store-btn');
+            var openAppBtn = document.getElementById('open-app-btn');
+            storeBtn.href = storeUrl;
+            storeBtn.textContent = isIOS ? '📲 Download on App Store' : '📲 Download from Play Store';
+            openAppBtn.href = appLink;
+
+            var container = document.getElementById('main-container');
+            var statusText = document.getElementById('status-text');
+
+            // Try to open the app using custom scheme
+            function tryOpenApp() {
+                var startTime = Date.now();
+
+                // Create a hidden iframe to try the custom scheme
+                // This avoids showing an error page if the app isn't installed
+                var iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = appLink;
+                document.body.appendChild(iframe);
+
+                // Also try window.location for better compatibility
+                setTimeout(function() {
+                    window.location.href = appLink;
+                }, 100);
+
+                // If we're still here after 2.5 seconds, the app probably isn't installed
+                setTimeout(function() {
+                    var elapsed = Date.now() - startTime;
+                    // If the page is still visible (app didn't open), show fallback
+                    if (document.visibilityState !== 'hidden' && elapsed < 4000) {
+                        showFallback();
+                    }
+                    // Clean up iframe
+                    if (iframe.parentNode) {
+                        iframe.parentNode.removeChild(iframe);
+                    }
+                }, 2500);
+            }
+
+            function showFallback() {
+                container.className = 'container fallback-state';
+                statusText.textContent = "Couldn't open the app. You may need to install it first.";
+            }
+
+            // Handle visibility change — if user switched to the app, don't show fallback
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'hidden') {
+                    // User left the page (app opened successfully)
+                    clearTimeout(window._fallbackTimeout);
+                }
+            });
+
+            // Start the flow
+            if (postId) {
+                tryOpenApp();
+            } else {
+                statusText.textContent = 'Invalid link. No post ID found.';
+                showFallback();
+            }
+        })();
+    </script>
+</body>
+</html>

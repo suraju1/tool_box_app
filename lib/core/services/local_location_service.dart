@@ -11,7 +11,7 @@ class LocalLocationService {
     await box.put(_savedAddressesKey, addresses);
   }
 
-  /// Load the list of addresses from Hive
+  // Load the list of addresses from Hive
   static List<Map<String, String>> loadAddresses() {
     final box = Hive.box(_boxName);
     final List? data = box.get(_savedAddressesKey);

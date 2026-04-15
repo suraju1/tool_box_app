@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.toolucs",
+      "sha256_cert_fingerprints": [
+        "E2:60:BD:B6:9B:A7:CF:8E:B4:25:7C:4A:EE:C1:50:80:A5:45:94:FE:5C:87:10:F4:C9:8F:02:53:D5:09:61:BF"
+      ]
+    }
+  }
+]
+

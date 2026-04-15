@@ -49,5 +49,16 @@
     <string>This app needs access to your location for signup and personalized services.</string>
     <key>NSLocationAlwaysUsageDescription</key>
     <string>This app needs access to your location.</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>toolucs</string>
+        </array>
+      </dict>
+    </array>
   </dict>
 </plist>

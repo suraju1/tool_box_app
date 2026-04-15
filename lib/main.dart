@@ -15,6 +15,7 @@ import 'package:tool_bocs/firebase_options.dart';
 import 'package:tool_bocs/util/connectivity_service.dart';
 import 'package:tool_bocs/core/services/notification_service.dart';
 import 'package:tool_bocs/core/services/firebase_notification_service.dart';
+import 'package:tool_bocs/core/services/deep_link_handler.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/address/controller/address_controller.dart';
@@ -49,6 +50,9 @@ void main() async {
 
   await NotificationService().init();
   await FirebaseNotificationService().init();
+
+  // Initialize deep link handler for shared URL handling
+  await DeepLinkHandler().init();
 
   runApp(
     ScreenUtilInit(

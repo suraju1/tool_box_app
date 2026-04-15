@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/core/widgets/share_button.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -87,63 +88,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             );
           },
         ),
-        // not need to show here
-        // actions: [
-        //   //report and block
-        //   PopupMenuButton<String>(
-        //     padding: EdgeInsets.zero,
-        //     onSelected: (value) {
-        //       // Handle selection
-        //     },
-        //     offset: const Offset(0, 55),
-        //     shape: PopupMenuArrowShape(borderRadius: 10.r),
-        //     color: context.surfaceColor,
-        //     elevation: 4,
-        //     itemBuilder: (context) => [
-        //       PopupMenuItem<String>(
-        //         // padding: EdgeInsets.zero,
-        //         value: 'block',
-        //         height: 40.h,
-        //         child: Center(
-        //           child: Text(
-        //             'Block',
-        //             textAlign: TextAlign.center,
-        //             style: TextStyle(
-        //               color: context.textColor,
-        //               fontSize: 14.sp,
-        //               fontWeight: FontWeight.w600,
-        //               fontFamily: FontFamily.openSans,
-        //             ),
-        //           ),
-        //         ),
-        //       ),
-        //       PopupMenuDivider(height: 1),
-        //       PopupMenuItem<String>(
-        //         value: 'report',
-        //         height: 40.h,
-        //         child: Center(
-        //           child: Text(
-        //             'Report',
-        //             style: TextStyle(
-        //               color: context.textColor,
-        //               fontSize: 14.sp,
-        //               fontWeight: FontWeight.w600,
-        //               fontFamily: FontFamily.openSans,
-        //             ),
-        //           ),
-        //         ),
-        //       ),
-        //     ],
-        //     child: Padding(
-        //       padding: EdgeInsets.only(right: 15.w),
-        //       child: Icon(
-        //         Icons.more_vert,
-        //         color: context.textColor,
-        //         size: 28.sp,
-        //       ),
-        //     ),
-        //   ),
-        // ],
+        actions: [
+          // Share button — visible once post data loads
+          Consumer<TradeController>(
+            builder: (context, controller, child) {
+              final post = controller.selectedPost;
+              if (post == null) return const SizedBox.shrink();
+              return ShareButton(
+                post: post,
+                includeImage: true,
+                style: ShareButtonStyle.icon,
+              );
+            },
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(10),
           child: Divider(height: 1, color: context.dividerColor),
