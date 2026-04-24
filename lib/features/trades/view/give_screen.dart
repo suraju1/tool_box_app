@@ -44,7 +44,7 @@ class _GiveScreenState extends State<GiveScreen> {
         locationController.longitude,
       );
 
-      tradeController.fetchGivePosts();
+      tradeController.fetchTakePosts();
     });
     _scrollController.addListener(_scrollListener);
   }
@@ -52,7 +52,7 @@ class _GiveScreenState extends State<GiveScreen> {
   void _scrollListener() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      context.read<TradeController>().loadMoreGivePosts();
+      context.read<TradeController>().loadMoreTakePosts();
     }
   }
 
@@ -82,8 +82,8 @@ class _GiveScreenState extends State<GiveScreen> {
           });
         }
 
-        return tradeController.isGiveLoading &&
-                tradeController.givePosts.isEmpty
+        return tradeController.isTakeLoading &&
+                tradeController.takePosts.isEmpty
             ? _buildShimmer(context)
             : Stack(
                 children: [
@@ -101,10 +101,10 @@ class _GiveScreenState extends State<GiveScreen> {
                           onRefresh: () async {
                             await context
                                 .read<TradeController>()
-                                .fetchGivePosts(refresh: true);
+                                .fetchTakePosts(refresh: true);
                           },
-                          child: tradeController.givePosts.isEmpty &&
-                                  !tradeController.isGiveLoading
+                          child: tradeController.takePosts.isEmpty &&
+                                  !tradeController.isTakeLoading
                               ? ListView(
                                   children: [
                                     SizedBox(height: 100.h),
@@ -130,19 +130,19 @@ class _GiveScreenState extends State<GiveScreen> {
                                   controller: _scrollController,
                                   padding:
                                       EdgeInsets.fromLTRB(8.w, 4.h, 8.w, 100.h),
-                                  itemCount: tradeController.givePosts.length +
+                                  itemCount: tradeController.takePosts.length +
                                       1 +
-                                      (tradeController.isGiveLoadMoreRunning
+                                      (tradeController.isTakeLoadMoreRunning
                                           ? 1
                                           : 0),
                                   itemBuilder: (context, index) {
                                     if (index == 0) {
                                       return _buildResultHeader(context,
-                                          tradeController.givePosts.length);
+                                          tradeController.takePosts.length);
                                     }
 
                                     if (index ==
-                                        tradeController.givePosts.length + 1) {
+                                        tradeController.takePosts.length + 1) {
                                       return Center(
                                         child: Padding(
                                           padding: EdgeInsets.all(16.0),
@@ -153,7 +153,7 @@ class _GiveScreenState extends State<GiveScreen> {
                                     }
 
                                     final post =
-                                        tradeController.givePosts[index - 1];
+                                        tradeController.takePosts[index - 1];
                                     return Padding(
                                       padding: EdgeInsets.only(bottom: 6.h),
                                       child: _buildProductCard(
@@ -251,7 +251,7 @@ class _GiveScreenState extends State<GiveScreen> {
                     onChanged: (value) {
                       context
                           .read<TradeController>()
-                          .setSearchQuery(value, type: 'give');
+                          .setSearchQuery(value, type: 'take');
                     },
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
@@ -346,7 +346,7 @@ class _GiveScreenState extends State<GiveScreen> {
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
                 builder: (context) =>
-                    const FilterBottomSheet(initialPostType: 'give'),
+                    const FilterBottomSheet(initialPostType: 'take'),
               ),
               child: _buildFilterButton(context),
             ),

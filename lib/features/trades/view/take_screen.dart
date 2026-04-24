@@ -43,7 +43,7 @@ class _TakeScreenState extends State<TakeScreen> {
         locationController.longitude,
       );
 
-      tradeController.fetchTakePosts();
+      tradeController.fetchGivePosts();
     });
     _searchController = TextEditingController();
     _scrollController.addListener(_onScroll);
@@ -59,7 +59,7 @@ class _TakeScreenState extends State<TakeScreen> {
   void _onScroll() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      context.read<TradeController>().loadMoreTakePosts();
+      context.read<TradeController>().loadMoreGivePosts();
     }
   }
 
@@ -80,18 +80,18 @@ class _TakeScreenState extends State<TakeScreen> {
             });
           }
 
-          if (controller.isTakeLoading && controller.takePosts.isEmpty) {
+          if (controller.isGiveLoading && controller.givePosts.isEmpty) {
             return _buildShimmer(context);
           }
 
-          if (controller.errorMessage != null && controller.takePosts.isEmpty) {
+          if (controller.errorMessage != null && controller.givePosts.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(controller.errorMessage!),
                   ElevatedButton(
-                    onPressed: () => controller.fetchTakePosts(),
+                    onPressed: () => controller.fetchGivePosts(),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -113,10 +113,10 @@ class _TakeScreenState extends State<TakeScreen> {
                   Expanded(
                     child: RefreshIndicator(
                       onRefresh: () async {
-                        await controller.fetchTakePosts(refresh: true);
+                        await controller.fetchGivePosts(refresh: true);
                       },
-                      child: controller.takePosts.isEmpty &&
-                              !controller.isTakeLoading
+                      child: controller.givePosts.isEmpty &&
+                              !controller.isGiveLoading
                           ? ListView(
                               children: [
                                 SizedBox(height: 100.h),
@@ -142,12 +142,12 @@ class _TakeScreenState extends State<TakeScreen> {
                               controller: _scrollController,
                               padding:
                                   EdgeInsets.fromLTRB(8.w, 4.h, 8.w, 100.h),
-                              itemCount: controller.takePosts.length +
-                                  (controller.isTakeLoadMoreRunning ? 1 : 0),
+                              itemCount: controller.givePosts.length +
+                                  (controller.isGiveLoadMoreRunning ? 1 : 0),
                               separatorBuilder: (context, index) =>
                                   SizedBox(height: 6.h),
                               itemBuilder: (context, index) {
-                                if (index == controller.takePosts.length) {
+                                if (index == controller.givePosts.length) {
                                   return const Center(
                                     child: CircularProgressIndicator(),
                                   );
@@ -158,11 +158,11 @@ class _TakeScreenState extends State<TakeScreen> {
                                     children: [
                                       _buildResultHeader(
                                         context,
-                                        controller.takePosts.length,
+                                        controller.givePosts.length,
                                       ),
                                       _buildProductCard(
                                         context,
-                                        controller.takePosts[index],
+                                        controller.givePosts[index],
                                       ),
                                     ],
                                   );
@@ -170,7 +170,7 @@ class _TakeScreenState extends State<TakeScreen> {
 
                                 return _buildProductCard(
                                   context,
-                                  controller.takePosts[index],
+                                  controller.givePosts[index],
                                 );
                               },
                             ),
@@ -241,7 +241,7 @@ class _TakeScreenState extends State<TakeScreen> {
                     onChanged: (value) {
                       context
                           .read<TradeController>()
-                          .setSearchQuery(value, type: 'take');
+                          .setSearchQuery(value, type: 'give');
                     },
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
@@ -341,7 +341,7 @@ class _TakeScreenState extends State<TakeScreen> {
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
                 builder: (context) =>
-                    const FilterBottomSheet(initialPostType: 'take'),
+                    const FilterBottomSheet(initialPostType: 'give'),
               ),
               child: _buildFilterButton(context),
             ),
@@ -378,7 +378,7 @@ class _TakeScreenState extends State<TakeScreen> {
       decoration: BoxDecoration(
         color: context.primaryColor,
         borderRadius: BorderRadius.circular(10.r),
-      ),
+      ), 
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -459,7 +459,7 @@ class _TakeScreenState extends State<TakeScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          "${post.userName}'s Taking",
+                          "${post.userName}'s ${post.postType.toLowerCase() == 'give' ? 'Giving' : 'Taking'}",
                           style: TextStyle(
                             fontSize: 9.sp,
                             color: context.subTextColor,
