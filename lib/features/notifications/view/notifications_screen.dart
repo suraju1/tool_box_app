@@ -841,23 +841,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               child: Row(
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.all(6.r),
+                                    width: 42.r,
+                                    height: 42.r,
                                     decoration: BoxDecoration(
-                                      color: isUnread
-                                          ? context.primaryColor
-                                              .withOpacity(0.15)
-                                          : context.dividerColor
-                                              .withOpacity(0.05),
+                                      color: Colors.grey.shade100,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
-                                      isUnread
-                                          ? Icons.notifications_active
-                                          : Icons.notifications_none,
-                                      color: isUnread
-                                          ? context.primaryColor
-                                          : context.subTextColor,
-                                      size: 16.sp,
+                                    padding: EdgeInsets.all(5.r),
+                                    child: Image.asset(
+                                      'assets/logo_transperant.png',
+                                      fit: BoxFit.contain,
+                                      color: Colors.black,
                                     ),
                                   ),
                                   SizedBox(width: 10.w),

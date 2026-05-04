@@ -10,6 +10,7 @@ import 'package:tool_bocs/features/trades/view/take_screen.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/features/chat/view/chat_list_screen.dart';
 import 'package:tool_bocs/features/chat/controller/chat_service.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import '../controller/bottom_navbar_controller.dart';
 
 class BottomNavBarScreen extends StatelessWidget {
@@ -22,9 +23,8 @@ class BottomNavBarScreen extends StatelessWidget {
     final List<Widget> screens = [
       const HomeScreen(),
       const GiveScreen(),
-      const ChatListScreen(),
       const TakeScreen(),
-      const ProfileScreen(),
+      const ChatListScreen(),
     ];
 
     return Scaffold(
@@ -53,7 +53,7 @@ class BottomNavBarScreen extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
-            label: 'Home',
+            label: AppLocalizations.of(context)!.home,
           ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
@@ -65,7 +65,19 @@ class BottomNavBarScreen extends StatelessWidget {
               colorFilter:
                   ColorFilter.mode(context.primaryColor, BlendMode.srcIn),
             ), // Icon(Icons.card_giftcard),
-            label: 'Give',
+            label: AppLocalizations.of(context)!.give,
+          ),
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(
+              'assets/icons/take.svg',
+              colorFilter: ColorFilter.mode(greyColor, BlendMode.srcIn),
+            ), // Icon(Icons.save_alt_outlined),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/take.svg',
+              colorFilter:
+                  ColorFilter.mode(context.primaryColor, BlendMode.srcIn),
+            ), // Icon(Icons.save_alt),
+            label: AppLocalizations.of(context)!.take,
           ),
           BottomNavigationBarItem(
             icon: StreamBuilder<int>(
@@ -156,24 +168,7 @@ class BottomNavBarScreen extends StatelessWidget {
                 );
               },
             ),
-            label: 'Chat',
-          ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/icons/take.svg',
-              colorFilter: ColorFilter.mode(greyColor, BlendMode.srcIn),
-            ), // Icon(Icons.save_alt_outlined),
-            activeIcon: SvgPicture.asset(
-              'assets/icons/take.svg',
-              colorFilter:
-                  ColorFilter.mode(context.primaryColor, BlendMode.srcIn),
-            ), // Icon(Icons.save_alt),
-            label: 'Take',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            label: AppLocalizations.of(context)!.chat,
           ),
         ],
       ),

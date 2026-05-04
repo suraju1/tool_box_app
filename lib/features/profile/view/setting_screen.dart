@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/controller/theme_controller.dart';
+import 'package:tool_bocs/core/controller/language_controller.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -76,15 +80,20 @@ class _SettingScreenState extends State<SettingScreen> {
                     Navigator.pushNamed(context, AppRoutes.helpSupport),
               ),
               _buildDivider(),
-              //dont show theme option
-              // _buildSettingItem(
-              //   context,
-              //   icon: Icons.palette_outlined,
-              //   label: 'Theme',
-              //   onTap: () =>
-              //       Navigator.pushNamed(context, AppRoutes.themeChange),
-              // ),
-              // _buildDivider(),
+              _buildSettingItem(
+                context,
+                icon: Icons.wb_sunny_outlined,
+                label: AppLocalizations.of(context)!.appearance,
+                onTap: () => _showThemeBottomSheet(context),
+              ),
+              _buildDivider(),
+              _buildSettingItem(
+                context,
+                icon: Icons.language_outlined,
+                label: AppLocalizations.of(context)!.language,
+                onTap: () => _showLanguageBottomSheet(context),
+              ),
+              _buildDivider(),
               _buildSettingItem(
                 context,
                 icon: Icons.description_outlined,
@@ -147,6 +156,236 @@ class _SettingScreenState extends State<SettingScreen> {
       height: 1,
       thickness: 1,
       color: context.dividerColor,
+    );
+  }
+
+  void _showLanguageBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        final languageController = context.watch<LanguageController>();
+        final currentLocale = languageController.locale.languageCode;
+
+        return Container(
+          padding: EdgeInsets.all(20.r),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.selectLanguage,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: context.textColor,
+                ),
+              ),
+              SizedBox(height: 20.h),
+              _buildLanguageOption(
+                context,
+                title: 'English',
+                isSelected: currentLocale == 'en',
+                onTap: () {
+                  languageController.setLanguage('en');
+                  Navigator.pop(context);
+                },
+              ),
+              _buildLanguageOption(
+                context,
+                title: 'हिन्दी (Hindi)',
+                isSelected: currentLocale == 'hi',
+                onTap: () {
+                  languageController.setLanguage('hi');
+                  Navigator.pop(context);
+                },
+              ),
+              _buildLanguageOption(
+                context,
+                title: 'मराठी (Marathi)',
+                isSelected: currentLocale == 'mr',
+                onTap: () {
+                  languageController.setLanguage('mr');
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(height: 20.h),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLanguageOption(
+    BuildContext context, {
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.sp,
+          color: isSelected ? context.primaryColor : context.textColor,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: context.primaryColor)
+          : null,
+    );
+  }
+
+  void _showThemeBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: context.scaffoldBg,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.r)),
+      ),
+      builder: (context) {
+        ThemeMode selectedMode = context.read<ThemeController>().themeMode;
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 30.h),
+              decoration: BoxDecoration(
+                color: context.scaffoldBg,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(25.r)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Appearance',
+                        style: TextStyle(
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: FontFamily.openSans,
+                          color: context.textColor,
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: context.isDarkMode
+                              ? Colors.white10
+                              : Colors.grey.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.close,
+                              color: context.textColor, size: 20.sp),
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                        ),
+                        padding: EdgeInsets.all(8.w),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15.h),
+                  Divider(color: context.dividerColor, thickness: 1),
+                  _buildThemeOption(
+                    context,
+                    title: 'Light theme',
+                    mode: ThemeMode.light,
+                    currentMode: selectedMode,
+                    onChanged: (mode) =>
+                        setModalState(() => selectedMode = mode!),
+                  ),
+                  _buildDivider(),
+                  _buildThemeOption(
+                    context,
+                    title: 'Dark theme',
+                    mode: ThemeMode.dark,
+                    currentMode: selectedMode,
+                    onChanged: (mode) =>
+                        setModalState(() => selectedMode = mode!),
+                  ),
+                  _buildDivider(),
+                  _buildThemeOption(
+                    context,
+                    title: 'Use device theme',
+                    mode: ThemeMode.system,
+                    currentMode: selectedMode,
+                    onChanged: (mode) =>
+                        setModalState(() => selectedMode = mode!),
+                  ),
+                  SizedBox(height: 30.h),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.read<ThemeController>().setTheme(selectedMode);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Save preference',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: FontFamily.openSans,
+                          color: context.onPrimaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context, {
+    required String title,
+    required ThemeMode mode,
+    required ThemeMode currentMode,
+    required ValueChanged<ThemeMode?> onChanged,
+  }) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        unselectedWidgetColor: greyColor,
+      ),
+      child: RadioListTile<ThemeMode>(
+        value: mode,
+        groupValue: currentMode,
+        onChanged: onChanged,
+        activeColor: context.primaryColor,
+        contentPadding: EdgeInsets.zero,
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            fontFamily: FontFamily.openSans,
+            color: context.textColor,
+          ),
+        ),
+        controlAffinity: ListTileControlAffinity.trailing,
+      ),
     );
   }
 }

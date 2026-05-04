@@ -14,6 +14,7 @@ import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/util/date_util.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class GiveScreen extends StatefulWidget {
   const GiveScreen({super.key});
@@ -201,7 +202,7 @@ class _GiveScreenState extends State<GiveScreen> {
       child: Row(
         children: [
           Text(
-            'Nearby Items',
+            AppLocalizations.of(context)!.nearbyItems,
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -256,7 +257,7 @@ class _GiveScreenState extends State<GiveScreen> {
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-                      hintText: 'Search what you want to give',
+                      hintText: AppLocalizations.of(context)!.searchWhatYouWantToGive,
                       hintStyle: TextStyle(
                           color: context.subTextColor, fontSize: 14.sp),
                       prefixIcon: Icon(Icons.search,
@@ -365,7 +366,7 @@ class _GiveScreenState extends State<GiveScreen> {
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: context.primaryColor,
-        borderRadius: BorderRadius.circular(8.r),
+        shape: BoxShape.circle,
       ),
       child: Icon(
         Icons.add,

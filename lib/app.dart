@@ -5,6 +5,9 @@ import 'core/constants/app_theme.dart';
 import 'core/controller/theme_controller.dart';
 import 'package:tool_bocs/features/network_connectivity/view/connectivity_wrapper.dart';
 import 'package:tool_bocs/routes/navigator_key.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
+import 'package:tool_bocs/core/controller/language_controller.dart';
 
 import 'routes/app_routes.dart';
 
@@ -14,6 +17,8 @@ class ToolUcsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = context.watch<ThemeController>();
+
+    final languageController = context.watch<LanguageController>();
 
     return ConnectivityWrapper(
       child: MaterialApp(
@@ -25,6 +30,18 @@ class ToolUcsApp extends StatelessWidget {
         navigatorKey: navigatorKey,
         initialRoute: AppRoutes.splash,
         routes: AppPages.routes,
+        locale: languageController.locale,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('hi'),
+          Locale('mr'),
+        ],
       ),
     );
   }

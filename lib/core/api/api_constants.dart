@@ -85,9 +85,9 @@ class ApiConstants {
 
 //-----------------------------------------------------------------------------//
   // Timeout durations
-  static const Duration connectTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
-  static const Duration sendTimeout = Duration(seconds: 30);
+  static const Duration connectTimeout = Duration(seconds: 60);
+  static const Duration receiveTimeout = Duration(seconds: 60);
+  static const Duration sendTimeout = Duration(seconds: 60);
 
   // Retry configuration
   static const int maxRetries = 3;

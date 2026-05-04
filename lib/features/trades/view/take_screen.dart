@@ -15,6 +15,7 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/util/date_util.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class TakeScreen extends StatefulWidget {
   const TakeScreen({super.key});
@@ -191,7 +192,7 @@ class _TakeScreenState extends State<TakeScreen> {
       child: Row(
         children: [
           Text(
-            'Nearby Items',
+            AppLocalizations.of(context)!.nearbyItems,
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -246,7 +247,7 @@ class _TakeScreenState extends State<TakeScreen> {
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-                      hintText: 'Search what you want to take',
+                      hintText: AppLocalizations.of(context)!.searchWhatYouWantToTake,
                       hintStyle: TextStyle(
                         color: context.subTextColor,
                         fontSize: 14.sp,
@@ -360,7 +361,7 @@ class _TakeScreenState extends State<TakeScreen> {
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: context.primaryColor,
-        borderRadius: BorderRadius.circular(8.r),
+        shape: BoxShape.circle,
       ),
       child: Icon(
         Icons.add,

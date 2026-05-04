@@ -327,6 +327,8 @@ class TradeController extends ChangeNotifier {
           (a, b) => (a.distanceKm ?? 9999.0).compareTo(b.distanceKm ?? 9999.0));
     } else if (_selectedSort == 'Newest First') {
       filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    } else if (_selectedSort == 'Oldest First') {
+      filtered.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     } else if (_selectedSort == 'Highest Rated') {
       filtered
           .sort((a, b) => (b.userRating ?? 0.0).compareTo(a.userRating ?? 0.0));

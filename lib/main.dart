@@ -22,7 +22,7 @@ import 'package:tool_bocs/features/address/controller/address_controller.dart';
 import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
 import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
 import 'package:tool_bocs/features/trades/controller/wallet_controller.dart';
-import 'package:tool_bocs/features/trades/controller/wallet_controller.dart';
+import 'package:tool_bocs/core/controller/language_controller.dart';
 
 import 'app.dart';
 
@@ -86,6 +86,8 @@ void main() async {
                   NotificationController()), // Notification controller
           ChangeNotifierProvider(
               create: (_) => WalletController()), // Wallet controller
+          ChangeNotifierProvider(
+              create: (_) => LanguageController()), // Language controller
         ],
         child: const ToolUcsApp(),
       ),

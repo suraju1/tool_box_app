@@ -13,6 +13,9 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/firebase_notification_service.dart';
+import 'package:tool_bocs/core/controller/theme_controller.dart';
+import 'package:tool_bocs/core/controller/language_controller.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isTab;
@@ -88,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       _buildHeader(context, profile),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
                         child: Column(
                           children: [
                             SizedBox(height: 10.h),
@@ -327,32 +330,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Row(
             children: [
-              if (!widget.isTab && Navigator.of(context).canPop())
-                IconButton(
-                  onPressed: () => Navigator.of(context).maybePop(),
-                  icon: Icon(Icons.arrow_back_ios,
-                      color: context.textColor, size: 20.sp),
-                ),
-              Text(
-                'Profile',
-                style: TextStyle(
-                  color: context.textColor,
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: FontFamily.openSans,
-                ),
-              ),
-              const Spacer(),
+              // Back Button (same left position)
               IconButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingScreen(),
-                    ),
-                  );
+                  Navigator.pop(context);
                 },
-                icon: Icon(Icons.menu, color: context.textColor, size: 28.sp),
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  size: 22,
+                  color: Colors.black,
+                ),
+              ),
+
+              // Center Title
+              Expanded(
+                child: Center(
+                  child: Text(
+                    "Profile",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Right side spacing to balance title center
+              const SizedBox(
+                width: 48,
               ),
             ],
           ),
@@ -367,14 +373,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       border: Border.all(color: context.dividerColor, width: 1),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(48.r),
+                      borderRadius: BorderRadius.circular(38.r),
                       child: AppCachedImage(
                         imageUrl: user.image ?? '',
                         userName: user.fullName,
-                        width: 96.r,
-                        height: 96.r,
+                        width: 76.r,
+                        height: 76.r,
                         fit: BoxFit.cover,
-                        radius: 48.r,
+                        radius: 38.r,
                         placeholderBgColor:
                             context.primaryColor.withOpacity(0.1),
                         placeholderTextColor: context.textColor,
@@ -397,7 +403,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // ),
                 ],
               ),
-              SizedBox(width: 20.w),
+              SizedBox(width: 14.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       user.fullName,
                       style: TextStyle(
                         color: context.textColor,
-                        fontSize: 22.sp,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
                         fontFamily: FontFamily.openSans,
                       ),
@@ -415,7 +421,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       user.location ?? 'No location provided',
                       style: TextStyle(
                         color: context.subTextColor,
-                        fontSize: 14.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
                         fontFamily: FontFamily.openSans,
                       ),
@@ -750,31 +756,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
-          _buildProfileSettingItem(
-            context,
-            icon: Icons.wb_sunny_outlined,
-            label: 'Themes',
-            onTap: () => Navigator.pushNamed(context, AppRoutes.themeChange),
-          ),
-          _buildDivider(),
+
           _buildProfileSettingItem(
             context,
             icon: Icons.post_add_outlined,
-            label: 'My Posts',
+            label: AppLocalizations.of(context)!.myPosts,
             onTap: () => Navigator.pushNamed(context, AppRoutes.myPosts),
           ),
           _buildDivider(),
           _buildProfileSettingItem(
             context,
             icon: Icons.card_membership_outlined,
-            label: 'My Subscription',
+            label: AppLocalizations.of(context)!.mySubscription,
             onTap: () => Navigator.pushNamed(context, AppRoutes.mySubscription),
           ),
           _buildDivider(),
           _buildProfileSettingItem(
             context,
             icon: Icons.sync_alt,
-            label: 'Transaction History',
+            label: AppLocalizations.of(context)!.transactionHistory,
             onTap: () =>
                 Navigator.pushNamed(context, AppRoutes.transactionHistory),
           ),
@@ -782,21 +782,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildProfileSettingItem(
             context,
             icon: Icons.bookmark_border,
-            label: 'Saved Profiles',
+            label: AppLocalizations.of(context)!.savedProfiles,
             onTap: () => Navigator.pushNamed(context, AppRoutes.savedUsers),
           ),
           _buildDivider(),
           _buildProfileSettingItem(
             context,
             icon: Icons.block_outlined,
-            label: 'Blocked Users',
+            label: AppLocalizations.of(context)!.blockedUsers,
             onTap: () => Navigator.pushNamed(context, AppRoutes.blockedUsers),
           ),
           _buildDivider(),
           _buildProfileSettingItem(
             context,
             icon: Icons.settings_outlined,
-            label: 'Settings',
+            label: AppLocalizations.of(context)!.settings,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SettingScreen()),
@@ -806,7 +806,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildProfileSettingItem(
             context,
             icon: Icons.login_outlined,
-            label: 'Logout',
+            label: AppLocalizations.of(context)!.logout,
             onTap: () => showDialog(
               context: context,
               builder: (context) => const LogoutDialog(),
@@ -814,6 +814,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showLanguageBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        final languageController = context.watch<LanguageController>();
+        final currentLocale = languageController.locale.languageCode;
+
+        return Container(
+          padding: EdgeInsets.all(20.r),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.selectLanguage,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: context.textColor,
+                ),
+              ),
+              SizedBox(height: 20.h),
+              _buildLanguageOption(
+                context,
+                title: 'English',
+                isSelected: currentLocale == 'en',
+                onTap: () {
+                  languageController.setLanguage('en');
+                  Navigator.pop(context);
+                },
+              ),
+              _buildLanguageOption(
+                context,
+                title: 'हिन्दी (Hindi)',
+                isSelected: currentLocale == 'hi',
+                onTap: () {
+                  languageController.setLanguage('hi');
+                  Navigator.pop(context);
+                },
+              ),
+              _buildLanguageOption(
+                context,
+                title: 'मराठी (Marathi)',
+                isSelected: currentLocale == 'mr',
+                onTap: () {
+                  languageController.setLanguage('mr');
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(height: 20.h),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLanguageOption(
+    BuildContext context, {
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.sp,
+          color: isSelected ? context.primaryColor : context.textColor,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: context.primaryColor)
+          : null,
     );
   }
 
@@ -849,6 +932,153 @@ class _ProfileScreenState extends State<ProfileScreen> {
       height: 1,
       thickness: 1,
       color: context.dividerColor,
+    );
+  }
+
+  void _showThemeBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: context.scaffoldBg,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.r)),
+      ),
+      builder: (context) {
+        ThemeMode selectedMode = context.read<ThemeController>().themeMode;
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 30.h),
+              decoration: BoxDecoration(
+                color: context.scaffoldBg,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(25.r)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Appearance',
+                        style: TextStyle(
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: FontFamily.openSans,
+                          color: context.textColor,
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: context.isDarkMode
+                              ? Colors.white10
+                              : Colors.grey.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.close,
+                              color: context.textColor, size: 20.sp),
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                        ),
+                        padding: EdgeInsets.all(8.w),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15.h),
+                  Divider(color: context.dividerColor, thickness: 1),
+                  _buildThemeOption(
+                    context,
+                    title: 'Light theme',
+                    mode: ThemeMode.light,
+                    currentMode: selectedMode,
+                    onChanged: (mode) =>
+                        setModalState(() => selectedMode = mode!),
+                  ),
+                  _buildDivider(),
+                  _buildThemeOption(
+                    context,
+                    title: 'Dark theme',
+                    mode: ThemeMode.dark,
+                    currentMode: selectedMode,
+                    onChanged: (mode) =>
+                        setModalState(() => selectedMode = mode!),
+                  ),
+                  _buildDivider(),
+                  _buildThemeOption(
+                    context,
+                    title: 'Use device theme',
+                    mode: ThemeMode.system,
+                    currentMode: selectedMode,
+                    onChanged: (mode) =>
+                        setModalState(() => selectedMode = mode!),
+                  ),
+                  SizedBox(height: 30.h),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.read<ThemeController>().setTheme(selectedMode);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Save preference',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: FontFamily.openSans,
+                          color: context.onPrimaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context, {
+    required String title,
+    required ThemeMode mode,
+    required ThemeMode currentMode,
+    required ValueChanged<ThemeMode?> onChanged,
+  }) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        unselectedWidgetColor: greyColor,
+      ),
+      child: RadioListTile<ThemeMode>(
+        value: mode,
+        groupValue: currentMode,
+        onChanged: onChanged,
+        activeColor: context.primaryColor,
+        contentPadding: EdgeInsets.zero,
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            fontFamily: FontFamily.openSans,
+            color: context.textColor,
+          ),
+        ),
+        controlAffinity: ListTileControlAffinity.trailing,
+      ),
     );
   }
 }

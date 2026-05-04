@@ -97,6 +97,7 @@ class TradeService {
 
       if (response.statusCode == 200) {
         final data = response.data;
+        print("API Response (getAllPosts): $data");
         if (data['success'] == true) {
           final List<dynamic> list = data['data'] ?? [];
           final posts = list.map((e) => PostModel.fromJson(e)).toList();

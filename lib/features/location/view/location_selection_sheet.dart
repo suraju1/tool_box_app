@@ -28,7 +28,6 @@ class LocationSelectionSheet extends StatefulWidget {
 }
 
 class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
-  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -40,7 +39,6 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -63,8 +61,6 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               children: [
-                _buildSearchField(),
-                SizedBox(height: 20.h),
                 _buildUseCurrentLocation(context),
                 _buildDivider(),
                 _buildOptionItem(
@@ -163,25 +159,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
     );
   }
 
-  Widget _buildSearchField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          hintText: 'Search for area, street name...',
-          hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
-          prefixIcon: Icon(Icons.search, color: context.primaryColor, size: 22.sp),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildUseCurrentLocation(BuildContext context) {
     final locationController = context.watch<LocationController>();

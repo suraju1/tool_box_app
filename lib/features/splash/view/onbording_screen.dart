@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tool_bocs/routes/app_routes.dart';
 
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:flutter/material.dart';
@@ -75,6 +76,7 @@ class BoardingPage extends StatefulWidget {
 
 class _BoardingScreenState extends State<BoardingPage> {
   late PageController _pageController;
+  Timer? _redirectTimer;
 
   @override
   void initState() {
@@ -83,12 +85,34 @@ class _BoardingScreenState extends State<BoardingPage> {
 
     // Fetch data when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<OnBoardingController>().fetchOnboardingData();
+      final controller = context.read<OnBoardingController>();
+      // Listen for errors → auto-navigate to login
+      controller.addListener(_onControllerUpdate);
+      controller.fetchOnboardingData();
     });
+  }
+
+  void _onControllerUpdate() {
+    final controller = context.read<OnBoardingController>();
+    // If loading is done and we have an error OR empty list, auto go to login
+    if (!controller.isLoading &&
+        (controller.errorMessage != null ||
+            controller.onBoardingList.isEmpty) &&
+        mounted) {
+      _redirectTimer?.cancel();
+      _redirectTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.login);
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
+    _redirectTimer?.cancel();
+    final controller = context.read<OnBoardingController>();
+    controller.removeListener(_onControllerUpdate);
     _pageController.dispose();
     super.dispose();
   }
@@ -182,11 +206,45 @@ class _BoardingScreenState extends State<BoardingPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(controller.errorMessage!, textAlign: TextAlign.center),
-                  SizedBox(height: 20.h),
-                  ElevatedButton(
-                    onPressed: () => controller.fetchOnboardingData(),
-                    child: const Text("Retry"),
+                  const Icon(Icons.cloud_off_outlined,
+                      size: 64, color: Colors.grey),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'Server starting up...',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: context.textColor,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    'Redirecting to login in 3 seconds...',
+                    style:
+                        TextStyle(fontSize: 13.sp, color: context.subTextColor),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 24.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          _redirectTimer?.cancel();
+                          controller.fetchOnboardingData();
+                        },
+                        child: const Text("Retry"),
+                      ),
+                      SizedBox(width: 12.w),
+                      TextButton(
+                        onPressed: () {
+                          _redirectTimer?.cancel();
+                          Navigator.pushReplacementNamed(
+                              context, AppRoutes.login);
+                        },
+                        child: const Text("Go to Login"),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -197,29 +255,10 @@ class _BoardingScreenState extends State<BoardingPage> {
         final onboardingList = controller.onBoardingList;
 
         if (onboardingList.isEmpty) {
-          // If data is empty after loading, we can show a message or just proceed to login
-          // Let's show a retry if no error message is set, but the list is empty.
+          // Auto-redirect handled by listener; show minimal loading state
           return Scaffold(
             backgroundColor: context.scaffoldBg,
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("No onboarding content available.",
-                      textAlign: TextAlign.center),
-                  SizedBox(height: 20.h),
-                  ElevatedButton(
-                    onPressed: () => controller.fetchOnboardingData(),
-                    child: const Text("Retry"),
-                  ),
-                  TextButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, AppRoutes.login),
-                    child: const Text("Skip to Login"),
-                  ),
-                ],
-              ),
-            ),
+            body: const Center(child: CircularProgressIndicator()),
           );
         }
 

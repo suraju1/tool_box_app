@@ -9,6 +9,7 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/address/controller/address_controller.dart';
 import 'package:tool_bocs/features/address/model/address_model.dart';
+import 'package:geocoding/geocoding.dart' as geo;
 
 class MapAddressPickerScreen extends StatefulWidget {
   final bool isPickOnly;
@@ -23,13 +24,14 @@ class MapAddressPickerScreen extends StatefulWidget {
 class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   final Completer<GoogleMapController> _controller = Completer();
   LatLng _lastMapPosition = const LatLng(18.5204, 73.8567); // Default Pune
-  String _currentAddress = "Loading address..."; 
+  String _currentAddress = "Loading address...";
   bool _isReverseGeocoding = false;
 
   // Form controllers
   final TextEditingController _houseController = TextEditingController();
   final TextEditingController _floorController = TextEditingController();
   final TextEditingController _areaController = TextEditingController();
+  final TextEditingController _mapSearchController = TextEditingController();
   String _selectedLabel = 'Home';
   String _orderFor = 'Myself';
   double _radius = 5.0; // km
@@ -153,8 +155,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         children: [
           _buildMap(),
           _buildMarkerOverlay(),
-          //not needed currently
-          // _buildSearchOverlay(),
+          _buildSearchOverlay(),
           _buildUseCurrentLocationFloating(),
           _buildRadiusSliderOverlay(),
           _buildBottomForm(),
@@ -350,15 +351,61 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
             Icon(Icons.search, color: context.primaryColor),
             SizedBox(width: 10.w),
             Expanded(
-              child: Text(
-                'Search for a new area, locality...',
-                style: TextStyle(color: context.subTextColor, fontSize: 14.sp),
+              child: TextField(
+                controller: _mapSearchController,
+                decoration: InputDecoration(
+                  hintText: 'Search for area, locality...',
+                  hintStyle:
+                      TextStyle(color: context.subTextColor, fontSize: 14.sp),
+                  border: InputBorder.none,
+                ),
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) => _searchLocation(value),
+                onChanged: (val) => setState(() {}),
               ),
             ),
+            if (_mapSearchController.text.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  setState(() {
+                    _mapSearchController.clear();
+                  });
+                },
+              ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _searchLocation(String query) async {
+    if (query.isEmpty) return;
+
+    setState(() => _isReverseGeocoding = true);
+    try {
+      List<geo.Location> locations = await geo.locationFromAddress(query);
+      if (locations.isNotEmpty) {
+        final loc = locations.first;
+        final position = LatLng(loc.latitude, loc.longitude);
+
+        // Get proper address from coordinates
+        final address = await LocationService.getAddressFromCoordinates(
+          loc.latitude,
+          loc.longitude,
+        );
+
+        if (mounted) {
+          _updateLocalLocation(position, address ?? query);
+        }
+      } else {
+        if (mounted) ToastService.showErrorToast(context, 'Location not found');
+      }
+    } catch (e) {
+      if (mounted) ToastService.showErrorToast(context, 'Location not found');
+    } finally {
+      if (mounted) setState(() => _isReverseGeocoding = false);
+    }
   }
 
   Widget _buildUseCurrentLocationFloating() {
@@ -775,7 +822,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         isDefault: _isDefault ? 1 : 0,
       );
 
-      addressController.updateAddress(updatedAddress.id!, updatedAddress).then((response) {
+      addressController
+          .updateAddress(updatedAddress.id!, updatedAddress)
+          .then((response) {
         if (response.success) {
           context.read<LocationController>().setLocation(
                 _lastMapPosition.latitude,
@@ -784,7 +833,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                 radius: _radius,
               );
 
-          ToastService.showSuccessToast(context, 'Address updated successfully');
+          ToastService.showSuccessToast(
+              context, 'Address updated successfully');
           Navigator.pop(context);
         } else {
           ToastService.showErrorToast(context, response.message);
@@ -797,9 +847,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         address: fullAddress,
         latitude: _lastMapPosition.latitude,
         longitude: _lastMapPosition.longitude,
-        isDefault: _isDefault
-            ? 1
-            : (addressController.addresses.isEmpty ? 1 : 0),
+        isDefault:
+            _isDefault ? 1 : (addressController.addresses.isEmpty ? 1 : 0),
       );
 
       addressController.saveAddress(newAddress).then((response) {

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final String? initialPostType;
@@ -74,6 +75,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     _buildDistanceSection(),
                     SizedBox(height: 12.h),
                     _buildReturnTypeSection(),
+                    SizedBox(height: 12.h),
+                    _buildSortBySection(),
                     SizedBox(height: 25.h),
                   ],
                 ),
@@ -114,7 +117,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         Expanded(
           child: Center(
             child: Text(
-              'Filter',
+              AppLocalizations.of(context)!.filter,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -133,7 +136,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Category', style: _sectionTitleStyle()),
+        Text(AppLocalizations.of(context)!.category, style: _sectionTitleStyle()),
         SizedBox(height: 10.h),
         Consumer<TradeController>(
           builder: (context, tradeController, child) {
@@ -224,7 +227,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Distance', style: _sectionTitleStyle()),
+        Text(AppLocalizations.of(context)!.distance, style: _sectionTitleStyle()),
         SizedBox(height: 5.h),
         Row(
           children: [
@@ -411,7 +414,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               padding: EdgeInsets.symmetric(vertical: 8.h),
             ),
             child: Text(
-              'Apply',
+              AppLocalizations.of(context)!.apply,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -444,7 +447,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               padding: EdgeInsets.symmetric(vertical: 8.h),
             ),
             child: Text(
-              'Reset',
+              AppLocalizations.of(context)!.reset,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700),
             ),
           ),
@@ -454,22 +457,26 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   Widget _buildPostTypeSection() {
-    final types = ['All', 'Give', 'Take'];
+    final types = [
+      {'label': AppLocalizations.of(context)!.all, 'value': 'all'},
+      {'label': AppLocalizations.of(context)!.give, 'value': 'give'},
+      {'label': AppLocalizations.of(context)!.take, 'value': 'take'},
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Post Type', style: _sectionTitleStyle()),
+        Text(AppLocalizations.of(context)!.postType, style: _sectionTitleStyle()),
         SizedBox(height: 10.h),
         Row(
           children: types.map((type) {
             bool isSelected =
-                selectedPostType.toLowerCase() == type.toLowerCase();
+                selectedPostType.toLowerCase() == type['value']!.toLowerCase();
             return Expanded(
               child: GestureDetector(
                 onTap: () =>
-                    setState(() => selectedPostType = type.toLowerCase()),
+                    setState(() => selectedPostType = type['value']!.toLowerCase()),
                 child: Container(
-                  margin: EdgeInsets.only(right: type == 'Take' ? 0 : 10.w),
+                  margin: EdgeInsets.only(right: type['label'] == AppLocalizations.of(context)!.take ? 0 : 10.w),
                   padding: EdgeInsets.symmetric(vertical: 8.h),
                   decoration: BoxDecoration(
                     color: isSelected
@@ -484,7 +491,60 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    type,
+                    type['label']!,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: isSelected
+                          ? context.onPrimaryColor
+                          : context.subTextColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSortBySection() {
+    final sortOptions = [
+      {'label': AppLocalizations.of(context)!.distance, 'value': 'Nearest First'},
+      {'label': AppLocalizations.of(context)!.newest, 'value': 'Newest First'},
+      {'label': AppLocalizations.of(context)!.oldest, 'value': 'Oldest First'},
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(AppLocalizations.of(context)!.sortBy, style: _sectionTitleStyle()),
+        SizedBox(height: 10.h),
+        Row(
+          children: sortOptions.map((option) {
+            bool isSelected = selectedSort == option['value'];
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => selectedSort = option['value']!),
+                child: Container(
+                  margin: EdgeInsets.only(
+                      right: option['label'] == 'Oldest' ? 0 : 10.w),
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? context.primaryColor
+                        : context.surfaceColor,
+                    borderRadius: BorderRadius.circular(22.r),
+                    border: Border.all(
+                      color: isSelected
+                          ? context.primaryColor
+                          : context.dividerColor,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    option['label']!,
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: isSelected

@@ -17,6 +17,7 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
 import 'package:tool_bocs/core/widgets/theme_selection_bottom_sheet.dart';
 import 'package:tool_bocs/util/date_util.dart';
+import 'package:tool_bocs/features/profile/view/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -76,7 +78,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: context.scaffoldBg,
+      drawer: Drawer(
+        width: 1.sw * 0.85,
+        child: const ProfileScreen(isTab: false),
+      ),
       body: Column(
         children: [
           SizedBox(height: 25.h),
@@ -193,104 +200,27 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: EdgeInsets.only(
         left: 10.w,
         right: 10.w,
-        bottom: 4.h,
+        bottom: 8.h,
       ),
       decoration: BoxDecoration(
         color: context.appBarColor,
       ),
       child: Column(
         children: [
-          // dont shgow logo here
-          // Image.asset(
-          //   'assets/logo_transperant.png',
-          //   height: 40.h,
-          //   color: context.isDarkMode ? Colors.white : Colors.black,
-          // ),
-          //SizedBox(height: 6.h),
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(
-                Icons.location_on_outlined,
+              IconButton(
+                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                icon: Icon(Icons.menu, color: context.textColor, size: 28.sp),
+              ),
+              Image.asset(
+                'assets/logo_transperant.png',
+                height: 35.h,
+                fit: BoxFit.contain,
                 color: context.textColor,
-                size: 20.sp,
               ),
-              SizedBox(width: 10.w),
-              Consumer<LocationController>(
-                builder: (context, locationController, child) {
-                  return Expanded(
-                    child: InkWell(
-                      onTap: () async {
-                        await LocationSelectionSheet.show(context);
-                        // After selection, update trade controller location and refresh
-                        if (mounted) {
-                          context.read<TradeController>().setLocation(
-                                locationController.latitude,
-                                locationController.longitude,
-                              );
-                          context.read<TradeController>().fetchHomePosts();
-                        }
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              locationController.address ?? 'NA',
-                              style: TextStyle(
-                                color: context.textColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.sp,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.center,
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                            margin: EdgeInsets.only(right: 25.w),
-                            child: Icon(
-                              Icons.keyboard_arrow_down,
-                              color: context.textColor,
-                              size: 26.sp,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-              //no need to show this filter button currently on home screen
-              // InkWell(
-              //   onTap: () => showModalBottomSheet(
-              //     context: context,
-              //     isScrollControlled: true,
-              //     backgroundColor: Colors.transparent,
-              //     builder: (context) =>
-              //         const FilterBottomSheet(initialPostType: 'all'),
-              //   ),
-              //   child: Container(
-              //     clipBehavior: Clip.antiAlias,
-              //     margin: EdgeInsets.only(left: 8.w),
-              //     padding:
-              //         EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-              //     decoration: BoxDecoration(
-              //       color: Colors.white.withOpacity(0.2),
-              //       borderRadius: BorderRadius.circular(8.r),
-              //     ),
-              //     child: SvgPicture.asset(
-              //       'assets/filter_icon.svg',
-              //       width: 20.w,
-              //       height: 20.h,
-              //       colorFilter:
-              //           const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-              //     ),
-              //   ),
-              // ),
-              //SizedBox(width: 1.w),
               Consumer<NotificationController>(
                 builder: (context, notificationController, child) {
                   return InkWell(
@@ -346,6 +276,64 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+          SizedBox(height: 12.h),
+          Consumer<LocationController>(
+            builder: (context, locationController, child) {
+              return InkWell(
+                onTap: () async {
+                  await LocationSelectionSheet.show(context);
+                  if (mounted) {
+                    context.read<TradeController>().setLocation(
+                          locationController.latitude,
+                          locationController.longitude,
+                        );
+                    context.read<TradeController>().fetchHomePosts();
+                  }
+                },
+                child: Row(
+                  children: [
+                    // Icon(
+                    //   Icons.location_on_outlined,
+                    //   color: context.textColor,
+                    //   size: 20.sp,
+                    // ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: RichText(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'HOME - ',
+                              style: TextStyle(
+                                color: context.textColor,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15.sp,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '${locationController.address ?? 'NA'}',
+                              style: TextStyle(
+                                color: context.textColor,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      color: context.textColor,
+                      size: 22.sp,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -363,16 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Distance',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: context.textColor,
-                  fontFamily: FontFamily.openSans,
-                ),
-              ),
-              SizedBox(height: 5.h),
+              SizedBox(height: 10.h),
               Row(
                 children: [
                   Expanded(
@@ -403,6 +382,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ],
+              ),
+              SizedBox(height: 5.h),
+              Text(
+                'Distance',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: context.textColor,
+                  fontFamily: FontFamily.openSans,
+                ),
               ),
               SizedBox(height: 5.h),
               Text(
