@@ -34,6 +34,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _showTradeHistory = false;
   File? _selectedImage;
   bool _isInitialized = false;
+  double? _selectedLatitude;
+  double? _selectedLongitude;
 
   @override
   void initState() {
@@ -48,6 +50,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _profileVisibility = profile?.profileVisibility == 1;
     _showTradeHistory = profile?.showTradeHistory == 1;
     _selectedGender = profile?.gender;
+    _selectedLatitude = _parseCoordinate(profile?.latitude);
+    _selectedLongitude = _parseCoordinate(profile?.longitude);
     if (profile?.dateOfBirth != null && profile!.dateOfBirth!.isNotEmpty) {
       try {
         _selectedDate = DateTime.parse(profile.dateOfBirth!);
@@ -74,12 +78,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  double? _parseCoordinate(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString());
+  }
+
   void _updateLocationFromController() {
     final locationController = context.read<LocationController>();
     if (mounted) {
       if (locationController.address != null) {
         setState(() {
           _locationController.text = locationController.address!;
+          _selectedLatitude = locationController.latitude;
+          _selectedLongitude = locationController.longitude;
         });
       }
     }
@@ -101,6 +113,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _profileVisibility = profile.profileVisibility == 1;
       _showTradeHistory = profile.showTradeHistory == 1;
       _selectedGender = profile.gender;
+      _selectedLatitude = _parseCoordinate(profile.latitude);
+      _selectedLongitude = _parseCoordinate(profile.longitude);
       if (profile.dateOfBirth != null && profile.dateOfBirth!.isNotEmpty) {
         try {
           _selectedDate = DateTime.parse(profile.dateOfBirth!);
@@ -484,31 +498,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ? const Center(child: CircularProgressIndicator())
           : ElevatedButton(
               onPressed: () async {
-                final locationController = context.read<LocationController>();
+                final fullName = _nameController.text.trim();
+                if (fullName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Full name is required')),
+                  );
+                  return;
+                }
+
                 final response = await controller.updateProfile(
-                  fullName: _nameController.text.isNotEmpty
-                      ? _nameController.text
-                      : null,
-                  location: _locationController.text.isNotEmpty
-                      ? _locationController.text
-                      : null,
-                  email: _emailController.text.isNotEmpty
-                      ? _emailController.text
-                      : null,
-                  mobile: _mobileController.text.isNotEmpty
-                      ? _mobileController.text
-                      : null,
-                  bio: _bioController.text.isNotEmpty
-                      ? _bioController.text
-                      : null,
+                  fullName: fullName,
+                  location: _locationController.text.trim(),
+                  email: _emailController.text.trim(),
+                  mobile: _mobileController.text.trim(),
+                  bio: _bioController.text.trim(),
                   profileVisibility: _profileVisibility ? 1 : 0,
                   showTradeHistory: _showTradeHistory ? 1 : 0,
                   gender: _selectedGender,
                   dateOfBirth: _selectedDate != null
                       ? "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}"
                       : null,
-                  latitude: locationController.latitude,
-                  longitude: locationController.longitude,
+                  latitude: _selectedLatitude,
+                  longitude: _selectedLongitude,
                   termsAccepted: true,
                   profileImage: _selectedImage,
                 );
@@ -540,10 +551,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: Text(
                 'Save Changes',
                 style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: context.onPrimaryColor,
-                    fontFamily: FontFamily.openSans),
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: context.onPrimaryColor,
+                  fontFamily: FontFamily.openSans,
+                ),
               ),
             ),
     );

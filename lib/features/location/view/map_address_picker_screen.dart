@@ -314,13 +314,19 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Text(
-                    'Move the pin to adjust your location',
+                    'Move the map to adjust your location',
                     style: TextStyle(
                         color: context.reverseTextColor, fontSize: 10.sp),
                   ),
                 ),
                 SizedBox(height: 8.h),
-                Icon(Icons.location_on, color: Colors.black, size: 40.sp),
+                SizedBox(
+                  width: 42.r,
+                  height: 42.r,
+                  child: CustomPaint(
+                    painter: _MapFocusMarkerPainter(),
+                  ),
+                ),
               ],
             ),
           ),
@@ -868,4 +874,50 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       });
     }
   }
+}
+
+class _MapFocusMarkerPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+
+    final outlinePaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 5
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final markerPaint = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    // Draw white outline for better visibility on map
+    canvas.drawLine(
+      Offset(8, center.dy),
+      Offset(size.width - 8, center.dy),
+      outlinePaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx, 8),
+      Offset(center.dx, size.height - 8),
+      outlinePaint,
+    );
+
+    // Draw black plus sign
+    canvas.drawLine(
+      Offset(8, center.dy),
+      Offset(size.width - 8, center.dy),
+      markerPaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx, 8),
+      Offset(center.dx, size.height - 8),
+      markerPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

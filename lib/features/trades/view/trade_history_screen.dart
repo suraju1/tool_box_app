@@ -23,8 +23,17 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TradeController>().fetchMyTrades();
+      _loadTradeHistory();
     });
+  }
+
+  Future<void> _loadTradeHistory() async {
+    final tradeController = context.read<TradeController>();
+    await Future.wait([
+      tradeController.fetchMyTrades(),
+      tradeController.fetchSentResponses(),
+      tradeController.fetchAllPostResponses(),
+    ]);
   }
 
   @override
@@ -36,12 +45,13 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
       backgroundColor:
           context.isDarkMode ? Colors.black : const Color(0xFFF8F9FB),
       appBar: _buildAppBar(context),
-      body: (shimmer.isLoading || tradeController.isMyTradesLoading)
+      body: (shimmer.isLoading ||
+              tradeController.isMyTradesLoading ||
+              tradeController.isSentLoading ||
+              tradeController.isIncomingLoading)
           ? _buildShimmer(context)
           : RefreshIndicator(
-              onRefresh: () async {
-                await tradeController.fetchMyTrades();
-              },
+              onRefresh: _loadTradeHistory,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
@@ -79,7 +89,10 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
   }
 
   Widget _buildTradeSummary() {
-    final stats = context.watch<TradeController>().myTradeStats;
+    final tradeController = context.watch<TradeController>();
+    final stats = tradeController.myTradeStats;
+    final sentOffers = tradeController.sentResponses.length;
+    final receivedOffers = tradeController.postResponses.length;
     return Padding(
       padding: EdgeInsets.all(10.w),
       child: Column(
@@ -98,11 +111,11 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSummaryCard('${stats?.totalGives ?? 0}', 'Total Gives',
-                  '🎁', Colors.red.shade100),
-              _buildSummaryCard('${stats?.totalTakes ?? 0}', 'Total Takes',
-                  '📦', Colors.orange.shade100),
               _buildSummaryCard('${stats?.totalTrades ?? 0}', 'Total Trades',
+                  '🎁', Colors.red.shade100),
+              _buildSummaryCard('$sentOffers', 'Sent Offers',
+                  '📦', Colors.orange.shade100),
+              _buildSummaryCard('$receivedOffers', 'Received Offers',
                   '🤝', Colors.blue.shade100),
             ],
           ),

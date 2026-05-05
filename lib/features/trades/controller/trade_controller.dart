@@ -19,6 +19,7 @@ class TradeController extends ChangeNotifier {
   bool _isIncomingLoading = false;
   bool _isSentLoading = false;
   bool _isMyTradesLoading = false;
+  bool _isMarkingUser = false;
   String? _errorMessage;
   String? _categoryErrorMessage;
   bool _noSubscriptionError = false;
@@ -30,6 +31,7 @@ class TradeController extends ChangeNotifier {
   List<MyTradeModel> get myTrades => _myTrades;
   MyTradeStats? get myTradeStats => _myTradeStats;
   bool get isMyTradesLoading => _isMyTradesLoading;
+  bool get isMarkingUser => _isMarkingUser;
 
   // --- Filter State ---
   List<String> _selectedCategories = [];
@@ -878,6 +880,36 @@ class TradeController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<bool> submitUserMark({
+    required int tradeResponseId,
+    required int userId,
+    required String mark,
+  }) async {
+    _isMarkingUser = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.submitUserMark(
+        tradeResponseId: tradeResponseId,
+        userId: userId,
+        mark: mark,
+      );
+
+      if (!response.success) {
+        _errorMessage = response.message;
+      }
+
+      return response.success;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isMarkingUser = false;
+      notifyListeners();
     }
   }
 }

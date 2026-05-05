@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
@@ -16,6 +17,7 @@ import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 import 'package:tool_bocs/core/controller/theme_controller.dart';
 import 'package:tool_bocs/core/controller/language_controller.dart';
 import 'package:tool_bocs/l10n/generated/app_localizations.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isTab;
@@ -94,8 +96,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
                         child: Column(
                           children: [
-                            SizedBox(height: 10.h),
-                            _buildBioSection(profile),
                             SizedBox(height: 10.h),
                             _buildReviewsSection(profile),
                             SizedBox(height: 10.h),
@@ -356,9 +356,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
 
-              // Right side spacing to balance title center
-              const SizedBox(
-                width: 48,
+              IconButton(
+                tooltip: 'Edit Profile',
+                onPressed: () => Navigator.pushNamed(
+                  context,
+                  AppRoutes.editProfile,
+                ),
+                icon: Icon(
+                  Icons.edit_outlined,
+                  size: 22.sp,
+                  color: context.textColor,
+                ),
               ),
             ],
           ),
@@ -417,13 +425,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontFamily: FontFamily.openSans,
                       ),
                     ),
+                    if (user.bio != null && user.bio!.trim().isNotEmpty) ...[
+                      SizedBox(height: 3.h),
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: context.textColor.withOpacity(0.75),
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: FontFamily.openSans,
+                            height: 1.25,
+                          ),
+                          children: _buildBioTextSpans(
+                            user.bio!.trim(),
+                            context,
+                          ),
+                        ),
+                        softWrap: true,
+                      ),
+                    ],
+                    SizedBox(height: 7.h),
                     Text(
                       user.location ?? 'No location provided',
                       style: TextStyle(
                         color: context.subTextColor,
-                        fontSize: 12.sp,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.w400,
                         fontFamily: FontFamily.openSans,
+                        height: 1.15,
                       ),
                     ),
                     SizedBox(height: 5.h),
@@ -471,43 +500,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildBioSection(UserProfileModel profile) {
-    if (profile.userDetails.bio == null || profile.userDetails.bio!.isEmpty) {
-      return const SizedBox.shrink();
+  List<TextSpan> _buildBioTextSpans(String bio, BuildContext context) {
+    final spans = <TextSpan>[];
+    final linkStyle = TextStyle(
+      color: Colors.blue.shade700,
+      fontSize: 12.sp,
+      fontWeight: FontWeight.w700,
+      fontFamily: FontFamily.openSans,
+      height: 1.25,
+      decoration: TextDecoration.underline,
+    );
+    final normalStyle = TextStyle(
+      color: context.textColor.withOpacity(0.75),
+      fontSize: 12.sp,
+      fontWeight: FontWeight.w500,
+      fontFamily: FontFamily.openSans,
+      height: 1.25,
+    );
+    final pattern = RegExp(
+      r'\[([^\]]+)\]\((https?:\/\/[^)\s]+|www\.[^)\s]+)\)|https?:\/\/[^\s]+|www\.[^\s]+|@[A-Za-z0-9._]{2,30}',
+    );
+
+    var lastIndex = 0;
+    for (final match in pattern.allMatches(bio)) {
+      if (match.start > lastIndex) {
+        spans.add(TextSpan(
+          text: bio.substring(lastIndex, match.start),
+          style: normalStyle,
+        ));
+      }
+
+      final markdownLabel = match.group(1);
+      final markdownUrl = match.group(2);
+      final rawText = match.group(0) ?? '';
+      final displayText = markdownLabel ?? rawText;
+      final url = markdownUrl ?? _bioUrlFromText(rawText);
+
+      spans.add(TextSpan(
+        text: displayText,
+        style: linkStyle,
+        recognizer: TapGestureRecognizer()
+          ..onTap = () => _openBioLink(displayText, url),
+      ));
+      lastIndex = match.end;
     }
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(15.r),
-        border: Border.all(color: context.dividerColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Bio',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
-              fontFamily: FontFamily.openSans,
-              color: context.textColor,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            profile.userDetails.bio!,
-            textAlign: TextAlign.justify,
-            style: TextStyle(
-              color: greyColor,
-              fontSize: 12.sp,
-              height: 1.3,
-              fontFamily: FontFamily.openSans,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
+
+    if (lastIndex < bio.length) {
+      spans.add(TextSpan(text: bio.substring(lastIndex), style: normalStyle));
+    }
+
+    return spans;
+  }
+
+  String _bioUrlFromText(String text) {
+    final cleanText = text.replaceAll(RegExp(r'[.,;:!?]+$'), '');
+    if (cleanText.startsWith('@')) {
+      return 'https://www.instagram.com/${cleanText.substring(1)}';
+    }
+    if (cleanText.startsWith('www.')) {
+      return 'https://$cleanText';
+    }
+    return cleanText;
+  }
+
+  void _openBioLink(String title, String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _ProfileBioLinkScreen(title: title, url: url),
       ),
     );
   }
@@ -594,8 +654,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ],
+          SizedBox(height: 8.h),
+          _buildMarksRow(profile),
         ],
       ),
+    );
+  }
+
+  Widget _buildMarksRow(UserProfileModel profile) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: context.isDarkMode ? Colors.white10 : greyColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: context.dividerColor),
+      ),
+      child: Row(
+        children: [
+          Text(
+            'Marks',
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+              fontFamily: FontFamily.openSans,
+            ),
+          ),
+          const Spacer(),
+          _buildMarkCount(
+              Icons.thumb_up_alt_outlined, profile.userDetails.totalLikes, Colors.green),
+          SizedBox(width: 14.w),
+          _buildMarkCount(Icons.thumb_down_alt_outlined,
+              profile.userDetails.totalDislikes, Colors.red),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMarkCount(IconData icon, int count, Color color) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 15.sp),
+        SizedBox(width: 4.w),
+        Text(
+          count.toString(),
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w700,
+            color: context.textColor,
+          ),
+        ),
+      ],
     );
   }
 
@@ -629,40 +738,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Expanded(
                 child: _buildStatCard(
-                  'Total Gives',
-                  stats.totalGives.toString(),
-                  Colors.red,
-                  Icons.card_giftcard,
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.myPosts,
-                    arguments: {'initialFilter': ' Gives '},
-                  ),
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: _buildStatCard(
-                  'Total Takes',
-                  stats.totalTakes.toString(),
-                  Colors.orange,
-                  Icons.redeem_outlined,
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.myPosts,
-                    arguments: {'initialFilter': ' Takes '},
-                  ),
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: _buildStatCard(
                   'Total Trades',
                   stats.totalTrades.toString(),
-                  Colors.orange,
+                  Colors.blue,
                   Icons.handshake,
                   onTap: () =>
                       Navigator.pushNamed(context, AppRoutes.tradeHistory),
+                ),
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: _buildStatCard(
+                  'Sent Offers',
+                  stats.sentOffers.toString(),
+                  Colors.red,
+                  Icons.outbox_outlined,
+                ),
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: _buildStatCard(
+                  'Received Offers',
+                  stats.receivedOffers.toString(),
+                  Colors.orange,
+                  Icons.move_to_inbox_outlined,
                 ),
               ),
             ],
@@ -756,7 +855,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
-
           _buildProfileSettingItem(
             context,
             icon: Icons.post_add_outlined,
@@ -1078,6 +1176,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         controlAffinity: ListTileControlAffinity.trailing,
+      ),
+    );
+  }
+}
+
+class _ProfileBioLinkScreen extends StatefulWidget {
+  final String title;
+  final String url;
+
+  const _ProfileBioLinkScreen({
+    required this.title,
+    required this.url,
+  });
+
+  @override
+  State<_ProfileBioLinkScreen> createState() => _ProfileBioLinkScreenState();
+}
+
+class _ProfileBioLinkScreenState extends State<_ProfileBioLinkScreen> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (_) => setState(() => _isLoading = true),
+          onPageFinished: (_) => setState(() => _isLoading = false),
+          onWebResourceError: (_) => setState(() => _isLoading = false),
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.url));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: context.scaffoldBg,
+      appBar: AppBar(
+        backgroundColor: context.scaffoldBg,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: context.textColor),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: context.textColor,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
+        ],
       ),
     );
   }

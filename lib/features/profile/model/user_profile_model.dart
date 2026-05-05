@@ -16,8 +16,15 @@ class UserProfileModel {
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
+    final userDetailsJson =
+        Map<String, dynamic>.from(json['user_details'] ?? {});
+    if (json['review_stats'] != null &&
+        userDetailsJson['review_stats'] == null) {
+      userDetailsJson['review_stats'] = json['review_stats'];
+    }
+
     return UserProfileModel(
-      userDetails: UserDetails.fromJson(json['user_details'] ?? {}),
+      userDetails: UserDetails.fromJson(userDetailsJson),
       tradeStats: TradeStats.fromJson(json['trade_stats'] ?? {}),
       reviews:
           (json['reviews'] as List?)?.map((e) => Review.fromJson(e)).toList() ??
@@ -45,6 +52,8 @@ class UserDetails {
   final dynamic longitude;
   final String averageRating;
   final int totalReviews;
+  final int totalLikes;
+  final int totalDislikes;
   final String? remainingBalance;
   final bool termsAccepted;
 
@@ -64,11 +73,17 @@ class UserDetails {
     this.longitude,
     required this.averageRating,
     required this.totalReviews,
+    this.totalLikes = 0,
+    this.totalDislikes = 0,
     this.remainingBalance,
     this.termsAccepted = true,
   });
 
   factory UserDetails.fromJson(Map<String, dynamic> json) {
+    final reviewStats = json['review_stats'] is Map<String, dynamic>
+        ? json['review_stats'] as Map<String, dynamic>
+        : <String, dynamic>{};
+
     return UserDetails(
       id: json['id'] ?? 0,
       fullName: json['full_name'] ?? '',
@@ -85,6 +100,9 @@ class UserDetails {
       longitude: json['longitude'],
       averageRating: json['average_rating']?.toString() ?? '0.0',
       totalReviews: json['total_reviews'] ?? 0,
+      totalLikes: _parseInt(json['total_likes'] ?? reviewStats['likes']),
+      totalDislikes:
+          _parseInt(json['total_dislikes'] ?? reviewStats['dislikes']),
       remainingBalance: json['remaining_balance']?.toString(),
       termsAccepted:
           json['terms_accepted'] == 1 || json['terms_accepted'] == true,
@@ -96,20 +114,31 @@ class TradeStats {
   final int totalGives;
   final int totalTakes;
   final int totalTrades;
+  final int sentOffers;
+  final int receivedOffers;
 
   TradeStats({
     required this.totalGives,
     required this.totalTakes,
     required this.totalTrades,
+    this.sentOffers = 0,
+    this.receivedOffers = 0,
   });
 
   factory TradeStats.fromJson(Map<String, dynamic> json) {
     return TradeStats(
-      totalGives: json['total_gives'] ?? 0,
-      totalTakes: json['total_takes'] ?? 0,
-      totalTrades: json['total_trades'] ?? 0,
+      totalGives: _parseInt(json['total_gives']),
+      totalTakes: _parseInt(json['total_takes']),
+      totalTrades: _parseInt(json['total_trades']),
+      sentOffers: _parseInt(json['sent_offers']),
+      receivedOffers: _parseInt(json['received_offers']),
     );
   }
+}
+
+int _parseInt(dynamic value) {
+  if (value is int) return value;
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }
 
 class Review {

@@ -223,17 +223,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             ),
                             SizedBox(height: 8.h),
                             _buildDetailRow(
-                              'Return Type',
-                              post.returnType,
-                              Icons.keyboard_return_rounded,
-                            ),
-                            SizedBox(height: 8.h),
-                            _buildDetailRow(
                               'Item Source',
                               post.itemSource,
                               Icons.source_outlined,
                             ),
-                            if (post.returnType == 'Price') ...[
+                            if (_isPriceReturn(post)) ...[
+                              SizedBox(height: 20.h),
+                              _buildReturnHeader(post),
                               SizedBox(height: 8.h),
                               _buildDetailRow(
                                 'Price Range',
@@ -241,17 +237,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 Icons.monetization_on_outlined,
                                 true,
                               ),
-                            ] else if (post.returnType == 'Item') ...[
+                            ] else if (_hasReturnItemDetails(post)) ...[
                               SizedBox(height: 20.h),
-                              Text(
-                                'Return Item Details',
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: FontFamily.openSans,
-                                  color: context.textColor,
-                                ),
-                              ),
+                              _buildReturnHeader(post),
                               SizedBox(height: 8.h),
                               if (post.returnItemImages.isNotEmpty) ...[
                                 SizedBox(
@@ -270,40 +258,46 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                               .startsWith('http')
                                           ? post.returnItemImages[index]
                                           : '${ApiConstants.baseUrl2}${post.returnItemImages[index]}';
-                                      return Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(12.r),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black
-                                                  .withOpacity(0.05),
-                                              blurRadius: 8,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
+                                      return GestureDetector(
+                                        onTap: () => _openReturnImagePreview(
+                                          post.returnItemImages,
+                                          index,
                                         ),
-                                        child: AppCachedImage(
-                                          imageUrl: imageUrl,
-                                          height: 120.h,
-                                          width: 120.h,
-                                          fit: BoxFit.cover,
-                                          radius: 12.r,
-                                          errorWidget: Container(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12.r),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.05),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: AppCachedImage(
+                                            imageUrl: imageUrl,
                                             height: 120.h,
                                             width: 120.h,
-                                            decoration: BoxDecoration(
-                                              color: context.isDarkMode
-                                                  ? Colors.white10
-                                                  : Colors.grey[100],
-                                              borderRadius:
-                                                  BorderRadius.circular(12.r),
-                                            ),
-                                            child: Icon(
-                                              Icons
-                                                  .image_not_supported_outlined,
-                                              color: Colors.grey,
-                                              size: 30.sp,
+                                            fit: BoxFit.cover,
+                                            radius: 12.r,
+                                            errorWidget: Container(
+                                              height: 120.h,
+                                              width: 120.h,
+                                              decoration: BoxDecoration(
+                                                color: context.isDarkMode
+                                                    ? Colors.white10
+                                                    : Colors.grey[100],
+                                                borderRadius:
+                                                    BorderRadius.circular(12.r),
+                                              ),
+                                              child: Icon(
+                                                Icons
+                                                    .image_not_supported_outlined,
+                                                color: Colors.grey,
+                                                size: 30.sp,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -318,13 +312,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   'Item Name',
                                   post.returnItemName!,
                                 ),
-                              if (post.returnItemCategory != null) ...[
-                                SizedBox(height: 8.h),
-                                _buildDetailRow(
-                                  'Category',
-                                  post.returnItemCategory!,
-                                ),
-                              ],
                               if (post.returnItemCondition != null) ...[
                                 SizedBox(height: 8.h),
                                 _buildDetailRow(
@@ -630,6 +617,80 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
+  void _openReturnImagePreview(List<String> images, int initialIndex) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _ReturnImagePreviewScreen(
+          images: images,
+          initialIndex: initialIndex,
+        ),
+      ),
+    );
+  }
+
+  bool _isPriceReturn(PostModel post) {
+    final type = post.returnType.trim().toLowerCase();
+    return type == 'price' ||
+        type == 'money' ||
+        type == 'cash' ||
+        type == 'amount';
+  }
+
+  bool _hasReturnItemDetails(PostModel post) {
+    return post.returnItemImages.isNotEmpty ||
+        (post.returnItemName?.trim().isNotEmpty ?? false) ||
+        (post.returnItemCategory?.trim().isNotEmpty ?? false) ||
+        (post.returnItemCondition?.trim().isNotEmpty ?? false) ||
+        (post.returnItemSource?.trim().isNotEmpty ?? false) ||
+        (post.returnItemDescription?.trim().isNotEmpty ?? false);
+  }
+
+  String _titleCase(String value) {
+    return value
+        .trim()
+        .replaceAll(RegExp(r'[_-]+'), ' ')
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
+  }
+
+  Widget _buildReturnHeader(PostModel post) {
+    final returnType = _titleCase(post.returnType);
+    final category = _titleCase(post.returnItemCategory ?? '');
+
+    return Row(
+      children: [
+        Text(
+          returnType.isEmpty ? 'Return in return' : '$returnType in return',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+            fontFamily: FontFamily.openSans,
+            color: context.textColor,
+          ),
+        ),
+        if (category.isNotEmpty) ...[
+          SizedBox(width: 12.w),
+          const Spacer(),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 140.w),
+            child: Text(
+              category,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                fontFamily: FontFamily.openSans,
+                color: context.textColor,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildDetailRow(String label, String value,
       [IconData? icon, bool isPrice = false]) {
     return Row(
@@ -844,6 +905,116 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           color: context.primaryColor,
           fontSize: size * 0.4,
           fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+class _ReturnImagePreviewScreen extends StatefulWidget {
+  final List<String> images;
+  final int initialIndex;
+
+  const _ReturnImagePreviewScreen({
+    required this.images,
+    required this.initialIndex,
+  });
+
+  @override
+  State<_ReturnImagePreviewScreen> createState() =>
+      _ReturnImagePreviewScreenState();
+}
+
+class _ReturnImagePreviewScreenState extends State<_ReturnImagePreviewScreen> {
+  late final PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex =
+        widget.initialIndex.clamp(0, widget.images.length - 1).toInt();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              itemCount: widget.images.length,
+              onPageChanged: (index) => setState(() => _currentIndex = index),
+              itemBuilder: (context, index) {
+                return Center(
+                  child: InteractiveViewer(
+                    minScale: 1,
+                    maxScale: 4,
+                    child: SizedBox.expand(
+                      child: AppCachedImage(
+                        imageUrl: widget.images[index],
+                        fit: BoxFit.contain,
+                        radius: 0,
+                        errorWidget: const Center(
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: Colors.white54,
+                            size: 42,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            Positioned(
+              top: 8.h,
+              left: 8.w,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 28.sp,
+                ),
+              ),
+            ),
+            if (widget.images.length > 1)
+              Positioned(
+                top: 18.h,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.45),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Text(
+                      '${_currentIndex + 1}/${widget.images.length}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

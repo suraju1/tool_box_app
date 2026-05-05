@@ -466,4 +466,37 @@ class TradeService {
       return ApiResponse(success: false, message: e.toString());
     }
   }
+
+  Future<ApiResponse<dynamic>> submitUserMark({
+    required int tradeResponseId,
+    required int userId,
+    required String mark,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.submitUserMark,
+        data: {
+          'trade_response_id': tradeResponseId,
+          'user_id': userId,
+          'mark': mark,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'User marked successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
 }

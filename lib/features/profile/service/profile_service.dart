@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:tool_bocs/core/api/api_client.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/api/api_response.dart';
@@ -17,6 +19,7 @@ class ProfileService {
   Future<ApiResponse<UserProfileModel>> fetchOwnProfile() async {
     try {
       final response = await _apiClient.get(ApiConstants.getUserProfile);
+      _logProfileApiResponse('OWN PROFILE', response.data);
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -49,6 +52,7 @@ class ProfileService {
       final response = await _apiClient.get(
         ApiConstants.getOtherProfile.replaceFirst('{{id}}', userId.toString()),
       );
+      _logProfileApiResponse('OTHER PROFILE $userId', response.data);
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -135,7 +139,7 @@ class ProfileService {
   Future<ApiResponse<dynamic>> updateProfileImage(File imageFile) async {
     try {
       final formData = FormData();
-      String fileName = imageFile.path.split('/').last;
+      final fileName = imageFile.path.split(RegExp(r'[\\/]')).last;
       formData.files.add(MapEntry(
           'profile_image',
           await MultipartFile.fromFile(imageFile.path, filename: fileName)));
@@ -415,5 +419,25 @@ class ProfileService {
     } catch (e) {
       return ApiResponse(success: false, message: e.toString());
     }
+  }
+
+  void _logProfileApiResponse(String title, dynamic data) {
+    if (!kDebugMode) return;
+
+    String output;
+    try {
+      output = const JsonEncoder.withIndent('  ').convert(data);
+    } catch (_) {
+      output = data.toString();
+    }
+
+    const chunkSize = 800;
+    debugPrint('================ $title API RESPONSE START ================');
+    for (var i = 0; i < output.length; i += chunkSize) {
+      final end =
+          i + chunkSize < output.length ? i + chunkSize : output.length;
+      debugPrint(output.substring(i, end));
+    }
+    debugPrint('================ $title API RESPONSE END ==================');
   }
 }

@@ -653,8 +653,57 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
               ),
             ),
+          SizedBox(height: 8.h),
+          _buildMarksRow(profile),
         ],
       ),
+    );
+  }
+
+  Widget _buildMarksRow(UserProfileModel profile) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: context.isDarkMode ? Colors.white10 : greyColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: context.dividerColor),
+      ),
+      child: Row(
+        children: [
+          Text(
+            'Marks',
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+              fontFamily: FontFamily.openSans,
+            ),
+          ),
+          const Spacer(),
+          _buildMarkCount(Icons.thumb_up_alt_outlined,
+              profile.userDetails.totalLikes, Colors.green),
+          SizedBox(width: 14.w),
+          _buildMarkCount(Icons.thumb_down_alt_outlined,
+              profile.userDetails.totalDislikes, Colors.red),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMarkCount(IconData icon, int count, Color color) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 15.sp),
+        SizedBox(width: 4.w),
+        Text(
+          count.toString(),
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w700,
+            color: context.textColor,
+          ),
+        ),
+      ],
     );
   }
 
@@ -688,23 +737,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             children: [
               Expanded(
                 child: _buildStatCard(
-                    'Total Gives',
-                    stats.totalGives.toString(),
-                    Colors.red,
-                    Icons.card_giftcard),
+                    'Total Trades',
+                    stats.totalTrades.toString(),
+                    Colors.blue,
+                    Icons.handshake),
               ),
               SizedBox(width: 12.w),
               Expanded(
                 child: _buildStatCard(
-                    'Total Takes',
-                    stats.totalTakes.toString(),
-                    Colors.orange,
-                    Icons.redeem_outlined),
+                    'Sent Offers',
+                    stats.sentOffers.toString(),
+                    Colors.red,
+                    Icons.outbox_outlined),
               ),
               SizedBox(width: 12.w),
               Expanded(
-                child: _buildStatCard('Total Trades',
-                    stats.totalTrades.toString(), Colors.blue, Icons.handshake),
+                child: _buildStatCard(
+                    'Received Offers',
+                    stats.receivedOffers.toString(),
+                    Colors.orange,
+                    Icons.move_to_inbox_outlined),
               ),
             ],
           ),

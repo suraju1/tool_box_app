@@ -6,6 +6,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
@@ -19,6 +20,8 @@ class TradeDetailsScreen extends StatefulWidget {
 }
 
 class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
+  String? _submittedMark;
+
   @override
   void initState() {
     super.initState();
@@ -91,6 +94,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
               _buildSectionTitle('Trade With'),
               SizedBox(height: 8.h),
               _buildUserCard(response),
+              _buildUserMarkActions(response),
               SizedBox(height: 14.h),
               _buildSectionTitle('Exchange Details'),
               SizedBox(height: 8.h),
@@ -410,6 +414,134 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildUserMarkActions(TradeResponseModel response) {
+    final authController = context.read<AuthController>();
+    final currentUserId = authController.currentUser?.id;
+    final isCompleted = response.status.toLowerCase() == 'completed';
+    final isPoster = currentUserId == response.posterUserId;
+    final partnerId = isPoster ? response.responderId : response.posterUserId;
+
+    if (!isCompleted || currentUserId == null || partnerId == 0) {
+      return const SizedBox.shrink();
+    }
+
+    return Consumer<TradeController>(
+      builder: (context, tradeController, _) {
+        return Container(
+          margin: EdgeInsets.only(top: 10.h),
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color:
+                context.isDarkMode ? Colors.white10 : const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: context.dividerColor),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildMarkButton(
+                  label: 'Like',
+                  icon: Icons.thumb_up_alt_outlined,
+                  color: Colors.green,
+                  isSelected: _submittedMark == 'like',
+                  isLoading: tradeController.isMarkingUser,
+                  onTap: () => _submitUserMark(response, partnerId, 'like'),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _buildMarkButton(
+                  label: 'Dislike',
+                  icon: Icons.thumb_down_alt_outlined,
+                  color: Colors.red,
+                  isSelected: _submittedMark == 'dislike',
+                  isLoading: tradeController.isMarkingUser,
+                  onTap: () => _submitUserMark(response, partnerId, 'dislike'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMarkButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required bool isSelected,
+    required bool isLoading,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: isLoading ? null : onTap,
+      borderRadius: BorderRadius.circular(10.r),
+      child: Container(
+        height: 44.h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? color : context.surfaceColor,
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(color: isSelected ? color : context.dividerColor),
+        ),
+        child: isLoading
+            ? SizedBox(
+                height: 18.r,
+                width: 18.r,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: context.primaryColor,
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon,
+                      color: isSelected ? Colors.white : color, size: 18.sp),
+                  SizedBox(width: 8.w),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w700,
+                      color: isSelected ? Colors.white : context.textColor,
+                      fontFamily: FontFamily.openSans,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Future<void> _submitUserMark(
+    TradeResponseModel response,
+    int partnerId,
+    String mark,
+  ) async {
+    final success = await context.read<TradeController>().submitUserMark(
+          tradeResponseId: response.id,
+          userId: partnerId,
+          mark: mark,
+        );
+
+    if (!mounted) return;
+
+    if (success) {
+      setState(() => _submittedMark = mark);
+      ToastService.showSuccessToast(
+        context,
+        mark == 'like' ? 'Liked successfully' : 'Disliked successfully',
+      );
+      return;
+    }
+
+    final message = context.read<TradeController>().errorMessage ??
+        'Failed to submit mark';
+    ToastService.showErrorToast(context, message);
   }
 
   Widget _buildExchangeCard(TradeResponseModel response) {
