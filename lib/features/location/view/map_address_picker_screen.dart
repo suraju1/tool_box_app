@@ -9,6 +9,7 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/address/controller/address_controller.dart';
 import 'package:tool_bocs/features/address/model/address_model.dart';
+import 'dart:math' as math;
 import 'package:geocoding/geocoding.dart' as geo;
 
 class MapAddressPickerScreen extends StatefulWidget {
@@ -35,6 +36,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   String _selectedLabel = 'Home';
   String _orderFor = 'Myself';
   double _radius = 5.0; // km
+  double _currentZoom = 13.2; // default zoom for 5km
 
   // State management for multistep flow
   bool _showFullForm = false;
@@ -43,6 +45,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   @override
   void initState() {
     super.initState();
+    _currentZoom = _getZoomForRadius(_radius);
     _isDefault = widget.editAddress?.isDefault == 1;
     if (widget.editAddress != null) {
       _initEditAddress();
@@ -115,6 +118,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   Future<void> _onCameraMove(CameraPosition position) async {
     setState(() {
       _lastMapPosition = position.target;
+      _currentZoom = position.zoom;
     });
   }
 
@@ -194,7 +198,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                       TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  '${_radius.toInt()} km',
+                  _radius < 1
+                      ? '${(_radius * 1000).toInt()} meters'
+                      : '${_radius.toInt()} km',
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
@@ -212,7 +218,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
               ),
               child: Slider(
                 value: _radius,
-                min: 1,
+                min: 0.1,
                 max: 50,
                 activeColor: context.primaryColor,
                 inactiveColor: context.dividerColor,
@@ -228,42 +234,28 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     );
   }
 
+  double _getZoomForRadius(double radius) {
+    if (radius <= 0.2) return 17.5;
+    if (radius <= 0.5) return 16.5;
+    if (radius <= 1) return 15.5;
+    if (radius <= 2) return 14.5;
+    if (radius <= 5) return 13.2;
+    if (radius <= 10) return 12.2;
+    if (radius <= 20) return 11.2;
+    if (radius <= 35) return 10.2;
+    return 9.5;
+  }
+
   Future<void> _updateCameraZoom(double radius) async {
     final GoogleMapController controller = await _controller.future;
-
-    double zoom;
-    if (radius <= 1) {
-      zoom = 15.5;
-    } else if (radius <= 2)
-      zoom = 14.5;
-    else if (radius <= 5)
-      zoom = 13.2;
-    else if (radius <= 10)
-      zoom = 12.2;
-    else if (radius <= 20)
-      zoom = 11.2;
-    else if (radius <= 35)
-      zoom = 10.2;
-    else
-      zoom = 9.5;
-
+    double zoom = _getZoomForRadius(radius);
     controller
         .animateCamera(CameraUpdate.newLatLngZoom(_lastMapPosition, zoom));
   }
 
   Widget _buildMap() {
     // Calculate initial zoom based on radius
-    double initialZoom = 15 - (_radius / 5);
-    if (_radius <= 2) {
-      initialZoom = 15;
-    } else if (_radius <= 5)
-      initialZoom = 13.5;
-    else if (_radius <= 10)
-      initialZoom = 12.5;
-    else if (_radius <= 20)
-      initialZoom = 11.5;
-    else
-      initialZoom = 10.5;
+    double initialZoom = _getZoomForRadius(_radius);
 
     return GoogleMap(
       initialCameraPosition:
@@ -296,35 +288,81 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
 
   Widget _buildMarkerOverlay() {
     if (_showFullForm) return const SizedBox.shrink();
+
+    // Calculate pixels per meter based on current zoom and latitude
+    double metersPerPixel = 156543.03392 * math.cos(_lastMapPosition.latitude * math.pi / 180) / math.pow(2, _currentZoom);
+    double radiusInPixels = (_radius * 1000) / metersPerPixel;
+
     return IgnorePointer(
       child: Padding(
         padding: EdgeInsets.only(top: 70.h, bottom: 350.h),
         child: Align(
           alignment: Alignment.center,
-          child: FractionalTranslation(
-            translation: const Offset(0, -0.5),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+          child: SizedBox(
+            width: 42.r,
+            height: 42.r,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
               children: [
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                  decoration: BoxDecoration(
-                    color: context.textColor.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Text(
-                    'Move the map to adjust your location',
-                    style: TextStyle(
-                        color: context.reverseTextColor, fontSize: 10.sp),
+                // Text above the crosshair
+                Positioned(
+                  bottom: 42.r + 8.h,
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: context.textColor.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      'Move the map to adjust your location',
+                      style: TextStyle(
+                          color: context.reverseTextColor, fontSize: 10.sp),
+                    ),
                   ),
                 ),
-                SizedBox(height: 8.h),
-                SizedBox(
-                  width: 42.r,
-                  height: 42.r,
-                  child: CustomPaint(
-                    painter: _MapFocusMarkerPainter(),
+                // Crosshair exactly in center
+                CustomPaint(
+                  size: Size(42.r, 42.r),
+                  painter: _MapFocusMarkerPainter(),
+                ),
+                // Radius Line
+                Positioned(
+                  left: 21.r, // Center of the crosshair
+                  top: 21.r - 1, // Center vertically with line thickness
+                  child: SizedBox(
+                    width: radiusInPixels,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // The horizontal line
+                        Container(height: 3, color: Colors.black87),
+                        // The vertical tick at the end
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(width: 3, height: 10.h, color: Colors.black87),
+                        ),
+                        // The text
+                        Positioned(
+                          top: 12.h,
+                          left: 0,
+                          right: 0,
+                          child: Text(
+                            _radius < 1 
+                              ? '${(_radius * 1000).toInt()} meters' 
+                              : '${_radius.toStringAsFixed(_radius.truncateToDouble() == _radius ? 0 : 1)} km',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

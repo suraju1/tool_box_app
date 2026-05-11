@@ -28,6 +28,11 @@ class BottomNavBarScreen extends StatelessWidget {
     ];
 
     return Scaffold(
+      drawer: Drawer(
+        width: 1.sw * 0.85,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        child: const ProfileScreen(isTab: false, isDrawer: true),
+      ),
       body: PageView(
         controller: controller.pageController,
         onPageChanged: (index) {

@@ -21,9 +21,11 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isTab;
+  final bool isDrawer;
   const ProfileScreen({
     super.key,
     this.isTab = true,
+    this.isDrawer = false,
   });
 
   @override
@@ -88,29 +90,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 )
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _buildHeader(context, profile),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+              : widget.isDrawer
+                  ? SingleChildScrollView(
+                      child: SafeArea(
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(height: 10.h),
-                            _buildReviewsSection(profile),
-                            SizedBox(height: 10.h),
-                            _buildTradeHistoryStats(context, profile),
-                            SizedBox(height: 10.h),
-                            _buildSettingsList(context),
-                            //SizedBox(height: 15.h),
-                            // _logoutButton(context),
-                            SizedBox(height: 40.h),
+                            _buildDrawerHeader(context, profile),
+                            Divider(color: context.dividerColor, height: 1),
+                            _buildDrawerMenu(context),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _buildHeader(context, profile),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16.w),
+                            child: Column(
+                              children: [
+                                SizedBox(height: 10.h),
+                                _buildReviewsSection(profile),
+                                SizedBox(height: 10.h),
+                                _buildTradeHistoryStats(context, profile),
+                                SizedBox(height: 10.h),
+                                _buildSettingsList(context),
+                                SizedBox(height: 40.h),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
     );
   }
 
@@ -1021,6 +1034,199 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Icons.arrow_forward_ios,
         size: 16.sp,
         color: greyColor,
+      ),
+    );
+  }
+
+  Widget _buildDrawerHeader(BuildContext context, UserProfileModel profile) {
+    final user = profile.userDetails;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 30.h, 20.w, 20.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: context.dividerColor, width: 1),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30.r),
+                  child: AppCachedImage(
+                    imageUrl: user.image ?? '',
+                    userName: user.fullName,
+                    width: 60.r,
+                    height: 60.r,
+                    fit: BoxFit.cover,
+                    radius: 30.r,
+                    placeholderBgColor: context.primaryColor.withOpacity(0.1),
+                    placeholderTextColor: context.textColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            user.fullName,
+            style: TextStyle(
+              color: context.textColor,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              fontFamily: FontFamily.openSans,
+            ),
+          ),
+          if (user.bio != null && user.bio!.trim().isNotEmpty) ...[
+            SizedBox(height: 4.h),
+            RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  color: context.subTextColor,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: FontFamily.openSans,
+                  height: 1.25,
+                ),
+                children: _buildBioTextSpans(user.bio!.trim(), context),
+              ),
+              softWrap: true,
+            ),
+          ],
+          SizedBox(height: 8.h),
+          Text(
+            user.location ?? 'No location provided',
+            style: TextStyle(
+              color: context.subTextColor,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w400,
+              fontFamily: FontFamily.openSans,
+              height: 1.15,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Row(
+            children: [
+              Text(
+                'Credit Balance : ',
+                style: TextStyle(
+                  color: context.subTextColor,
+                  fontSize: 14.sp,
+                  fontFamily: FontFamily.openSans,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                user.remainingBalance ?? '0.00',
+                style: TextStyle(
+                  color: context.textColor,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerMenu(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(height: 10.h),
+        _buildDrawerMenuItem(
+          context,
+          icon: Icons.person_outline,
+          label: 'Profile',
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProfileScreen(isTab: false, isDrawer: false),
+              ),
+            );
+          },
+        ),
+        _buildDrawerMenuItem(
+          context,
+          icon: Icons.post_add_outlined,
+          label: AppLocalizations.of(context)!.myPosts,
+          onTap: () => Navigator.pushNamed(context, AppRoutes.myPosts),
+        ),
+        _buildDrawerMenuItem(
+          context,
+          icon: Icons.card_membership_outlined,
+          label: AppLocalizations.of(context)!.mySubscription,
+          onTap: () => Navigator.pushNamed(context, AppRoutes.mySubscription),
+        ),
+        _buildDrawerMenuItem(
+          context,
+          icon: Icons.sync_alt,
+          label: AppLocalizations.of(context)!.transactionHistory,
+          onTap: () => Navigator.pushNamed(context, AppRoutes.transactionHistory),
+        ),
+        _buildDrawerMenuItem(
+          context,
+          icon: Icons.bookmark_border,
+          label: AppLocalizations.of(context)!.savedProfiles,
+          onTap: () => Navigator.pushNamed(context, AppRoutes.savedUsers),
+        ),
+        _buildDrawerMenuItem(
+          context,
+          icon: Icons.block_outlined,
+          label: AppLocalizations.of(context)!.blockedUsers,
+          onTap: () => Navigator.pushNamed(context, AppRoutes.blockedUsers),
+        ),
+        SizedBox(height: 10.h),
+        Divider(color: context.dividerColor, height: 1),
+        SizedBox(height: 10.h),
+        _buildDrawerMenuItem(
+          context,
+          icon: Icons.settings_outlined,
+          label: AppLocalizations.of(context)!.settings,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SettingScreen()),
+          ),
+        ),
+        _buildDrawerMenuItem(
+          context,
+          icon: Icons.login_outlined,
+          label: AppLocalizations.of(context)!.logout,
+          onTap: () => showDialog(
+            context: context,
+            builder: (context) => const LogoutDialog(),
+          ),
+        ),
+        SizedBox(height: 20.h),
+      ],
+    );
+  }
+
+  Widget _buildDrawerMenuItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0),
+      leading: Icon(icon, color: context.textColor, size: 28.sp),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 18.sp,
+          fontWeight: FontWeight.bold,
+          color: context.textColor,
+          fontFamily: FontFamily.openSans,
+        ),
       ),
     );
   }

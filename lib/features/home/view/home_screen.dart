@@ -80,10 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: context.scaffoldBg,
-      drawer: Drawer(
-        width: 1.sw * 0.85,
-        child: const ProfileScreen(isTab: false),
-      ),
       body: Column(
         children: [
           SizedBox(height: 25.h),
@@ -212,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                onPressed: () => Scaffold.of(context).openDrawer(),
                 icon: Icon(Icons.menu, color: context.textColor, size: 28.sp),
               ),
               Image.asset(

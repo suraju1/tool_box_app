@@ -1,4 +1,4 @@
-package com.example.toolucs
+package com.toolucs.app
 
 import io.flutter.embedding.android.FlutterActivity
 
