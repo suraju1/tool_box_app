@@ -19,16 +19,25 @@ class TradeService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        if (data['success'] == true && data['data'] != null) {
+        if (data is Map<String, dynamic> &&
+            data['success'] == true &&
+            data['data'] != null) {
           final List<dynamic> categoriesJson = data['data'];
-          final categories =
-              categoriesJson.map((e) => CategoryModel.fromJson(e)).toList();
+          final categories = categoriesJson
+              .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+          return ApiResponse(
+              success: true, message: 'Categories fetched', data: categories);
+        } else if (data is List) {
+          final categories = data
+              .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
+              .toList();
           return ApiResponse(
               success: true, message: 'Categories fetched', data: categories);
         } else {
           return ApiResponse(
               success: false,
-              message: data['message'] ?? 'Failed to fetch categories');
+              message: data is Map ? (data['message'] ?? 'Failed to fetch categories') : 'Unexpected response format');
         }
       } else {
         return ApiResponse(
@@ -98,9 +107,19 @@ class TradeService {
       if (response.statusCode == 200) {
         final data = response.data;
         print("API Response (getAllPosts): $data");
-        if (data['success'] == true) {
+        if (data is Map<String, dynamic> && data['success'] == true) {
           final List<dynamic> list = data['data'] ?? [];
-          final posts = list.map((e) => PostModel.fromJson(e)).toList();
+          final posts = list
+              .map((e) => PostModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+          return ApiResponse(
+              success: true,
+              message: 'Posts fetched successfully',
+              data: posts);
+        } else if (data is List) {
+          final posts = data
+              .map((e) => PostModel.fromJson(e as Map<String, dynamic>))
+              .toList();
           return ApiResponse(
               success: true,
               message: 'Posts fetched successfully',
@@ -108,7 +127,7 @@ class TradeService {
         } else {
           return ApiResponse(
               success: false,
-              message: data['message'] ?? 'Failed to fetch posts');
+              message: data is Map ? (data['message'] ?? 'Failed to fetch posts') : 'Unexpected response format');
         }
       } else {
         return ApiResponse(
@@ -390,16 +409,28 @@ class TradeService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        if (data['success'] == true) {
+        if (data is Map<String, dynamic> && data['success'] == true) {
           return ApiResponse(
             success: true,
             message: data['message'] ?? 'My trades fetched',
             data: MyTradeResponseModel.fromJson(data),
           );
+        } else if (data is List) {
+          return ApiResponse(
+            success: true,
+            message: 'My trades fetched',
+            data: MyTradeResponseModel.fromJson(<String, dynamic>{
+              'success': true,
+              'message': 'Success',
+              'data': data,
+            }),
+          );
         } else {
           return ApiResponse(
             success: false,
-            message: data['message'] ?? 'Failed to fetch my trades',
+            message: data is Map
+                ? (data['message'] ?? 'Failed to fetch my trades')
+                : 'Unexpected response format',
           );
         }
       } else {

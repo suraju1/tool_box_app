@@ -299,15 +299,15 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         child: Align(
           alignment: Alignment.center,
           child: SizedBox(
-            width: 42.r,
-            height: 42.r,
+            width: 4.r,
+            height: 4.r,
             child: Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
               children: [
-                // Text above the crosshair
+                // Tooltip text above center
                 Positioned(
-                  bottom: 42.r + 8.h,
+                  bottom: 4.r + 16.h,
                   child: Container(
                     padding:
                         EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
@@ -322,15 +322,10 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                     ),
                   ),
                 ),
-                // Crosshair exactly in center
-                CustomPaint(
-                  size: Size(42.r, 42.r),
-                  painter: _MapFocusMarkerPainter(),
-                ),
-                // Radius Line
+                // Radius measurement line from center
                 Positioned(
-                  left: 21.r, // Center of the crosshair
-                  top: 21.r - 1, // Center vertically with line thickness
+                  left: 2.r, // Start from center point
+                  top: 0,
                   child: SizedBox(
                     width: radiusInPixels,
                     child: Stack(
@@ -341,10 +336,16 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                         // The vertical tick at the end
                         Positioned(
                           right: 0,
-                          top: 0,
-                          child: Container(width: 3, height: 10.h, color: Colors.black87),
+                          top: -4.h,
+                          child: Container(width: 3, height: 12.h, color: Colors.black87),
                         ),
-                        // The text
+                        // The vertical tick at the start
+                        Positioned(
+                          left: 0,
+                          top: -4.h,
+                          child: Container(width: 3, height: 12.h, color: Colors.black87),
+                        ),
+                        // The distance text
                         Positioned(
                           top: 12.h,
                           left: 0,
@@ -914,48 +915,3 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   }
 }
 
-class _MapFocusMarkerPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-
-    final outlinePaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    final markerPaint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 2.4
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    // Draw white outline for better visibility on map
-    canvas.drawLine(
-      Offset(8, center.dy),
-      Offset(size.width - 8, center.dy),
-      outlinePaint,
-    );
-    canvas.drawLine(
-      Offset(center.dx, 8),
-      Offset(center.dx, size.height - 8),
-      outlinePaint,
-    );
-
-    // Draw black plus sign
-    canvas.drawLine(
-      Offset(8, center.dy),
-      Offset(size.width - 8, center.dy),
-      markerPaint,
-    );
-    canvas.drawLine(
-      Offset(center.dx, 8),
-      Offset(center.dx, size.height - 8),
-      markerPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

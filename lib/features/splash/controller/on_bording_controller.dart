@@ -22,19 +22,26 @@ class OnBoardingController extends ChangeNotifier {
 
     try {
       final response = await _apiClient.get('onboarding');
-      if (response.data['status'] == true) {
-        final List<dynamic> data = response.data['data'];
-        onBoardingList =
-            data.map((json) => OnBoardingModel.fromJson(json)).toList();
+      final data = response.data;
+      if (data is Map<String, dynamic> && data['status'] == true) {
+        final List<dynamic> list = data['data'] ?? [];
+        onBoardingList = list
+            .map((json) => OnBoardingModel.fromJson(json as Map<String, dynamic>))
+            .toList();
 
         // Sort by screen_order if available
         onBoardingList
             .sort((a, b) => (a.screenOrder ?? 0).compareTo(b.screenOrder ?? 0));
-
-        // If sorting isn't needed or order is already correct, you can skip sorting
+      } else if (data is List) {
+        onBoardingList = data
+            .map((json) => OnBoardingModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+        onBoardingList
+            .sort((a, b) => (a.screenOrder ?? 0).compareTo(b.screenOrder ?? 0));
       } else {
-        errorMessage =
-            response.data['message'] ?? 'Failed to fetch onboarding data';
+        errorMessage = data is Map
+            ? (data['message'] ?? 'Failed to fetch onboarding data')
+            : 'Unexpected response format';
       }
     } catch (e) {
       errorMessage = 'An error occurred: $e';

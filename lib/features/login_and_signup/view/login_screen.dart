@@ -19,10 +19,46 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
 
+  /// Track last shown error to avoid duplicate toasts
+  String? _lastShownError;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to AuthController changes for async callback errors
+    // (verificationFailed fires AFTER await returns, so we need a listener)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthController>().addListener(_onAuthStateChanged);
+    });
+  }
+
   @override
   void dispose() {
+    // Remove listener to prevent memory leaks
+    try {
+      context.read<AuthController>().removeListener(_onAuthStateChanged);
+    } catch (_) {}
     _phoneController.dispose();
     super.dispose();
+  }
+
+  /// React to AuthController state changes (handles async Firebase callbacks)
+  void _onAuthStateChanged() {
+    if (!mounted) return;
+    final authController = context.read<AuthController>();
+
+    // Show error toast when a NEW error arrives from async callbacks
+    if (authController.errorMessage != null &&
+        authController.errorMessage != _lastShownError) {
+      _lastShownError = authController.errorMessage;
+      debugPrint("[Login] Showing error toast: ${authController.errorMessage}");
+      ToastService.showErrorToast(context, authController.errorMessage!);
+    }
+
+    // Reset tracking when error is cleared
+    if (authController.errorMessage == null) {
+      _lastShownError = null;
+    }
   }
 
   String? _phoneError;
@@ -55,41 +91,19 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Clear previous errors
+    // Clear previous errors and reset tracking
+    _lastShownError = null;
     context.read<AuthController>().clearError();
 
-    // Create login request
-    final request = LoginRequest(phoneNumber: _phoneController.text.trim());
+    debugPrint("[Login] User pressed Get OTP for phone: ${_phoneController.text.trim()}");
 
-    // Call login API
+    // Call Firebase verifyPhoneNumber
+    // NOTE: Navigation to OTP screen happens inside codeSent callback in AuthController.
+    // Error display happens via _onAuthStateChanged listener above.
     final authController = context.read<AuthController>();
-    final success = await authController.loginUser(request);
+    await authController.verifyPhoneNumber(_phoneController.text.trim());
 
-    if (!mounted) return;
-
-    if (authController.errorMessage != null) {
-      // Show error
-      ToastService.showErrorToast(context, authController.errorMessage!);
-      return;
-    }
-
-    if (success) {
-      // Show success message from backend
-      final message = authController.successMessage ?? 'OTP sent successfully';
-      ToastService.showSuccessToast(context, message);
-
-      // Wait a moment for toast to be visible, then navigate
-      await Future.delayed(Duration(milliseconds: 500));
-
-      if (!mounted) return;
-
-      // Navigate to OTP screen
-      Navigator.pushNamed(
-        context,
-        AppRoutes.otp,
-        arguments: _phoneController.text.trim(),
-      );
-    }
+    debugPrint("[Login] verifyPhoneNumber returned. Callbacks will fire asynchronously.");
   }
 
   @override
@@ -246,6 +260,29 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 75.h),
 
+                // Status message while sending OTP
+                Consumer<AuthController>(
+                  builder: (context, authController, child) {
+                    if (authController.statusMessage != null && authController.statusMessage!.isNotEmpty) {
+                      return Column(
+                        children: [
+                          Text(
+                            authController.statusMessage!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: context.primaryColor,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                        ],
+                      );
+                    }
+                    return SizedBox.shrink();
+                  },
+                ),
+
                 // Get OTP button
                 Consumer<AuthController>(
                   builder: (context, authController, child) {
@@ -254,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 44.h,
                       child: ElevatedButton(
                         onPressed:
-                            authController.isLoading ? null : _handleGetOtp,
+                            authController.isSendingOtp ? null : _handleGetOtp,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.primaryColor,
                           foregroundColor: Colors.white,
@@ -266,7 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           disabledBackgroundColor:
                               context.primaryColor.withOpacity(0.6),
                         ),
-                        child: authController.isLoading
+                        child: authController.isSendingOtp
                             ? SizedBox(
                                 height: 20.h,
                                 width: 20.w,

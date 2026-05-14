@@ -103,22 +103,9 @@ class _OtpScreenState extends State<OtpScreen> {
       return;
     }
 
-    // Clear previous errors
-    context.read<AuthController>().clearError();
-
-    // Get FCM token
-    final fcmToken = await FirebaseNotificationService.getFcmToken() ?? '';
-
-    // Create verify OTP request
-    final request = VerifyOtpRequest(
-      phoneNumber: _phoneNumber!,
-      otpCode: _getOtpCode(),
-      fcmToken: fcmToken,
-    );
-
-    // Call verify OTP API
+    // Call verify OTP Firebase
     final authController = context.read<AuthController>();
-    final success = await authController.verifyOtp(request);
+    final success = await authController.signInWithOtp(_getOtpCode(), _phoneNumber!);
 
     if (!mounted) return;
 
@@ -177,15 +164,9 @@ class _OtpScreenState extends State<OtpScreen> {
       return;
     }
 
-    // Clear previous errors
-    context.read<AuthController>().clearError();
-
-    // Create login request to resend OTP
-    final request = LoginRequest(phoneNumber: _phoneNumber!);
-
-    // Call login API to resend OTP
+    // Call verifyPhoneNumber to resend OTP
     final authController = context.read<AuthController>();
-    await authController.loginUser(request);
+    await authController.verifyPhoneNumber(_phoneNumber!);
 
     if (!mounted) return;
 
@@ -200,7 +181,7 @@ class _OtpScreenState extends State<OtpScreen> {
       }
       _focusNodes[0].requestFocus();
       // Show success toast
-      ToastService.showSuccessToast(context, 'OTP resent successfully');
+      ToastService.showSuccessToast(context, 'OTP resent successfully via Firebase');
     }
   }
 
@@ -396,7 +377,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     height: 44.h,
                     child: ElevatedButton(
                       onPressed:
-                          authController.isLoading ? null : _handleVerifyOtp,
+                          authController.isVerifyingOtp ? null : _handleVerifyOtp,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: context.primaryColor,
                         foregroundColor: Colors.white,
@@ -408,7 +389,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         disabledBackgroundColor:
                             context.primaryColor.withOpacity(0.6),
                       ),
-                      child: authController.isLoading
+                      child: authController.isVerifyingOtp
                           ? SizedBox(
                               height: 20.h,
                               width: 20.w,

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "70648687498",
+    "project_id": "toolucs-7cbc3",
+    "storage_bucket": "toolucs-7cbc3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70648687498:android:fd4616c28b732df59cb673",
+        "android_client_info": {
+          "package_name": "com.toolucs.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMML-eP9wbd5L6QJw7KiQYUYWHr7YdUKY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

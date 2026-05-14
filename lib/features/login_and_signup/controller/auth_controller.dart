@@ -28,26 +28,37 @@ class AuthController extends ChangeNotifier {
 
   // Error state
   String? _errorMessage;
+  String? _statusMessage; // Real-time status
 
   // User data
   UserModel? _currentUser;
   String? _authToken;
   String? _successMessage;
 
+  // Firebase Phone Auth
+  String? _verificationId;
+  int? _resendToken;
+  bool _isSendingOtp = false;
+  String? _backendOtpCode; // OTP returned by backend /login (used for /verify-otp)
+  
   // Getters
+  bool get isSendingOtp => _isSendingOtp;
+  String? get verificationId => _verificationId;
   bool get isLoading => _isLoading;
   bool get isRegistering => _isRegistering;
   bool get isLoggingIn => _isLoggingIn;
   bool get isVerifyingOtp => _isVerifyingOtp;
   String? get errorMessage => _errorMessage;
+  String? get statusMessage => _statusMessage;
   UserModel? get currentUser => _currentUser;
   String? get authToken => _authToken;
   String? get successMessage => _successMessage;
   bool get isAuthenticated => _authToken != null && _currentUser != null;
 
-  /// Clear error message
+  /// Clear error message and status
   void clearError() {
     _errorMessage = null;
+    _statusMessage = null;
     _successMessage = null;
     notifyListeners();
   }
@@ -82,18 +93,7 @@ class AuthController extends ChangeNotifier {
           _apiClient.setAuthToken(_authToken!);
         }
 
-        // Start Chat Listener
-        try {
-          // If backend provides a custom firebase token, use it
-          // Otherwise fallback to anonymous for now
-          // Note: response.data.firebaseToken is assumed to be the field if added to backend
-          // For now, it will likely still be null until backend is updated
-          await FirebaseAuth.instance.signInAnonymously();
-          debugPrint("Signed in to Firebase Anonymously");
-        } catch (e) {
-          debugPrint("Firebase Auth Failed: $e");
-        }
-
+        // Start Chat Listener after profile completion
         ChatListener().startListening();
         FirebaseNotificationService().saveTokenToFirestore();
 
@@ -123,46 +123,254 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// Login with phone number
-  /// Returns true if OTP sent successfully
-  Future<bool> loginUser(LoginRequest request) async {
-    _isLoggingIn = true;
+  /// Verify Phone Number — calls backend /login first, then Firebase
+  Future<void> verifyPhoneNumber(String phoneNumber) async {
+    _isSendingOtp = true;
+    _errorMessage = null;
+    _statusMessage = "Sending OTP...";
+    notifyListeners();
+
+    debugPrint("[Auth] verifyPhoneNumber called with: '$phoneNumber'");
+
+    if (phoneNumber.isEmpty || phoneNumber.length != 10) {
+      _statusMessage = null;
+      _isSendingOtp = false;
+      _errorMessage = "Invalid phone number. Please enter 10 digits.";
+      debugPrint("[Auth] Validation failed — length: ${phoneNumber.length}");
+      notifyListeners();
+      return;
+    }
+
+    // Step 1: Call backend /login to get the backend's OTP code
+    try {
+      debugPrint("[Auth] Step 1: Calling backend /login...");
+      final loginRequest = LoginRequest(phoneNumber: phoneNumber);
+      final loginResponse = await _authService.login(loginRequest);
+
+      if (loginResponse.success && loginResponse.data != null) {
+        _backendOtpCode = loginResponse.data!.otpCode;
+        debugPrint("[Auth] Backend /login success — OTP stored ✅");
+      } else {
+        debugPrint("[Auth] Backend /login failed: ${loginResponse.message}");
+        // Continue anyway — Firebase will still verify the phone
+      }
+    } catch (e) {
+      debugPrint("[Auth] Backend /login error (continuing with Firebase): $e");
+      // Don't fail — Firebase can still handle phone verification
+    }
+
+    // Step 2: Call Firebase verifyPhoneNumber to send OTP SMS
+    final formattedPhone = '+91$phoneNumber';
+    debugPrint("[Auth] Step 2: Calling Firebase with: $formattedPhone");
+
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: formattedPhone,
+        forceResendingToken: _resendToken,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          debugPrint("[Firebase Auth] Auto-verification completed!");
+          _isSendingOtp = false;
+          _statusMessage = null;
+          notifyListeners();
+          await _signInWithCredential(credential, phoneNumber: phoneNumber);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          debugPrint("[Firebase Auth] FAILED — code: ${e.code}, msg: ${e.message}");
+          _isSendingOtp = false;
+          _statusMessage = null;
+          _errorMessage = _getAuthErrorMessage(e);
+          notifyListeners();
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          debugPrint("[Firebase Auth] OTP SENT ✅ — verificationId: $verificationId");
+          _verificationId = verificationId;
+          _resendToken = resendToken;
+          _isSendingOtp = false;
+          _statusMessage = null;
+          notifyListeners();
+
+          // Navigate to OTP screen
+          debugPrint("[Auth] Navigating to OTP screen for: $phoneNumber");
+          navigatorKey.currentState?.pushNamed(
+            AppRoutes.otp,
+            arguments: phoneNumber,
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          debugPrint("[Firebase Auth] codeAutoRetrievalTimeout — verificationId: $verificationId");
+          if (_verificationId == null) {
+            _verificationId = verificationId;
+          }
+          _isSendingOtp = false;
+          notifyListeners();
+        },
+        timeout: const Duration(seconds: 60),
+      );
+    } on FirebaseAuthException catch (e) {
+      debugPrint("[Firebase Auth] FirebaseAuthException — code: ${e.code}, msg: ${e.message}");
+      _isSendingOtp = false;
+      _statusMessage = null;
+      _errorMessage = _getAuthErrorMessage(e);
+      notifyListeners();
+    } catch (e) {
+      debugPrint("[Firebase Auth] Unexpected error: $e");
+      _isSendingOtp = false;
+      _statusMessage = null;
+      _errorMessage = "Something went wrong. Please try again.";
+      notifyListeners();
+    }
+  }
+
+  /// Sign in with OTP (SMS Code)
+  Future<bool> signInWithOtp(String smsCode, String phoneNumber) async {
+    if (_verificationId == null) {
+      _errorMessage = "Verification session expired. Please resend OTP.";
+      notifyListeners();
+      return false;
+    }
+
+    _isVerifyingOtp = true;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
+    debugPrint("Verifying OTP for verificationId: $_verificationId");
+
     try {
-      final response = await _authService.login(request);
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: _verificationId!,
+        smsCode: smsCode,
+      );
 
-      if (response.success && response.data != null) {
-        _successMessage = response.message;
+      return await _signInWithCredential(
+        credential,
+        phoneNumber: phoneNumber,
+        smsCode: smsCode,
+      );
+    } catch (e) {
+      debugPrint("Error in signInWithOtp: $e");
+      _errorMessage = "Invalid OTP. Please check and try again.";
+      _isVerifyingOtp = false;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
 
-        // We can access otpCode here if needed for debugging/auto-fill
-        // print('OTP: ${response.data!.otpCode}');
+  /// Helper to sign in with Firebase Credential and sync with backend
+  Future<bool> _signInWithCredential(PhoneAuthCredential credential,
+      {String? phoneNumber, String? smsCode}) async {
+    try {
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
-        _isLoggingIn = false;
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      } else {
-        _errorMessage = response.message;
-        _isLoggingIn = false;
-        _isLoading = false;
-        notifyListeners();
-        return false;
+      if (userCredential.user != null) {
+        debugPrint("[Auth] Firebase Login Success ✅ UID: ${userCredential.user!.uid}");
+
+        final phone = phoneNumber ??
+            userCredential.user!.phoneNumber?.replaceAll('+91', '') ??
+            '';
+
+        // Get FCM token
+        final fcmToken = await FirebaseNotificationService.getFcmToken() ?? '';
+
+        // Use the SMS code entered by user if available, fallback to backend OTP
+        final otpForBackend = (smsCode != null && smsCode.isNotEmpty)
+            ? smsCode
+            : (_backendOtpCode ?? '');
+        
+        debugPrint("[Auth] Calling backend /verify-otp with OTP: $otpForBackend for phone: $phone");
+
+        final request = VerifyOtpRequest(
+          phoneNumber: phone,
+          otpCode: otpForBackend,
+          fcmToken: fcmToken,
+        );
+
+        final response = await _authService.verifyOtp(request);
+
+        if (response.success && response.data != null) {
+          debugPrint("[Auth] Backend /verify-otp success ✅");
+          _successMessage = response.message;
+          _currentUser = response.data!.user;
+          _authToken = response.data!.token;
+
+          await _saveAuthData(response.data!);
+
+          if (_authToken != null) {
+            _apiClient.setAuthToken(_authToken!);
+          }
+
+          ChatListener().startListening();
+          FirebaseNotificationService().saveTokenToFirestore();
+
+          // Clear stored backend OTP
+          _backendOtpCode = null;
+
+          _isVerifyingOtp = false;
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        } else {
+          debugPrint("[Auth] Backend /verify-otp failed: ${response.message}");
+          _errorMessage = response.message;
+          _isVerifyingOtp = false;
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
       }
-    } on ApiException catch (e) {
-      _errorMessage = e.message;
-      _isLoggingIn = false;
+      return false;
+    } on FirebaseAuthException catch (e) {
+      _errorMessage = _getAuthErrorMessage(e);
+      _isVerifyingOtp = false;
       _isLoading = false;
       notifyListeners();
       return false;
     } catch (e) {
-      _errorMessage = 'An unexpected error occurred';
-      _isLoggingIn = false;
+      debugPrint("[Auth] Error in _signInWithCredential: $e");
+      _errorMessage = "An unexpected error occurred during sign in.";
+      _isVerifyingOtp = false;
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  /// Map FirebaseAuth errors to user-friendly messages
+  String _getAuthErrorMessage(FirebaseAuthException e) {
+    debugPrint("[Firebase Auth] Mapping error code: '${e.code}' message: '${e.message}'");
+    
+    // Check the message for specific sub-errors that Firebase wraps as 'unknown'
+    final msg = e.message?.toUpperCase() ?? '';
+    
+    if (msg.contains('BILLING_NOT_ENABLED')) {
+      return 'SMS service not configured. Please contact support.';
+    }
+    if (msg.contains('QUOTA_EXCEEDED') || msg.contains('SMS_QUOTA')) {
+      return 'SMS quota exceeded. Please try again later.';
+    }
+    if (msg.contains('APP_NOT_AUTHORIZED')) {
+      return 'App not authorized. Please contact support.';
+    }
+    
+    switch (e.code) {
+      case 'invalid-phone-number':
+        return 'The phone number entered is invalid.';
+      case 'too-many-requests':
+        return 'Too many requests. Please try again later.';
+      case 'invalid-verification-code':
+        return 'The OTP entered is incorrect.';
+      case 'session-expired':
+        return 'The session has expired. Please request a new OTP.';
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      case 'quota-exceeded':
+        return 'SMS quota exceeded. Please try again later.';
+      case 'unknown':
+        return 'Authentication failed. Please try again.';
+      default:
+        return e.message ?? 'Authentication failed. Please try again.';
     }
   }
 
@@ -196,16 +404,8 @@ class AuthController extends ChangeNotifier {
           _apiClient.setAuthToken(_authToken!);
         }
 
-        // Start Chat Listener only if profile is complete (meaning fully logged in)
+        // Start Chat Listener only if profile is complete
         if (response.data!.isProfileComplete) {
-          try {
-            // Future-proofing: check for custom token from backend
-            // await FirebaseAuth.instance.signInWithCustomToken(customToken);
-            await FirebaseAuth.instance.signInAnonymously();
-            debugPrint("Signed in to Firebase Anonymously");
-          } catch (e) {
-            debugPrint("Firebase Auth Failed: $e");
-          }
           ChatListener().startListening();
           FirebaseNotificationService().saveTokenToFirestore();
         }
@@ -255,13 +455,20 @@ class AuthController extends ChangeNotifier {
       _currentUser = UserModel.fromJson(jsonDecode(userDataJson));
       _apiClient.setAuthToken(token);
 
-      // Start Chat Listener
+      // Ensure Firebase auth for Firestore access (chat listener needs this)
+      // If user already signed in via phone auth, use that. Otherwise, anonymous.
       try {
-        await FirebaseAuth.instance.signInAnonymously();
-        debugPrint("Signed in to Firebase Anonymously");
+        if (FirebaseAuth.instance.currentUser == null) {
+          await FirebaseAuth.instance.signInAnonymously();
+          debugPrint("[Auth] Signed in to Firebase Anonymously for Firestore access");
+        } else {
+          debugPrint("[Auth] Firebase user already exists: ${FirebaseAuth.instance.currentUser!.uid}");
+        }
       } catch (e) {
-        debugPrint("Firebase Auth Failed: $e");
+        debugPrint("[Auth] Firebase Auth Failed in loadAuthData: $e");
       }
+
+      // Start Chat Listener
       ChatListener().startListening();
       FirebaseNotificationService().saveTokenToFirestore();
 
