@@ -39,8 +39,9 @@ class AuthController extends ChangeNotifier {
   String? _verificationId;
   int? _resendToken;
   bool _isSendingOtp = false;
-  String? _backendOtpCode; // OTP returned by backend /login (used for /verify-otp)
-  
+  String?
+      _backendOtpCode; // OTP returned by backend /login (used for /verify-otp)
+
   // Getters
   bool get isSendingOtp => _isSendingOtp;
   String? get verificationId => _verificationId;
@@ -175,14 +176,24 @@ class AuthController extends ChangeNotifier {
           await _signInWithCredential(credential, phoneNumber: phoneNumber);
         },
         verificationFailed: (FirebaseAuthException e) {
-          debugPrint("[Firebase Auth] FAILED — code: ${e.code}, msg: ${e.message}");
+          debugPrint(
+              "[Firebase Auth] ========================================");
+          debugPrint("[Firebase Auth] PHONE VERIFICATION FAILED!");
+          debugPrint("[Firebase Auth] Error Code: '${e.code}'");
+          debugPrint("[Firebase Auth] Error Message: '${e.message}'");
+          debugPrint("[Firebase Auth] Error Email: '${e.email}'");
+          debugPrint("[Firebase Auth] Error Credential: '${e.credential}'");
+          debugPrint("[Firebase Auth] Full Exception Object: $e");
+          debugPrint(
+              "[Firebase Auth] ========================================");
           _isSendingOtp = false;
           _statusMessage = null;
           _errorMessage = _getAuthErrorMessage(e);
           notifyListeners();
         },
         codeSent: (String verificationId, int? resendToken) {
-          debugPrint("[Firebase Auth] OTP SENT ✅ — verificationId: $verificationId");
+          debugPrint(
+              "[Firebase Auth] OTP SENT ✅ — verificationId: $verificationId");
           _verificationId = verificationId;
           _resendToken = resendToken;
           _isSendingOtp = false;
@@ -197,7 +208,8 @@ class AuthController extends ChangeNotifier {
           );
         },
         codeAutoRetrievalTimeout: (String verificationId) {
-          debugPrint("[Firebase Auth] codeAutoRetrievalTimeout — verificationId: $verificationId");
+          debugPrint(
+              "[Firebase Auth] codeAutoRetrievalTimeout — verificationId: $verificationId");
           if (_verificationId == null) {
             _verificationId = verificationId;
           }
@@ -207,7 +219,8 @@ class AuthController extends ChangeNotifier {
         timeout: const Duration(seconds: 60),
       );
     } on FirebaseAuthException catch (e) {
-      debugPrint("[Firebase Auth] FirebaseAuthException — code: ${e.code}, msg: ${e.message}");
+      debugPrint(
+          "[Firebase Auth] FirebaseAuthException — code: ${e.code}, msg: ${e.message}");
       _isSendingOtp = false;
       _statusMessage = null;
       _errorMessage = _getAuthErrorMessage(e);
@@ -265,7 +278,8 @@ class AuthController extends ChangeNotifier {
           await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (userCredential.user != null) {
-        debugPrint("[Auth] Firebase Login Success ✅ UID: ${userCredential.user!.uid}");
+        debugPrint(
+            "[Auth] Firebase Login Success ✅ UID: ${userCredential.user!.uid}");
 
         final phone = phoneNumber ??
             userCredential.user!.phoneNumber?.replaceAll('+91', '') ??
@@ -278,8 +292,9 @@ class AuthController extends ChangeNotifier {
         final otpForBackend = (smsCode != null && smsCode.isNotEmpty)
             ? smsCode
             : (_backendOtpCode ?? '');
-        
-        debugPrint("[Auth] Calling backend /verify-otp with OTP: $otpForBackend for phone: $phone");
+
+        debugPrint(
+            "[Auth] Calling backend /verify-otp with OTP: $otpForBackend for phone: $phone");
 
         final request = VerifyOtpRequest(
           phoneNumber: phone,
@@ -339,11 +354,12 @@ class AuthController extends ChangeNotifier {
 
   /// Map FirebaseAuth errors to user-friendly messages
   String _getAuthErrorMessage(FirebaseAuthException e) {
-    debugPrint("[Firebase Auth] Mapping error code: '${e.code}' message: '${e.message}'");
-    
+    debugPrint(
+        "[Firebase Auth] Mapping error code: '${e.code}' message: '${e.message}'");
+
     // Check the message for specific sub-errors that Firebase wraps as 'unknown'
     final msg = e.message?.toUpperCase() ?? '';
-    
+
     if (msg.contains('BILLING_NOT_ENABLED')) {
       return 'SMS service not configured. Please contact support.';
     }
@@ -353,7 +369,7 @@ class AuthController extends ChangeNotifier {
     if (msg.contains('APP_NOT_AUTHORIZED')) {
       return 'App not authorized. Please contact support.';
     }
-    
+
     switch (e.code) {
       case 'invalid-phone-number':
         return 'The phone number entered is invalid.';
@@ -460,9 +476,11 @@ class AuthController extends ChangeNotifier {
       try {
         if (FirebaseAuth.instance.currentUser == null) {
           await FirebaseAuth.instance.signInAnonymously();
-          debugPrint("[Auth] Signed in to Firebase Anonymously for Firestore access");
+          debugPrint(
+              "[Auth] Signed in to Firebase Anonymously for Firestore access");
         } else {
-          debugPrint("[Auth] Firebase user already exists: ${FirebaseAuth.instance.currentUser!.uid}");
+          debugPrint(
+              "[Auth] Firebase user already exists: ${FirebaseAuth.instance.currentUser!.uid}");
         }
       } catch (e) {
         debugPrint("[Auth] Firebase Auth Failed in loadAuthData: $e");

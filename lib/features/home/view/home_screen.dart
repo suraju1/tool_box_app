@@ -104,14 +104,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 if (controller.errorMessage != null &&
                     controller.homePosts.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.fetchHomePosts(refresh: true);
+                    },
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        Text(controller.errorMessage!),
-                        ElevatedButton(
-                          onPressed: () => controller.fetchHomePosts(),
-                          child: const Text('Retry'),
+                        SizedBox(height: 200.h),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(controller.errorMessage!),
+                              ElevatedButton(
+                                onPressed: () => controller.fetchHomePosts(),
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -139,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: controller.homePosts.isEmpty &&
                                 !controller.isHomeLoading
                             ? ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 children: [
                                   SizedBox(height: 50.h),
                                   Center(
@@ -161,6 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               )
                             : ListView.separated(
                                 controller: _scrollController,
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 8.w, vertical: 8.h),
                                 itemCount: controller.homePosts.length +

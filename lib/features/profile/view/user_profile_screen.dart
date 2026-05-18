@@ -628,7 +628,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               child: ListView.separated(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
-                itemCount: reviews.length,
+                itemCount: reviews.length > 3 ? 3 : reviews.length,
                 separatorBuilder: (_, __) => Divider(color: context.dividerColor),
                 itemBuilder: (context, index) => ReviewItemWidget(review: reviews[index]),
               ),

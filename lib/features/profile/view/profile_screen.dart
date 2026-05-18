@@ -636,7 +636,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ListView.separated(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
-                itemCount: profile.reviews.length,
+                itemCount: profile.reviews.length > 3 ? 3 : profile.reviews.length,
                 separatorBuilder: (_, __) => const Divider(),
                 itemBuilder: (context, index) =>
                     ReviewItemWidget(review: profile.reviews[index]),

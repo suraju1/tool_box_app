@@ -788,7 +788,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
       final isOwner = authController.currentUser?.id == response.posterUserId;
 
       if (isOwner) {
-        if (response.paymentStatus == 'paid') {
+        if (response.paymentStatus == 'paid' || response.status == 'paid') {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -800,10 +800,8 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
             ),
           );
         } else {
-          ToastService.showErrorToast(
-            context,
-            'Waiting for partner response',
-          );
+          Navigator.pushNamed(context, AppRoutes.tradeDetails,
+              arguments: response.id);
         }
       } else {
         Navigator.pushNamed(context, AppRoutes.tradeCompletion);

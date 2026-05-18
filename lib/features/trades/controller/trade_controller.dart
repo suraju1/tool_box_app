@@ -286,6 +286,9 @@ class TradeController extends ChangeNotifier {
   List<PostModel> _applyFilters(List<PostModel> posts) {
     List<PostModel> filtered = List.from(posts);
 
+    // 0. Filter out completed trades (they shouldn't be publicly visible)
+    filtered = filtered.where((p) => p.status.toLowerCase() != 'completed').toList();
+
     // 1. Filter by Post Type (only for Home posts usually, but safe here)
     if (_selectedPostType != 'all') {
       filtered = filtered.where((p) {

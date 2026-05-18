@@ -98,15 +98,7 @@ class ReviewItemWidget extends StatelessWidget {
                           fontSize: 12.sp, color: context.subTextColor),
                     ),
                   SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      Icon(Icons.thumb_up_outlined,
-                          size: 14.sp, color: greyColor),
-                      SizedBox(width: 12.w),
-                      Icon(Icons.thumb_down_outlined,
-                          size: 14.sp, color: greyColor),
-                    ],
-                  ),
+
                 ],
               ),
             ),

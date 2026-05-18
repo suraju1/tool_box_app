@@ -98,7 +98,8 @@ class NotificationService {
   Future<ApiResponse<dynamic>> markAsRead(int notificationId) async {
     try {
       final response = await _apiClient.put(
-        ApiConstants.notificationMarkRead.replaceFirst('{{id}}', notificationId.toString()),
+        ApiConstants.notificationMarkRead
+            .replaceFirst('{{id}}', notificationId.toString()),
       );
 
       if (response.statusCode == 200) {
@@ -122,7 +123,8 @@ class NotificationService {
   Future<ApiResponse<dynamic>> deleteNotification(int notificationId) async {
     try {
       final response = await _apiClient.delete(
-        ApiConstants.notificationDelete.replaceFirst('{{id}}', notificationId.toString()),
+        ApiConstants.notificationDelete
+            .replaceFirst('{{id}}', notificationId.toString()),
       );
 
       if (response.statusCode == 200) {

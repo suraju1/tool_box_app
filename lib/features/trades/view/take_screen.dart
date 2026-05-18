@@ -86,98 +86,106 @@ class _TakeScreenState extends State<TakeScreen> {
           }
 
           if (controller.errorMessage != null && controller.givePosts.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            return RefreshIndicator(
+              onRefresh: () async {
+                await controller.fetchGivePosts(refresh: true);
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  Text(controller.errorMessage!),
-                  ElevatedButton(
-                    onPressed: () => controller.fetchGivePosts(),
-                    child: const Text('Retry'),
+                  SizedBox(height: 200.h),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(controller.errorMessage!),
+                        ElevatedButton(
+                          onPressed: () => controller.fetchGivePosts(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             );
           }
 
-          return Stack(
+          return Column(
             children: [
-              Column(
-                children: [
-                  SizedBox(height: 15.h),
-                  _buildHeader(context),
-                  Divider(
-                    color: context.dividerColor,
-                    height: 0.h,
-                    thickness: 0.5,
-                  ),
-                  Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        await controller.fetchGivePosts(refresh: true);
-                      },
-                      child: controller.givePosts.isEmpty &&
-                              !controller.isGiveLoading
-                          ? ListView(
-                              children: [
-                                SizedBox(height: 100.h),
-                                Center(
-                                  child: Column(
-                                    children: [
-                                      Icon(Icons.search_off,
-                                          size: 64.sp, color: Colors.grey),
-                                      SizedBox(height: 16.h),
-                                      Text(
-                                        'No posts found matching your filters',
-                                        style: TextStyle(
-                                          color: context.subTextColor,
-                                          fontSize: 16.sp,
-                                        ),
-                                      ),
-                                    ],
+              SizedBox(height: 15.h),
+              _buildHeader(context),
+              Divider(
+                color: context.dividerColor,
+                height: 0.h,
+                thickness: 0.5,
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await controller.fetchGivePosts(refresh: true);
+                  },
+                  child: controller.givePosts.isEmpty &&
+                          !controller.isGiveLoading
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(height: 100.h),
+                            Center(
+                              child: Column(
+                                children: [
+                                  Icon(Icons.search_off,
+                                      size: 64.sp, color: Colors.grey),
+                                  SizedBox(height: 16.h),
+                                  Text(
+                                    'No posts found matching your filters',
+                                    style: TextStyle(
+                                      color: context.subTextColor,
+                                      fontSize: 16.sp,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            )
-                          : ListView.separated(
-                              controller: _scrollController,
-                              padding:
-                                  EdgeInsets.fromLTRB(8.w, 4.h, 8.w, 100.h),
-                              itemCount: controller.givePosts.length +
-                                  (controller.isGiveLoadMoreRunning ? 1 : 0),
-                              separatorBuilder: (context, index) =>
-                                  SizedBox(height: 6.h),
-                              itemBuilder: (context, index) {
-                                if (index == controller.givePosts.length) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-
-                                if (index == 0) {
-                                  return Column(
-                                    children: [
-                                      _buildResultHeader(
-                                        context,
-                                        controller.givePosts.length,
-                                      ),
-                                      _buildProductCard(
-                                        context,
-                                        controller.givePosts[index],
-                                      ),
-                                    ],
-                                  );
-                                }
-
-                                return _buildProductCard(
-                                  context,
-                                  controller.givePosts[index],
-                                );
-                              },
+                                ],
+                              ),
                             ),
-                    ),
-                  ),
-                ],
+                          ],
+                        )
+                      : ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          controller: _scrollController,
+                          padding: EdgeInsets.fromLTRB(8.w, 4.h, 8.w, 100.h),
+                          itemCount: controller.givePosts.length +
+                              (controller.isGiveLoadMoreRunning ? 1 : 0),
+                          separatorBuilder: (context, index) =>
+                              SizedBox(height: 6.h),
+                          itemBuilder: (context, index) {
+                            if (index == controller.givePosts.length) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+
+                            if (index == 0) {
+                              return Column(
+                                children: [
+                                  _buildResultHeader(
+                                    context,
+                                    controller.givePosts.length,
+                                  ),
+                                  _buildProductCard(
+                                    context,
+                                    controller.givePosts[index],
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return _buildProductCard(
+                              context,
+                              controller.givePosts[index],
+                            );
+                          },
+                        ),
+                ),
               ),
             ],
           );

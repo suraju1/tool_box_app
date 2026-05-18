@@ -8,6 +8,7 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 
 class TradeHistoryScreen extends StatefulWidget {
   const TradeHistoryScreen({super.key});
@@ -326,37 +327,13 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
         ),
         child: Row(
           children: [
-            Container(
+            AppCachedImage(
+              imageUrl: imagePath,
               width: 90.w,
               height: 100.w,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.r),
-                color: Colors.grey.shade200,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10.r),
-                child: imagePath.startsWith('http')
-                    ? CachedNetworkImage(
-                        imageUrl: imagePath,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.broken_image_outlined),
-                        placeholder: (context, url) => Center(
-                          child: SizedBox(
-                            width: 20.w,
-                            height: 20.w,
-                            child:
-                                const CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      )
-                    : Image.asset(
-                        imagePath.isNotEmpty ? imagePath : 'assets/iphone.png',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.broken_image_outlined),
-                      ),
-              ),
+              radius: 10.r,
+              fit: BoxFit.cover,
+              errorWidget: const Icon(Icons.image_outlined),
             ),
             SizedBox(width: 15.w),
             Expanded(

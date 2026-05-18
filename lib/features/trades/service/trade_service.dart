@@ -37,7 +37,9 @@ class TradeService {
         } else {
           return ApiResponse(
               success: false,
-              message: data is Map ? (data['message'] ?? 'Failed to fetch categories') : 'Unexpected response format');
+              message: data is Map
+                  ? (data['message'] ?? 'Failed to fetch categories')
+                  : 'Unexpected response format');
         }
       } else {
         return ApiResponse(
@@ -127,7 +129,9 @@ class TradeService {
         } else {
           return ApiResponse(
               success: false,
-              message: data is Map ? (data['message'] ?? 'Failed to fetch posts') : 'Unexpected response format');
+              message: data is Map
+                  ? (data['message'] ?? 'Failed to fetch posts')
+                  : 'Unexpected response format');
         }
       } else {
         return ApiResponse(

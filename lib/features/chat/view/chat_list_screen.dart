@@ -27,6 +27,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
   final ChatService _chatService = ChatService();
   String? _currentUserId;
   Stream<QuerySnapshot>? _chatRoomsStream;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -211,6 +219,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             otherUserImage =
                                 userData['profileImage'] as String?;
                           }
+                        }
+
+                        // Apply search filter here
+                        if (_searchQuery.isNotEmpty &&
+                            !displayName.toLowerCase().contains(_searchQuery)) {
+                          return const SizedBox.shrink();
                         }
 
                         final tradeDetails =
@@ -406,10 +420,35 @@ class _ChatListScreenState extends State<ChatListScreen> {
           children: [
             Icon(Icons.search, color: context.subTextColor),
             SizedBox(width: 10.w),
-            Text(
-              'Search ...',
-              style: TextStyle(color: context.subTextColor, fontSize: 16.sp),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.toLowerCase();
+                  });
+                },
+                style: TextStyle(color: context.textColor, fontSize: 16.sp),
+                decoration: InputDecoration(
+                  hintText: 'Search chats...',
+                  hintStyle: TextStyle(color: context.subTextColor, fontSize: 16.sp),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
             ),
+            if (_searchQuery.isNotEmpty)
+              GestureDetector(
+                onTap: () {
+                  _searchController.clear();
+                  setState(() {
+                    _searchQuery = '';
+                  });
+                  FocusScope.of(context).unfocus();
+                },
+                child: Icon(Icons.clear, color: context.subTextColor, size: 20.sp),
+              ),
           ],
         ),
       ),

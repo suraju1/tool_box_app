@@ -110,7 +110,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               authController.currentUser?.id == response.posterUserId;
 
           if (isOwner) {
-            if (response.status == 'completed') {
+            if (response.status == 'completed' ||
+                response.status == 'accepted' ||
+                response.status == 'meeting_set') {
               Navigator.pushNamed(context, AppRoutes.tradeDetails,
                   arguments: response.id);
             } else if (response.paymentStatus == 'paid' ||

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/features/chat/view/chat_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
@@ -8,6 +9,7 @@ import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
@@ -107,11 +109,113 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
               _buildSectionTitle('Trade Notes'),
               SizedBox(height: 8.h),
               _buildNotesCard(response),
-              SizedBox(height: 30.h),
+              SizedBox(height: 20.h),
+              _buildChatButton(context, response),
+              SizedBox(height: 10.h),
+              _buildCompleteButton(context, response),
+              SizedBox(height: 10.h),
               _buildCancelButton(context, response),
               SizedBox(height: 20.h),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompleteButton(
+      BuildContext context, TradeResponseModel response) {
+    final authController = context.read<AuthController>();
+    final currentUserId = authController.currentUser?.id;
+    final isResponder = currentUserId == response.responderId;
+
+    // Only responder needs to see 'Complete' button here to go to Step 4
+    final canComplete = isResponder &&
+        (response.status == 'accepted' || response.status == 'meeting_set');
+
+    if (!canComplete) return const SizedBox.shrink();
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          // Set the selected response in controller just in case
+          context.read<TradeController>().setSelectedResponse(response);
+          // Navigate to Step 4 Completion Screen
+          Navigator.pushNamed(context, AppRoutes.tradeCompletion);
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          elevation: 0,
+        ),
+        child: Text(
+          'Complete Trade',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatButton(BuildContext context, TradeResponseModel response) {
+    final authController = context.read<AuthController>();
+    final currentUserId = authController.currentUser?.id;
+    final isOwner = currentUserId == response.posterUserId;
+
+    // Show chat button if trade is in active progress
+    final showChat = response.status == 'accepted' ||
+        response.status == 'meeting_set' ||
+        response.status == 'paid' ||
+        response.status == 'completed';
+
+    if (!showChat) return const SizedBox.shrink();
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          final otherUserId = isOwner
+              ? response.responderId.toString()
+              : response.posterUserId.toString();
+          final otherUserName = isOwner
+              ? response.responderName
+              : (response.posterName ?? 'User');
+          final otherUserImage =
+              isOwner ? response.responderImage : response.posterImage;
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                otherUserId: otherUserId,
+                otherUserName: otherUserName,
+                otherUserImage: otherUserImage,
+                tradeResponse: response,
+              ),
+            ),
+          );
+        },
+        icon: Icon(Icons.chat_bubble_outline, color: context.onPrimaryColor),
+        label: Text(
+          'Chat with ${isOwner ? response.responderName : (response.posterName ?? 'User')}',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+            color: context.onPrimaryColor,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: context.primaryColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          elevation: 0,
         ),
       ),
     );
@@ -233,11 +337,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
     final images = response.postItemImages.isNotEmpty
         ? response.postItemImages
         : (response.givingItemImages ?? []);
-    final imageUrl = images.isNotEmpty
-        ? (images.first.startsWith('http')
-            ? images.first
-            : '${ApiConstants.baseUrl2}${images.first}')
-        : '';
+    final imageUrl = images.isNotEmpty ? images.first : '';
     final isGive = response.postType == 'give' || response.postType == 'giving';
 
     return Container(
@@ -342,11 +442,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
         ? (response.responderImage ?? '')
         : (response.posterImage ?? '');
 
-    final imageUrl = partnerImage.isNotEmpty
-        ? (partnerImage.startsWith('http')
-            ? partnerImage
-            : '${ApiConstants.baseUrl2}$partnerImage')
-        : '';
+    final imageUrl = partnerImage;
 
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -539,8 +635,8 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
       return;
     }
 
-    final message = context.read<TradeController>().errorMessage ??
-        'Failed to submit mark';
+    final message =
+        context.read<TradeController>().errorMessage ?? 'Failed to submit mark';
     ToastService.showErrorToast(context, message);
   }
 
