@@ -94,10 +94,10 @@ class _BoardingScreenState extends State<BoardingPage> {
 
   void _onControllerUpdate() {
     final controller = context.read<OnBoardingController>();
-    // If loading is done and we have an error OR empty list, auto go to login
+    // Only auto-redirect to login if loading is done, there is an error, and the list is empty
     if (!controller.isLoading &&
-        (controller.errorMessage != null ||
-            controller.onBoardingList.isEmpty) &&
+        controller.errorMessage != null &&
+        controller.onBoardingList.isEmpty &&
         mounted) {
       _redirectTimer?.cancel();
       _redirectTimer = Timer(const Duration(seconds: 3), () {
@@ -191,7 +191,7 @@ class _BoardingScreenState extends State<BoardingPage> {
   Widget build(BuildContext context) {
     return Consumer<OnBoardingController>(
       builder: (context, controller, child) {
-        if (controller.isLoading) {
+        if (controller.isLoading && controller.onBoardingList.isEmpty) {
           return Scaffold(
             backgroundColor: context.scaffoldBg,
             body: Center(child: CircularProgressIndicator()),

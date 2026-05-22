@@ -234,6 +234,31 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
 
     bool isGivePost = post?.postType == 'give';
 
+    // ========== LOGGING API RESPONSE ==========
+    log('==== TRADE OFFER SCREEN - POST DATA ====');
+    log('Post ID: ${post?.id}');
+    log('Post Type: ${post?.postType}');
+    log('Item Name (What they\'re giving): ${post?.itemName}');
+    log('Item Category: ${post?.itemCategory}');
+    log('Item Images: ${post?.itemImages}');
+    log('Item Condition: ${post?.itemCondition}');
+    log('Item Note: ${post?.itemNote}');
+    log('---');
+    log('RETURN TYPE (What they\'re asking for): ${post?.returnType}');
+    log('Return Item Name: ${post?.returnItemName}');
+    log('Return Item Category: ${post?.returnItemCategory}');
+    log('Return Item Condition: ${post?.returnItemCondition}');
+    log('Return Item Description: ${post?.returnItemDescription}');
+    log('Return Item Images: ${post?.returnItemImages}');
+    log('Price Min: ${post?.priceMin}');
+    log('Price Max: ${post?.priceMax}');
+    log('Is Negotiable: ${post?.isNegotiable}');
+    log('Trade Type: ${post?.tradeType}');
+    log('User Name: ${post?.userName}');
+    log('Distance: ${post?.distanceKm}');
+    log('========== END LOGGING ==========');
+    // ====================================
+
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       appBar: _buildAppBar(
@@ -373,6 +398,76 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
   }
 
   Widget _buildRecipientCard(dynamic post, bool isGivePost) {
+    String returnItemText = post?.returnType?.toLowerCase() == 'price'
+        ? 'Money'
+        : (post?.returnItemName ?? 'Offers');
+
+    String givingText = '';
+    String takingText = '';
+    String? givingImageUrl;
+    String? takingImageUrl;
+    bool isGivingMoney = false;
+    bool isTakingMoney = false;
+
+    if (isGivePost) {
+      givingText = "- Giving ${post?.itemName ?? 'NA'}";
+      takingText = "- Taking $returnItemText in return";
+      givingImageUrl = (post?.itemImages != null && post!.itemImages.isNotEmpty)
+          ? post.itemImages.first
+          : null;
+      takingImageUrl = (post?.returnItemImages != null &&
+              post!.returnItemImages.isNotEmpty)
+          ? post.returnItemImages.first
+          : null;
+      isTakingMoney = post?.returnType?.toLowerCase() == 'price';
+    } else {
+      takingText = "- Taking ${post?.itemName ?? 'NA'}";
+      givingText = "- Giving $returnItemText in return";
+      takingImageUrl = (post?.itemImages != null && post!.itemImages.isNotEmpty)
+          ? post.itemImages.first
+          : null;
+      givingImageUrl = (post?.returnItemImages != null &&
+              post!.returnItemImages.isNotEmpty)
+          ? post.returnItemImages.first
+          : null;
+      isGivingMoney = post?.returnType?.toLowerCase() == 'price';
+    }
+
+    String tradeTypeFormatted = (post?.tradeType?.toLowerCase() == 'temporary')
+        ? '(Temporarily)'
+        : '(Permanently)';
+
+    Widget buildImageBox(String? url, bool isMoney) {
+      if (isMoney) {
+        return Container(
+          width: 70.w,
+          height: 70.h,
+          decoration: BoxDecoration(
+            color: context.primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: context.primaryColor),
+          ),
+          child: Icon(Icons.payments_outlined,
+              color: context.primaryColor, size: 30.sp),
+        );
+      }
+      return Container(
+        width: 70.w,
+        height: 70.h,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: context.dividerColor),
+          image: DecorationImage(
+            image: url != null
+                ? NetworkImage(AppCachedImage.getFormattedUrl(url))
+                    as ImageProvider
+                : const AssetImage('assets/iphone.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -383,7 +478,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             ? []
             : [
                 BoxShadow(
-                  color: greyColorWithOpacity0_4,
+                  color: Colors.black.withOpacity(0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -392,118 +487,105 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            isGivePost ? 'GIVER' : 'TAKER',
+            style: TextStyle(
+              color: context.primaryColor,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            post?.userName ?? '-',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w800,
+              fontFamily: FontFamily.openSans,
+              color: context.textColor,
+            ),
+          ),
+          SizedBox(height: 16.h),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isGivePost ? 'GIVER' : 'TAKER',
-                              style: TextStyle(
-                                color: context.primaryColor,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              post?.userName ?? '-',
-                              style: TextStyle(
-                                fontSize: 20.sp,
-                                fontWeight: FontWeight.w800,
-                                fontFamily: FontFamily.openSans,
-                                color: context.textColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
                     Text(
-                      '${post?.userName ?? '-'}’s ${isGivePost ? 'Giving' : 'Taking'}',
+                      givingText,
                       style: TextStyle(
-                        color: greyColor,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      post?.itemName ?? 'NA',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
                         fontFamily: FontFamily.openSans,
                         color: context.textColor,
                       ),
                     ),
-                    SizedBox(height: 16.h),
-                    _buildIconLabel(
-                        context,
-                        Icons.swap_horiz,
-                        '${isGivePost ? 'Give' : 'Take'} Type : ',
-                        post?.tradeType ?? 'Permanent'),
-                    SizedBox(height: 4.h),
-                    _buildIconLabel(context, Icons.category_outlined,
-                        'Category : ', post?.itemCategory ?? 'Other'),
+                    SizedBox(height: 2.h),
+                    Text(
+                      tradeTypeFormatted,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    Text(
+                      takingText,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: FontFamily.openSans,
+                        color: context.textColor,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      tradeTypeFormatted,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ],
                 ),
               ),
+              SizedBox(width: 12.w),
               Column(
                 children: [
-                  SizedBox(height: 40.h),
-                  Container(
-                    width: 120.w,
-                    height: 120.h,
-                    margin: EdgeInsets.only(left: 6.w),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.r),
-                      image: DecorationImage(
-                        image: (post?.itemImages != null &&
-                                post!.itemImages.isNotEmpty)
-                            ? NetworkImage(AppCachedImage.getFormattedUrl(
-                                post.itemImages.first))
-                            : (post?.returnItemImages != null &&
-                                    post!.returnItemImages.isNotEmpty)
-                                ? NetworkImage(AppCachedImage.getFormattedUrl(
-                                    post.returnItemImages.first))
-                                : const AssetImage('assets/iphone.png')
-                                    as ImageProvider,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  buildImageBox(givingImageUrl, isGivingMoney),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                    child: Icon(Icons.swap_vert,
+                        color: context.primaryColor, size: 28.sp),
                   ),
-                  SizedBox(height: 12.h),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Icon(Icons.location_on,
-                            color: context.subTextColor, size: 18.sp),
-                        SizedBox(width: 4.w),
-                        Text(
-                          '${post?.distanceKm?.toStringAsFixed(1) ?? '0.4'} km away',
-                          style: TextStyle(
-                            color: context.subTextColor,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  buildImageBox(takingImageUrl, isTakingMoney),
                 ],
               ),
             ],
+          ),
+          SizedBox(height: 16.h),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(Icons.location_on,
+                    color: context.subTextColor, size: 14.sp),
+                SizedBox(width: 4.w),
+                Text(
+                  '${post?.distanceKm?.toStringAsFixed(1) ?? '0.4'} km away',
+                  style: TextStyle(
+                    color: context.subTextColor,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -625,114 +707,168 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
   }
 
   Widget _buildItemPreviewCard(dynamic post) {
-    if (post?.returnType == 'Price') {
-      return Container(
-        margin: EdgeInsets.only(top: 16.h),
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: context.dividerColor),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                color: context.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Icon(Icons.payments_outlined,
-                  color: context.primaryColor, size: 24.sp),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    post?.postType == 'give'
-                        ? 'Price Offer Requested'
-                        : 'Price Offer Provided',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: context.textColor,
-                    ),
-                  ),
-                  Text(
-                    '₹${post.priceMin?.toStringAsFixed(2) ?? '0'} - ₹${post.priceMax?.toStringAsFixed(2) ?? '0'}',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w800,
-                      color: context.textColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return Container(
       margin: EdgeInsets.only(top: 16.h),
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: context.dividerColor),
+      alignment: Alignment.centerRight,
+      child: InkWell(
+        onTap: () => _showReturnDetailsSheet(context, post),
+        borderRadius: BorderRadius.circular(8.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'See Details',
+                style: TextStyle(
+                  color: context.primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.sp,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+              SizedBox(width: 4.w),
+              Icon(Icons.arrow_forward_ios, color: context.primaryColor, size: 12.sp),
+            ],
+          ),
+        ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 50.w,
-            height: 50.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.r),
-              image: DecorationImage(
-                image: (post?.returnItemImages != null &&
-                        post!.returnItemImages.isNotEmpty)
-                    ? NetworkImage(AppCachedImage.getFormattedUrl(
-                        post.returnItemImages.first)) as ImageProvider
-                    : (post?.itemImages != null && post!.itemImages.isNotEmpty)
-                        ? NetworkImage(AppCachedImage.getFormattedUrl(
-                            post.itemImages.first)) as ImageProvider
-                        : const AssetImage('assets/iphone.png'),
-                fit: BoxFit.cover,
+    );
+  }
+
+  void _showReturnDetailsSheet(BuildContext context, dynamic post) {
+    if (post == null) return;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        ),
+        padding: EdgeInsets.all(20.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 5.h,
+                decoration: BoxDecoration(
+                  color: context.dividerColor,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
               ),
             ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            SizedBox(height: 20.h),
+            Text(
+              'Requested Return Details',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: context.textColor,
+              ),
+            ),
+            SizedBox(height: 20.h),
+            if (post.returnType?.toLowerCase() == 'price') ...[
+              _buildInfoRow('Price Range', '₹${post.priceMin?.toStringAsFixed(2) ?? '0'} - ₹${post.priceMax?.toStringAsFixed(2) ?? '0'}'),
+              SizedBox(height: 12.h),
+              _buildInfoRow('Negotiable', post.isNegotiable == true ? 'Yes' : 'No'),
+            ] else ...[
+              if (post.returnItemImages != null && post.returnItemImages.isNotEmpty)
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: AppCachedImage(
+                      imageUrl: post.returnItemImages.first,
+                      width: 120.w,
+                      height: 120.h,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              SizedBox(height: 20.h),
+              _buildInfoRow('Item Name', post.returnItemName ?? 'NA'),
+              SizedBox(height: 12.h),
+              _buildInfoRow('Category', post.returnItemCategory ?? 'NA'),
+              SizedBox(height: 12.h),
+              _buildInfoRow('Condition', post.returnItemCondition ?? 'NA'),
+              SizedBox(height: 12.h),
+              _buildInfoRow('Trade Type', post.tradeType ?? 'NA'),
+              if (post.returnItemDescription != null && post.returnItemDescription.isNotEmpty) ...[
+                SizedBox(height: 16.h),
                 Text(
-                  post?.returnItemName ??
-                      (post?.postType == 'give'
-                          ? 'Requested Item'
-                          : 'Offered Item'),
+                  'Description',
                   style: TextStyle(
                     fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
+                    color: context.subTextColor,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  post.returnItemDescription,
+                  style: TextStyle(
+                    fontSize: 14.sp,
                     color: context.textColor,
                   ),
                 ),
-                Text(
-                  post?.returnItemCategory ?? 'Other',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: context.subTextColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
               ],
+            ],
+            SizedBox(height: 30.h),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.primaryColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                ),
+                child: Text('Close', style: TextStyle(color: context.onPrimaryColor, fontWeight: FontWeight.bold)),
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: context.subTextColor.withOpacity(0.8),
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        const Spacer(),
+        Expanded(
+          flex: 2,
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: context.textColor,
+              fontFamily: FontFamily.openSans,
+              height: 1.2,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.visible,
+          ),
+        ),
+      ],
     );
   }
 

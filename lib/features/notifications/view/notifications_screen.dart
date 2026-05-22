@@ -15,6 +15,7 @@ import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
 import 'package:tool_bocs/features/notifications/model/notification_model.dart';
 import 'package:intl/intl.dart';
+import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/view/profile_screen.dart';
 
@@ -149,15 +150,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         backgroundColor: context.scaffoldBg,
         appBar: _buildAppBar(context),
         body: TabBarView(
           children: [
             _buildGeneralNotificationsView(context),
-            _buildResponsesListView(context, isIncoming: true),
-            _buildResponsesListView(context, isIncoming: false),
+            _buildCombinedMatchesView(context),
           ],
         ),
       ),
@@ -246,6 +246,180 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
+  Widget _buildCombinedMatchesView(BuildContext context) {
+    final shimmer = context.watch<ShimmerController>();
+    final tradeController = context.watch<TradeController>();
+
+    // Get incoming responses (My Items - responses on your posts)
+    final incomingResponses = tradeController.postResponses;
+    final incomingLoading = tradeController.isIncomingLoading;
+
+    // Get outgoing responses (My Offers - your responses to others' posts)
+    final outgoingResponses = tradeController.sentResponses;
+    final outgoingLoading = tradeController.isSentLoading;
+
+    if (shimmer.isLoading || incomingLoading || outgoingLoading) {
+      return _buildShimmer(context);
+    }
+
+    // Filter incoming into Active and History
+    final incomingActive = incomingResponses.where((r) {
+      return r.status == 'pending' || r.status == 'meeting_set';
+    }).toList();
+
+    final incomingHistory = incomingResponses.where((r) {
+      return r.status == 'completed' ||
+          r.status == 'accepted' ||
+          r.status == 'rejected' ||
+          r.status == 'paid';
+    }).toList();
+
+    // Filter outgoing into Active and History
+    final outgoingActive = outgoingResponses.where((r) {
+      return r.status == 'pending' || r.status == 'meeting_set';
+    }).toList();
+
+    final outgoingHistory = outgoingResponses.where((r) {
+      return r.status == 'completed' ||
+          r.status == 'accepted' ||
+          r.status == 'rejected' ||
+          r.status == 'paid';
+    }).toList();
+
+    // Sort all histories by date (newest first)
+    incomingHistory.sort((a, b) {
+      try {
+        DateTime dateA = DateTime.parse(a.createdAt);
+        DateTime dateB = DateTime.parse(b.createdAt);
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return 0;
+      }
+    });
+
+    outgoingHistory.sort((a, b) {
+      try {
+        DateTime dateA = DateTime.parse(a.createdAt);
+        DateTime dateB = DateTime.parse(b.createdAt);
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return 0;
+      }
+    });
+
+    final totalActiveIncoming = incomingActive.length;
+    final totalActiveOutgoing = outgoingActive.length;
+
+    if (totalActiveIncoming == 0 && totalActiveOutgoing == 0 && incomingHistory.isEmpty && outgoingHistory.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(40.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.shopping_bag_outlined,
+                  size: 64.sp, color: context.subTextColor),
+              SizedBox(height: 16.h),
+              Text(
+                'No matches yet',
+                style: TextStyle(
+                  color: context.subTextColor,
+                  fontSize: 16.sp,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(vertical: 20.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // INCOMING SECTION
+          if (incomingActive.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMatchSectionHeader(
+                  context,
+                  '📥 INCOMING',
+                  '${incomingActive.length} Offers on your posts',
+                ),
+                ...incomingActive.map((response) =>
+                    _buildResponseCard(context, response, true)),
+              ],
+            ),
+
+          // OUTGOING SECTION
+          if (outgoingActive.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: incomingActive.isNotEmpty ? 20.h : 0),
+                _buildMatchSectionHeader(
+                  context,
+                  '📤 OUTGOING',
+                  '${outgoingActive.length} Offers you sent',
+                ),
+                ...outgoingActive.map((response) =>
+                    _buildResponseCard(context, response, false)),
+              ],
+            ),
+
+          // HISTORY SECTION
+          if (incomingHistory.isNotEmpty || outgoingHistory.isNotEmpty) ...[
+            SizedBox(height: (incomingActive.isNotEmpty || outgoingActive.isNotEmpty) ? 20.h : 0),
+            _buildMatchSectionHeader(
+              context,
+              '⏱️ HISTORY',
+              'Past matches',
+            ),
+            if (incomingHistory.isNotEmpty)
+              ...incomingHistory.map((response) =>
+                  _buildResponseCard(context, response, true)),
+            if (outgoingHistory.isNotEmpty)
+              ...outgoingHistory.map((response) =>
+                  _buildResponseCard(context, response, false)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchSectionHeader(BuildContext context, String title, String subtitle) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(15.w, 0, 15.w, 12.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              fontFamily: FontFamily.openSans,
+              color: context.textColor,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              fontFamily: FontFamily.openSans,
+              color: context.subTextColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildResponseCard(
       BuildContext context, TradeResponseModel response, bool isIncoming) {
     List<TextSpan> messageSpans = [];
@@ -253,29 +427,47 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     String actionLabel = '';
     Color actionColor = context.primaryColor;
 
+    // Format time ago
+    final timeAgo = DateUtil.formatTimeAgo(response.createdAt);
+
+    // Determine action word: "Taking" for incoming, "Giving" for outgoing
+    final actionWord = isIncoming ? 'Taking' : 'Giving';
+
     if (response.responseType == 'price' || response.responseType == 'Price') {
       messageSpans = [
         TextSpan(
             text: response.responderName,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        const TextSpan(text: ' offered '),
+        TextSpan(text: ' is $actionWord '),
         const TextSpan(
             text: 'Price', style: TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' ~ $timeAgo'),
       ];
-      subText =
-          'Price: ₹${response.priceRangeStart} - ₹${response.priceRangeEnd}';
+      final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
+      final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
+      subText = 'Price: ₹$startPrice - ₹$endPrice';
     } else {
       messageSpans = [
         TextSpan(
             text: response.responderName,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        const TextSpan(text: ' offered '),
+        TextSpan(text: ' is $actionWord '),
         TextSpan(
             text: response.itemName ?? 'an item',
             style: const TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' ~ $timeAgo'),
       ];
-      subText =
-          'Category: ${response.itemCategory} | Condition: ${response.itemCondition}';
+      // Show return item or price they want in return
+      if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
+        subText = 'Wants: ${response.returnItemName} in return';
+      } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+        final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
+        final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
+        subText = 'Wants: ₹$startPrice - ₹$endPrice in return';
+      } else {
+        subText =
+            'Category: ${response.itemCategory} | Condition: ${response.itemCondition}';
+      }
     }
 
     // If it's a global response, show which post it's for
@@ -285,18 +477,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           TextSpan(
               text: response.responderName,
               style: const TextStyle(fontWeight: FontWeight.bold)),
-          const TextSpan(text: ' on your '),
+          const TextSpan(text: ' is Taking your '),
           TextSpan(
               text: response.postItemName!,
               style: const TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: ' ~ $timeAgo'),
         ];
+        // Show what they're offering or want in return
+        if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
+          subText = 'Offering: ${response.returnItemName}';
+        } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+          final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
+          final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
+          subText = 'Offering: ₹$startPrice - ₹$endPrice';
+        }
       } else {
         messageSpans = [
           const TextSpan(text: 'Your offer on '),
           TextSpan(
               text: response.postItemName!,
               style: const TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: ' ~ $timeAgo'),
         ];
+        if (response.itemName != null && response.itemName!.isNotEmpty) {
+          subText = 'Offering: ${response.itemName}';
+        }
       }
     }
 
@@ -324,7 +529,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         TextSpan(
             text: response.postItemName ?? 'item',
             style: const TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' ~ $timeAgo'),
       ];
+      if (response.itemName != null && response.itemName!.isNotEmpty) {
+        subText = 'Offering: ${response.itemName}';
+      }
     }
 
     // Use response item image if available, else post image
@@ -418,28 +627,124 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           fontFamily: FontFamily.openSans,
         ),
       ),
-      // actions: [
-      //   if (widget.postId == null)
-      //     Consumer<NotificationController>(
-      //       builder: (context, controller, child) {
-      //         if (controller.unreadCount > 0) {
-      //           return TextButton(
-      //             onPressed: () => controller.markAllAsRead(),
-      //             child: Text(
-      //               'Mark all as read',
-      //               style: TextStyle(
-      //                 color: context.primaryColor,
-      //                 fontSize: 12.sp,
-      //                 fontWeight: FontWeight.w600,
-      //               ),
-      //             ),
-      //           );
-      //         }
-      //         return const SizedBox.shrink();
-      //       },
-      //     ),
-      //],
-      bottom: widget.postId == null
+    actions: [
+  PopupMenuButton<void>(
+    offset: const Offset(-200, 50),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12.r),
+    ),
+    color: Colors.white,
+    surfaceTintColor: Colors.transparent,
+
+    // ✅ Updated Detail / Info Icon
+    icon: Container(
+      padding: EdgeInsets.all(6.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4.r,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Icon(
+        Icons.info_outline,
+        size: 18.sp,
+        color: Colors.black87,
+      ),
+    ),
+
+    itemBuilder: (context) => [
+      PopupMenuItem<void>(
+        enabled: false,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 12.h,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'See what people want around you',
+                style: TextStyle(
+                  color: const Color(0xFF111311),
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+
+              SizedBox(height: 10.h),
+
+              Text(
+                '• See existing posts by givers around you',
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+
+              SizedBox(height: 6.h),
+
+              Text(
+                '• Respond to posts, mention what you can offer in return',
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      const PopupMenuDivider(height: 1),
+
+      PopupMenuItem<void>(
+        onTap: () {
+          Future.delayed(Duration.zero, () {
+            Navigator.pushNamed(
+              context,
+              AppRoutes.helpSupport,
+            );
+          });
+        },
+
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.help_outline,
+              size: 18.sp,
+              color: context.primaryColor,
+            ),
+
+            SizedBox(width: 8.w),
+
+            Text(
+              'Help & Support',
+              style: TextStyle(
+                color: context.primaryColor,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.bold,
+                fontFamily: FontFamily.openSans,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+],  bottom: widget.postId == null
           ? TabBar(
               dividerColor: Colors.transparent,
               indicatorColor: context.primaryColor,
@@ -481,8 +786,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         ),
                       )
                     : const Tab(text: 'General'),
-                const Tab(text: 'My Items'),
-                const Tab(text: 'My Offers'),
+                const Tab(text: 'Matches'),
               ],
             )
           : PreferredSize(

@@ -133,7 +133,7 @@ class TradeSuccessScreen extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: isPrimary ? context.textColor : context.primaryColor,
+            color: isPrimary ? Colors.white : context.primaryColor,
             fontWeight: FontWeight.w700,
             fontSize: 16.sp,
           ),

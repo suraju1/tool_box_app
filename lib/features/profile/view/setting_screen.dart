@@ -7,6 +7,8 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/controller/theme_controller.dart';
 import 'package:tool_bocs/core/controller/language_controller.dart';
 import 'package:tool_bocs/l10n/generated/app_localizations.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -109,7 +111,6 @@ class _SettingScreenState extends State<SettingScreen> {
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.privacyPolicy),
               ),
-              // _buildDivider(),
               // _buildSettingItem(
               //   context,
               //   icon: Icons.block_outlined,
@@ -117,6 +118,19 @@ class _SettingScreenState extends State<SettingScreen> {
               //   onTap: () =>
               //       Navigator.pushNamed(context, AppRoutes.blockedUsers),
               // ),
+              _buildDivider(),
+              _buildSettingItem(
+                context,
+                icon: Icons.visibility_outlined,
+                label: 'Unhide All Posts',
+                onTap: () async {
+                  await context.read<TradeController>().clearHiddenPosts();
+                  if (context.mounted) {
+                    ToastService.showSuccessToast(context, 'All hidden posts are now visible');
+                    context.read<TradeController>().fetchHomePosts(); // Refresh feed
+                  }
+                },
+              ),
             ],
           ),
         ),

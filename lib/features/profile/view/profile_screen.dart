@@ -438,6 +438,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontFamily: FontFamily.openSans,
                       ),
                     ),
+                    if (user.giverType != null || user.takerType != null)
+                      Padding(
+                        padding: EdgeInsets.only(top: 2.h),
+                        child: Text(
+                          [user.giverType, user.takerType]
+                              .where((e) => e != null && e!.isNotEmpty)
+                              .join(' - '),
+                          style: TextStyle(
+                            color: context.textColor,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                        ),
+                      ),
                     if (user.bio != null && user.bio!.trim().isNotEmpty) ...[
                       SizedBox(height: 3.h),
                       RichText(
@@ -458,17 +473,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                     SizedBox(height: 7.h),
-                    Text(
-                      user.location ?? 'No location provided',
-                      style: TextStyle(
-                        color: context.subTextColor,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: FontFamily.openSans,
-                        height: 1.15,
-                      ),
-                    ),
-                    SizedBox(height: 5.h),
+
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 6.h),
                       decoration: BoxDecoration(
@@ -1097,17 +1102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
           SizedBox(height: 8.h),
-          Text(
-            user.location ?? 'No location provided',
-            style: TextStyle(
-              color: context.subTextColor,
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              fontFamily: FontFamily.openSans,
-              height: 1.15,
-            ),
-          ),
-          SizedBox(height: 16.h),
+
           Row(
             children: [
               Text(

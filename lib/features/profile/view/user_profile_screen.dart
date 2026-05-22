@@ -510,15 +510,20 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   fontFamily: FontFamily.openSans,
                 ),
               ),
-              if (details.location != null)
-                Text(
-                  details.location!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: context.subTextColor,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: FontFamily.openSans,
+              if (details.giverType != null || details.takerType != null)
+                Padding(
+                  padding: EdgeInsets.only(top: 4.h),
+                  child: Text(
+                    [details.giverType, details.takerType]
+                        .where((e) => e != null && e!.isNotEmpty)
+                        .join(' - '),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: context.textColor,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: FontFamily.openSans,
+                    ),
                   ),
                 ),
             ],

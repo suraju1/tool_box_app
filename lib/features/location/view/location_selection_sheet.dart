@@ -331,24 +331,6 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                 ],
               ),
             ),
-            if (addr.isDefault == 1)
-              Icon(Icons.star, size: 20.sp, color: Colors.orange)
-            else
-              IconButton(
-                icon: Icon(Icons.star_border, size: 20.sp, color: Colors.orange),
-                onPressed: () {
-                  context
-                      .read<AddressController>()
-                      .setAsDefault(addr.id!)
-                      .then((response) {
-                    if (response.success) {
-                      ToastService.showSuccessToast(context, 'Set as default');
-                    } else {
-                      ToastService.showErrorToast(context, response.message);
-                    }
-                  });
-                },
-              ),
             IconButton(
               icon: Icon(Icons.edit_outlined, size: 20.sp, color: Colors.blue),
               onPressed: () {

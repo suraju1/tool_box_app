@@ -18,7 +18,10 @@ import 'package:tool_bocs/core/services/storage_service.dart';
 import 'package:tool_bocs/core/widgets/theme_selection_bottom_sheet.dart';
 import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/features/profile/view/profile_screen.dart';
-
+import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -528,6 +531,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             style:
                                 TextStyle(color: Colors.grey, fontSize: 11.sp),
                           ),
+                          SizedBox(width: 4.w),
+                          _buildPostMenu(context, post, isOwner),
                         ],
                       ),
                     ],
@@ -544,7 +549,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: imagePath.isNotEmpty
                     ? AppCachedImage(
                         imageUrl: imagePath,
-                        fit: BoxFit.fill,
+                        fit: BoxFit.contain,
                         width: 1.sw - 44.w,
                         height: (1.sw - 44.w) * 9 / 14,
                         radius: 0,
@@ -748,6 +753,82 @@ class _HomeScreenState extends State<HomeScreen> {
           fontWeight: FontWeight.bold,
         ),
       ),
+    );
+  }
+
+  Widget _buildPostMenu(BuildContext context, PostModel post, bool isOwner) {
+    return PopupMenuButton<String>(
+      color: context.surfaceColor,
+      surfaceTintColor: Colors.transparent,
+      icon: Icon(Icons.more_vert, color: context.textColor, size: 20.sp),
+      padding: EdgeInsets.zero,
+      onSelected: (value) async {
+        final profileController = context.read<ProfileController>();
+        switch (value) {
+          case 'profile':
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UserProfileScreen(userId: post.userId.toString()),
+              ),
+            );
+            break;
+          case 'save':
+            final success = await profileController.toggleSaveUser(post.userId);
+            if (success.success && mounted) {
+              ToastService.showSuccessToast(context, 'User saved successfully');
+            } else if (mounted) {
+              ToastService.showErrorToast(context, success.message ?? 'Error saving user');
+            }
+            break;
+          case 'share':
+            Share.share('Check out ${post.userName}\'s trade: ${post.itemName}\nDownload the app to see more!');
+            break;
+          case 'hide':
+            context.read<TradeController>().hidePost(post.id);
+            if (mounted) {
+              ToastService.showSuccessToast(context, 'Post hidden');
+              context.read<TradeController>().fetchHomePosts(); // Refresh list to remove hidden post
+            }
+            break;
+          case 'block':
+            final success = await profileController.blockUser(post.userId);
+            if (success.success && mounted) {
+              ToastService.showSuccessToast(context, 'User blocked successfully');
+              context.read<TradeController>().fetchHomePosts(); // Refresh feed
+            } else if (mounted) {
+              ToastService.showErrorToast(context, success.message ?? 'Error blocking user');
+            }
+            break;
+        }
+      },
+      itemBuilder: (BuildContext context) {
+        return [
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'profile',
+              child: Text('View Seller Profile'),
+            ),
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'save',
+              child: Text('Save Seller'),
+            ),
+          const PopupMenuItem<String>(
+            value: 'share',
+            child: Text('Share Post'),
+          ),
+          const PopupMenuItem<String>(
+            value: 'hide',
+            child: Text('Hide Post'),
+          ),
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'block',
+              child: Text('Block User'),
+            ),
+        ];
+      },
     );
   }
 }

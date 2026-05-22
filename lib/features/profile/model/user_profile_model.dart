@@ -56,6 +56,8 @@ class UserDetails {
   final int totalDislikes;
   final String? remainingBalance;
   final bool termsAccepted;
+  final String? giverType;
+  final String? takerType;
 
   UserDetails({
     required this.id,
@@ -77,12 +79,18 @@ class UserDetails {
     this.totalDislikes = 0,
     this.remainingBalance,
     this.termsAccepted = true,
+    this.giverType,
+    this.takerType,
   });
 
   factory UserDetails.fromJson(Map<String, dynamic> json) {
     final reviewStats = json['review_stats'] is Map<String, dynamic>
         ? json['review_stats'] as Map<String, dynamic>
         : <String, dynamic>{};
+        
+    final userTypeJson = json['user_type'] is Map<String, dynamic>
+        ? json['user_type'] as Map<String, dynamic>
+        : null;
 
     return UserDetails(
       id: json['id'] ?? 0,
@@ -106,6 +114,8 @@ class UserDetails {
       remainingBalance: json['remaining_balance']?.toString(),
       termsAccepted:
           json['terms_accepted'] == 1 || json['terms_accepted'] == true,
+      giverType: userTypeJson?['giver']?.toString(),
+      takerType: userTypeJson?['taker']?.toString(),
     );
   }
 }

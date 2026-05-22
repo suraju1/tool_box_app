@@ -39,8 +39,20 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
   String _returnSelectedCondition = 'New';
   bool _isReturnHomemade = false;
   bool _isReturnStoreBought = false;
-  CategoryModel? _selectedCategory;
-  CategoryModel? _selectedReturnCategory;
+  CategoryModel? _selectedCategory = CategoryModel(
+    id: 12,
+    name: 'Goods',
+    subId: 0,
+    imageUrl: '',
+    status: 1,
+  );
+  CategoryModel? _selectedReturnCategory = CategoryModel(
+    id: 12,
+    name: 'Goods',
+    subId: 0,
+    imageUrl: '',
+    status: 1,
+  );
 
   // Form Controllers
   final TextEditingController _itemNameController = TextEditingController();
@@ -538,9 +550,10 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         SizedBox(height: 20.h),
         Text('Category', style: _labelStyle()),
         SizedBox(height: 8.h),
-        _buildDropdown('Select Category',
-            value: _selectedCategory,
-            onChanged: (val) => setState(() => _selectedCategory = val)),
+        _buildCategoryToggleSelection(
+          _selectedCategory,
+          (val) => setState(() => _selectedCategory = val),
+        ),
         SizedBox(height: 16.h),
         Text('Condition', style: _labelStyle()),
         SizedBox(height: 12.h),
@@ -807,42 +820,10 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         SizedBox(height: 20.h),
         Text('Category', style: _labelStyle()),
         SizedBox(height: 8.h),
-        // Note: For return item, we might want another dropdown or reuse logic.
-        // For simplicity reusing the same dropdown builder but state management for return category is needed if it's different.
-        // The requirements didn't specify return item category selection distinct from the main one in the API provided.
-        // Waiting on user clarification for complex return item logic, but for now assuming text field or similar.
-        // Actually, the UI shows a dropdown. I should probably add another state variable for return category if needed.
-        // checking API: "return_type": "Price" or "Item". If "Item", no specific "return_item_category_id" in the provided API example json.
-        // The API only has `item_category_id`. The return item details seem to be less structured in the example JSON?
-        // Wait, the API JSON example shows `return_item_images` but NO `return_item_category` etc.
-        // However, the UI code I'm replacing HAS these fields.
-        // The user said "pass the proper and exact/real data for each field in the given api".
-        // The API JSON provided:
-        // "return_type": "Price", "price_min": 10...
-        // IF return_type is Item, what are the fields? The example JSON showed "Price".
-        // I will hide the category dropdown for return item for now or keep it UI-only as it's not in the provided API example for "Give" post.
-        // Actually, let's keep the UI fields but maybe they aren't sent if the API doesn't support them?
-        // Let's look at the `GiveawayRequestModel` I created. It only has `returnItemImages`.
-        // It seems the API example was for "Price" return type.
-        // If I switch to "Item" return type, the API likely expects `return_item_name`, `return_item_description` etc.
-        // BUT the user provided API response for "Giveaway created" with "Price".
-        // I will assume for now I should send what I can.
-        // BUt wait, the `GiveawayRequestModel` I created DOES NOT have `returnItemName`, `returnItemCondition` etc.
-        // I MISSED adding return item specific fields to the model!
-        // The user said "pass the proper and exact/real data for each field in the given api".
-        // The API Example:
-        // "item_name": "Vintage Wooden Chair11", "item_category": "Furniture"...
-        // It DOES NOT show return item fields because `return_type` was "Price".
-        // I should probably UPDATE the model to include `return_item_name`, `return_item_condition` etc. to be safe.
-        // OR better, I should ask the user? No, I should enable it.
-        // I will implement the UI and map it to the model. I need to update the model first?
-        // Let's stick to what's in the model for now.
-        // Wait, I see I missed adding `returnItemName` etc to the model.
-        // I should probably add them.
-        // For now, let's just update the UI Binding.
-        _buildDropdown('Select Category',
-            value: _selectedReturnCategory,
-            onChanged: (val) => setState(() => _selectedReturnCategory = val)),
+        _buildCategoryToggleSelection(
+          _selectedReturnCategory,
+          (val) => setState(() => _selectedReturnCategory = val),
+        ),
         SizedBox(height: 16.h),
         Text('Condition', style: _labelStyle()),
         SizedBox(height: 12.h),
@@ -1099,6 +1080,12 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       isValid = false;
     }
 
+    // Validate Category
+    if (_selectedCategory == null) {
+      ToastService.showErrorToast(context, 'Please select a category for the item');
+      isValid = false;
+    }
+
     // Validate Images
     if (_itemImages.isEmpty) {
       setState(() => _showImageError = true);
@@ -1114,6 +1101,10 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
 
     // Validate Return Item Details (if applicable)
     if (!_isPriceSelected) {
+      if (_selectedReturnCategory == null) {
+        ToastService.showErrorToast(context, 'Please select a category for the return item');
+        isValid = false;
+      }
       if (_returnItemImages.isEmpty) {
         setState(() => _showReturnImageError = true);
         // ToastService.showErrorToast(context, 'Please add at least 1 photo of the return item');
@@ -1329,95 +1320,58 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     );
   }
 
-  Widget _buildDropdown(String hint,
-      {CategoryModel? value, ValueChanged<CategoryModel?>? onChanged}) {
+  Widget _buildCategoryToggleSelection(CategoryModel? currentValue, Function(CategoryModel) onSelected) {
     return Consumer<TradeController>(
       builder: (context, tradeController, child) {
-        if (tradeController.isLoading) {
-          return Center(
-            child: SizedBox(
-              height: 20.w,
-              width: 20.w,
-              child: CircularProgressIndicator(
-                  strokeWidth: 2, color: context.primaryColor),
-            ),
-          );
-        }
-
-        if (tradeController.categoryErrorMessage != null) {
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.red),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    tradeController.categoryErrorMessage!,
-                    style: TextStyle(color: Colors.red, fontSize: 13.sp),
+        Widget buildBtn(String label) {
+          bool isSelected = currentValue?.name == label;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                // Find category from API or fallback to default
+                CategoryModel cat = tradeController.categories.firstWhere(
+                  (c) => c.name.toLowerCase() == label.toLowerCase(),
+                  orElse: () => CategoryModel(
+                    id: label == 'Goods' ? 12 : (label == 'Services' ? 13 : 14),
+                    name: label,
+                    subId: 0,
+                    imageUrl: '',
+                    status: 1,
+                  ),
+                );
+                onSelected(cat);
+              },
+              child: Container(
+                height: 45.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isSelected ? context.primaryColor : context.surfaceColor,
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(
+                    color: isSelected ? context.primaryColor : context.dividerColor,
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.refresh, color: Colors.red, size: 20.sp),
-                  onPressed: () {
-                    context.read<TradeController>().fetchCategories();
-                  },
-                )
-              ],
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? context.onPrimaryColor : context.subTextColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.sp,
+                  ),
+                ),
+              ),
             ),
           );
         }
 
-        return DropdownButtonFormField<CategoryModel>(
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          decoration: InputDecoration(
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            filled: true,
-            fillColor: context.surfaceColor,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: BorderSide(color: context.dividerColor),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: BorderSide(color: context.dividerColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: BorderSide(color: context.primaryColor),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-          ),
-          hint: Text(hint,
-              style: TextStyle(color: context.subTextColor, fontSize: 13.sp)),
-          isExpanded: true,
-          value: value,
-          validator: (value) => value == null ? 'Category is required' : null,
-          items: tradeController.categories.map((category) {
-            return DropdownMenuItem<CategoryModel>(
-              value: category,
-              child: Text(
-                category.name,
-                style: TextStyle(
-                  color: context.textColor,
-                  fontSize: 14.sp,
-                  fontFamily: FontFamily.openSans,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: onChanged,
+        return Row(
+          children: [
+            buildBtn('Goods'),
+            SizedBox(width: 10.w),
+            buildBtn('Services'),
+            SizedBox(width: 10.w),
+            buildBtn('Money'),
+          ],
         );
       },
     );

@@ -271,35 +271,73 @@ class _GiveScreenState extends State<GiveScreen> {
                 offset: const Offset(-200, 50),
                 shape: PopupMenuArrowShape(borderRadius: 12.r),
                 color: Colors.white,
+                surfaceTintColor: Colors.transparent,
                 elevation: 4,
                 itemBuilder: (context) => [
                   PopupMenuItem<void>(
                     enabled: false,
+                    padding: EdgeInsets.zero,
                     child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          '• See what people want around you',
-                          '• See existing posts by takers around you',
-                          '• Respond to posts, Mention what you want in return',
-                        ]
-                            .map((text) => Padding(
-                                  padding: EdgeInsets.only(bottom: 8.h),
-                                  child: Text(
-                                    text,
-                                    style: TextStyle(
-                                      color: const Color(0xFF111311),
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: FontFamily.openSans,
-                                    ),
-                                  ),
-                                ))
-                            .toList(),
+                          Text(
+                            'See what people want around you',
+                            style: TextStyle(
+                              color: const Color(0xFF111311),
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+                          Text(
+                            '• See existing posts by takers around you',
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          ),
+                          SizedBox(height: 6.h),
+                          Text(
+                            '• Respond to posts, Mention what you want in return',
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                  ),
+                  const PopupMenuDivider(height: 1),
+                  PopupMenuItem<void>(
+                    onTap: () {
+                      Future.delayed(Duration.zero, () {
+                        Navigator.pushNamed(context, AppRoutes.helpSupport);
+                      });
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.help_outline, size: 18.sp, color: context.primaryColor),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'Help & Support',
+                          style: TextStyle(
+                            color: context.primaryColor,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

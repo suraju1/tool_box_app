@@ -118,6 +118,8 @@ class AppCachedImage extends StatelessWidget {
         ? userName!.trim().substring(0, 1).toUpperCase()
         : '?';
 
+    final double effectiveHeight = (height != null && height!.isFinite) ? height! : 40.0;
+
     return Container(
       height: height,
       width: width,
@@ -132,7 +134,7 @@ class AppCachedImage extends StatelessWidget {
         firstLetter,
         style: TextStyle(
           color: placeholderTextColor ?? Theme.of(context).primaryColor,
-          fontSize: (height ?? 40) * 0.4,
+          fontSize: effectiveHeight * 0.4,
           fontWeight: FontWeight.bold,
         ),
       ),

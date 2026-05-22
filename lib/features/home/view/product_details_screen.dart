@@ -253,11 +253,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     separatorBuilder: (_, __) =>
                                         SizedBox(width: 12.w),
                                     itemBuilder: (context, index) {
-                                      final imageUrl = post
-                                              .returnItemImages[index]
-                                              .startsWith('http')
-                                          ? post.returnItemImages[index]
-                                          : '${ApiConstants.baseUrl2}${post.returnItemImages[index]}';
+                                      final imageUrl = post.returnItemImages[index];
                                       return GestureDetector(
                                         onTap: () => _openReturnImagePreview(
                                           post.returnItemImages,
@@ -372,6 +368,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           final post = tradeController.selectedPost;
           if (post == null) return const SizedBox.shrink();
 
+          // Hide the bottom bar entirely if the post is completed
+          if (post.status.toLowerCase() == 'completed') {
+            return const SizedBox.shrink();
+          }
+
           // Hide the response button for owners, but show "View Offers" if they have responses
           if (authController.currentUser?.id == post.userId) {
             return Container(
@@ -409,10 +410,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             );
           }
 
-          // Hide the button if the current user has already responded
-          if (post.hasResponded) {
-            return const SizedBox.shrink();
-          }
+          // removed has_responded check so the button is always visible for active posts
 
           return Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),

@@ -518,7 +518,14 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
     final isCompleted = response.status.toLowerCase() == 'completed';
     final isPoster = currentUserId == response.posterUserId;
     final partnerId = isPoster ? response.responderId : response.posterUserId;
+    // Retrieve previously submitted mark from controller (persisted across navigation)
+    final tradeController = context.read<TradeController>();
+    final existingMark = tradeController.getUserMark(response.id);
+    // local variable for UI (will be overwritten by controller state if present)
+    final markFromState = existingMark ?? _submittedMark;
 
+
+    // Show like/dislike only after trade completed and valid partner
     if (!isCompleted || currentUserId == null || partnerId == 0) {
       return const SizedBox.shrink();
     }
@@ -541,7 +548,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
                   label: 'Like',
                   icon: Icons.thumb_up_alt_outlined,
                   color: Colors.green,
-                  isSelected: _submittedMark == 'like',
+                  isSelected: (tradeController.getUserMark(response.id) ?? _submittedMark) == 'like',
                   isLoading: tradeController.isMarkingUser,
                   onTap: () => _submitUserMark(response, partnerId, 'like'),
                 ),
@@ -552,7 +559,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
                   label: 'Dislike',
                   icon: Icons.thumb_down_alt_outlined,
                   color: Colors.red,
-                  isSelected: _submittedMark == 'dislike',
+                  isSelected: (tradeController.getUserMark(response.id) ?? _submittedMark) == 'dislike',
                   isLoading: tradeController.isMarkingUser,
                   onTap: () => _submitUserMark(response, partnerId, 'dislike'),
                 ),
@@ -618,7 +625,8 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
     int partnerId,
     String mark,
   ) async {
-    final success = await context.read<TradeController>().submitUserMark(
+    final tc = context.read<TradeController>();
+    final success = await tc.submitUserMark(
           tradeResponseId: response.id,
           userId: partnerId,
           mark: mark,
@@ -627,6 +635,8 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
     if (!mounted) return;
 
     if (success) {
+      // Persist the mark in controller for later retrieval
+      tc.setUserMark(response.id, mark);
       setState(() => _submittedMark = mark);
       ToastService.showSuccessToast(
         context,
@@ -636,7 +646,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
     }
 
     final message =
-        context.read<TradeController>().errorMessage ?? 'Failed to submit mark';
+        tc.errorMessage ?? 'Failed to submit mark';
     ToastService.showErrorToast(context, message);
   }
 

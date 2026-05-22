@@ -145,7 +145,7 @@ class AuthController extends ChangeNotifier {
     // Step 1: Call backend /login to get the backend's OTP code
     try {
       debugPrint("[Auth] Step 1: Calling backend /login...");
-      final loginRequest = LoginRequest(phoneNumber: phoneNumber);
+      final loginRequest = LoginRequest(phoneNumber: '+91$phoneNumber');
       final loginResponse = await _authService.login(loginRequest);
 
       if (loginResponse.success && loginResponse.data != null) {
@@ -173,7 +173,7 @@ class AuthController extends ChangeNotifier {
           _isSendingOtp = false;
           _statusMessage = null;
           notifyListeners();
-          await _signInWithCredential(credential, phoneNumber: phoneNumber);
+          await _signInWithCredential(credential, phoneNumber: '+91$phoneNumber');
         },
         verificationFailed: (FirebaseAuthException e) {
           debugPrint(

@@ -218,7 +218,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
               ),
               child: Slider(
                 value: _radius,
-                min: 0.1,
+                min: 0.01,
                 max: 50,
                 activeColor: context.primaryColor,
                 inactiveColor: context.dividerColor,
@@ -235,6 +235,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   }
 
   double _getZoomForRadius(double radius) {
+    if (radius <= 0.05) return 19.0;
+    if (radius <= 0.1) return 18.0;
     if (radius <= 0.2) return 17.5;
     if (radius <= 0.5) return 16.5;
     if (radius <= 1) return 15.5;
@@ -574,9 +576,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           width: double.infinity,
           height: 50.h,
           child: ElevatedButton(
-            onPressed: widget.isPickOnly
-                ? _onConfirmLocation
-                : () => setState(() => _showFullForm = true),
+            onPressed: widget.isPickOnly ? _onConfirmLocation : _onDirectSave,
             style: ElevatedButton.styleFrom(
               backgroundColor: context.primaryColor,
               shape: RoundedRectangleBorder(
@@ -588,16 +588,11 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                 Text(
                     widget.isPickOnly
                         ? 'Confirm Location'
-                        : 'Add more address details',
+                        : 'Save Location',
                     style: TextStyle(
                         color: context.onPrimaryColor,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold)),
-                if (!widget.isPickOnly) ...[
-                  SizedBox(width: 8.w),
-                  Icon(Icons.keyboard_arrow_right,
-                      color: context.onPrimaryColor),
-                ]
               ],
             ),
           ),
@@ -634,6 +629,62 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           radius: _radius,
         );
     Navigator.pop(context);
+  }
+
+  void _onDirectSave() {
+    final addressController = context.read<AddressController>();
+
+    if (widget.editAddress != null) {
+      final updatedAddress = AddressModel(
+        id: widget.editAddress!.id,
+        label: 'Other',
+        address: _currentAddress,
+        latitude: _lastMapPosition.latitude,
+        longitude: _lastMapPosition.longitude,
+        isDefault: 1,
+      );
+
+      addressController
+          .updateAddress(updatedAddress.id!, updatedAddress)
+          .then((response) {
+        if (response.success) {
+          context.read<LocationController>().setLocation(
+                _lastMapPosition.latitude,
+                _lastMapPosition.longitude,
+                _currentAddress,
+                radius: _radius,
+              );
+          ToastService.showSuccessToast(
+              context, 'Address updated successfully');
+          Navigator.pop(context);
+        } else {
+          ToastService.showErrorToast(context, response.message);
+        }
+      });
+    } else {
+      final newAddress = AddressModel(
+        label: 'Other',
+        address: _currentAddress,
+        latitude: _lastMapPosition.latitude,
+        longitude: _lastMapPosition.longitude,
+        isDefault: addressController.addresses.isEmpty ? 1 : 0,
+      );
+
+      addressController.saveAddress(newAddress).then((response) {
+        if (response.success) {
+          context.read<LocationController>().setLocation(
+                _lastMapPosition.latitude,
+                _lastMapPosition.longitude,
+                _currentAddress,
+                radius: _radius,
+              );
+          ToastService.showSuccessToast(context, 'Address saved successfully');
+          Navigator.pop(context);
+        } else {
+          ToastService.showErrorToast(context, response.message);
+        }
+      });
+    }
   }
 
   Widget _buildDetailedAddressForm() {

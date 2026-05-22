@@ -17,12 +17,18 @@ class SplashController extends ChangeNotifier {
     BuildContext context,
     AuthController authController,
   ) async {
-    // Request location permission on first launch
+    // Start minimum splash delay of 2 seconds
+    final delayFuture = Future.delayed(const Duration(seconds: 2));
+
+    // Request location permission on first launch in the background (non-blocking)
     final locationController = context.read<LocationController>();
-    await locationController.fetchLocation();
+    locationController.fetchLocation().catchError((e) {
+      debugPrint('Error fetching location on startup: $e');
+      return true;
+    });
 
     // Show splash for minimum 2 seconds
-    await Future.delayed(const Duration(seconds: 2));
+    await delayFuture;
 
     // Check if user is logged in
     final isLoggedIn = await StorageService.isLoggedIn();

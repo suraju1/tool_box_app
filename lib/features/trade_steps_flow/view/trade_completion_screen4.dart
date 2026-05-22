@@ -55,25 +55,16 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
               SizedBox(height: 20.h),
               ElevatedButton(
                 onPressed: () {
-                  if (response.paymentStatus == 'paid' ||
-                      response.status == 'paid' ||
-                      response.status == 'completed') {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatScreen(
-                          otherUserId: response.posterUserId.toString(),
-                          otherUserName: response.posterName,
-                          tradeResponse: response,
-                        ),
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(
+                        otherUserId: response.responderId.toString(),
+                        otherUserName: response.responderName,
+                        tradeResponse: response,
                       ),
-                    );
-                  } else {
-                    ToastService.showErrorToast(
-                      context,
-                      'Waiting for partner response',
-                    );
-                  }
+                    ),
+                  );
                 },
                 child: const Text('Go to Chat'),
               ),
@@ -316,10 +307,6 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
 
     return InkWell(
       onTap: () {
-        if (!isPaid) {
-          _showPaymentRequiredDialog(context);
-          return;
-        }
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -373,22 +360,11 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
                       color: context.textColor,
                     ),
                   ),
-                  Text(
-                    'Spend a Ticket (15 mtrs)',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: context.subTextColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
                 ],
               ),
             ),
-            Opacity(
-              opacity: isPaid ? 1.0 : 0.5,
-              child: Icon(Icons.arrow_forward_ios,
-                  color: context.textColor, size: 18.sp),
-            ),
+            Icon(Icons.arrow_forward_ios,
+                color: context.textColor, size: 18.sp),
           ],
         ),
       ),

@@ -1,8 +1,8 @@
 class ApiConstants {
   // Base URL
-// //old
-//   static const String baseUrl = 'https://toolbocs.apluscrm.in/api/';
-//   static const String baseUrl2 = 'https://toolbocs.apluscrm.in/';
+  // //old
+  //   static const String baseUrl = 'https://toolbocs.apluscrm.in/api/';
+  //   static const String baseUrl2 = 'https://toolbocs.apluscrm.in/';
 
   //new
   static const String baseUrl = 'http://88.222.245.145:4000/api/';
@@ -10,7 +10,7 @@ class ApiConstants {
   static const String termsConditionsUrl = '${baseUrl2}terms-conditions';
   static const String privacyPolicyUrl = '${baseUrl2}privacy-policy';
 
-//-------------------------------- API Endpoints -----------------------------------//
+  //-------------------------------- API Endpoints -----------------------------------//
 
   //1. Auth/login/complete-profile/verify-otp/logout
   static const String completeProfile = 'complete-profile'; //post
@@ -28,6 +28,9 @@ class ApiConstants {
   static const String updateGiveTakePost = 'update_post/{{postid}}'; // put
   static const String deleteGiveTakePost = 'delete_post/{{postid}}'; // put
   static const String getMyPosts = 'get_my_posts'; //get
+
+  // New endpoint for reactivating a post
+  static const String reactivatePost = 'reactivate_post/{{postId}}'; //put
 
   // 4-Step Trade Flow
   static const String respondToPost = 'respond/{{postid}}'; //post
@@ -65,7 +68,7 @@ class ApiConstants {
   static const String unsaveUser = 'unsave_user/{{id}}'; //delete
   static const String listSaveUser = 'list_save_user'; //get
 
-  // Subscription
+   // static const String reactivatePost = 'reactivate_post/{{postid}}'; //put
   static const String subscribe = 'subscribe'; //post
   static const String mySubscription = 'my_subscription'; //get
   static const String mySubscriptionHistory = 'my_subscription_history'; //get
@@ -84,7 +87,7 @@ class ApiConstants {
   static const String notificationDelete = 'notifications_del/{{id}}'; //delete
   static const String walletTransactions = 'wallet_transactions'; //get
 
-//-----------------------------------------------------------------------------//
+  //-----------------------------------------------------------------------------//
   // Timeout durations
   static const Duration connectTimeout = Duration(seconds: 60);
   static const Duration receiveTimeout = Duration(seconds: 60);

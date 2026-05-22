@@ -9,6 +9,7 @@ import 'package:tool_bocs/features/profile/model/user_review_request_model.dart'
 import '../model/blocked_user_model.dart';
 import 'package:tool_bocs/features/profile/service/profile_service.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
+import 'package:tool_bocs/features/profile/view/profile_screen.dart';
 import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
 import 'package:tool_bocs/features/profile/model/faq_model.dart';
@@ -322,10 +323,14 @@ class ProfileController extends ChangeNotifier {
   static void navigateToUserProfile(BuildContext context, int userId) {
     final authController = context.read<AuthController>();
 
-    // If it's own profile, just go to profile tab
+    // If it's own profile, push ProfileScreen
     if (authController.currentUser?.id == userId) {
-      context.read<BottomNavBarController>().setIndex(4);
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProfileScreen(isTab: false, isDrawer: false),
+        ),
+      );
       return;
     }
 

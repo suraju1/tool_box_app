@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:tool_bocs/features/trades/model/category_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
@@ -12,6 +13,38 @@ import 'package:tool_bocs/util/debouncer.dart';
 
 class TradeController extends ChangeNotifier {
   final TradeService _tradeService = TradeService();
+  List<int> _hiddenPostIds = [];
+
+  TradeController() {
+    _loadHiddenPosts();
+  }
+
+  Future<void> _loadHiddenPosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList('hidden_posts') ?? [];
+    _hiddenPostIds = list.map((e) => int.parse(e)).toList();
+    notifyListeners();
+  }
+
+  Future<void> hidePost(int postId) async {
+    if (!_hiddenPostIds.contains(postId)) {
+      _hiddenPostIds.add(postId);
+      notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setStringList('hidden_posts', _hiddenPostIds.map((id) => id.toString()).toList());
+    }
+  }
+
+  Future<void> clearHiddenPosts() async {
+    if (_hiddenPostIds.isNotEmpty) {
+      _hiddenPostIds.clear();
+      notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      prefs.remove('hidden_posts');
+    }
+  }
+
+
 
   List<CategoryModel> _categories = [];
   bool _isLoading = false;
@@ -20,6 +53,9 @@ class TradeController extends ChangeNotifier {
   bool _isSentLoading = false;
   bool _isMyTradesLoading = false;
   bool _isMarkingUser = false;
+  // Map to store user marks per trade response ID
+  final Map<int, String> _userMarks = {};
+
   String? _errorMessage;
   String? _categoryErrorMessage;
   bool _noSubscriptionError = false;
@@ -32,6 +68,15 @@ class TradeController extends ChangeNotifier {
   MyTradeStats? get myTradeStats => _myTradeStats;
   bool get isMyTradesLoading => _isMyTradesLoading;
   bool get isMarkingUser => _isMarkingUser;
+
+  // Getter for a stored user mark
+  String? getUserMark(int tradeResponseId) => _userMarks[tradeResponseId];
+
+  // Setter to store a user mark and notify listeners
+  void setUserMark(int tradeResponseId, String mark) {
+    _userMarks[tradeResponseId] = mark;
+    notifyListeners();
+  }
 
   // --- Filter State ---
   List<String> _selectedCategories = [];
@@ -285,6 +330,9 @@ class TradeController extends ChangeNotifier {
 
   List<PostModel> _applyFilters(List<PostModel> posts) {
     List<PostModel> filtered = List.from(posts);
+
+    // Filter out hidden posts locally
+    filtered = filtered.where((p) => !_hiddenPostIds.contains(p.id)).toList();
 
     // 0. Filter out completed trades (they shouldn't be publicly visible)
     filtered = filtered.where((p) => p.status.toLowerCase() != 'completed').toList();
