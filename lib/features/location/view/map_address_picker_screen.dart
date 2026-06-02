@@ -36,6 +36,14 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   String _selectedLabel = 'Home';
   String _orderFor = 'Myself';
   double _radius = 5.0; // km
+  String get formattedRadius {
+    if (_radius < 1) {
+      return '${(_radius * 1000).toInt()} meters';
+    }
+
+    return '${_radius.toStringAsFixed(1)} km';
+  }
+
   double _currentZoom = 13.2; // default zoom for 5km
 
   // State management for multistep flow
@@ -158,7 +166,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       body: Stack(
         children: [
           _buildMap(),
-          _buildMarkerOverlay(),
+          _buildRadiusText(),
+          // _buildMarkerOverlay(),
           _buildSearchOverlay(),
           _buildUseCurrentLocationFloating(),
           _buildRadiusSliderOverlay(),
@@ -168,10 +177,49 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     );
   }
 
+  Widget _buildRadiusText() {
+    // Calculate pixels per meter
+    final double metersPerPixel = 156543.03392 *
+        math.cos(_lastMapPosition.latitude * math.pi / 180) /
+        math.pow(2, _currentZoom);
+
+    final double radiusInPixels =
+        ((_radius * 1000) / metersPerPixel).clamp(0.0, 5000.0);
+
+    return IgnorePointer(
+      child: Padding(
+        padding: EdgeInsets.only(top: 70.h, bottom: 350.h),
+        child: Center(
+          child: Transform.translate(
+            offset: Offset(radiusInPixels / 2, 18.h),
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 6.w,
+                vertical: 2.h,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+              child: Text(
+                formattedRadius,
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildRadiusSliderOverlay() {
     if (_showFullForm) return const SizedBox.shrink();
     return Positioned(
-      bottom: 240.h,
+      bottom: 260.h,
       left: 16.w,
       right: 16.w,
       child: Container(
@@ -198,9 +246,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                       TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  _radius < 1
-                      ? '${(_radius * 1000).toInt()} meters'
-                      : '${_radius.toInt()} km',
+                  formattedRadius,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
@@ -250,9 +296,20 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
 
   Future<void> _updateCameraZoom(double radius) async {
     final GoogleMapController controller = await _controller.future;
-    double zoom = _getZoomForRadius(radius);
-    controller
-        .animateCamera(CameraUpdate.newLatLngZoom(_lastMapPosition, zoom));
+
+    final double zoom = _getZoomForRadius(radius);
+
+    // Extra zoom-out buffer so circle never cuts
+    final double adjustedZoom = zoom - 0.6;
+
+    controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: _lastMapPosition,
+          zoom: adjustedZoom,
+        ),
+      ),
+    );
   }
 
   Widget _buildMap() {
@@ -285,78 +342,121 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           strokeWidth: 2,
         ),
       },
+      polylines: {
+        Polyline(
+          polylineId: const PolylineId('radius_line'),
+          points: [
+            _lastMapPosition,
+            LatLng(
+              _lastMapPosition.latitude,
+              _lastMapPosition.longitude +
+                  (_radius /
+                      (111.32 *
+                          math.cos(
+                            _lastMapPosition.latitude * math.pi / 180,
+                          ))),
+            ),
+          ],
+          color: Colors.black,
+          width: 3,
+        ),
+      },
     );
   }
 
   Widget _buildMarkerOverlay() {
     if (_showFullForm) return const SizedBox.shrink();
 
-    // Calculate pixels per meter based on current zoom and latitude
-    double metersPerPixel = 156543.03392 * math.cos(_lastMapPosition.latitude * math.pi / 180) / math.pow(2, _currentZoom);
-    double radiusInPixels = (_radius * 1000) / metersPerPixel;
+    // Smooth radius calculation
+    final double metersPerPixel = 156543.03392 *
+        math.cos(_lastMapPosition.latitude * math.pi / 180) /
+        math.pow(2, _currentZoom);
+
+    final double radiusInPixels =
+        ((_radius * 1000) / metersPerPixel).clamp(0.0, 5000.0);
 
     return IgnorePointer(
       child: Padding(
         padding: EdgeInsets.only(top: 70.h, bottom: 350.h),
-        child: Align(
-          alignment: Alignment.center,
-          child: SizedBox(
-            width: 4.r,
-            height: 4.r,
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                // Tooltip text above center
-                Positioned(
-                  bottom: 4.r + 16.h,
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: context.textColor.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Text(
-                      'Move the map to adjust your location',
-                      style: TextStyle(
-                          color: context.reverseTextColor, fontSize: 10.sp),
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              // Tooltip
+              Positioned(
+                top: -55.h,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 6.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.textColor.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    'Move the map to adjust your location',
+                    style: TextStyle(
+                      color: context.reverseTextColor,
+                      fontSize: 10.sp,
                     ),
                   ),
                 ),
-                // Radius measurement line from center
-                Positioned(
-                  left: 2.r, // Start from center point
-                  top: 0,
-                  child: SizedBox(
-                    width: radiusInPixels,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        // The horizontal line
-                        Container(height: 3, color: Colors.black87),
-                        // The vertical tick at the end
-                        Positioned(
-                          right: 0,
-                          top: -4.h,
-                          child: Container(width: 3, height: 12.h, color: Colors.black87),
+              ),
+
+              // Radius Line
+              Transform.translate(
+                offset: Offset(radiusInPixels / 2, 0),
+                child: SizedBox(
+                  width: radiusInPixels,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      // Horizontal line
+                      Container(
+                        height: 2.5.h,
+                        width: radiusInPixels,
+                        color: Colors.black87,
+                      ),
+
+                      // Start Tick
+                      Positioned(
+                        left: 0,
+                        child: Container(
+                          width: 2.w,
+                          height: 14.h,
+                          color: Colors.black87,
                         ),
-                        // The vertical tick at the start
-                        Positioned(
-                          left: 0,
-                          top: -4.h,
-                          child: Container(width: 3, height: 12.h, color: Colors.black87),
+                      ),
+
+                      // End Tick
+                      Positioned(
+                        right: 0,
+                        child: Container(
+                          width: 2.w,
+                          height: 14.h,
+                          color: Colors.black87,
                         ),
-                        // The distance text
-                        Positioned(
-                          top: 12.h,
-                          left: 0,
-                          right: 0,
+                      ),
+
+                      // Radius Text
+                      Positioned(
+                        top: 12.h,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 4.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
                           child: Text(
-                            _radius < 1 
-                              ? '${(_radius * 1000).toInt()} meters' 
-                              : '${_radius.toStringAsFixed(_radius.truncateToDouble() == _radius ? 0 : 1)} km',
-                            textAlign: TextAlign.center,
+                            _radius < 1
+                                ? '${(_radius * 1000).toInt()} meters'
+                                : '${_radius.toStringAsFixed(_radius.truncateToDouble() == _radius ? 0 : 1)} km',
                             style: TextStyle(
                               color: Colors.black87,
                               fontSize: 11.sp,
@@ -364,12 +464,22 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              // Center Dot
+              Container(
+                width: 8.w,
+                height: 8.w,
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -585,10 +695,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                    widget.isPickOnly
-                        ? 'Confirm Location'
-                        : 'Save Location',
+                Text(widget.isPickOnly ? 'Confirm Location' : 'Save Location',
                     style: TextStyle(
                         color: context.onPrimaryColor,
                         fontSize: 16.sp,
@@ -965,4 +1072,3 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     }
   }
 }
-

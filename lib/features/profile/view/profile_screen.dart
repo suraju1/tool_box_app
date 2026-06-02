@@ -348,10 +348,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: const Icon(
+                icon: Icon(
                   Icons.arrow_back_ios_new,
                   size: 22,
-                  color: Colors.black,
+                  color: context.textColor,
                 ),
               ),
 
@@ -363,7 +363,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: context.textColor,
                     ),
                   ),
                 ),

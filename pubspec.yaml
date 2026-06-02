@@ -1,4 +1,5 @@
 name: tool_bocs
+
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0+3
@@ -48,6 +49,12 @@ dependencies:
   path_provider: ^2.1.5
   http: ^1.6.0
 
+  # Web‑compatible alternatives (added)
+  google_maps_flutter_web: ^0.5.0
+  # geolocator_web not required – web support is bundled with geolocator package
+  # image_picker is already web‑enabled; no separate package needed
+  # permission_handler includes its own web implementation; no separate package needed
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -67,7 +74,6 @@ flutter:
   uses-material-design: true
   generate: true
 
- 
   assets:
     - assets/
     - assets/icons/chat.svg
@@ -75,4 +81,3 @@ flutter:
     - assets/icons/take.svg
     - assets/icons/logout.svg
     - assets/icons/logout1.svg
-  

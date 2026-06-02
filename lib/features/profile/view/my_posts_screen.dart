@@ -132,12 +132,20 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSummaryCard('${controller.totalMyGivesCount}',
-                  'Total Gives', '🎁', Colors.red.shade100),
-              _buildSummaryCard('${controller.totalMyTakesCount}',
-                  'Total Takes', '📦', Colors.orange.shade100),
-              _buildSummaryCard('${controller.totalMyPostsCount}',
-                  'Total Posts', '📜', Colors.blue.shade100),
+              Expanded(
+                child: _buildSummaryCard('${controller.totalMyGivesCount}',
+                    'Total Gives', Icons.outbox_outlined, Colors.red),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildSummaryCard('${controller.totalMyTakesCount}',
+                    'Total Takes', Icons.move_to_inbox_outlined, Colors.orange),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildSummaryCard('${controller.totalMyPostsCount}',
+                    'Total Posts', Icons.handshake, Colors.blue),
+              ),
             ],
           ),
         ],
@@ -146,49 +154,32 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
   }
 
   Widget _buildSummaryCard(
-      String count, String label, String emoji, Color bgColor) {
+      String count, String label, IconData icon, Color color) {
     return Container(
-      width: 115.w,
-      padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 10.w),
+      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(15.r),
+        color: context.isDarkMode ? Colors.white10 : greyColor.withOpacity(0.1),
         border: Border.all(color: context.dividerColor),
-        boxShadow: context.isDarkMode
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
+        borderRadius: BorderRadius.circular(10.r),
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(emoji, style: TextStyle(fontSize: 16.sp)),
-              SizedBox(width: 5.w),
-              Text(
-                count,
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w700,
-                  color: context.primaryColor,
-                  fontFamily: FontFamily.openSans,
-                ),
-              ),
-            ],
+          Icon(icon, color: color, size: 28.sp),
+          Text(
+            count,
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w800,
+              color: context.primaryColor,
+              fontFamily: FontFamily.openSans,
+            ),
           ),
-          SizedBox(height: 5.h),
           Text(
             label,
             style: TextStyle(
-              fontSize: 12.sp,
-              color: context.subTextColor,
-              fontWeight: FontWeight.w600,
+              fontSize: 10.sp,
+              color: context.textColor,
+              fontWeight: FontWeight.w500,
               fontFamily: FontFamily.openSans,
             ),
           ),
@@ -440,14 +431,22 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                 ],
               ),
             ),
-            AspectRatio(
-              aspectRatio: 16 / 9,
+            Container(
+              width: double.infinity,
+              height: 150.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.r),
+                //overflow: Overflow.hidden,
+              ),
               child: imagePath.isNotEmpty
                   ? AppCachedImage(
                       imageUrl: imagePath,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                       width: double.infinity,
-                      radius: 0,
+                      height: double.infinity,
+                      radius: 12.r,
+                      errorWidget:
+                          Image.asset('assets/iphone.png', fit: BoxFit.cover),
                     )
                   : Container(
                       color: context.dividerColor,

@@ -173,7 +173,8 @@ class AuthController extends ChangeNotifier {
           _isSendingOtp = false;
           _statusMessage = null;
           notifyListeners();
-          await _signInWithCredential(credential, phoneNumber: '+91$phoneNumber');
+          await _signInWithCredential(credential,
+              phoneNumber: '+91$phoneNumber');
         },
         verificationFailed: (FirebaseAuthException e) {
           debugPrint(

@@ -76,12 +76,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                     );
                   },
                 ),
-                _buildOptionItem(
-                  icon: Icons.chat_bubble_outline,
-                  title: 'Request address from someone else',
-                  iconColor: Colors.green,
-                  onTap: () {},
-                ),
+
                 // _buildOptionItem(
                 //   image:
                 //       'assets/icons/zomato.png', // Fallback to icon if image missing

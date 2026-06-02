@@ -113,11 +113,11 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildSummaryCard('${stats?.totalTrades ?? 0}', 'Total Trades',
-                  '🎁', Colors.red.shade100),
+                  Icons.handshake, Colors.blue),
               _buildSummaryCard('$sentOffers', 'Sent Offers',
-                  '📦', Colors.orange.shade100),
+                  Icons.outbox_outlined, Colors.red),
               _buildSummaryCard('$receivedOffers', 'Received Offers',
-                  '🤝', Colors.blue.shade100),
+                  Icons.move_to_inbox_outlined, Colors.orange),
             ],
           ),
           SizedBox(height: 4.h),
@@ -127,7 +127,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
   }
 
   Widget _buildSummaryCard(
-      String count, String label, String emoji, Color bgColor) {
+      String count, String label, IconData icon, Color iconColor) {
     return Container(
       width: 115.w,
       padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 10.w),
@@ -150,7 +150,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(emoji, style: TextStyle(fontSize: 16.sp)),
+              Icon(icon, color: iconColor, size: 24.sp),
               SizedBox(width: 5.w),
               Text(
                 count,

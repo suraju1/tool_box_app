@@ -220,7 +220,7 @@ class _MySubscriptionStatusScreenState
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: subscription.status.toLowerCase() == 'active'
-                      ? const Color(0xFFE8F1FF)
+                      ? context.primaryColor.withOpacity(0.1)
                       : Colors.orange.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
@@ -279,7 +279,7 @@ class _MySubscriptionStatusScreenState
               Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF2F7FF),
+                  color: context.primaryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Icon(Icons.calendar_today,
@@ -394,7 +394,7 @@ class _MySubscriptionStatusScreenState
                 height: 8.h,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0F0F0),
+                  color: context.isDarkMode ? Colors.grey.withOpacity(0.3) : const Color(0xFFF0F0F0),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
               ),
@@ -425,8 +425,8 @@ class _MySubscriptionStatusScreenState
         children: [
           Container(
             padding: EdgeInsets.all(4.w),
-            decoration: const BoxDecoration(
-              color: Color(0xFFE8F1FF),
+            decoration: BoxDecoration(
+              color: context.primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.check, color: context.primaryColor, size: 14.sp),
@@ -470,7 +470,7 @@ class _MySubscriptionStatusScreenState
         child: Text(
           label,
           style: TextStyle(
-            color: isPrimary ? Colors.white : context.textColor,
+            color: isPrimary ? (context.isDarkMode ? Colors.black : Colors.white) : context.textColor,
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
           ),

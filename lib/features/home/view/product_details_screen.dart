@@ -138,26 +138,40 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 _buildOwnerProfile(post),
                 SizedBox(height: 10.h),
                 if (images.isNotEmpty)
-                  _buildImageCarousel(images)
+                  _buildImageCarousel(images, post.itemCategory)
                 else
-                  Container(
-                    height: 320.h,
-                    width: double.infinity,
-                    color: Colors.grey[200],
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 50.sp,
-                      color: Colors.grey,
-                    ),
+                  Stack(
+                    children: [
+                      Container(
+                        height: 320.h,
+                        width: double.infinity,
+                        color: Colors.grey[200],
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 50.sp,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      Positioned(
+                        top: 10.h,
+                        left: 20.w,
+                        child: _buildCategoryTag(post.itemCategory),
+                      ),
+                    ],
                   ),
                 Padding(
                   padding: EdgeInsets.all(10.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [_buildCategoryTag(post.itemCategory)],
+                      Text(
+                        post.itemName,
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w800,
+                          fontFamily: FontFamily.openSans,
+                          color: context.textColor,
+                        ),
                       ),
                       SizedBox(height: 15.h),
                       Text(
@@ -227,133 +241,157 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               post.itemSource,
                               Icons.source_outlined,
                             ),
-                            if (_isPriceReturn(post)) ...[
-                              SizedBox(height: 20.h),
-                              _buildReturnHeader(post),
-                              SizedBox(height: 8.h),
-                              _buildDetailRow(
-                                'Price Range',
-                                '₹${post.priceMin} - ₹${post.priceMax}',
-                                Icons.monetization_on_outlined,
-                                true,
-                              ),
-                            ] else if (_hasReturnItemDetails(post)) ...[
-                              SizedBox(height: 20.h),
-                              _buildReturnHeader(post),
-                              SizedBox(height: 8.h),
-                              if (post.returnItemImages.isNotEmpty) ...[
-                                SizedBox(
-                                  height: 120.h,
-                                  child: ListView.separated(
-                                    scrollDirection: Axis.horizontal,
-                                    physics: const BouncingScrollPhysics(),
-                                    itemCount: post.returnItemImages.length,
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 4.w),
-                                    separatorBuilder: (_, __) =>
-                                        SizedBox(width: 12.w),
-                                    itemBuilder: (context, index) {
-                                      final imageUrl = post.returnItemImages[index];
-                                      return GestureDetector(
-                                        onTap: () => _openReturnImagePreview(
-                                          post.returnItemImages,
-                                          index,
-                                        ),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(12.r),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.05),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          child: AppCachedImage(
-                                            imageUrl: imageUrl,
-                                            height: 120.h,
-                                            width: 120.h,
-                                            fit: BoxFit.cover,
-                                            radius: 12.r,
-                                            errorWidget: Container(
-                                              height: 120.h,
-                                              width: 120.h,
-                                              decoration: BoxDecoration(
-                                                color: context.isDarkMode
-                                                    ? Colors.white10
-                                                    : Colors.grey[100],
-                                                borderRadius:
-                                                    BorderRadius.circular(12.r),
-                                              ),
-                                              child: Icon(
-                                                Icons
-                                                    .image_not_supported_outlined,
-                                                color: Colors.grey,
-                                                size: 30.sp,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                SizedBox(height: 15.h),
-                              ],
-                              if (post.returnItemName != null)
-                                _buildDetailRow(
-                                  'Item Name',
-                                  post.returnItemName!,
-                                ),
-                              if (post.returnItemCondition != null) ...[
-                                SizedBox(height: 8.h),
-                                _buildDetailRow(
-                                  'Condition',
-                                  post.returnItemCondition!,
-                                ),
-                              ],
-                              if (post.returnItemSource != null) ...[
-                                SizedBox(height: 8.h),
-                                _buildDetailRow(
-                                  'Item Source',
-                                  post.returnItemSource!,
-                                ),
-                              ],
-                              if (post.returnItemDescription != null &&
-                                  post.returnItemDescription!.isNotEmpty) ...[
-                                SizedBox(height: 8.h),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Description',
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: context.subTextColor,
-                                        fontFamily: FontFamily.openSans,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4.h),
-                                    Text(
-                                      post.returnItemDescription!,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: context.textColor,
-                                        fontFamily: FontFamily.openSans,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ],
                           ],
                         ),
                       ),
+                      if (_isPriceReturn(post) || _hasReturnItemDetails(post)) ...[
+                        SizedBox(height: 15.h),
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(10.w),
+                          decoration: BoxDecoration(
+                            color: context.surfaceColor,
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(color: context.dividerColor),
+                            boxShadow: context.isDarkMode
+                                ? []
+                                : [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (_isPriceReturn(post)) ...[
+                                _buildReturnHeader(post),
+                                SizedBox(height: 8.h),
+                                _buildDetailRow(
+                                  'Price Range',
+                                  '₹${post.priceMin} - ₹${post.priceMax}',
+                                  Icons.monetization_on_outlined,
+                                  true,
+                                ),
+                              ] else if (_hasReturnItemDetails(post)) ...[
+                                _buildReturnHeader(post),
+                                SizedBox(height: 8.h),
+                                if (post.returnItemImages.isNotEmpty) ...[
+                                  SizedBox(
+                                    height: 120.h,
+                                    child: ListView.separated(
+                                      scrollDirection: Axis.horizontal,
+                                      physics: const BouncingScrollPhysics(),
+                                      itemCount: post.returnItemImages.length,
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 4.w),
+                                      separatorBuilder: (_, __) =>
+                                          SizedBox(width: 12.w),
+                                      itemBuilder: (context, index) {
+                                        final imageUrl = post.returnItemImages[index];
+                                        return GestureDetector(
+                                          onTap: () => _openReturnImagePreview(
+                                            post.returnItemImages,
+                                            index,
+                                          ),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(12.r),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.05),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: AppCachedImage(
+                                              imageUrl: imageUrl,
+                                              height: 120.h,
+                                              width: 120.h,
+                                              fit: BoxFit.cover,
+                                              radius: 12.r,
+                                              errorWidget: Container(
+                                                height: 120.h,
+                                                width: 120.h,
+                                                decoration: BoxDecoration(
+                                                  color: context.isDarkMode
+                                                      ? Colors.white10
+                                                      : Colors.grey[100],
+                                                  borderRadius:
+                                                      BorderRadius.circular(12.r),
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .image_not_supported_outlined,
+                                                  color: Colors.grey,
+                                                  size: 30.sp,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(height: 15.h),
+                                ],
+                                if (post.returnItemName != null)
+                                  _buildDetailRow(
+                                    'Item Name',
+                                    post.returnItemName!,
+                                  ),
+                                if (post.returnItemCondition != null) ...[
+                                  SizedBox(height: 8.h),
+                                  _buildDetailRow(
+                                    'Condition',
+                                    post.returnItemCondition!,
+                                  ),
+                                ],
+                                if (post.returnItemSource != null) ...[
+                                  SizedBox(height: 8.h),
+                                  _buildDetailRow(
+                                    'Item Source',
+                                    post.returnItemSource!,
+                                  ),
+                                ],
+                                if (post.returnItemDescription != null &&
+                                    post.returnItemDescription!.isNotEmpty) ...[
+                                  SizedBox(height: 8.h),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Description',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: context.subTextColor,
+                                          fontFamily: FontFamily.openSans,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4.h),
+                                      Text(
+                                        post.returnItemDescription!,
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: context.textColor,
+                                          fontFamily: FontFamily.openSans,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                       SizedBox(height: 20.h),
                     ],
                   ),
@@ -465,7 +503,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildImageCarousel(List<String> images) {
+  Widget _buildImageCarousel(List<String> images, String category) {
     return Column(
       children: [
         Container(
@@ -488,7 +526,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     borderRadius: BorderRadius.circular(20.r),
                     child: AppCachedImage(
                       imageUrl: imagePath,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                       width: 1.sw - 40.w,
                       height: 320.h,
                       radius: 20.r,
@@ -524,6 +562,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     }),
                   ),
                 ),
+              Positioned(
+                top: 10.h,
+                left: 10.w,
+                child: _buildCategoryTag(category),
+              ),
             ],
           ),
         ),
@@ -533,15 +576,29 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   Widget _buildCategoryTag(String label) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: context.primaryColor,
-        borderRadius: BorderRadius.circular(30.r),
+        color: label.toLowerCase().contains('goods')
+            ? Colors.blue.shade700
+            : label.toLowerCase().contains('services')
+                ? Colors.green.shade700
+                : label.toLowerCase().contains('money')
+                    ? Colors.orange.shade700
+                    : context.isDarkMode
+                        ? Colors.white
+                        : Colors.black.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: context.onPrimaryColor,
+          color: (label.toLowerCase().contains('goods') ||
+                  label.toLowerCase().contains('services') ||
+                  label.toLowerCase().contains('money'))
+              ? Colors.white
+              : context.isDarkMode
+                  ? Colors.black
+                  : Colors.white,
           fontSize: 12.sp,
           fontWeight: FontWeight.w700,
           fontFamily: FontFamily.openSans,

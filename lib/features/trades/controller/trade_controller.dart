@@ -31,7 +31,8 @@ class TradeController extends ChangeNotifier {
       _hiddenPostIds.add(postId);
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
-      prefs.setStringList('hidden_posts', _hiddenPostIds.map((id) => id.toString()).toList());
+      prefs.setStringList(
+          'hidden_posts', _hiddenPostIds.map((id) => id.toString()).toList());
     }
   }
 
@@ -43,8 +44,6 @@ class TradeController extends ChangeNotifier {
       prefs.remove('hidden_posts');
     }
   }
-
-
 
   List<CategoryModel> _categories = [];
   bool _isLoading = false;
@@ -335,7 +334,8 @@ class TradeController extends ChangeNotifier {
     filtered = filtered.where((p) => !_hiddenPostIds.contains(p.id)).toList();
 
     // 0. Filter out completed trades (they shouldn't be publicly visible)
-    filtered = filtered.where((p) => p.status.toLowerCase() != 'completed').toList();
+    filtered =
+        filtered.where((p) => p.status.toLowerCase() != 'completed').toList();
 
     // 1. Filter by Post Type (only for Home posts usually, but safe here)
     if (_selectedPostType != 'all') {

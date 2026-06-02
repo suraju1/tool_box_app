@@ -22,6 +22,7 @@ import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -437,6 +438,37 @@ class _HomeScreenState extends State<HomeScreen> {
     final isOwner = authController.currentUser?.id == post.userId;
     final actionLabel = isOwner ? 'Offers' : (isTake ? 'Give' : 'Take');
 
+    // Format exchange details dynamically
+    String getExchangeText() {
+      final type = post.returnType.toLowerCase().trim();
+      final min = post.priceMin;
+      final max = post.priceMax;
+      final name = post.returnItemName ?? '';
+      final category = post.returnItemCategory ?? '';
+
+      if (type == 'price' || type == 'money' || min != null) {
+        if (min != null) {
+          if (max != null && max != min) {
+            return 'In exchange for: ₹${min.toStringAsFixed(0)} - ₹${max.toStringAsFixed(0)} (Money)';
+          }
+          return 'In exchange for: ₹${min.toStringAsFixed(0)} (Money)';
+        }
+        return 'In exchange for: Money';
+      } else if (type == 'free') {
+        return 'In exchange for: Free';
+      } else {
+        if (name.isNotEmpty) {
+          return category.isNotEmpty
+              ? 'In exchange for: $name ($category)'
+              : 'In exchange for: $name';
+        }
+        if (category.isNotEmpty) {
+          return 'In exchange for: ($category)';
+        }
+        return 'In exchange for: -';
+      }
+    }
+
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
@@ -491,27 +523,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            SizedBox(height: 1.h),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.label_outline,
-                                  color: Colors.grey,
-                                  size: 13.sp,
-                                ),
-                                SizedBox(width: 4.w),
-                                Text(
-                                  post.itemCategory,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 10.sp,
-                                    color: Colors.grey,
-                                    fontFamily: FontFamily.openSans,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
@@ -546,17 +557,70 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.blue.withOpacity(
                   0.1,
                 ), // Fixed withValues to withOpacity for compatibility if needed, or keeping withValues if on new Flutter
-                child: imagePath.isNotEmpty
-                    ? AppCachedImage(
-                        imageUrl: imagePath,
-                        fit: BoxFit.contain,
-                        width: 1.sw - 44.w,
-                        height: (1.sw - 44.w) * 9 / 14,
-                        radius: 0,
-                        errorWidget:
-                            Icon(Icons.image, size: 50.sp, color: Colors.grey),
-                      )
-                    : Icon(Icons.image, size: 50.sp, color: Colors.grey),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    imagePath.isNotEmpty
+                        ? AppCachedImage(
+                            imageUrl: imagePath,
+                            fit: BoxFit.contain,
+                            width: 1.sw - 44.w,
+                            height: (1.sw - 44.w) * 9 / 14,
+                            radius: 0,
+                            errorWidget: Icon(Icons.image,
+                                size: 50.sp, color: Colors.grey),
+                          )
+                        : Icon(Icons.image, size: 50.sp, color: Colors.grey),
+                    Positioned(
+                      top: 8.h,
+                      left: 8.w,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 4.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              post.itemCategory.toLowerCase().contains('goods')
+                                  ? Colors.blue.shade700
+                                  : post.itemCategory
+                                          .toLowerCase()
+                                          .contains('services')
+                                      ? Colors.green.shade700
+                                      : post.itemCategory
+                                              .toLowerCase()
+                                              .contains('money')
+                                          ? Colors.orange.shade700
+                                          : context.isDarkMode
+                                              ? Colors.white
+                                              : Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Text(
+                          post.itemCategory,
+                          style: TextStyle(
+                            color: (post.itemCategory
+                                        .toLowerCase()
+                                        .contains('goods') ||
+                                    post.itemCategory
+                                        .toLowerCase()
+                                        .contains('services') ||
+                                    post.itemCategory
+                                        .toLowerCase()
+                                        .contains('money'))
+                                ? Colors.white
+                                : context.isDarkMode
+                                    ? Colors.black
+                                    : Colors.white,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Padding(
@@ -565,89 +629,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10.r),
-                              child: post.userImage != null &&
-                                      post.userImage!.isNotEmpty
-                                  ? AppCachedImage(
-                                      imageUrl: post.userImage!,
-                                      userName: post.userName,
-                                      width: 20.r,
-                                      height: 20.r,
-                                      fit: BoxFit.cover,
-                                      radius: 10.r,
-                                    )
-                                  : _buildLetterPlaceholder(
-                                      post.userName, 20.r),
-                            ),
-                            SizedBox(width: 6.w),
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      post.userName,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 12.sp,
-                                        color: context.textColor,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  Text(
-                                    "• ${DateUtil.formatTimeAgo(post.createdAt)}",
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // dont show the rating
-                        // SizedBox(height: 4.h),
-                        // Row(
-                        //   children: [
-                        //     Text(
-                        //       "${post.userRating ?? 4.8} ", // Real rating or fallback
-                        //       style: TextStyle(
-                        //         fontWeight: FontWeight.bold,
-                        //         fontSize: 12.sp,
-                        //         color: context.textColor,
-                        //       ),
-                        //     ),
-                        //     SizedBox(width: 4.w),
-                        //     ...List.generate(
-                        //       5,
-                        //       (index) => Icon(
-                        //         Icons.star,
-                        //         color: amberColor,
-                        //         size: 13.sp,
-                        //       ),
-                        //     ),
-                        //     SizedBox(width: 4.w),
-                        //     Text(
-                        //       "(Person rating)",
-                        //       style: TextStyle(
-                        //         color: Colors.grey,
-                        //         fontSize: 11.sp,
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-                      ],
+                    child: Text(
+                      getExchangeText(),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  SizedBox(width: 8.w),
                   InkWell(
                     onTap: () {
                       if (isOwner) {
@@ -769,7 +763,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => UserProfileScreen(userId: post.userId.toString()),
+                builder: (context) =>
+                    UserProfileScreen(userId: post.userId.toString()),
               ),
             );
             break;
@@ -778,26 +773,32 @@ class _HomeScreenState extends State<HomeScreen> {
             if (success.success && mounted) {
               ToastService.showSuccessToast(context, 'User saved successfully');
             } else if (mounted) {
-              ToastService.showErrorToast(context, success.message ?? 'Error saving user');
+              ToastService.showErrorToast(
+                  context, success.message ?? 'Error saving user');
             }
             break;
           case 'share':
-            Share.share('Check out ${post.userName}\'s trade: ${post.itemName}\nDownload the app to see more!');
+            Share.share(
+                'Check out ${post.userName}\'s trade: ${post.itemName}\nDownload the app to see more!');
             break;
           case 'hide':
             context.read<TradeController>().hidePost(post.id);
             if (mounted) {
               ToastService.showSuccessToast(context, 'Post hidden');
-              context.read<TradeController>().fetchHomePosts(); // Refresh list to remove hidden post
+              context
+                  .read<TradeController>()
+                  .fetchHomePosts(); // Refresh list to remove hidden post
             }
             break;
           case 'block':
             final success = await profileController.blockUser(post.userId);
             if (success.success && mounted) {
-              ToastService.showSuccessToast(context, 'User blocked successfully');
+              ToastService.showSuccessToast(
+                  context, 'User blocked successfully');
               context.read<TradeController>().fetchHomePosts(); // Refresh feed
             } else if (mounted) {
-              ToastService.showErrorToast(context, success.message ?? 'Error blocking user');
+              ToastService.showErrorToast(
+                  context, success.message ?? 'Error blocking user');
             }
             break;
         }
@@ -829,6 +830,87 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
         ];
       },
+    );
+  }
+}
+
+class _ExpandableDescription extends StatefulWidget {
+  final String text;
+  const _ExpandableDescription({Key? key, required this.text})
+      : super(key: key);
+
+  @override
+  State<_ExpandableDescription> createState() => _ExpandableDescriptionState();
+}
+
+class _ExpandableDescriptionState extends State<_ExpandableDescription> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(left: 10.w, right: 10.w, top: 10.h),
+      child: LayoutBuilder(builder: (context, size) {
+        final span = TextSpan(
+          text: widget.text,
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: context.textColor,
+            fontFamily: FontFamily.openSans,
+          ),
+        );
+        final tp = TextPainter(
+          text: span,
+          maxLines: 2,
+          textDirection: TextDirection.ltr,
+        );
+        tp.layout(maxWidth: size.maxWidth);
+
+        if (tp.didExceedMaxLines) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.text,
+                maxLines: isExpanded ? null : 2,
+                overflow: isExpanded ? null : TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: context.textColor,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isExpanded = !isExpanded;
+                  });
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(top: 4.h, bottom: 2.h),
+                  child: Text(
+                    isExpanded ? "Show less" : "Read more",
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: context.primaryColor,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        } else {
+          return Text(
+            widget.text,
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: context.textColor,
+              fontFamily: FontFamily.openSans,
+            ),
+          );
+        }
+      }),
     );
   }
 }

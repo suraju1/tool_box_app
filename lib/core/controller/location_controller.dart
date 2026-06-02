@@ -19,6 +19,20 @@ class LocationController extends ChangeNotifier {
   static const String _defaultAddress = "Pune, Maharashtra, India";
   static const String _defaultCity = "Pune";
 
+  LocationController() {
+    _loadFromCache();
+  }
+
+  void _loadFromCache() {
+    final cached = LocalLocationService.loadLastSelectedLocation();
+    if (cached != null && cached['lat'] != null && cached['lng'] != null) {
+      _latitude = double.tryParse(cached['lat']!);
+      _longitude = double.tryParse(cached['lng']!);
+      _address = cached['address'];
+      _city = cached['city'];
+    }
+  }
+
   // Getters
   double? get latitude => _latitude;
   double? get longitude => _longitude;

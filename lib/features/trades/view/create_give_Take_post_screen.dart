@@ -217,8 +217,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   children: [
                     _buildLocationSection(),
                     SizedBox(height: 20.h),
-                    _buildTradeDetailsSection(),
-                    SizedBox(height: 20.h),
+                    // _buildTradeDetailsSection(),
+                    // SizedBox(height: 20.h),
                   ],
                 ),
               ),
@@ -241,17 +241,13 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                           ),
                         ],
                 ),
-                child: Column(
-                  children: [
-                    _buildItemDetailsSection(),
-                    // SizedBox(height: 20.h),
-                    // _buildReturnSection(),
-                    // SizedBox(height: 20.h),
-                    // _buildWalletAndNotificationSection(),
-                    // SizedBox(height: 30.h),
-                    // _buildPostButton(),
-                  ],
-                ),
+                child: _buildItemDetailsSection(),
+                // SizedBox(height: 20.h),
+                // _buildReturnSection(),
+                // SizedBox(height: 20.h),
+                // _buildWalletAndNotificationSection(),
+                // SizedBox(height: 30.h),
+                // _buildPostButton(),
               ),
               SizedBox(height: 8.h),
               //return section
@@ -284,7 +280,35 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                 ),
               ),
               SizedBox(height: 8.h),
-              //wallet section
+              // Trade Details Section
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 8.h),
+                padding: EdgeInsets.symmetric(
+                  vertical: 12.h,
+                  horizontal: 12.w,
+                ),
+                decoration: BoxDecoration(
+                  color: context.surfaceColor,
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(color: context.dividerColor),
+                  boxShadow: context.isDarkMode
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: greyColorWithOpacity0_4,
+                            blurRadius: 5,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                ),
+                child: Column(
+                  children: [
+                    _buildTradeDetailsSection(),
+                  ],
+                ),
+              ),
+
+//wallet section
               Container(
                 margin: EdgeInsets.symmetric(vertical: 8.h),
                 padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
@@ -326,7 +350,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Location',
+          'Trading Point',
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
@@ -335,7 +359,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           ),
         ),
         SizedBox(height: 12.h),
-        Text('Pickup Area', style: _labelStyle()),
+        Text('Select Area', style: _labelStyle()),
         SizedBox(height: 8.h),
         InkWell(
           onTap: () {
@@ -381,7 +405,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Area Diameter', style: _labelStyle()),
+            Text('Select Area Diameter', style: _labelStyle()),
             Text('${_diameter.toInt()} km', style: _labelStyle()),
           ],
         ),
@@ -1082,7 +1106,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
 
     // Validate Category
     if (_selectedCategory == null) {
-      ToastService.showErrorToast(context, 'Please select a category for the item');
+      ToastService.showErrorToast(
+          context, 'Please select a category for the item');
       isValid = false;
     }
 
@@ -1102,7 +1127,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     // Validate Return Item Details (if applicable)
     if (!_isPriceSelected) {
       if (_selectedReturnCategory == null) {
-        ToastService.showErrorToast(context, 'Please select a category for the return item');
+        ToastService.showErrorToast(
+            context, 'Please select a category for the return item');
         isValid = false;
       }
       if (_returnItemImages.isEmpty) {
@@ -1320,7 +1346,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     );
   }
 
-  Widget _buildCategoryToggleSelection(CategoryModel? currentValue, Function(CategoryModel) onSelected) {
+  Widget _buildCategoryToggleSelection(
+      CategoryModel? currentValue, Function(CategoryModel) onSelected) {
     return Consumer<TradeController>(
       builder: (context, tradeController, child) {
         Widget buildBtn(String label) {
@@ -1345,16 +1372,21 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                 height: 45.h,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: isSelected ? context.primaryColor : context.surfaceColor,
+                  color:
+                      isSelected ? context.primaryColor : context.surfaceColor,
                   borderRadius: BorderRadius.circular(10.r),
                   border: Border.all(
-                    color: isSelected ? context.primaryColor : context.dividerColor,
+                    color: isSelected
+                        ? context.primaryColor
+                        : context.dividerColor,
                   ),
                 ),
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: isSelected ? context.onPrimaryColor : context.subTextColor,
+                    color: isSelected
+                        ? context.onPrimaryColor
+                        : context.subTextColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 13.sp,
                   ),
@@ -1402,30 +1434,28 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
 
   Widget _buildConditionChip(String label) {
     bool isSelected = _selectedCondition == label;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedCondition = label),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: isSelected ? context.primaryColor : context.surfaceColor,
-          borderRadius: BorderRadius.circular(25.r),
-          border: Border.all(
-              color: isSelected ? context.primaryColor : context.dividerColor),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                      color: context.primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4))
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? context.onPrimaryColor : context.subTextColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 13.sp,
+
+    return Flexible(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedCondition = label),
+        child: Container(
+          height: 45.h,
+          width: 90.w,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected ? context.primaryColor : context.surfaceColor,
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(
+              color: isSelected ? context.primaryColor : context.dividerColor,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? context.onPrimaryColor : context.subTextColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 13.sp,
+            ),
           ),
         ),
       ),

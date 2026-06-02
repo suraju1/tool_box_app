@@ -415,10 +415,10 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       givingImageUrl = (post?.itemImages != null && post!.itemImages.isNotEmpty)
           ? post.itemImages.first
           : null;
-      takingImageUrl = (post?.returnItemImages != null &&
-              post!.returnItemImages.isNotEmpty)
-          ? post.returnItemImages.first
-          : null;
+      takingImageUrl =
+          (post?.returnItemImages != null && post!.returnItemImages.isNotEmpty)
+              ? post.returnItemImages.first
+              : null;
       isTakingMoney = post?.returnType?.toLowerCase() == 'price';
     } else {
       takingText = "- Taking ${post?.itemName ?? 'NA'}";
@@ -426,10 +426,10 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       takingImageUrl = (post?.itemImages != null && post!.itemImages.isNotEmpty)
           ? post.itemImages.first
           : null;
-      givingImageUrl = (post?.returnItemImages != null &&
-              post!.returnItemImages.isNotEmpty)
-          ? post.returnItemImages.first
-          : null;
+      givingImageUrl =
+          (post?.returnItemImages != null && post!.returnItemImages.isNotEmpty)
+              ? post.returnItemImages.first
+              : null;
       isGivingMoney = post?.returnType?.toLowerCase() == 'price';
     }
 
@@ -440,8 +440,8 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
     Widget buildImageBox(String? url, bool isMoney) {
       if (isMoney) {
         return Container(
-          width: 70.w,
-          height: 70.h,
+          width: 120.w,
+          height: 120.h,
           decoration: BoxDecoration(
             color: context.primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8.r),
@@ -452,8 +452,8 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
         );
       }
       return Container(
-        width: 70.w,
-        height: 70.h,
+        width: 120.w,
+        height: 120.h,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.r),
           border: Border.all(color: context.dividerColor),
@@ -484,108 +484,99 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                 ),
               ],
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            isGivePost ? 'GIVER' : 'TAKER',
-            style: TextStyle(
-              color: context.primaryColor,
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            post?.userName ?? '-',
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w800,
-              fontFamily: FontFamily.openSans,
-              color: context.textColor,
-            ),
-          ),
-          SizedBox(height: 16.h),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      givingText,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: FontFamily.openSans,
-                        color: context.textColor,
-                      ),
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      tradeTypeFormatted,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    SizedBox(height: 24.h),
-                    Text(
-                      takingText,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: FontFamily.openSans,
-                        color: context.textColor,
-                      ),
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      tradeTypeFormatted,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Column(
-                children: [
-                  buildImageBox(givingImageUrl, isGivingMoney),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.h),
-                    child: Icon(Icons.swap_vert,
-                        color: context.primaryColor, size: 28.sp),
-                  ),
-                  buildImageBox(takingImageUrl, isTakingMoney),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.location_on,
-                    color: context.subTextColor, size: 14.sp),
-                SizedBox(width: 4.w),
                 Text(
-                  '${post?.distanceKm?.toStringAsFixed(1) ?? '0.4'} km away',
+                  isGivePost ? 'GIVER' : 'TAKER',
                   style: TextStyle(
-                    color: context.subTextColor,
+                    color: context.primaryColor,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  post?.userName ?? '-',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: FontFamily.openSans,
+                    color: context.textColor,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  "${post?.userName ?? '-'}'s ${isGivePost ? 'Giving' : 'Taking'}",
+                  style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
+                    color: context.subTextColor,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  post?.itemName ?? '-',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: FontFamily.openSans,
+                    color: context.textColor,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Offer Type : ${post?.tradeType ?? '-'}',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: context.subTextColor,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'Category : ${post?.itemCategory ?? '-'}',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: context.subTextColor,
                   ),
                 ),
               ],
             ),
+          ),
+          SizedBox(width: 12.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              buildImageBox(
+                (post?.itemImages != null && post!.itemImages.isNotEmpty)
+                    ? post.itemImages.first
+                    : null,
+                false,
+              ),
+              SizedBox(height: 8.h),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.location_on,
+                      color: context.subTextColor, size: 14.sp),
+                  SizedBox(width: 4.w),
+                  Text(
+                    '${post?.distanceKm?.toStringAsFixed(1) ?? '0.4'} km away',
+                    style: TextStyle(
+                      color: context.subTextColor,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
@@ -707,30 +698,114 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
   }
 
   Widget _buildItemPreviewCard(dynamic post) {
-    return Container(
-      margin: EdgeInsets.only(top: 16.h),
-      alignment: Alignment.centerRight,
-      child: InkWell(
-        onTap: () => _showReturnDetailsSheet(context, post),
-        borderRadius: BorderRadius.circular(8.r),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'See Details',
-                style: TextStyle(
-                  color: context.primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.sp,
-                  decoration: TextDecoration.underline,
+    final bool isMoney = post?.returnType?.toLowerCase() == 'price';
+    final String? returnImageUrl =
+        (post?.returnItemImages != null && post!.returnItemImages.isNotEmpty)
+            ? post.returnItemImages.first
+            : null;
+    final String returnName = isMoney
+        ? 'Money'
+        : (post?.returnItemName ?? '-');
+    final String returnCategory = isMoney
+        ? '₹${post?.priceMin?.toStringAsFixed(0) ?? '0'} - ₹${post?.priceMax?.toStringAsFixed(0) ?? '0'}'
+        : (post?.returnItemCategory ?? '-');
+
+    return GestureDetector(
+      onTap: () => _showReturnDetailsSheet(context, post),
+      child: Container(
+        margin: EdgeInsets.only(top: 12.h),
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: context.isDarkMode
+              ? Colors.white.withOpacity(0.08)
+              : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Row(
+          children: [
+            // Return item image or money icon
+            if (isMoney)
+              Container(
+                width: 45.w,
+                height: 45.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.r),
+                  color: context.primaryColor.withOpacity(0.1),
+                  border: Border.all(color: context.primaryColor),
                 ),
+                child: Icon(Icons.payments_outlined,
+                    color: context.primaryColor, size: 22.sp),
+              )
+            else
+              Container(
+                width: 45.w,
+                height: 45.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.r),
+                  color: context.surfaceColor,
+                  border: Border.all(color: context.dividerColor),
+                  image: returnImageUrl != null
+                      ? DecorationImage(
+                          image: NetworkImage(
+                              AppCachedImage.getFormattedUrl(returnImageUrl)),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: returnImageUrl == null
+                    ? Icon(Icons.image_outlined,
+                        color: context.subTextColor, size: 20.sp)
+                    : null,
               ),
-              SizedBox(width: 4.w),
-              Icon(Icons.arrow_forward_ios, color: context.primaryColor, size: 12.sp),
-            ],
-          ),
+            SizedBox(width: 10.w),
+            // Name and category
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    returnName,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: context.textColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    returnCategory,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: context.subTextColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 8.w),
+            // See details link
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'See Details',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: context.subTextColor,
+                  ),
+                ),
+                SizedBox(width: 2.w),
+                Icon(Icons.arrow_forward_ios,
+                    color: context.subTextColor, size: 10.sp),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -738,7 +813,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
 
   void _showReturnDetailsSheet(BuildContext context, dynamic post) {
     if (post == null) return;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -774,11 +849,14 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             ),
             SizedBox(height: 20.h),
             if (post.returnType?.toLowerCase() == 'price') ...[
-              _buildInfoRow('Price Range', '₹${post.priceMin?.toStringAsFixed(2) ?? '0'} - ₹${post.priceMax?.toStringAsFixed(2) ?? '0'}'),
+              _buildInfoRow('Price Range',
+                  '₹${post.priceMin?.toStringAsFixed(2) ?? '0'} - ₹${post.priceMax?.toStringAsFixed(2) ?? '0'}'),
               SizedBox(height: 12.h),
-              _buildInfoRow('Negotiable', post.isNegotiable == true ? 'Yes' : 'No'),
+              _buildInfoRow(
+                  'Negotiable', post.isNegotiable == true ? 'Yes' : 'No'),
             ] else ...[
-              if (post.returnItemImages != null && post.returnItemImages.isNotEmpty)
+              if (post.returnItemImages != null &&
+                  post.returnItemImages.isNotEmpty)
                 Center(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12.r),
@@ -798,7 +876,8 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
               _buildInfoRow('Condition', post.returnItemCondition ?? 'NA'),
               SizedBox(height: 12.h),
               _buildInfoRow('Trade Type', post.tradeType ?? 'NA'),
-              if (post.returnItemDescription != null && post.returnItemDescription.isNotEmpty) ...[
+              if (post.returnItemDescription != null &&
+                  post.returnItemDescription.isNotEmpty) ...[
                 SizedBox(height: 16.h),
                 Text(
                   'Description',
@@ -825,10 +904,14 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.primaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.r)),
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                 ),
-                child: Text('Close', style: TextStyle(color: context.onPrimaryColor, fontWeight: FontWeight.bold)),
+                child: Text('Close',
+                    style: TextStyle(
+                        color: context.onPrimaryColor,
+                        fontWeight: FontWeight.bold)),
               ),
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom),

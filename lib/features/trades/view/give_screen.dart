@@ -15,6 +15,10 @@ import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/l10n/generated/app_localizations.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 
 class GiveScreen extends StatefulWidget {
   const GiveScreen({super.key});
@@ -107,6 +111,8 @@ class _GiveScreenState extends State<GiveScreen> {
                           child: tradeController.takePosts.isEmpty &&
                                   !tradeController.isTakeLoading
                               ? ListView(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
                                   children: [
                                     SizedBox(height: 100.h),
                                     Center(
@@ -128,6 +134,8 @@ class _GiveScreenState extends State<GiveScreen> {
                                   ],
                                 )
                               : ListView.builder(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
                                   controller: _scrollController,
                                   padding:
                                       EdgeInsets.fromLTRB(8.w, 4.h, 8.w, 100.h),
@@ -257,7 +265,8 @@ class _GiveScreenState extends State<GiveScreen> {
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-                      hintText: AppLocalizations.of(context)!.searchWhatYouWantToGive,
+                      hintText:
+                          AppLocalizations.of(context)!.searchWhatYouWantToGive,
                       hintStyle: TextStyle(
                           color: context.subTextColor, fontSize: 14.sp),
                       prefixIcon: Icon(Icons.search,
@@ -326,7 +335,8 @@ class _GiveScreenState extends State<GiveScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.help_outline, size: 18.sp, color: context.primaryColor),
+                        Icon(Icons.help_outline,
+                            size: 18.sp, color: context.primaryColor),
                         SizedBox(width: 8.w),
                         Text(
                           'Help & Support',
@@ -418,24 +428,27 @@ class _GiveScreenState extends State<GiveScreen> {
     return Container(
       height: 42.h,
       margin: EdgeInsets.only(left: 8.w),
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: context.primaryColor,
-        borderRadius: BorderRadius.circular(10.r),
+        color: context.surfaceColor,
+        border: Border.all(
+            color: context.isDarkMode ? Colors.white24 : Colors.grey.shade300,
+            width: 1),
+        borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             Icons.filter_alt_outlined,
-            color: context.onPrimaryColor,
-            size: 20.sp,
+            color: context.textColor,
+            size: 18.sp,
           ),
-          SizedBox(width: 8.w),
+          SizedBox(width: 6.w),
           Text(
             "Filter",
             style: TextStyle(
-              color: context.onPrimaryColor,
+              color: context.textColor,
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               fontFamily: FontFamily.openSans,
@@ -493,17 +506,59 @@ class _GiveScreenState extends State<GiveScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: imagePath != null
-                  ? AppCachedImage(
-                      imageUrl: imagePath,
-                      width: 136.w,
-                      height: 154.w,
-                      fit: BoxFit.cover,
-                      radius: 12.r,
-                      errorWidget:
-                          Image.asset('assets/iphone.png', fit: BoxFit.cover),
-                    )
-                  : Image.asset('assets/iphone.png', fit: BoxFit.cover),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  imagePath != null
+                      ? AppCachedImage(
+                          imageUrl: imagePath,
+                          width: 136.w,
+                          height: 154.w,
+                          fit: BoxFit.cover,
+                          radius: 12.r,
+                          errorWidget: Image.asset('assets/iphone.png',
+                              fit: BoxFit.cover),
+                        )
+                      : Image.asset('assets/iphone.png', fit: BoxFit.cover),
+                  Positioned(
+                    top: 8.h,
+                    left: 4.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 2.w,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: category.toLowerCase().contains('goods')
+                            ? Colors.blue.shade700
+                            : category.toLowerCase().contains('services')
+                                ? Colors.green.shade700
+                                : category.toLowerCase().contains('money')
+                                    ? Colors.orange.shade700
+                                    : context.isDarkMode
+                                        ? Colors.white
+                                        : Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        category,
+                        style: TextStyle(
+                          color: (category.toLowerCase().contains('goods') ||
+                                  category.toLowerCase().contains('services') ||
+                                  category.toLowerCase().contains('money'))
+                              ? Colors.white
+                              : context.isDarkMode
+                                  ? Colors.black
+                                  : Colors.white,
+                          fontSize: 7.sp,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: FontFamily.openSans,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -541,11 +596,14 @@ class _GiveScreenState extends State<GiveScreen> {
                               fontFamily: FontFamily.openSans,
                             ),
                           ),
+                          SizedBox(width: 4.w),
+                          _buildPostMenu(
+                              context, id, userId, owner, title, isOwner),
                         ],
                       ),
                     ],
                   ),
-                  SizedBox(height: 2.h),
+                  //  SizedBox(height: 2.h),
                   Text(
                     title,
                     style: TextStyle(
@@ -557,23 +615,23 @@ class _GiveScreenState extends State<GiveScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 1.h),
-                  Row(
-                    children: [
-                      Icon(Icons.label_outline,
-                          size: 13.sp, color: context.subTextColor),
-                      SizedBox(width: 4.w),
-                      Text(
-                        category,
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          color: context.subTextColor,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: FontFamily.openSans,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // SizedBox(height: 1.h),
+                  // Row(
+                  //   children: [
+                  //     Icon(Icons.label_outline,
+                  //         size: 13.sp, color: context.subTextColor),
+                  //     SizedBox(width: 4.w),
+                  //     Text(
+                  //       category,
+                  //       style: TextStyle(
+                  //         fontSize: 10.sp,
+                  //         color: context.subTextColor,
+                  //         fontWeight: FontWeight.w600,
+                  //         fontFamily: FontFamily.openSans,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   if (description != null) ...[
                     SizedBox(height: 2.h),
                     Text(
@@ -715,6 +773,90 @@ class _GiveScreenState extends State<GiveScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPostMenu(BuildContext context, int postId, int userId,
+      String userName, String itemName, bool isOwner) {
+    return PopupMenuButton<String>(
+      color: context.surfaceColor,
+      surfaceTintColor: Colors.transparent,
+      icon: Icon(Icons.more_vert, color: context.textColor, size: 20.sp),
+      padding: EdgeInsets.zero,
+      onSelected: (value) async {
+        final profileController = context.read<ProfileController>();
+        switch (value) {
+          case 'profile':
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    UserProfileScreen(userId: userId.toString()),
+              ),
+            );
+            break;
+          case 'save':
+            final success = await profileController.toggleSaveUser(userId);
+            if (success.success && mounted) {
+              ToastService.showSuccessToast(context, 'User saved successfully');
+            } else if (mounted) {
+              ToastService.showErrorToast(
+                  context, success.message ?? 'Error saving user');
+            }
+            break;
+          case 'share':
+            Share.share(
+                'Check out $userName\'s trade: $itemName\nDownload the app to see more!');
+            break;
+          case 'hide':
+            context.read<TradeController>().hidePost(postId);
+            if (mounted) {
+              ToastService.showSuccessToast(context, 'Post hidden');
+              context
+                  .read<TradeController>()
+                  .fetchTakePosts(); // Refresh list to remove hidden post
+            }
+            break;
+          case 'block':
+            final success = await profileController.blockUser(userId);
+            if (success.success && mounted) {
+              ToastService.showSuccessToast(
+                  context, 'User blocked successfully');
+              context.read<TradeController>().fetchTakePosts(); // Refresh feed
+            } else if (mounted) {
+              ToastService.showErrorToast(
+                  context, success.message ?? 'Error blocking user');
+            }
+            break;
+        }
+      },
+      itemBuilder: (BuildContext context) {
+        return [
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'profile',
+              child: Text('View Seller Profile'),
+            ),
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'save',
+              child: Text('Save Seller'),
+            ),
+          const PopupMenuItem<String>(
+            value: 'share',
+            child: Text('Share Post'),
+          ),
+          const PopupMenuItem<String>(
+            value: 'hide',
+            child: Text('Hide Post'),
+          ),
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'block',
+              child: Text('Block User'),
+            ),
+        ];
+      },
     );
   }
 }
