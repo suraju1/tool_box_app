@@ -109,12 +109,18 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       ),
       body: Consumer2<TradeController, LocationController>(
         builder: (context, controller, locationController, child) {
-          if (controller.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           if (controller.errorMessage != null) {
             return Center(child: Text(controller.errorMessage!));
+          }
+
+          if (widget.postId == 0) {
+            return const Center(
+              child: Text('Error: No Post ID provided (or page was refreshed)'),
+            );
+          }
+
+          if (controller.isLoading || controller.selectedPost?.id != widget.postId) {
+            return const Center(child: CircularProgressIndicator());
           }
 
           final post = controller.selectedPost;

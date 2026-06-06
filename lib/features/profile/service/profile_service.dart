@@ -136,13 +136,21 @@ class ProfileService {
     }
   }
 
-  Future<ApiResponse<dynamic>> updateProfileImage(File imageFile) async {
+  Future<ApiResponse<dynamic>> updateProfileImage(dynamic imageFile) async {
     try {
       final formData = FormData();
-      final fileName = imageFile.path.split(RegExp(r'[\\/]')).last;
-      formData.files.add(MapEntry(
-          'profile_image',
-          await MultipartFile.fromFile(imageFile.path, filename: fileName)));
+      final String path = imageFile.path;
+      final fileName = path.split(RegExp(r'[\\/]')).last;
+      if (kIsWeb) {
+        final bytes = await imageFile.readAsBytes();
+        formData.files.add(MapEntry(
+            'profile_image',
+            MultipartFile.fromBytes(bytes, filename: fileName)));
+      } else {
+        formData.files.add(MapEntry(
+            'profile_image',
+            await MultipartFile.fromFile(path, filename: fileName)));
+      }
 
       final response = await _apiClient.post(
         ApiConstants.updateProfile,

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,7 +41,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    final profile = context.read<ProfileController>().ownProfile?.userDetails;
+    final profileCtrl = context.read<ProfileController>();
+    if (profileCtrl.ownProfile == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        profileCtrl.getUserProfile(null, isOwnProfile: true);
+      });
+    }
+    final profile = profileCtrl.ownProfile?.userDetails;
     _nameController = TextEditingController(text: profile?.fullName ?? '');
     _locationController = TextEditingController(text: profile?.location ?? '');
     _emailController = TextEditingController(text: profile?.email ?? '');
@@ -72,6 +79,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickImage() async {
     final List<XFile>? images = await AppImagePickerBS.show(context);
     if (images != null && images.isNotEmpty) {
+      if (kIsWeb) {
+        // TODO (Phase 4): Handle web image uploading using bytes
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Web image upload coming in next phase')),
+        );
+        return;
+      }
       setState(() {
         _selectedImage = File(images.first.path);
       });

@@ -262,7 +262,7 @@ class ProfileController extends ChangeNotifier {
     double? latitude,
     double? longitude,
     bool? termsAccepted,
-    File? profileImage,
+    dynamic profileImage,
   }) async {
     _isLoading = true;
     notifyListeners();

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -122,12 +124,30 @@ class LocationService {
           addressParts.add(place.administrativeArea!);
         }
 
-        return addressParts.join(', ');
+        if (addressParts.isNotEmpty) return addressParts.join(', ');
       }
-      return null;
     } catch (e) {
-      return null;
+      debugPrint('Standard reverse geocoding failed: $e');
     }
+    
+    // Fallback for Web
+    if (kIsWeb) {
+      try {
+        const apiKey = 'AIzaSyDcGPon7dpfONgGUw8lBMOXveihNhaepVo';
+        final url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$apiKey';
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['status'] == 'OK' && data['results'] != null && data['results'].isNotEmpty) {
+            return data['results'][0]['formatted_address'];
+          }
+        }
+      } catch (e) {
+        debugPrint('Fallback reverse geocoding failed: $e');
+      }
+    }
+    
+    return null;
   }
 
   /// Get current location with address
@@ -177,9 +197,32 @@ class LocationService {
         Placemark place = placemarks[0];
         return place.locality ?? place.administrativeArea;
       }
-      return null;
     } catch (e) {
-      return null;
+      debugPrint('Standard city geocoding failed: $e');
     }
+    
+    if (kIsWeb) {
+      try {
+        const apiKey = 'AIzaSyDcGPon7dpfONgGUw8lBMOXveihNhaepVo';
+        final url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$apiKey';
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['status'] == 'OK' && data['results'] != null && data['results'].isNotEmpty) {
+            final addressComponents = data['results'][0]['address_components'] as List;
+            for (var component in addressComponents) {
+              final types = component['types'] as List;
+              if (types.contains('locality') || types.contains('administrative_area_level_2')) {
+                return component['long_name'];
+              }
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Fallback city geocoding failed: $e');
+      }
+    }
+    
+    return null;
   }
 }

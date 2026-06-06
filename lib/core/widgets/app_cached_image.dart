@@ -39,6 +39,9 @@ class AppCachedImage extends StatelessWidget {
   static String getFormattedUrl(String? url) {
     if (url == null || url.isEmpty) return '';
 
+    // Replace backslashes with forward slashes
+    url = url.replaceAll('\\', '/');
+
     String formattedUrl;
     if (url.startsWith('http')) {
       formattedUrl = url;

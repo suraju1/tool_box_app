@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
 import 'package:tool_bocs/util/string_util.dart';
 
 class TradeResponseRequestModel {
@@ -14,7 +16,7 @@ class TradeResponseRequestModel {
   final double? priceRangeStart;
   final double? priceRangeEnd;
   final bool? isNegotiable;
-  final List<String>? images; // List of file paths
+  final List<dynamic>? images; // List of file paths or XFiles
 
   TradeResponseRequestModel({
     required this.giveawayId,
@@ -83,12 +85,22 @@ class TradeResponseRequestModel {
     }
 
     if (images != null && images!.isNotEmpty) {
-      for (var path in images!) {
+      for (var image in images!) {
+        String path = image is String ? image : (image.path as String);
         if (path.isNotEmpty) {
-          formData.files.add(MapEntry(
-            'images',
-            await MultipartFile.fromFile(path),
-          ));
+          if (kIsWeb) {
+            final xFile = image is XFile ? image : XFile(path);
+            final bytes = await xFile.readAsBytes();
+            formData.files.add(MapEntry(
+              'images',
+              MultipartFile.fromBytes(bytes, filename: xFile.name),
+            ));
+          } else {
+            formData.files.add(MapEntry(
+              'images',
+              await MultipartFile.fromFile(path),
+            ));
+          }
         }
       }
     }

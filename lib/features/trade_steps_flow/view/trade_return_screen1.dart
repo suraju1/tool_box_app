@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -445,7 +446,9 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8.r),
                         image: DecorationImage(
-                          image: FileImage(File(_returnItemImages[index].path)),
+                          image: kIsWeb 
+                              ? NetworkImage(_returnItemImages[index].path) as ImageProvider
+                              : FileImage(File(_returnItemImages[index].path)),
                           fit: BoxFit.cover,
                         ),
                       ),

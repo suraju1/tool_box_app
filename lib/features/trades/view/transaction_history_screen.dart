@@ -8,6 +8,7 @@ import 'package:tool_bocs/features/trades/model/wallet_history_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
@@ -169,7 +170,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 borderRadius: BorderRadius.circular(8.r),
                 child: imageUrl.isNotEmpty
                     ? CachedNetworkImage(
-                        imageUrl: imageUrl,
+                        imageUrl: AppCachedImage.getFormattedUrl(imageUrl),
                         width: 50.w,
                         height: 50.w,
                         fit: BoxFit.cover,

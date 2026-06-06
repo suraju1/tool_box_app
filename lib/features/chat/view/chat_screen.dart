@@ -1,4 +1,6 @@
+
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -119,6 +121,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final List<XFile>? images = await AppImagePickerBS.show(context);
     if (images != null && images.isNotEmpty) {
+      if (kIsWeb) {
+        // TODO (Phase 4): Handle web image uploading using bytes
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Web image upload coming in next phase')),
+        );
+        return;
+      }
       File file = File(images.first.path);
       String fileName = const Uuid().v4();
 

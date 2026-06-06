@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
 import 'package:tool_bocs/util/string_util.dart';
 
 class PostRequestModel {
@@ -21,8 +23,8 @@ class PostRequestModel {
   final int walletCredits;
   final bool notifyPartnersOnly;
   final String postType; // "give" or "take"
-  final List<String> itemImages; // Paths to images
-  final List<String> returnItemImages; // Paths to return item images (if any)
+  final List<dynamic> itemImages; // Paths or XFiles to images
+  final List<dynamic> returnItemImages; // Paths or XFiles to return item images (if any)
   final String? returnItemName;
   final String? returnItemCategory;
   final int? returnItemCategoryId;
@@ -120,22 +122,42 @@ class PostRequestModel {
     const String itemImagesKey = 'item_images';
     const String returnItemImagesKey = 'return_item_images';
 
-    for (var imagePath in itemImages) {
+    for (var image in itemImages) {
+      String imagePath = image is String ? image : (image.path as String);
       if (imagePath.isNotEmpty) {
-        formData.files.add(MapEntry(
-          itemImagesKey,
-          await MultipartFile.fromFile(imagePath),
-        ));
+        if (kIsWeb) {
+          final xFile = image is XFile ? image : XFile(imagePath);
+          final bytes = await xFile.readAsBytes();
+          formData.files.add(MapEntry(
+            itemImagesKey,
+            MultipartFile.fromBytes(bytes, filename: xFile.name),
+          ));
+        } else {
+          formData.files.add(MapEntry(
+            itemImagesKey,
+            await MultipartFile.fromFile(imagePath),
+          ));
+        }
       }
     }
 
     if (returnType.toLowerCase() == 'item') {
-      for (var imagePath in returnItemImages) {
+      for (var image in returnItemImages) {
+        String imagePath = image is String ? image : (image.path as String);
         if (imagePath.isNotEmpty) {
-          formData.files.add(MapEntry(
-            returnItemImagesKey,
-            await MultipartFile.fromFile(imagePath),
-          ));
+          if (kIsWeb) {
+            final xFile = image is XFile ? image : XFile(imagePath);
+            final bytes = await xFile.readAsBytes();
+            formData.files.add(MapEntry(
+              returnItemImagesKey,
+              MultipartFile.fromBytes(bytes, filename: xFile.name),
+            ));
+          } else {
+            formData.files.add(MapEntry(
+              returnItemImagesKey,
+              await MultipartFile.fromFile(imagePath),
+            ));
+          }
         }
       }
     }

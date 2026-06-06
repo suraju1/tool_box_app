@@ -196,7 +196,11 @@ class ChatService {
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .snapshots()
-        .asBroadcastStream(); // Firestore snapshots are broadcast-friendly
+        .map((snapshot) {
+      debugPrint(
+          "getMessages FULL LOG for $chatRoomId: ${snapshot.docs.map((e) => e.data()).toList()}");
+      return snapshot;
+    }).asBroadcastStream(); // Firestore snapshots are broadcast-friendly
   }
 
   // Get chat rooms stream for current user
@@ -206,13 +210,13 @@ class ChatService {
         .asyncExpand((firebaseUser) {
           if (firebaseUser == null) {
             debugPrint("getChatRooms: No Firebase user signed in.");
-            return const Stream.empty();
+            return Stream.error('permission-denied');
           }
 
           return Stream.fromFuture(getCurrentUser()).asyncExpand((currentUser) {
             if (currentUser == null) {
               debugPrint("getChatRooms: No local user data found.");
-              return const Stream.empty();
+              return Stream.error('permission-denied');
             }
 
             final String userId = currentUser.id.toString();
@@ -223,7 +227,12 @@ class ChatService {
                 .collection('chat_rooms')
                 .where('users', arrayContains: userId)
                 .orderBy('updatedAt', descending: true)
-                .snapshots();
+                .snapshots()
+                .map((snapshot) {
+              debugPrint(
+                  "getChatRooms FULL LOG: ${snapshot.docs.map((e) => e.data()).toList()}");
+              return snapshot;
+            });
           });
         })
         .cast<QuerySnapshot>()

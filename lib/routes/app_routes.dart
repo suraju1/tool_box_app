@@ -13,6 +13,7 @@ class AppRoutes {
   static const editProfile = '/editProfile';
   static const tradeHistory = '/tradeHistory';
   static const blockedUsers = '/blockedUsers';
+  static const settings = '/settings';
   static const helpSupport = '/helpSupport';
   static const transactionHistory = '/transactionHistory';
   static const tradeStart = '/tradeStart';
@@ -32,4 +33,7 @@ class AppRoutes {
   static const myPosts = '/myPosts';
   static const allReviews = '/allReviews';
   static const shimmerTest = '/shimmerTest';
+  static const webGive = '/webGive';
+  static const webTake = '/webTake';
+  static const webProfile = '/webProfile';
 }

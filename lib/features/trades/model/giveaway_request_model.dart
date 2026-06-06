@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
 
 class GiveawayRequestModel {
   final int userId;
@@ -20,8 +22,8 @@ class GiveawayRequestModel {
   final int walletCredits;
   final bool notifyPartnersOnly;
   final String postType; // "give" or "take"
-  final List<String> itemImages; // Paths to images
-  final List<String> returnItemImages; // Paths to return item images (if any)
+  final List<dynamic> itemImages; // Paths to images
+  final List<dynamic> returnItemImages; // Paths to return item images (if any)
 
   GiveawayRequestModel({
     required this.userId,
@@ -73,22 +75,42 @@ class GiveawayRequestModel {
     final formData = FormData.fromMap(data);
 
     // Add item images
-    for (var imagePath in itemImages) {
+    for (var image in itemImages) {
+      String imagePath = image is String ? image : (image.path as String);
       if (imagePath.isNotEmpty) {
-        formData.files.add(MapEntry(
-          'item_images',
-          await MultipartFile.fromFile(imagePath),
-        ));
+        if (kIsWeb) {
+          final xFile = image is XFile ? image : XFile(imagePath);
+          final bytes = await xFile.readAsBytes();
+          formData.files.add(MapEntry(
+            'item_images',
+            MultipartFile.fromBytes(bytes, filename: xFile.name),
+          ));
+        } else {
+          formData.files.add(MapEntry(
+            'item_images',
+            await MultipartFile.fromFile(imagePath),
+          ));
+        }
       }
     }
 
     // Add return item images
-    for (var imagePath in returnItemImages) {
+    for (var image in returnItemImages) {
+      String imagePath = image is String ? image : (image.path as String);
       if (imagePath.isNotEmpty) {
-        formData.files.add(MapEntry(
-          'return_item_images',
-          await MultipartFile.fromFile(imagePath),
-        ));
+        if (kIsWeb) {
+          final xFile = image is XFile ? image : XFile(imagePath);
+          final bytes = await xFile.readAsBytes();
+          formData.files.add(MapEntry(
+            'return_item_images',
+            MultipartFile.fromBytes(bytes, filename: xFile.name),
+          ));
+        } else {
+          formData.files.add(MapEntry(
+            'return_item_images',
+            await MultipartFile.fromFile(imagePath),
+          ));
+        }
       }
     }
 

@@ -17,7 +17,10 @@ import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/skeleton_widgets.dart';
 
 class ChatListScreen extends StatefulWidget {
-  const ChatListScreen({super.key});
+  final Function(String chatRoomId, String otherUserId, String otherUserName,
+      String? otherUserImage, TradeResponseModel? tradeResponse)? onChatTap;
+
+  const ChatListScreen({super.key, this.onChatTap});
 
   @override
   State<ChatListScreen> createState() => _ChatListScreenState();
@@ -88,13 +91,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   if (error.contains('permission-denied')) {
                     return Center(
                       child: Padding(
-                        padding: EdgeInsets.all(24.w),
+                        padding: const EdgeInsets.all(24.0),
                         child: Text(
                           'Your chats will appear here once you are logged in.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: context.subTextColor,
-                            fontSize: 16.sp,
+                            fontSize: 16.0,
                             fontFamily: FontFamily.openSans,
                           ),
                         ),
@@ -104,8 +107,24 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
 
-                if (_currentUserId == null ||
-                    snapshot.connectionState == ConnectionState.waiting) {
+                if (_currentUserId == null) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Text(
+                        'Your chats will appear here once you are logged in.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: context.subTextColor,
+                          fontSize: 16.0,
+                          fontFamily: FontFamily.openSans,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return _buildShimmer(context);
                 }
 
@@ -117,7 +136,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       'No chats yet',
                       style: TextStyle(
                         color: context.textColor,
-                        fontSize: 16.sp,
+                        fontSize: 16.0,
                       ),
                     ),
                   );
@@ -431,7 +450,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 style: TextStyle(color: context.textColor, fontSize: 16.sp),
                 decoration: InputDecoration(
                   hintText: 'Search chats...',
-                  hintStyle: TextStyle(color: context.subTextColor, fontSize: 16.sp),
+                  hintStyle:
+                      TextStyle(color: context.subTextColor, fontSize: 16.sp),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
@@ -447,7 +467,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   });
                   FocusScope.of(context).unfocus();
                 },
-                child: Icon(Icons.clear, color: context.subTextColor, size: 20.sp),
+                child:
+                    Icon(Icons.clear, color: context.subTextColor, size: 20.sp),
               ),
           ],
         ),
@@ -470,18 +491,23 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatScreen(
-              chatRoomId: chatRoomId,
-              otherUserId: otherUserId,
-              otherUserName: name,
-              otherUserImage: imagePath.isNotEmpty ? imagePath : null,
-              tradeResponse: tradeResponse,
+        if (widget.onChatTap != null) {
+          widget.onChatTap!(chatRoomId, otherUserId, name,
+              imagePath.isNotEmpty ? imagePath : null, tradeResponse);
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                chatRoomId: chatRoomId,
+                otherUserId: otherUserId,
+                otherUserName: name,
+                otherUserImage: imagePath.isNotEmpty ? imagePath : null,
+                tradeResponse: tradeResponse,
+              ),
             ),
-          ),
-        );
+          );
+        }
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
@@ -550,15 +576,20 @@ class _ChatListScreenState extends State<ChatListScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: context.textColor,
-                      fontFamily: FontFamily.openSans,
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: context.textColor,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  SizedBox(width: 8.w),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [

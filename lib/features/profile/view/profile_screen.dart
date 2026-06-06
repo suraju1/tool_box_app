@@ -913,10 +913,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             context,
             icon: Icons.settings_outlined,
             label: AppLocalizations.of(context)!.settings,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingScreen()),
-            ),
+            onTap: () => Navigator.pushNamed(context, AppRoutes.settings),
           ),
           _buildDivider(),
           _buildProfileSettingItem(

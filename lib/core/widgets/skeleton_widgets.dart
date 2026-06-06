@@ -86,17 +86,19 @@ class ListTileSkeleton extends StatelessWidget {
           ShimmerBox(height: 50.r, width: 50.r, radius: 25.r),
           SizedBox(width: 12.w),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ShimmerBox(height: 14.h, width: 120.w, radius: 4.r),
-                SizedBox(height: 6.h),
-                ShimmerBox(height: 12.h, width: 200.w, radius: 4.r),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShimmerBox(height: 14.h, width: constraints.maxWidth * 0.5, radius: 4.r),
+                    SizedBox(height: 6.h),
+                    ShimmerBox(height: 12.h, width: constraints.maxWidth * 0.8, radius: 4.r),
+                  ],
+                );
+              },
             ),
           ),
-          SizedBox(width: 8.w),
-          ShimmerBox(height: 10.h, width: 40.w, radius: 4.r),
         ],
       ),
     );

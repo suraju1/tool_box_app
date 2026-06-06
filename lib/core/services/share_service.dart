@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -82,6 +83,12 @@ class ShareService {
     required String text,
     required String imageUrl,
   }) async {
+    if (kIsWeb) {
+      // Web doesn't support temp files in the same way, fallback to text
+      await _shareTextOnly(text: text);
+      return;
+    }
+
     File? tempFile;
     try {
       // Ensure absolute URL

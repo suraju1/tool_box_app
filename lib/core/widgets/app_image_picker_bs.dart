@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,6 +12,16 @@ class AppImagePickerBS extends StatelessWidget {
 
   static Future<List<XFile>?> show(BuildContext context,
       {bool allowMultiple = false, int? limit}) async {
+    if (kIsWeb) {
+      final picker = ImagePicker();
+      if (allowMultiple) {
+        final List<XFile> images = await picker.pickMultiImage(limit: limit);
+        return images.isNotEmpty ? images : null;
+      } else {
+        final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+        return image != null ? [image] : null;
+      }
+    }
     return await showModalBottomSheet<List<XFile>>(
       context: context,
       backgroundColor: Colors.transparent,

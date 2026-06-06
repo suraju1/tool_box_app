@@ -1,0 +1,1354 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/core/controller/shimmer_controller.dart';
+import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
+import 'package:tool_bocs/util/colors.dart';
+import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/chat/view/chat_screen.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
+import 'package:tool_bocs/features/notifications/model/notification_model.dart';
+import 'package:intl/intl.dart';
+import 'package:tool_bocs/util/date_util.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/features/profile/view/profile_screen.dart';
+
+class WebNotificationsScreen extends StatefulWidget {
+  final int? postId;
+  const WebNotificationsScreen({super.key, this.postId});
+
+  @override
+  State<WebNotificationsScreen> createState() => _WebNotificationsScreenState();
+}
+
+class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final tradeController = context.read<TradeController>();
+      final notificationController = context.read<NotificationController>();
+
+      if (widget.postId != null) {
+        tradeController.fetchPostResponses(widget.postId!);
+      } else {
+        tradeController.fetchAllPostResponses();
+        tradeController.fetchSentResponses();
+        notificationController.fetchNotifications(isRefresh: true);
+      }
+    });
+  }
+
+  void _navigateToChat(TradeResponseModel response) {
+    final authController = context.read<AuthController>();
+    final isOwner = authController.currentUser?.id == response.posterUserId;
+
+    final otherUserId = isOwner
+        ? response.responderId.toString()
+        : response.posterUserId.toString();
+    final otherUserName =
+        isOwner ? response.responderName : (response.posterName ?? 'User');
+    final otherUserImage =
+        isOwner ? response.responderImage : response.posterImage;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatScreen(
+          otherUserId: otherUserId,
+          otherUserName: otherUserName,
+          otherUserImage: otherUserImage,
+          tradeResponse: response,
+        ),
+      ),
+    );
+  }
+
+  void _onResponseTap(TradeResponseModel response) async {
+    final tradeController = context.read<TradeController>();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      tradeController.setSelectedResponse(response);
+      await tradeController.fetchPostDetails(response.postId);
+
+      if (tradeController.selectedPost == null) {
+        throw 'Failed to load post details. Please try again.';
+      }
+
+      if (mounted) Navigator.pop(context);
+
+      if (mounted) {
+        if (response.status == 'pending') {
+          Navigator.pushNamed(context, AppRoutes.tradeStart);
+        } else if (response.status == 'rejected') {
+          Navigator.pushNamed(context, AppRoutes.tradeStart);
+        } else if (response.status == 'accepted' ||
+            response.status == 'meeting_set' ||
+            response.status == 'paid' ||
+            response.status == 'completed') {
+          final authController = context.read<AuthController>();
+          final isOwner =
+              authController.currentUser?.id == response.posterUserId;
+
+          if (isOwner) {
+            if (response.status == 'completed' ||
+                response.status == 'accepted' ||
+                response.status == 'meeting_set') {
+              Navigator.pushNamed(context, AppRoutes.tradeDetails,
+                  arguments: response.id);
+            } else if (response.paymentStatus == 'paid' ||
+                response.status == 'paid') {
+              _navigateToChat(response);
+            } else {
+              ToastService.showErrorToast(
+                context,
+                'Waiting for partner response',
+              );
+            }
+          } else {
+            if (response.status == 'completed') {
+              Navigator.pushNamed(context, AppRoutes.tradeDetails,
+                  arguments: response.id);
+            } else {
+              Navigator.pushNamed(context, AppRoutes.tradeCompletion);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ToastService.showErrorToast(context, e.toString());
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.postId != null) {
+      return _buildSinglePostResponsesView(context);
+    }
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: context.scaffoldBg,
+        appBar: _buildAppBar(context),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: TabBarView(
+              children: [
+                _buildGeneralNotificationsView(context),
+                _buildCombinedMatchesView(context),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSinglePostResponsesView(BuildContext context) {
+    return Scaffold(
+      backgroundColor: context.scaffoldBg,
+      appBar: _buildAppBar(context),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: _buildResponsesListView(context, isIncoming: true),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResponsesListView(BuildContext context,
+      {required bool isIncoming}) {
+    final shimmer = context.watch<ShimmerController>();
+    final tradeController = context.watch<TradeController>();
+    final allResponses = isIncoming
+        ? tradeController.postResponses
+        : tradeController.sentResponses;
+
+    final isLoading = isIncoming
+        ? tradeController.isIncomingLoading
+        : tradeController.isSentLoading;
+
+    if (shimmer.isLoading || isLoading) {
+      return _buildShimmer(context);
+    }
+
+    final activeResponses = allResponses.where((r) {
+      return r.status == 'pending' || r.status == 'meeting_set';
+    }).toList();
+
+    final historyResponses = allResponses.where((r) {
+      return r.status == 'completed' ||
+          r.status == 'accepted' ||
+          r.status == 'rejected' ||
+          r.status == 'paid';
+    }).toList();
+
+    historyResponses.sort((a, b) {
+      try {
+        DateTime dateA = DateTime.parse(a.createdAt);
+        DateTime dateB = DateTime.parse(b.createdAt);
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return 0;
+      }
+    });
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            context,
+            widget.postId != null
+                ? 'Responses for ${tradeController.responsesPost?.itemName ?? 'Post'} (${activeResponses.length})'
+                : isIncoming
+                    ? 'Incoming Offers (${activeResponses.length})'
+                    : 'Sent Offers (${activeResponses.length})',
+          ),
+          if (activeResponses.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(40),
+                child: Text(
+                  'No active offers yet',
+                  style: TextStyle(color: context.subTextColor, fontSize: 16),
+                ),
+              ),
+            )
+          else
+            ...activeResponses.map((response) =>
+                _buildResponseCard(context, response, isIncoming)),
+          if (historyResponses.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            _buildSuggestionsSection(context, historyResponses, isIncoming),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCombinedMatchesView(BuildContext context) {
+    final shimmer = context.watch<ShimmerController>();
+    final tradeController = context.watch<TradeController>();
+
+    final incomingResponses = tradeController.postResponses;
+    final incomingLoading = tradeController.isIncomingLoading;
+
+    final outgoingResponses = tradeController.sentResponses;
+    final outgoingLoading = tradeController.isSentLoading;
+
+    if (shimmer.isLoading || incomingLoading || outgoingLoading) {
+      return _buildShimmer(context);
+    }
+
+    final incomingActive = incomingResponses.where((r) {
+      return r.status == 'pending' || r.status == 'meeting_set';
+    }).toList();
+
+    final incomingHistory = incomingResponses.where((r) {
+      return r.status == 'completed' ||
+          r.status == 'accepted' ||
+          r.status == 'rejected' ||
+          r.status == 'paid';
+    }).toList();
+
+    final outgoingActive = outgoingResponses.where((r) {
+      return r.status == 'pending' || r.status == 'meeting_set';
+    }).toList();
+
+    final outgoingHistory = outgoingResponses.where((r) {
+      return r.status == 'completed' ||
+          r.status == 'accepted' ||
+          r.status == 'rejected' ||
+          r.status == 'paid';
+    }).toList();
+
+    incomingHistory.sort((a, b) {
+      try {
+        DateTime dateA = DateTime.parse(a.createdAt);
+        DateTime dateB = DateTime.parse(b.createdAt);
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return 0;
+      }
+    });
+
+    outgoingHistory.sort((a, b) {
+      try {
+        DateTime dateA = DateTime.parse(a.createdAt);
+        DateTime dateB = DateTime.parse(b.createdAt);
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return 0;
+      }
+    });
+
+    final totalActiveIncoming = incomingActive.length;
+    final totalActiveOutgoing = outgoingActive.length;
+
+    if (totalActiveIncoming == 0 && totalActiveOutgoing == 0 && incomingHistory.isEmpty && outgoingHistory.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.shopping_bag_outlined,
+                  size: 64, color: context.subTextColor),
+              const SizedBox(height: 16),
+              Text(
+                'No matches yet',
+                style: TextStyle(
+                  color: context.subTextColor,
+                  fontSize: 16,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (incomingActive.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMatchSectionHeader(
+                  context,
+                  '📥 INCOMING',
+                  '${incomingActive.length} Offers on your posts',
+                ),
+                ...incomingActive.map((response) =>
+                    _buildResponseCard(context, response, true)),
+              ],
+            ),
+          if (outgoingActive.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: incomingActive.isNotEmpty ? 20 : 0),
+                _buildMatchSectionHeader(
+                  context,
+                  '📤 OUTGOING',
+                  '${outgoingActive.length} Offers you sent',
+                ),
+                ...outgoingActive.map((response) =>
+                    _buildResponseCard(context, response, false)),
+              ],
+            ),
+          if (incomingHistory.isNotEmpty || outgoingHistory.isNotEmpty) ...[
+            SizedBox(height: (incomingActive.isNotEmpty || outgoingActive.isNotEmpty) ? 20 : 0),
+            _buildMatchSectionHeader(
+              context,
+              '⏱️ HISTORY',
+              'Past matches',
+            ),
+            if (incomingHistory.isNotEmpty)
+              ...incomingHistory.map((response) =>
+                  _buildResponseCard(context, response, true)),
+            if (outgoingHistory.isNotEmpty)
+              ...outgoingHistory.map((response) =>
+                  _buildResponseCard(context, response, false)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchSectionHeader(BuildContext context, String title, String subtitle) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(15, 0, 15, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              fontFamily: FontFamily.openSans,
+              color: context.textColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: FontFamily.openSans,
+              color: context.subTextColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResponseCard(
+      BuildContext context, TradeResponseModel response, bool isIncoming) {
+    List<TextSpan> messageSpans = [];
+    String subText = '';
+    String actionLabel = '';
+    Color actionColor = context.primaryColor;
+
+    final timeAgo = DateUtil.formatTimeAgo(response.createdAt);
+    final actionWord = isIncoming ? 'Taking' : 'Giving';
+
+    if (response.responseType == 'price' || response.responseType == 'Price') {
+      messageSpans = [
+        TextSpan(
+            text: response.responderName,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' is $actionWord '),
+        const TextSpan(
+            text: 'Price', style: TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' ~ $timeAgo'),
+      ];
+      final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
+      final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
+      subText = 'Price: ₹$startPrice - ₹$endPrice';
+    } else {
+      messageSpans = [
+        TextSpan(
+            text: response.responderName,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' is $actionWord '),
+        TextSpan(
+            text: response.itemName ?? 'an item',
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' ~ $timeAgo'),
+      ];
+      if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
+        subText = 'Wants: ${response.returnItemName} in return';
+      } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+        final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
+        final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
+        subText = 'Wants: ₹$startPrice - ₹$endPrice in return';
+      } else {
+        subText =
+            'Category: ${response.itemCategory} | Condition: ${response.itemCondition}';
+      }
+    }
+
+    if (widget.postId == null && response.postItemName != null) {
+      if (isIncoming) {
+        messageSpans = [
+          TextSpan(
+              text: response.responderName,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          const TextSpan(text: ' is Taking your '),
+          TextSpan(
+              text: response.postItemName!,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: ' ~ $timeAgo'),
+        ];
+        if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
+          subText = 'Offering: ${response.returnItemName}';
+        } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+          final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
+          final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
+          subText = 'Offering: ₹$startPrice - ₹$endPrice';
+        }
+      } else {
+        messageSpans = [
+          const TextSpan(text: 'Your offer on '),
+          TextSpan(
+              text: response.postItemName!,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: ' ~ $timeAgo'),
+        ];
+        if (response.itemName != null && response.itemName!.isNotEmpty) {
+          subText = 'Offering: ${response.itemName}';
+        }
+      }
+    }
+
+    if (response.status == 'pending') {
+      actionLabel = isIncoming ? 'Review' : 'Waiting';
+      actionColor = context.primaryColor;
+    } else if (response.status == 'accepted') {
+      actionLabel = 'Continue';
+      actionColor = Colors.green;
+    } else if (response.status == 'rejected') {
+      actionLabel = 'Rejected';
+      actionColor = Colors.red;
+    } else {
+      actionLabel = 'Details';
+      actionColor = Colors.blue;
+    }
+
+    if (!isIncoming && response.posterName != null) {
+      messageSpans = [
+        const TextSpan(text: 'Your offer to '),
+        TextSpan(
+            text: response.posterName!,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        const TextSpan(text: ' on '),
+        TextSpan(
+            text: response.postItemName ?? 'item',
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' ~ $timeAgo'),
+      ];
+      if (response.itemName != null && response.itemName!.isNotEmpty) {
+        subText = 'Offering: ${response.itemName}';
+      }
+    }
+
+    final responseImagePath =
+        response.itemImages.isNotEmpty ? response.itemImages.first : '';
+    final postImagePath =
+        response.postItemImages.isNotEmpty ? response.postItemImages.first : '';
+    final imageToUse =
+        responseImagePath.isNotEmpty ? responseImagePath : postImagePath;
+
+    return _buildNotificationCard(
+      context,
+      imageUrl: imageToUse,
+      distance: 'Unknown',
+      message: messageSpans,
+      subMessage: [
+        TextSpan(text: subText),
+      ],
+      actions: [
+        _buildActionButton(actionLabel, actionColor, context.onPrimaryColor,
+            () => _onResponseTap(response)),
+        if (response.status == 'completed') ...[
+          const SizedBox(width: 8),
+          _buildActionButton(' Chat ', context.primaryColor,
+              context.onPrimaryColor, () => _navigateToChat(response)),
+        ],
+      ],
+      onTap: () => _onResponseTap(response),
+    );
+  }
+
+  Widget _buildSuggestionsSection(
+      BuildContext context, List<TradeResponseModel> history, bool isIncoming) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'History',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: FontFamily.openSans,
+                  color: context.textColor,
+                ),
+              ),
+              Row(
+                children: [
+                  Icon(Icons.history, size: 18, color: context.textColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Recent',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: context.textColor,
+                      fontFamily: FontFamily.openSans,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...history.map(
+            (response) => _buildResponseCard(context, response, isIncoming)),
+      ],
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: context.appBarColor,
+      elevation: 0,
+      centerTitle: true,
+      title: Text(
+        'Match Offers',
+        style: TextStyle(
+          color: context.textColor,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          fontFamily: FontFamily.openSans,
+        ),
+      ),
+      actions: [
+        PopupMenuButton<void>(
+          offset: const Offset(-200, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          color: Theme.of(context).cardColor,
+          surfaceTintColor: Colors.transparent,
+          icon: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              shape: BoxShape.circle,
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.info_outline,
+              size: 20,
+              color: context.textColor,
+            ),
+          ),
+          itemBuilder: (context) => [
+            PopupMenuItem<void>(
+              enabled: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'See what people want around you',
+                      style: TextStyle(
+                        color: context.textColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '• See existing posts by givers around you',
+                      style: TextStyle(
+                        color: context.subTextColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '• Respond to posts, mention what you can offer in return',
+                      style: TextStyle(
+                        color: context.subTextColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const PopupMenuDivider(height: 1),
+            PopupMenuItem<void>(
+              onTap: () {
+                Future.delayed(Duration.zero, () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.helpSupport,
+                  );
+                });
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.help_outline,
+                    size: 20,
+                    color: context.primaryColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Help & Support',
+                    style: TextStyle(
+                      color: context.primaryColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: FontFamily.openSans,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+      bottom: widget.postId == null
+          ? TabBar(
+              dividerColor: Colors.transparent,
+              indicatorColor: context.primaryColor,
+              labelColor: context.primaryColor,
+              unselectedLabelColor: context.subTextColor,
+              labelStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                fontFamily: FontFamily.openSans,
+              ),
+              tabs: [
+                context.watch<NotificationController>().unreadCount > 0
+                    ? Tab(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('General'),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                context
+                                    .watch<NotificationController>()
+                                    .unreadCount
+                                    .toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const Tab(text: 'General'),
+                const Tab(text: 'Matches'),
+              ],
+            )
+          : PreferredSize(
+              preferredSize: const Size.fromHeight(10),
+              child: Divider(height: 1, color: context.dividerColor),
+            ),
+    );
+  }
+  
+
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(15, 0, 15, 12),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          fontFamily: FontFamily.openSans,
+          color: context.textColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationCard(
+    BuildContext context, {
+    String? imagePath,
+    String? imageUrl,
+    required String distance,
+    required List<TextSpan> message,
+    required List<TextSpan> subMessage,
+    required List<Widget> actions,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: context.isDarkMode
+              ? []
+              : [
+                  BoxShadow(
+                    color: context.dividerColor.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: AppCachedImage(
+                    imageUrl: imageUrl ?? imagePath ?? '',
+                    width: 85,
+                    height: 85,
+                    fit: BoxFit.cover,
+                    errorWidget: _buildImageErrorPlaceholder(context),
+                  ),
+                ),
+                Positioned(
+                  top: 6,
+                  left: 6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'Unknown',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: context.textColor,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                      children: message,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.subTextColor,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                      children: subMessage,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(children: actions),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageErrorPlaceholder(BuildContext context) {
+    return Container(
+      width: 85,
+      height: 85,
+      color: context.surfaceColor,
+      child: Icon(Icons.image,
+          color: context.isDarkMode ? Colors.white10 : Colors.grey.shade400),
+    );
+  }
+
+  Widget _buildActionButton(
+      String label, Color bgColor, Color textColor, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGeneralNotificationsView(BuildContext context) {
+    final notificationController = context.watch<NotificationController>();
+
+    if (notificationController.isLoading) {
+      return _buildShimmer(context);
+    }
+
+    if (notificationController.notifications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.notifications_none,
+                size: 64, color: context.subTextColor),
+            const SizedBox(height: 16),
+            Text(
+              'No notifications found',
+              style: TextStyle(
+                color: context.subTextColor,
+                fontSize: 16,
+                fontFamily: FontFamily.openSans,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () =>
+          notificationController.fetchNotifications(isRefresh: true),
+      child: Column(
+        children: [
+          if (notificationController.notifications.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => notificationController.markAllAsRead(),
+                    icon: Icon(Icons.done_all,
+                        size: 20, color: context.primaryColor),
+                    label: Text(
+                      'Mark all as read',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.primaryColor,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: 20),
+              itemCount: notificationController.notifications.length +
+                  (notificationController.hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == notificationController.notifications.length) {
+                  notificationController.loadMore();
+                  return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
+                }
+
+                final notification =
+                    notificationController.notifications[index];
+                return _buildGeneralNotificationCard(context, notification);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGeneralNotificationCard(
+      BuildContext context, NotificationModel notification) {
+    final notificationController = context.read<NotificationController>();
+    final isUnread = notification.isRead == 0;
+
+    return InkWell(
+      onTap: () {
+        if (isUnread) {
+          notificationController.markAsRead(notification.id);
+        }
+
+        final type = notification.type?.toLowerCase() ?? '';
+        final refId = notification.referenceId;
+        final createdBy = notification.createdBy;
+
+        debugPrint(
+            "Notification Tapped: Type=$type, RefId=$refId, CreatedBy=$createdBy");
+
+        switch (type) {
+          case 'giveaway':
+            if (refId != null) {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.productDetails,
+                arguments: refId,
+              );
+            }
+            break;
+          case 'response':
+            if (refId != null) {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.tradeDetails,
+                arguments: refId,
+              );
+            }
+            break;
+          case 'review':
+            final userId = createdBy ?? refId;
+            if (userId != null) {
+              ProfileController.navigateToUserProfile(context, userId);
+            }
+            break;
+          case 'subscription':
+            Navigator.pushNamed(context, AppRoutes.subscriptionHistory);
+            break;
+          case 'wallet_giveaway':
+          case 'wallet_trade':
+            Navigator.pushNamed(context, AppRoutes.transactionHistory);
+            break;
+          case 'profile':
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+            break;
+          case 'system':
+            _showSystemNotificationDialog(context, notification);
+            break;
+          default:
+            if (refId != null) {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.productDetails,
+                arguments: refId,
+              );
+            }
+        }
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        decoration: BoxDecoration(
+          color: isUnread
+              ? context.primaryColor.withOpacity(0.06)
+              : context.surfaceColor,
+          borderRadius: BorderRadius.circular(12),
+          border: isUnread
+              ? Border.all(
+                  color: context.primaryColor.withOpacity(0.1), width: 1)
+              : Border.all(color: Colors.transparent, width: 1),
+          boxShadow: context.isDarkMode
+              ? []
+              : [
+                  BoxShadow(
+                    color: isUnread
+                        ? context.primaryColor.withOpacity(0.05)
+                        : Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (isUnread)
+                  Container(
+                    width: 5,
+                    color: context.primaryColor,
+                  ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(8),
+                                    child: Image.asset(
+                                      'assets/logo_transperant.png',
+                                      fit: BoxFit.contain,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          notification.notificationTitle,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: isUnread
+                                                ? FontWeight.w800
+                                                : FontWeight.w600,
+                                            color: context.textColor,
+                                            fontFamily: FontFamily.openSans,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (isUnread)
+                                          Container(
+                                            margin: const EdgeInsets.only(top: 4),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: context.primaryColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: const Text(
+                                              'NEW',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => notificationController
+                                  .deleteNotification(notification.id),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                child: Icon(Icons.close,
+                                    size: 20,
+                                    color:
+                                        context.subTextColor.withOpacity(0.4)),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          notification.notificationMessage,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: isUnread
+                                ? context.textColor
+                                : context.subTextColor.withOpacity(0.8),
+                            fontFamily: FontFamily.openSans,
+                            fontWeight:
+                                isUnread ? FontWeight.w500 : FontWeight.normal,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.access_time,
+                                    size: 14, color: context.subTextColor),
+                                const SizedBox(width: 6),
+                                Text(
+                                  notification.createdAt != null
+                                      ? _formatDate(notification.createdAt!)
+                                      : '',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: context.subTextColor,
+                                    fontFamily: FontFamily.openSans,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (isUnread)
+                              Text(
+                                'Tap to read',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: context.primaryColor,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return DateFormat.jm().format(date);
+    } else if (difference.inDays < 7) {
+      return DateFormat.E().format(date);
+    } else {
+      return DateFormat.yMMMd().format(date);
+    }
+  }
+
+  Widget _buildShimmer(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: ShimmerBox(height: 24, width: 100),
+          ),
+          const SizedBox(height: 12),
+          _buildShimmerCard(context),
+          const SizedBox(height: 30),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ShimmerBox(height: 24, width: 120),
+                ShimmerBox(height: 20, width: 80),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildShimmerCard(context),
+          _buildShimmerCard(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerCard(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ShimmerBox(height: 85, width: 85, radius: 12),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShimmerBox(height: 18, width: 220),
+                const SizedBox(height: 8),
+                ShimmerBox(height: 16, width: 160),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    ShimmerBox(height: 32, width: 80, radius: 6),
+                    const SizedBox(width: 12),
+                    ShimmerBox(height: 32, width: 80, radius: 6),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSystemNotificationDialog(
+      BuildContext context, NotificationModel notification) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          notification.notificationTitle,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        content: Text(
+          notification.notificationMessage,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+}

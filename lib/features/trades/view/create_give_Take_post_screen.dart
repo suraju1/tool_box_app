@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -531,7 +532,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8.r),
                         image: DecorationImage(
-                          image: FileImage(File(_itemImages[index].path)),
+                          image: kIsWeb 
+                              ? NetworkImage(_itemImages[index].path) as ImageProvider
+                              : FileImage(File(_itemImages[index].path)),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -815,8 +818,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8.r),
                             image: DecorationImage(
-                              image: FileImage(
-                                  File(_returnItemImages[index].path)),
+                              image: kIsWeb 
+                                  ? NetworkImage(_returnItemImages[index].path) as ImageProvider
+                                  : FileImage(File(_returnItemImages[index].path)),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -1188,9 +1192,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           .toInt(),
       notifyPartnersOnly: _notifyPartnersOnly,
       postType: postType,
-      itemImages: _itemImages.map((e) => e.path).toList(),
+      itemImages: _itemImages,
       returnItemImages:
-          _isPriceSelected ? [] : _returnItemImages.map((e) => e.path).toList(),
+          _isPriceSelected ? [] : _returnItemImages,
       returnItemName:
           (!_isPriceSelected && _returnItemNameController.text.isNotEmpty)
               ? _returnItemNameController.text

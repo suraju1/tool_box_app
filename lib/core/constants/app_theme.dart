@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../util/colors.dart';
+import 'package:flutter/foundation.dart';
+
+class NoTransitionsBuilder extends PageTransitionsBuilder {
+  const NoTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
+  }
+}
 
 class AppTheme {
   static final ThemeData lightTheme = ThemeData(
@@ -11,11 +27,12 @@ class AppTheme {
       seedColor: Colors.black,
       primary: Colors.black, // Buttons/Headers
       onPrimary: Colors.white, // Text on Buttons/Headers
-      surface: Colors.white,
+      surface: const Color(0xFFF3F4F6), // Modern, clean light grey for cards
       onSurface: Colors.black, // Text on surfaces
-      background: bg1Color,
+      background: Colors.white,
     ),
-    scaffoldBackgroundColor: bg1Color,
+    scaffoldBackgroundColor: Colors.white,
+    cardColor: const Color(0xFFF3F4F6),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
       foregroundColor: Colors.black,
@@ -33,9 +50,28 @@ class AppTheme {
       ),
       iconTheme: IconThemeData(color: Colors.black),
     ),
+    popupMenuTheme: const PopupMenuThemeData(
+      color: Colors.white,
+      surfaceTintColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+    ),
     dividerTheme: DividerThemeData(
       color: Colors.grey.shade300,
       thickness: 1,
+    ),
+    pageTransitionsTheme: PageTransitionsTheme(
+      builders: kIsWeb
+          ? {
+              for (final platform in TargetPlatform.values)
+                platform: const NoTransitionsBuilder(),
+            }
+          : const {
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+            },
     ),
   );
 
@@ -73,6 +109,18 @@ class AppTheme {
     dividerTheme: const DividerThemeData(
       color: Color(0xFF2C2C2C),
       thickness: 1,
+    ),
+    pageTransitionsTheme: PageTransitionsTheme(
+      builders: kIsWeb
+          ? {
+              for (final platform in TargetPlatform.values)
+                platform: const NoTransitionsBuilder(),
+            }
+          : const {
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+            },
     ),
   );
 }

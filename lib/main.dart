@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -25,11 +26,16 @@ import 'package:tool_bocs/features/trades/controller/wallet_controller.dart';
 import 'package:tool_bocs/core/controller/language_controller.dart';
 
 import 'app.dart';
+import 'package:tool_bocs/core/widgets/web_responsive_wrapper.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Clear image cache on startup to remove any corrupted 0-byte files
+  await DefaultCacheManager().emptyCache();
+
   await Hive.initFlutter();
   await Hive.openBox('location_box');
   ConnectivityService().initialize();
@@ -56,42 +62,44 @@ void main() async {
   await DeepLinkHandler().init();
 
   runApp(
-    ScreenUtilInit(
-      designSize: Size(390, 844),
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider(
-              create: (_) => ShimmerController()), //shimmer controller
-          ChangeNotifierProvider(create: (_) => ThemeController()),
-          ChangeNotifierProvider(create: (_) => OnBoardingController()),
-          ChangeNotifierProvider(create: (_) => BottomNavBarController()),
-          ChangeNotifierProvider(create: (_) => ChatController()),
-          ChangeNotifierProvider(
-              create: (_) => AuthController()), // Auth controller
-          ChangeNotifierProvider(
-              create: (_) => LocationController()), // Location controller
-          ChangeNotifierProvider(
-              create: (_) => TradeController()), // Trade controller
-          ChangeNotifierProvider(
-              create: (_) => ProfileController()), // Profile controller
-          ChangeNotifierProvider(
-              create: (_) => AddressController()), // Address controller
-          ChangeNotifierProvider(
-              create: (_) =>
-                  SubscriptionController()), // Subscription controller
-          ChangeNotifierProvider(
-              create: (_) =>
-                  NotificationController()), // Notification controller
-          ChangeNotifierProvider(
-              create: (_) => WalletController()), // Wallet controller
-          ChangeNotifierProvider(
-              create: (_) => LanguageController()), // Language controller
-        ],
-        child: const ToolUcsApp(),
+    WebResponsiveWrapper(
+      child: ScreenUtilInit(
+        designSize: const Size(390, 844),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(
+                create: (_) => ShimmerController()), //shimmer controller
+            ChangeNotifierProvider(create: (_) => ThemeController()),
+            ChangeNotifierProvider(create: (_) => OnBoardingController()),
+            ChangeNotifierProvider(create: (_) => BottomNavBarController()),
+            ChangeNotifierProvider(create: (_) => ChatController()),
+            ChangeNotifierProvider(
+                create: (_) => AuthController()), // Auth controller
+            ChangeNotifierProvider(
+                create: (_) => LocationController()), // Location controller
+            ChangeNotifierProvider(
+                create: (_) => TradeController()), // Trade controller
+            ChangeNotifierProvider(
+                create: (_) => ProfileController()), // Profile controller
+            ChangeNotifierProvider(
+                create: (_) => AddressController()), // Address controller
+            ChangeNotifierProvider(
+                create: (_) =>
+                    SubscriptionController()), // Subscription controller
+            ChangeNotifierProvider(
+                create: (_) =>
+                    NotificationController()), // Notification controller
+            ChangeNotifierProvider(
+                create: (_) => WalletController()), // Wallet controller
+            ChangeNotifierProvider(
+                create: (_) => LanguageController()), // Language controller
+          ],
+          child: const ToolUcsApp(),
+        ),
+        child: const SizedBox(), // prevent black screen
       ),
-      child: const SizedBox(), // prevent black screen
     ),
   );
 }

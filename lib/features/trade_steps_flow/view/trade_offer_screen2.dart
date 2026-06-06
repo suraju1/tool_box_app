@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -138,7 +139,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       priceRangeStart: priceStart,
       priceRangeEnd: priceEnd,
       isNegotiable: isNegotiable,
-      images: _itemImages.map((e) => e.path).toList(),
+      images: _itemImages,
     );
 
     log(request.toJson().toString());
@@ -1058,7 +1059,9 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8.r),
                         image: DecorationImage(
-                          image: FileImage(File(_itemImages[index].path)),
+                          image: kIsWeb
+                              ? NetworkImage(_itemImages[index].path) as ImageProvider
+                              : FileImage(File(_itemImages[index].path)),
                           fit: BoxFit.cover,
                         ),
                       ),
