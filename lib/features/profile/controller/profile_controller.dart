@@ -17,7 +17,8 @@ import 'package:tool_bocs/features/profile/model/faq_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/core/models/pagination_model.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
-
+import 'package:tool_bocs/core/widgets/responsive_layout.dart';
+import 'package:tool_bocs/features/web_ui/view/web_user_profile_screen.dart';
 class ProfileController extends ChangeNotifier {
   final ProfileService _profileService = ProfileService();
 
@@ -351,22 +352,37 @@ class ProfileController extends ChangeNotifier {
   /// Global helper to navigate to user profile with privacy guard
   static void navigateToUserProfile(BuildContext context, int userId) {
     final authController = context.read<AuthController>();
+    final isWeb = ResponsiveLayout.isWeb(context);
 
     // If it's own profile, push ProfileScreen
     if (authController.currentUser?.id == userId) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ProfileScreen(isTab: false, isDrawer: false),
-        ),
-      );
+      if (isWeb) {
+        // Typically on web, own profile is accessed via nav bar or WebProfileScreen,
+        // but if navigated directly here, we can fallback to the web user profile screen for consistency 
+        // or just let it load own profile in it.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WebUserProfileScreen(userId: userId.toString()),
+          ),
+        );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ProfileScreen(isTab: false, isDrawer: false),
+          ),
+        );
+      }
       return;
     }
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => UserProfileScreen(userId: userId.toString()),
+        builder: (context) => isWeb
+            ? WebUserProfileScreen(userId: userId.toString())
+            : UserProfileScreen(userId: userId.toString()),
       ),
     );
   }
