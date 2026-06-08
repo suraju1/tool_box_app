@@ -44,7 +44,10 @@ class _WebPrivacyPolicyScreenState extends State<WebPrivacyPolicyScreen> {
               Expanded(
                 child: Stack(
                   children: [
-                    WebViewWidget(controller: _controller),
+                    Container(
+                      color: Colors.white,
+                      child: WebViewWidget(controller: _controller),
+                    ),
                     if (_isLoading)
                       Center(
                         child: CircularProgressIndicator(

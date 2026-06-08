@@ -21,7 +21,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
+      ..setBackgroundColor(Colors.transparent)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
@@ -75,7 +75,10 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
       ),
       body: Stack(
         children: [
-          WebViewWidget(controller: _controller),
+          Container(
+            color: context.scaffoldBg,
+            child: WebViewWidget(controller: _controller),
+          ),
           if (_isLoading)
             Center(
               child: CircularProgressIndicator(

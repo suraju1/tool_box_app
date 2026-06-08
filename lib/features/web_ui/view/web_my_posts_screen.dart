@@ -231,6 +231,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
 
   Widget _buildFilterChip(String label, ProfileController controller) {
     bool isSelected = controller.selectedMyPostsFilter == label;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: () {
         if (_scrollController.hasClients) {
@@ -244,14 +246,18 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? context.primaryColor : Theme.of(context).cardColor,
+          color: isSelected
+              ? (isDark ? Colors.white : Colors.black)
+              : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-              color: isSelected ? context.primaryColor : greyColor.withOpacity(0.3)),
+              color: isSelected
+                  ? (isDark ? Colors.white : Colors.black)
+                  : Colors.grey.withOpacity(0.2)),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: context.primaryColor.withOpacity(0.3),
+                    color: (isDark ? Colors.white : Colors.black).withOpacity(0.15),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   )
@@ -262,7 +268,9 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: isSelected ? Colors.white : Colors.grey.shade700,
+            color: isSelected
+                ? (isDark ? Colors.black : Colors.white)
+                : (isDark ? Colors.grey.shade400 : Colors.grey.shade700),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -282,7 +290,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 400,
-        mainAxisExtent: 320,
+        mainAxisExtent: 420,
         crossAxisSpacing: 24,
         mainAxisSpacing: 24,
       ),
@@ -326,7 +334,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
             maxCrossAxisExtent: 400,
-            mainAxisExtent: 320,
+            mainAxisExtent: 420,
             crossAxisSpacing: 24,
             mainAxisSpacing: 24,
           ),
@@ -390,7 +398,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
             onPressed: () =>
                 Navigator.pushNamed(context, AppRoutes.createGivePost),
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.primaryColor,
+              backgroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -548,29 +556,27 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                       ),
                     ],
                   ),
-                  InkWell(
-                    onTap: () {
+                  ElevatedButton(
+                    onPressed: () {
                       Navigator.pushNamed(
                         context,
                         AppRoutes.notifications,
                         arguments: post.id,
                       );
                     },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: context.primaryColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Text(
-                        'View Offers',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6)),
+                    ),
+                    child: const Text(
+                      'View Offers',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
                     ),
                   ),

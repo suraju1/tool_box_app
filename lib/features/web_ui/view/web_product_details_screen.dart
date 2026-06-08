@@ -164,13 +164,6 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
             return Row(
               children: [
                 IconButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to favorites!')));
-                  },
-                  icon: const Icon(Icons.favorite_border_rounded, color: Colors.grey),
-                  tooltip: 'Save',
-                ),
-                IconButton(
                   onPressed: _isSharing
                       ? null
                       : () async {
@@ -356,19 +349,32 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
 
   Widget _buildCategoryTag(String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.75),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        color: label.toLowerCase().contains('goods')
+            ? Colors.blue.shade700
+            : label.toLowerCase().contains('services')
+                ? Colors.green.shade700
+                : label.toLowerCase().contains('money')
+                    ? Colors.orange.shade700
+                    : context.isDarkMode
+                        ? Colors.white
+                        : Colors.black.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         label.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: (label.toLowerCase().contains('goods') ||
+                  label.toLowerCase().contains('services') ||
+                  label.toLowerCase().contains('money'))
+              ? Colors.white
+              : context.isDarkMode
+                  ? Colors.black
+                  : Colors.white,
           fontSize: 12,
           letterSpacing: 1.2,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -426,11 +432,11 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
           Text(
             post.itemName,
             style: TextStyle(
-              fontSize: 32,
+              fontSize: 28,
               fontWeight: FontWeight.w800,
               fontFamily: FontFamily.openSans,
               color: context.textColor,
-              height: 1.2,
+              height: 1.3,
             ),
           ),
           const SizedBox(height: 8),
@@ -452,7 +458,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                 Text(
                   '₹${post.priceMin}',
                   style: TextStyle(
-                    fontSize: 48,
+                    fontSize: 42,
                     fontWeight: FontWeight.w900,
                     fontFamily: FontFamily.openSans,
                     color: context.textColor,
@@ -461,7 +467,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                 if (post.priceMax != null && post.priceMax! > post.priceMin!) ...[
                   const SizedBox(width: 12),
                   Text(
-                    ' - ₹${post.priceMax}',
+                    '₹${post.priceMax}',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -561,11 +567,12 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
           onPressed: () => Navigator.pushNamed(context, AppRoutes.tradeOffer),
           style: ElevatedButton.styleFrom(
             backgroundColor: context.primaryColor,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            foregroundColor: context.onPrimaryColor,
             minimumSize: const Size(double.infinity, 60),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+            elevation: 8,
+            shadowColor: context.primaryColor.withOpacity(0.4),
           ),
           child: Text('Make Offer ($btnText)'),
         ),
@@ -588,11 +595,11 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
               label: Text(isSaved ? 'Seller Saved' : 'Save Seller'),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 20),
-                side: BorderSide(color: context.dividerColor, width: 1.5),
-                foregroundColor: context.textColor,
+                side: BorderSide(color: isSaved ? context.primaryColor : context.dividerColor, width: 1.5),
+                foregroundColor: isSaved ? context.primaryColor : context.textColor,
                 minimumSize: const Size(double.infinity, 60),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0.5),
               ),
             );
           },
@@ -717,13 +724,13 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.dividerColor.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -932,70 +939,14 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
         ),
         const SizedBox(height: 32),
         SizedBox(
-          height: 380,
+          height: 420,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: posts.length,
             separatorBuilder: (_, __) => const SizedBox(width: 24),
             itemBuilder: (context, index) {
               final item = posts[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WebProductDetailsScreen(postId: item.id),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: 300,
-                  color: Colors.transparent,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 250,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: context.surfaceColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: context.dividerColor.withOpacity(0.5)),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: item.itemImages.isNotEmpty
-                              ? AppCachedImage(
-                                  imageUrl: item.itemImages.first,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  radius: 0,
-                                )
-                              : const Center(child: Icon(Icons.image_not_supported, color: Colors.grey, size: 40)),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        item.itemCategory.toUpperCase(),
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.primaryColor, letterSpacing: 1.2),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        item.itemName,
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: context.textColor),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        item.returnType.toLowerCase() == 'price' ? '₹${item.priceMin}' : 'Exchange',
-                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22, color: context.textColor),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return _RelatedProductCard(item: item);
             },
           ),
         ),
@@ -1093,6 +1044,110 @@ class _ReturnImagePreviewScreenWebState extends State<_ReturnImagePreviewScreenW
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RelatedProductCard extends StatefulWidget {
+  final PostModel item;
+  const _RelatedProductCard({required this.item});
+
+  @override
+  State<_RelatedProductCard> createState() => _RelatedProductCardState();
+}
+
+class _RelatedProductCardState extends State<_RelatedProductCard> {
+  bool _isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WebProductDetailsScreen(postId: widget.item.id),
+          ),
+        );
+      },
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovering = true),
+        onExit: (_) => setState(() => _isHovering = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          width: 300,
+          transform: Matrix4.translationValues(0, _isHovering ? -8 : 0, 0),
+          decoration: BoxDecoration(
+            color: context.surfaceColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _isHovering ? context.primaryColor.withOpacity(0.3) : context.dividerColor.withOpacity(0.5)),
+            boxShadow: _isHovering
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 250,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: widget.item.itemImages.isNotEmpty
+                      ? AnimatedScale(
+                          scale: _isHovering ? 1.05 : 1.0,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOutQuart,
+                          child: AppCachedImage(
+                            imageUrl: widget.item.itemImages.first,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            radius: 0,
+                          ),
+                        )
+                      : const Center(child: Icon(Icons.image_not_supported, color: Colors.grey, size: 40)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.item.itemCategory.toUpperCase(),
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: context.primaryColor, letterSpacing: 1.2),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      widget.item.itemName,
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: context.textColor, height: 1.2),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      widget.item.returnType.toLowerCase() == 'price' ? '₹${widget.item.priceMin}' : 'Exchange',
+                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: context.textColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

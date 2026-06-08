@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
@@ -40,7 +40,7 @@ class AppSuccessDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(20),
       ),
       elevation: 0,
       backgroundColor: Colors.transparent,
@@ -50,11 +50,12 @@ class AppSuccessDialog extends StatelessWidget {
 
   Widget contentBox(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20.r),
+      constraints: const BoxConstraints(maxWidth: 400),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
         color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -67,39 +68,39 @@ class AppSuccessDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            height: 100.r,
-            width: 100.r,
+            height: 80,
+            width: 80,
             decoration: BoxDecoration(
               color: Colors.green.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.check_circle,
               color: Colors.green,
-              size: 60.r,
+              size: 50,
             ),
           ),
-          SizedBox(height: 20.h),
+          const SizedBox(height: 24),
           Text(
             title,
             style: TextStyle(
-              fontSize: 22.sp,
+              fontSize: 24,
               fontWeight: FontWeight.w700,
               fontFamily: FontFamily.openSans,
               color: context.textColor,
             ),
           ),
-          SizedBox(height: 15.h),
+          const SizedBox(height: 12),
           Text(
             message,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 15,
               fontFamily: FontFamily.openSans,
               color: context.subTextColor,
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 25.h),
+          const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -111,16 +112,16 @@ class AppSuccessDialog extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.primaryColor,
-                padding: EdgeInsets.symmetric(vertical: 12.h),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 0,
               ),
               child: Text(
                 buttonText,
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: context.onPrimaryColor,
                   fontFamily: FontFamily.openSans,

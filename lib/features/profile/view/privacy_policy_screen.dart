@@ -21,7 +21,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
+      ..setBackgroundColor(Colors.white)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
@@ -75,7 +75,10 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
       ),
       body: Stack(
         children: [
-          WebViewWidget(controller: _controller),
+          Container(
+            color: Colors.white,
+            child: WebViewWidget(controller: _controller),
+          ),
           if (_isLoading)
             Center(
               child: CircularProgressIndicator(

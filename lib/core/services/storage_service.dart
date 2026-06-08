@@ -86,11 +86,25 @@ class StorageService {
     return prefs.getBool(_isLoggedInKey) ?? false;
   }
 
-  /// Clear all authentication data
   static Future<void> clearAuthData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_authTokenKey);
     await prefs.remove(_userDataKey);
+    await prefs.remove(_userProfileKey);
     await prefs.remove(_isLoggedInKey);
+  }
+
+  static const _userProfileKey = 'user_profile_data';
+
+  /// Save user profile data as JSON string
+  static Future<void> saveUserProfile(String profileData) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userProfileKey, profileData);
+  }
+
+  /// Get user profile data JSON string
+  static Future<String?> getUserProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userProfileKey);
   }
 }

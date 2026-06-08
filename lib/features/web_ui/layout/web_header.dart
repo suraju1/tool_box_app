@@ -6,9 +6,28 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
 import 'package:tool_bocs/core/controller/theme_controller.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 
-class WebHeader extends StatelessWidget {
+class WebHeader extends StatefulWidget {
   const WebHeader({super.key});
+
+  @override
+  State<WebHeader> createState() => _WebHeaderState();
+}
+
+class _WebHeaderState extends State<WebHeader> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profileCtrl = context.read<ProfileController>();
+      if (profileCtrl.ownProfile == null) {
+        profileCtrl.getUserProfile(null, isOwnProfile: true);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,14 +100,42 @@ class WebHeader extends StatelessWidget {
             },
           ),
           const SizedBox(width: 16),
-          // User Profile Avatar
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: context.primaryColor.withOpacity(0.2),
-            child: Icon(Icons.person, color: context.primaryColor, size: 20),
+          Consumer2<AuthController, ProfileController>(
+            builder: (context, authController, profileController, child) {
+              final authUser = authController.currentUser;
+              final profileUser = profileController.ownProfile?.userDetails;
+              final String userName = profileUser?.fullName ?? authUser?.fullName ?? "User";
+              final String? imageUrl = profileUser?.image;
+
+              return Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: context.primaryColor.withOpacity(0.5), width: 1),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: AppCachedImage(
+                        imageUrl: imageUrl ?? '',
+                        userName: userName,
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                        radius: 18,
+                        placeholderBgColor: context.primaryColor.withOpacity(0.2),
+                        placeholderTextColor: context.primaryColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(userName, style: const TextStyle(fontWeight: FontWeight.w600)),
+                ],
+              );
+            },
           ),
-          const SizedBox(width: 8),
-          const Text("User", style: TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
     );

@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+
 class WebGiveScreen extends StatefulWidget {
   const WebGiveScreen({super.key});
 
@@ -19,6 +20,7 @@ class WebGiveScreen extends StatefulWidget {
 
 class _WebGiveScreenState extends State<WebGiveScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -31,6 +33,7 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -38,155 +41,159 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<TradeController>();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // HEADER / SEARCH SECTION
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                )
-              ]
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "What do you want to give today?",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+    return Scrollbar(
+      controller: _scrollController,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // HEADER / SEARCH SECTION
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    )
+                  ]),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "What do you want to give today?",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Search and fulfill requests from people around you.",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey.shade600,
+                  const SizedBox(height: 8),
+                  Text(
+                    "Search and fulfill requests from people around you.",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).scaffoldBackgroundColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (value) {
-                            controller.setSearchQuery(value, type: 'take');
-                          },
-                          decoration: const InputDecoration(
-                            icon: Icon(Icons.search, color: Colors.grey),
-                            hintText: "Search requests (e.g. Hammer, Drill)...",
-                            border: InputBorder.none,
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: (value) {
+                              controller.setSearchQuery(value, type: 'take');
+                            },
+                            decoration: const InputDecoration(
+                              icon: Icon(Icons.search, color: Colors.grey),
+                              hintText:
+                                  "Search requests (e.g. Hammer, Drill)...",
+                              border: InputBorder.none,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          AppRoutes.createGivePost,
-                          arguments: "Create Give Post",
-                        );
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text("Create Post"),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    )
-                  ],
+                      const SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.createGivePost,
+                            arguments: "Create Give Post",
+                          );
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text("Create Post"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // RESULTS COUNT
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Nearby Requests",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  "Showing ${controller.takePosts.length} Results",
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
-          ),
-          
-          const SizedBox(height: 40),
-          
-          // RESULTS COUNT
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Nearby Requests",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "Showing ${controller.takePosts.length} Results",
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          
-          // PRODUCTS GRID
-          if (controller.isTakeLoading && controller.takePosts.isEmpty)
-            const Center(child: CircularProgressIndicator())
-          else if (controller.takePosts.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(40.0),
-                child: Column(
-                  children: [
-                    Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
-                    const SizedBox(height: 16),
-                    Text(
-                      "No requests found matching your criteria.",
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
-                    )
-                  ],
-                ),
-              ),
-            )
-          else
-            LayoutBuilder(
-              builder: (context, constraints) {
-                int crossAxisCount = (constraints.maxWidth / 290).floor();
-                if (crossAxisCount < 1) crossAxisCount = 1;
-                
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                    childAspectRatio: 0.75,
+            const SizedBox(height: 20),
+
+            // PRODUCTS GRID
+            if (controller.isTakeLoading && controller.takePosts.isEmpty)
+              const Center(child: CircularProgressIndicator())
+            else if (controller.takePosts.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(40.0),
+                  child: Column(
+                    children: [
+                      Icon(Icons.search_off,
+                          size: 64, color: Colors.grey.shade400),
+                      const SizedBox(height: 16),
+                      Text(
+                        "No requests found matching your criteria.",
+                        style: TextStyle(
+                            color: Colors.grey.shade600, fontSize: 16),
+                      )
+                    ],
                   ),
-                  itemCount: controller.takePosts.length,
-                  itemBuilder: (context, index) {
-                    return _WebGiveCard(post: controller.takePosts[index]);
-                  },
-                );
-              }
-            ),
-        ],
+                ),
+              )
+            else
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 320,
+                  mainAxisExtent: 420,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                ),
+                itemCount: controller.takePosts.length,
+                itemBuilder: (context, index) {
+                  return _WebGiveCard(post: controller.takePosts[index]);
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -325,7 +332,8 @@ class _WebGiveCard extends StatelessWidget {
     } else {
       String text = 'In exchange for: ₹${min?.toStringAsFixed(0) ?? 0} (Money)';
       if (min != null && max != null && max != min) {
-        text = 'In exchange for: ₹${min.toStringAsFixed(0)} - ₹${max.toStringAsFixed(0)} (Money)';
+        text =
+            'In exchange for: ₹${min.toStringAsFixed(0)} - ₹${max.toStringAsFixed(0)} (Money)';
       }
       return Text(
         text,
@@ -358,8 +366,8 @@ class _WebGiveCard extends StatelessWidget {
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? greyColor.withOpacity(0.1) 
+            color: Theme.of(context).brightness == Brightness.dark
+                ? greyColor.withOpacity(0.1)
                 : Colors.grey.shade300,
           ),
           boxShadow: [
@@ -376,22 +384,23 @@ class _WebGiveCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image 
+            // Image
             Expanded(
               child: Stack(
                 children: [
                   Container(
                     width: double.infinity,
                     color: greyColor.withOpacity(0.1),
-                    child: imagePath.isNotEmpty 
-                      ? AppCachedImage(
-                          imageUrl: imagePath,
-                          fit: BoxFit.contain,
-                          width: double.infinity,
-                          height: double.infinity,
-                          radius: 0,
-                        )
-                      : const Icon(Icons.handyman, size: 50, color: Colors.grey),
+                    child: imagePath.isNotEmpty
+                        ? AppCachedImage(
+                            imageUrl: imagePath,
+                            fit: BoxFit.contain,
+                            width: double.infinity,
+                            height: double.infinity,
+                            radius: 0,
+                          )
+                        : const Icon(Icons.handyman,
+                            size: 50, color: Colors.grey),
                   ),
                   Positioned(
                     top: 8,
@@ -404,11 +413,16 @@ class _WebGiveCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: post.itemCategory.toLowerCase().contains('goods')
                             ? Colors.blue.shade700
-                            : post.itemCategory.toLowerCase().contains('services')
+                            : post.itemCategory
+                                    .toLowerCase()
+                                    .contains('services')
                                 ? Colors.green.shade700
-                                : post.itemCategory.toLowerCase().contains('money')
+                                : post.itemCategory
+                                        .toLowerCase()
+                                        .contains('money')
                                     ? Colors.orange.shade700
-                                    : Theme.of(context).brightness == Brightness.dark
+                                    : Theme.of(context).brightness ==
+                                            Brightness.dark
                                         ? Colors.white
                                         : Colors.black.withOpacity(0.7),
                         borderRadius: BorderRadius.circular(4),
@@ -416,9 +430,15 @@ class _WebGiveCard extends StatelessWidget {
                       child: Text(
                         post.itemCategory,
                         style: TextStyle(
-                          color: (post.itemCategory.toLowerCase().contains('goods') ||
-                                  post.itemCategory.toLowerCase().contains('services') ||
-                                  post.itemCategory.toLowerCase().contains('money'))
+                          color: (post.itemCategory
+                                      .toLowerCase()
+                                      .contains('goods') ||
+                                  post.itemCategory
+                                      .toLowerCase()
+                                      .contains('services') ||
+                                  post.itemCategory
+                                      .toLowerCase()
+                                      .contains('money'))
                               ? Colors.white
                               : Theme.of(context).brightness == Brightness.dark
                                   ? Colors.black
@@ -466,7 +486,8 @@ class _WebGiveCard extends StatelessWidget {
                             post.distanceKm != null
                                 ? '${post.distanceKm!.toStringAsFixed(1)} km away'
                                 : '- km away',
-                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 12),
                           ),
                         ],
                       ),
@@ -479,7 +500,8 @@ class _WebGiveCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           post.itemName,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -502,14 +524,12 @@ class _WebGiveCard extends StatelessWidget {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.black
-                              : null,
-                          foregroundColor: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : null,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6)),
                         ),
                         child: const Text("Offer to Give"),
                       ),

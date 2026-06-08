@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +16,7 @@ import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
 import 'package:tool_bocs/features/profile/model/faq_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/core/models/pagination_model.dart';
+import 'package:tool_bocs/core/services/storage_service.dart';
 
 class ProfileController extends ChangeNotifier {
   final ProfileService _profileService = ProfileService();
@@ -158,6 +160,19 @@ class ProfileController extends ChangeNotifier {
     return response;
   }
 
+  Future<void> loadCachedProfile() async {
+    final profileJsonStr = await StorageService.getUserProfile();
+    if (profileJsonStr != null && _ownProfile == null) {
+      try {
+        final Map<String, dynamic> json = jsonDecode(profileJsonStr);
+        _ownProfile = UserProfileModel.fromJson(json);
+        notifyListeners();
+      } catch (e) {
+        debugPrint("Error loading cached user profile: $e");
+      }
+    }
+  }
+
   Future<bool> getUserProfile(int? userId, {bool isOwnProfile = true}) async {
     _isLoading = true;
     _errorMessage = null;
@@ -174,6 +189,9 @@ class ProfileController extends ChangeNotifier {
     if (response.success) {
       if (isOwnProfile) {
         _ownProfile = response.data;
+        if (response.data != null) {
+           StorageService.saveUserProfile(jsonEncode(response.data!.toJson()));
+        }
       } else {
         _viewedProfile = response.data;
       }
@@ -295,7 +313,18 @@ class ProfileController extends ChangeNotifier {
     }
 
     // 2. Update General Profile Data
-    final response = await _profileService.updateGeneralProfile(requestData);
+    ApiResponse<dynamic> response = await _profileService.updateGeneralProfile(requestData);
+
+    // WORKAROUND for backend bug where completeProfile crashes on createNotification
+    // The database is successfully updated, but the backend throws this error
+    // because it tries to send a notification and fails. We can safely ignore it.
+    if (!response.success && response.message?.contains("createNotification") == true) {
+      response = ApiResponse(
+        success: true,
+        message: "Profile updated successfully",
+        data: response.data,
+      );
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -307,7 +336,7 @@ class ProfileController extends ChangeNotifier {
             isOwnProfile: true);
         // Sync both name and profile image to Firestore so chat screens stay up to date
         if (reloadSuccess) {
-          FirebaseNotificationService.syncProfileData(
+           FirebaseNotificationService.syncProfileData(
             fullName: _ownProfile?.userDetails.fullName,
             profileImageUrl: _ownProfile?.userDetails.image,
           );

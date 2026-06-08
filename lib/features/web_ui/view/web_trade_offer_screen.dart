@@ -953,7 +953,32 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
 
   Widget _buildBottomAction(bool isGivePost, TradeController controller) {
     final post = controller.selectedPost;
-    if (post != null && post.hasResponded) return const SizedBox.shrink();
+    if (post != null && post.hasResponded) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.green.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.green),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green),
+            const SizedBox(width: 12),
+            Text(
+              'You have already made an offer for this item.',
+              style: TextStyle(
+                color: context.isDarkMode ? Colors.green.shade400 : Colors.green.shade800,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return SizedBox(
       width: double.infinity,

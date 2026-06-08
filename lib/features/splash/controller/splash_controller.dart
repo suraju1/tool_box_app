@@ -39,6 +39,10 @@ class SplashController extends ChangeNotifier {
 
       // Check if auth data was loaded successfully
       if (authController.isAuthenticated) {
+        // Load cached profile data synchronously (or await it quickly)
+        final profileController = context.read<ProfileController>();
+        await profileController.loadCachedProfile();
+
         // Set token in API client for future requests
         final token = await StorageService.getAuthToken();
         if (token != null) {

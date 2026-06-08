@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/routes/app_route_pages.dart';
@@ -8,7 +9,6 @@ import 'package:tool_bocs/routes/navigator_key.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/core/controller/language_controller.dart';
-
 import 'routes/app_routes.dart';
 
 class ToolUcsApp extends StatelessWidget {
@@ -27,6 +27,15 @@ class ToolUcsApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: themeController.themeMode,
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          dragDevices: {
+            // Support drag scrolling on desktop/web
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.touch,
+            PointerDeviceKind.stylus,
+            PointerDeviceKind.trackpad,
+          },
+        ),
         navigatorKey: navigatorKey,
         initialRoute: AppRoutes.splash,
         routes: AppPages.routes,

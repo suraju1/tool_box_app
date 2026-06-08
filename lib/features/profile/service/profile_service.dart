@@ -140,7 +140,13 @@ class ProfileService {
     try {
       final formData = FormData();
       final String path = imageFile.path;
-      final fileName = path.split(RegExp(r'[\\/]')).last;
+      String fileName = '';
+      try {
+        fileName = imageFile.name;
+      } catch (_) {
+        fileName = path.split(RegExp(r'[\\/]')).last;
+      }
+
       if (kIsWeb) {
         final bytes = await imageFile.readAsBytes();
         formData.files.add(MapEntry(

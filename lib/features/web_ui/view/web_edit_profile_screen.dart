@@ -11,6 +11,9 @@ import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/app_success_dialog.dart';
 import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/widgets/premium_card.dart';
+import 'package:tool_bocs/core/widgets/premium_text_field.dart';
+import 'package:tool_bocs/core/widgets/animated_switch.dart';
 
 class WebEditProfileScreen extends StatefulWidget {
   const WebEditProfileScreen({super.key});
@@ -37,6 +40,8 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
   double? _selectedLatitude;
   double? _selectedLongitude;
 
+  bool _hasUnsavedChanges = false;
+
   @override
   void initState() {
     super.initState();
@@ -61,7 +66,8 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     if (profile?.dateOfBirth != null && profile!.dateOfBirth!.isNotEmpty) {
       try {
         _selectedDate = DateTime.parse(profile.dateOfBirth!);
-        _dobController.text = "${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}";
+        _dobController.text =
+            "${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}";
       } catch (e) {
         debugPrint('Error parsing DOB: $e');
         _dobController.text = profile.dateOfBirth!;
@@ -69,10 +75,27 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     }
     _isInitialized = profile != null;
 
+    // Add listeners to track unsaved changes
+    void markUnsaved() {
+      if (!_hasUnsavedChanges) {
+        setState(() {
+          _hasUnsavedChanges = true;
+        });
+      }
+    }
+
+    _nameController.addListener(markUnsaved);
+    _locationController.addListener(markUnsaved);
+    _emailController.addListener(markUnsaved);
+    _mobileController.addListener(markUnsaved);
+    _dobController.addListener(markUnsaved);
     _bioController.addListener(() {
-      setState(() {});
+      setState(() {}); // Rebuild for bio char counter
+      markUnsaved();
     });
   }
+
+
 
   Future<void> _pickImage() async {
     final List<XFile>? images = await AppImagePickerBS.show(context);
@@ -82,54 +105,12 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
       setState(() {
         _selectedWebImage = images.first;
         _selectedWebImageBytes = bytes;
+        _hasUnsavedChanges = true;
       });
     }
   }
 
-  void _viewImageFullScreen(String? imageUrl) {
-    if ((imageUrl == null || imageUrl.isEmpty) && _selectedWebImageBytes == null) return;
-    
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.zero,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(color: Colors.black87),
-            ),
-            InteractiveViewer(
-              boundaryMargin: const EdgeInsets.all(20),
-              minScale: 0.5,
-              maxScale: 4,
-              child: Center(
-                child: _selectedWebImageBytes != null
-                    ? Image.memory(_selectedWebImageBytes!)
-                    : AppCachedImage(
-                        imageUrl: imageUrl ?? '',
-                        userName: '',
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: MediaQuery.of(context).size.height * 0.8,
-                        fit: BoxFit.contain,
-                      ),
-              ),
-            ),
-            Positioned(
-              top: 20,
-              right: 20,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 36),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   double? _parseCoordinate(dynamic value) {
     if (value == null) return null;
@@ -145,6 +126,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
           _locationController.text = locationController.address!;
           _selectedLatitude = locationController.latitude;
           _selectedLongitude = locationController.longitude;
+          _hasUnsavedChanges = true;
         });
       }
     }
@@ -181,7 +163,8 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
       if (profile.dateOfBirth != null && profile.dateOfBirth!.isNotEmpty) {
         try {
           _selectedDate = DateTime.parse(profile.dateOfBirth!);
-          _dobController.text = "${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}";
+          _dobController.text =
+              "${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}";
         } catch (e) {
           _dobController.text = profile.dateOfBirth!;
         }
@@ -189,196 +172,119 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
       _isInitialized = true;
     }
 
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: Column(
-            children: [
-              _buildHeader(context),
-              const Divider(height: 1),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
-                  child: Container(
-                    padding: const EdgeInsets.all(40),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Theme.of(context).dividerColor),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildProfileImage(),
-                        const SizedBox(height: 32),
-                        const Text(
-                          'Personal Information',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(child: _buildTextField('Full Name', _nameController, icon: Icons.person_outline)),
-                            const SizedBox(width: 24),
-                            Expanded(
-                              child: _buildTextField(
-                                'Location',
-                                _locationController,
-                                icon: Icons.location_on_outlined,
-                                readOnly: true,
-                                onTap: () {
-                                  WebMapAddressPickerDialog.show(context, isPickOnly: true)
-                                      .then((_) => _updateLocationFromController());
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildTextField(
-                                'Email Address',
-                                _emailController,
-                                icon: Icons.email_outlined,
-                                helperText: 'Used for notifications and account recovery',
-                              ),
-                            ),
-                            const SizedBox(width: 24),
-                            Expanded(
-                              child: _buildTextField(
-                                'Mobile Number',
-                                _mobileController,
-                                icon: Icons.phone_android_outlined,
-                                helperText: 'Verified mobile number',
-                                readOnly: true,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          'Date of Birth',
-                          _dobController,
-                          icon: Icons.calendar_today_outlined,
-                          readOnly: true,
-                          onTap: () async {
-                            DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: _selectedDate ?? DateTime.now().subtract(const Duration(days: 6570)),
-                              firstDate: DateTime(1900),
-                              lastDate: DateTime.now(),
-                            );
-                            if (pickedDate != null) {
-                              setState(() {
-                                _selectedDate = pickedDate;
-                                _dobController.text = "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
-                              });
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 32),
-                        const Text(
-                          'Gender',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            _buildGenderRadio('Male'),
-                            const SizedBox(width: 16),
-                            _buildGenderRadio('Female'),
-                            const SizedBox(width: 16),
-                            _buildGenderRadio('Other'),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-                        const Text(
-                          'Bio',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Tell others about yourself',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildBioField(),
-                        const SizedBox(height: 32),
-                        const Text(
-                          'Preferences',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildSwitchTile(
-                          'Profile Visibility',
-                          'Public: Anyone can view your profile.',
-                          _profileVisibility,
-                          (val) => setState(() => _profileVisibility = val),
-                        ),
-                        const Divider(height: 32),
-                        _buildSwitchTile(
-                          'Show Trade History',
-                          'Your trade history is hidden from others.',
-                          _showTradeHistory,
-                          (val) => setState(() => _showTradeHistory = val),
-                        ),
-                        const SizedBox(height: 48),
-                        _buildSaveButton(controller),
-                      ],
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: _buildDashboardHeader(context),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(32, 24, 32, 120),
+                sliver: SliverToBoxAdapter(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: isDesktop 
+                          ? _buildDesktopGrid(controller)
+                          : _buildMobileLayout(controller),
                     ),
                   ),
                 ),
               ),
             ],
           ),
-        ),
+          _buildStickyActionBar(controller),
+        ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0),
-      child: Row(
+  Widget _buildDashboardHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final profile = context.watch<ProfileController>().ownProfile?.userDetails;
+    
+    return Container(
+      width: double.infinity,
+      height: 280,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.primaryColor.withOpacity(0.8),
+            theme.primaryColorDark,
+          ],
+        ),
+      ),
+      child: Stack(
         children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, size: 24),
-            splashRadius: 24,
+          Positioned(
+            top: 24,
+            left: 24,
+            child: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+              splashRadius: 28,
+            ),
           ),
-          const SizedBox(width: 16),
-          const Text(
-            'Edit Profile',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: FontFamily.openSans,
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 48,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _buildPremiumProfileImage(),
+                const SizedBox(width: 24),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 48.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _nameController.text.isNotEmpty ? _nameController.text : (profile?.fullName ?? 'User'),
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: FontFamily.openSans,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _locationController.text.isNotEmpty ? _locationController.text : 'No location set',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white.withOpacity(0.8),
+                          fontFamily: FontFamily.openSans,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -386,248 +292,428 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     );
   }
 
-  Widget _buildProfileImage() {
+  Widget _buildPremiumProfileImage() {
     final user = context.watch<ProfileController>().ownProfile?.userDetails;
-    return Center(
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              GestureDetector(
-                onTap: () => _viewImageFullScreen(user?.image),
-                child: Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+    return GestureDetector(
+      onTap: _pickImage,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 6),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(70),
-                    child: _selectedWebImageBytes != null
-                        ? Image.memory(
-                            _selectedWebImageBytes!,
-                            fit: BoxFit.cover,
-                          )
-                        : AppCachedImage(
-                            imageUrl: user?.image ?? '',
-                            userName: user?.fullName ?? '',
-                            width: 140,
-                            height: 140,
-                            fit: BoxFit.cover,
-                          ),
-                  ),
-                ),
+                ],
               ),
-              Positioned(
-                bottom: 4,
-                right: 4,
-                child: GestureDetector(
-                  onTap: _pickImage,
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      shape: BoxShape.circle,
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black12, blurRadius: 4),
-                      ],
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(80),
+                child: _selectedWebImageBytes != null
+                    ? Image.memory(
+                        _selectedWebImageBytes!,
+                        fit: BoxFit.cover,
+                      )
+                    : AppCachedImage(
+                        imageUrl: user?.image ?? '',
+                        userName: user?.fullName ?? '',
+                        width: 160,
+                        height: 160,
+                        fit: BoxFit.cover,
+                      ),
+              ),
+            ),
+            Positioned(
+              bottom: 12,
+              right: 12,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
                     ),
-                    child: Icon(Icons.camera_alt, size: 20, color: Theme.of(context).primaryColor),
-                  ),
+                  ],
                 ),
+                child: Icon(Icons.edit, size: 20, color: Theme.of(context).scaffoldBackgroundColor),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Tap camera icon to change photo',
-            style: TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {IconData? icon, String? helperText, bool readOnly = false, VoidCallback? onTap}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
+  Widget _buildDesktopGrid(ProfileController controller) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 7,
+          child: Column(
+            children: [
+              _buildPersonalInfoCard(),
+              const SizedBox(height: 24),
+              _buildContactInfoCard(),
+            ],
+          ),
+        ),
+        const SizedBox(width: 32),
+        Expanded(
+          flex: 5,
+          child: Column(
+            children: [
+              _buildPreferencesCard(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(ProfileController controller) {
+    return Column(
+      children: [
+        _buildPersonalInfoCard(),
+        const SizedBox(height: 24),
+        _buildContactInfoCard(),
+        const SizedBox(height: 24),
+        _buildPreferencesCard(),
+      ],
+    );
+  }
+
+  Widget _buildPersonalInfoCard() {
+    return PremiumCard(
+      title: 'Personal Information',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: controller,
-            readOnly: readOnly,
-            onTap: onTap,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: readOnly ? Theme.of(context).scaffoldBackgroundColor : Theme.of(context).cardColor,
-              prefixIcon: icon != null ? Icon(icon, color: Colors.grey, size: 20) : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).dividerColor),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).dividerColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).primaryColor),
-              ),
-            ),
-          ),
-          if (helperText != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              helperText,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBioField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).dividerColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          TextField(
-            controller: _bioController,
-            maxLines: 4,
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.all(16),
-              border: InputBorder.none,
-              hintText: 'Enter your bio...',
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              '${_bioController.text.length}/150',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSwitchTile(String title, String subtitle, bool value, Function(bool) onChanged) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Expanded(
+                child: PremiumTextField(
+                  label: 'Full Name',
+                  controller: _nameController,
+                  icon: Icons.person_outline,
+                  hintText: 'Enter your full name',
+                ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              const SizedBox(width: 24),
+              Expanded(
+                child: PremiumTextField(
+                  label: 'Date of Birth',
+                  controller: _dobController,
+                  icon: Icons.calendar_today_outlined,
+                  readOnly: true,
+                  hintText: 'DD/MM/YYYY',
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate ??
+                          DateTime.now().subtract(const Duration(days: 6570)),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      setState(() {
+                        _selectedDate = pickedDate;
+                        _dobController.text =
+                            "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+                        _hasUnsavedChanges = true;
+                      });
+                    }
+                  },
+                ),
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          const Text(
+            'Gender',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildGenderRadio('Male'),
+              const SizedBox(width: 24),
+              _buildGenderRadio('Female'),
+              const SizedBox(width: 24),
+              _buildGenderRadio('Other'),
+            ],
+          ),
+          const SizedBox(height: 24),
+          PremiumTextField(
+            label: 'Bio',
+            controller: _bioController,
+            maxLines: 4,
+            hintText: 'Tell others about yourself...',
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${_bioController.text.length}/150',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactInfoCard() {
+    return PremiumCard(
+      title: 'Contact Information',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: PremiumTextField(
+                  label: 'Email Address',
+                  controller: _emailController,
+                  icon: Icons.email_outlined,
+                  helperText: 'Used for notifications and recovery',
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: PremiumTextField(
+                  label: 'Mobile Number',
+                  controller: _mobileController,
+                  icon: Icons.phone_android_outlined,
+                  helperText: 'Verified mobile number',
+                  readOnly: true,
+                ),
+              ),
+            ],
+          ),
+          PremiumTextField(
+            label: 'Location',
+            controller: _locationController,
+            icon: Icons.location_on_outlined,
+            readOnly: true,
+            hintText: 'Pick your location',
+            onTap: () {
+              WebMapAddressPickerDialog.show(context, isPickOnly: true)
+                  .then((_) => _updateLocationFromController());
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreferencesCard() {
+    return PremiumCard(
+      title: 'Preferences',
+      child: Column(
+        children: [
+          AnimatedSwitch(
+            title: 'Profile Visibility',
+            subtitle: 'Public: Anyone can view your profile.',
+            value: _profileVisibility,
+            onChanged: (val) {
+              setState(() {
+                _profileVisibility = val;
+                _hasUnsavedChanges = true;
+              });
+            },
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Divider(height: 1),
+          ),
+          AnimatedSwitch(
+            title: 'Show Trade History',
+            subtitle: 'Your trade history is hidden from others.',
+            value: _showTradeHistory,
+            onChanged: (val) {
+              setState(() {
+                _showTradeHistory = val;
+                _hasUnsavedChanges = true;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildStickyActionBar(ProfileController controller) {
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      bottom: _hasUnsavedChanges ? 0 : -100,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: 80,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
-        Switch(
-          value: value,
-          onChanged: onChanged,
-          activeColor: Colors.green,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'You have unsaved changes',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: controller.isLoading ? null : () {
+                      // Discard changes by popping and reopening or resetting state
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    ),
+                    child: const Text('Cancel', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: controller.isLoading ? null : () async {
+                      final fullName = _nameController.text.trim();
+                      if (fullName.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Full name is required')),
+                        );
+                        return;
+                      }
+
+                      final response = await controller.updateProfile(
+                        fullName: fullName,
+                        location: _locationController.text.trim(),
+                        email: _emailController.text.trim(),
+                        mobile: _mobileController.text.trim(),
+                        bio: _bioController.text.trim(),
+                        profileVisibility: _profileVisibility ? 1 : 0,
+                        showTradeHistory: _showTradeHistory ? 1 : 0,
+                        gender: _selectedGender,
+                        dateOfBirth: _selectedDate != null
+                            ? "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}"
+                            : null,
+                        latitude: _selectedLatitude,
+                        longitude: _selectedLongitude,
+                        termsAccepted: true,
+                        profileImage: _selectedWebImage,
+                      );
+
+                      if (!context.mounted) return;
+                      if (response.success) {
+                        setState(() {
+                          _hasUnsavedChanges = false;
+                        });
+                        AppSuccessDialog.show(
+                          context,
+                          message: response.message,
+                          onButtonPressed: () {
+                            Navigator.pop(context);
+                          },
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(controller.errorMessage ?? 'Update failed')));
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Theme.of(context).scaffoldBackgroundColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: controller.isLoading
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).scaffoldBackgroundColor),
+                          )
+                        : const Text(
+                            'Save Changes',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildGenderRadio(String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Radio<String>(
-          value: label,
-          groupValue: _selectedGender,
-          activeColor: Theme.of(context).primaryColor,
-          onChanged: (v) => setState(() => _selectedGender = v),
-        ),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 16),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSaveButton(ProfileController controller) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: controller.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ElevatedButton(
-              onPressed: () async {
-                final fullName = _nameController.text.trim();
-                if (fullName.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Full name is required')),
-                  );
-                  return;
-                }
-
-                final response = await controller.updateProfile(
-                  fullName: fullName,
-                  location: _locationController.text.trim(),
-                  email: _emailController.text.trim(),
-                  mobile: _mobileController.text.trim(),
-                  bio: _bioController.text.trim(),
-                  profileVisibility: _profileVisibility ? 1 : 0,
-                  showTradeHistory: _showTradeHistory ? 1 : 0,
-                  gender: _selectedGender,
-                  dateOfBirth: _selectedDate != null
-                      ? "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}"
-                      : null,
-                  latitude: _selectedLatitude,
-                  longitude: _selectedLongitude,
-                  termsAccepted: true,
-                  profileImage: _selectedWebImage,
-                );
-
-                if (!context.mounted) return;
-                if (response.success) {
-                  AppSuccessDialog.show(
-                    context,
-                    message: response.message,
-                    onButtonPressed: () {
-                      Navigator.pop(context);
-                    },
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(controller.errorMessage ?? 'Update failed')));
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text(
-                'Save Changes',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedGender = label;
+          _hasUnsavedChanges = true;
+        });
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Radio<String>(
+            value: label,
+            groupValue: _selectedGender,
+            activeColor: Theme.of(context).primaryColor,
+            onChanged: (v) {
+              setState(() {
+                _selectedGender = v;
+                _hasUnsavedChanges = true;
+              });
+            },
+          ),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
     );
   }
 }

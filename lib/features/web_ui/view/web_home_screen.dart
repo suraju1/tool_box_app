@@ -20,6 +20,8 @@ class WebHomeScreen extends StatefulWidget {
 }
 
 class _WebHomeScreenState extends State<WebHomeScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -29,13 +31,23 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final controller = context.watch<TradeController>();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scrollbar(
+      controller: _scrollController,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // PROMOTIONAL BANNER
           if (controller.selectedCategories.isEmpty)
@@ -140,30 +152,25 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           else if (controller.homePosts.isEmpty)
             const Center(child: Text("No posts found near you."))
           else
-            LayoutBuilder(builder: (context, constraints) {
-              // Calculate how many columns we can fit
-              int crossAxisCount = (constraints.maxWidth / 290).floor();
-              if (crossAxisCount < 1) crossAxisCount = 1;
-
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  childAspectRatio: 0.75, // Adjust card height/width ratio
-                ),
-                itemCount: controller.homePosts.length,
-                itemBuilder: (context, index) {
-                  return _WebProductCard(post: controller.homePosts[index]);
-                },
-              );
-            }),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 320,
+                mainAxisExtent: 420,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+              ),
+              itemCount: controller.homePosts.length,
+              itemBuilder: (context, index) {
+                return _WebProductCard(post: controller.homePosts[index]);
+              },
+            ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildLocationHeader(BuildContext context) {
     return Consumer<LocationController>(

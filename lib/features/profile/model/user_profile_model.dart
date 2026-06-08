@@ -34,6 +34,17 @@ class UserProfileModel {
       showTradeHistory: json['show_trade_history'] ?? 1,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'user_details': userDetails.toJson(),
+      'trade_stats': tradeStats.toJson(),
+      'reviews': reviews.map((e) => e.toJson()).toList(),
+      'isSaved': isSaved,
+      'isRated': isRated,
+      'show_trade_history': showTradeHistory,
+    };
+  }
 }
 
 class UserDetails {
@@ -118,6 +129,34 @@ class UserDetails {
       takerType: userTypeJson?['taker']?.toString(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'full_name': fullName,
+      'location': location,
+      'image': image,
+      'bio': bio,
+      'email': email,
+      'phone_number': phoneNumber,
+      'profile_visibility': profileVisibility,
+      'show_trade_history': showTradeHistory,
+      'gender': gender,
+      'date_of_birth': dateOfBirth,
+      'latitude': latitude,
+      'longitude': longitude,
+      'average_rating': averageRating,
+      'total_reviews': totalReviews,
+      'total_likes': totalLikes,
+      'total_dislikes': totalDislikes,
+      'remaining_balance': remainingBalance,
+      'terms_accepted': termsAccepted ? 1 : 0,
+      'user_type': {
+        'giver': giverType,
+        'taker': takerType,
+      },
+    };
+  }
 }
 
 class TradeStats {
@@ -143,6 +182,16 @@ class TradeStats {
       sentOffers: _parseInt(json['sent_offers']),
       receivedOffers: _parseInt(json['received_offers']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'total_gives': totalGives,
+      'total_takes': totalTakes,
+      'total_trades': totalTrades,
+      'sent_offers': sentOffers,
+      'received_offers': receivedOffers,
+    };
   }
 }
 
@@ -186,5 +235,19 @@ class Review {
       comment: json['comment'],
       createdAt: json['created_at'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'reviewer_id': reviewerId,
+      'reviewer_name': reviewerName,
+      'reviewer_image': reviewerImage,
+      'rating': rating,
+      'feedback_label': feedbackLabel,
+      'comment': comment,
+      'created_at': createdAt,
+    };
   }
 }
