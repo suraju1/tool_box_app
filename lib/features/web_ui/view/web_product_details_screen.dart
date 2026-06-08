@@ -857,6 +857,23 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
               _buildReturnSpecItem('Category', post.returnItemCategory!),
             if (post.returnItemCondition != null && post.returnItemCondition!.isNotEmpty)
               _buildReturnSpecItem('Condition', post.returnItemCondition!),
+            if (post.returnItemSource != null && post.returnItemSource!.isNotEmpty)
+              _buildReturnSpecItem('Item Source', post.returnItemSource!),
+            if (post.returnItemDescription != null && post.returnItemDescription!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Description:', style: TextStyle(color: Colors.grey.shade600, fontSize: 15)),
+                    const SizedBox(height: 4),
+                    Text(
+                      post.returnItemDescription!,
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: context.textColor, height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
             if (post.returnItemImages.isNotEmpty) ...[
               const SizedBox(height: 16),
               const Text('Reference Images:', style: TextStyle(fontWeight: FontWeight.bold)),
