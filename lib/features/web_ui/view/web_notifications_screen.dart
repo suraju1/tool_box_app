@@ -431,7 +431,9 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
       ];
       final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
       final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-      subText = 'Price: ₹$startPrice - ₹$endPrice';
+      subText = startPrice == endPrice 
+          ? '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice in return'
+          : '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice - ₹$endPrice in return';
     } else {
       messageSpans = [
         TextSpan(
@@ -444,14 +446,16 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
         TextSpan(text: ' ~ $timeAgo'),
       ];
       if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
-        subText = 'Wants: ${response.returnItemName} in return';
+        subText = '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ${response.returnItemName} in return';
       } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
         final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
         final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-        subText = 'Wants: ₹$startPrice - ₹$endPrice in return';
+        subText = startPrice == endPrice
+            ? '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice in return'
+            : '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice - ₹$endPrice in return';
       } else {
         subText =
-            'Category: ${response.itemCategory} | Condition: ${response.itemCondition}';
+            '⬇️ (Category: ${response.itemCategory} | Condition: ${response.itemCondition})';
       }
     }
 
@@ -468,22 +472,34 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
           TextSpan(text: ' ~ $timeAgo'),
         ];
         if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
-          subText = 'Offering: ${response.returnItemName}';
+          subText = '⬇️ Giving you ${response.returnItemName} in return';
         } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
           final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
           final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-          subText = 'Offering: ₹$startPrice - ₹$endPrice';
+          subText = startPrice == endPrice
+              ? '⬇️ Giving you ₹$startPrice in return'
+              : '⬇️ Giving you ₹$startPrice - ₹$endPrice in return';
         }
       } else {
         messageSpans = [
-          const TextSpan(text: 'Your offer on '),
+          const TextSpan(text: 'Your offer to '),
           TextSpan(
-              text: response.postItemName!,
+              text: response.posterName!,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          const TextSpan(text: ' on '),
+          TextSpan(
+              text: response.postItemName ?? 'item',
               style: const TextStyle(fontWeight: FontWeight.bold)),
           TextSpan(text: ' ~ $timeAgo'),
         ];
         if (response.itemName != null && response.itemName!.isNotEmpty) {
-          subText = 'Offering: ${response.itemName}';
+          subText = '⬇️ Offering: ${response.itemName}';
+        } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+          final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
+          final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
+          subText = startPrice == endPrice
+              ? '⬇️ Offering: ₹$startPrice'
+              : '⬇️ Offering: ₹$startPrice - ₹$endPrice';
         }
       }
     }
