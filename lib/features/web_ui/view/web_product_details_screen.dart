@@ -12,7 +12,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/util/date_util.dart';
-import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_product_card.dart';
 
 class WebProductDetailsScreen extends StatefulWidget {
   final int postId;
@@ -965,7 +965,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
             separatorBuilder: (_, __) => const SizedBox(width: 24),
             itemBuilder: (context, index) {
               final item = posts[index];
-              return _RelatedProductCard(item: item);
+              return WebProductCard(post: item, width: 300);
             },
           ),
         ),
@@ -1069,106 +1069,4 @@ class _ReturnImagePreviewScreenWebState extends State<_ReturnImagePreviewScreenW
   }
 }
 
-class _RelatedProductCard extends StatefulWidget {
-  final PostModel item;
-  const _RelatedProductCard({required this.item});
 
-  @override
-  State<_RelatedProductCard> createState() => _RelatedProductCardState();
-}
-
-class _RelatedProductCardState extends State<_RelatedProductCard> {
-  bool _isHovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => WebProductDetailsScreen(postId: widget.item.id),
-          ),
-        );
-      },
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovering = true),
-        onExit: (_) => setState(() => _isHovering = false),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-          width: 300,
-          transform: Matrix4.translationValues(0, _isHovering ? -8 : 0, 0),
-          decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _isHovering ? context.primaryColor.withOpacity(0.3) : context.dividerColor.withOpacity(0.5)),
-            boxShadow: _isHovering
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 12),
-                    ),
-                  ]
-                : [],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 250,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: widget.item.itemImages.isNotEmpty
-                      ? AnimatedScale(
-                          scale: _isHovering ? 1.05 : 1.0,
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeOutQuart,
-                          child: AppCachedImage(
-                            imageUrl: widget.item.itemImages.first,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            radius: 0,
-                          ),
-                        )
-                      : const Center(child: Icon(Icons.image_not_supported, color: Colors.grey, size: 40)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.item.itemCategory.toUpperCase(),
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: context.primaryColor, letterSpacing: 1.2),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      widget.item.itemName,
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: context.textColor, height: 1.2),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      widget.item.returnType.toLowerCase() == 'price' ? '₹${widget.item.priceMin}' : 'Exchange',
-                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: context.textColor),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
