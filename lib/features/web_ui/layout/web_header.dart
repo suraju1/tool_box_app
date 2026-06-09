@@ -9,6 +9,7 @@ import 'package:tool_bocs/core/controller/theme_controller.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
 
 class WebHeader extends StatefulWidget {
   const WebHeader({super.key});
@@ -26,6 +27,7 @@ class _WebHeaderState extends State<WebHeader> {
       if (profileCtrl.ownProfile == null) {
         profileCtrl.getUserProfile(null, isOwnProfile: true);
       }
+      context.read<NotificationController>().fetchUnreadCount();
     });
   }
 
@@ -93,10 +95,20 @@ class _WebHeaderState extends State<WebHeader> {
           const SizedBox(width: 8),
           
           // Action Icons
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.notifications);
+          Consumer<NotificationController>(
+            builder: (context, notificationCtrl, child) {
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: notificationCtrl.unreadCount > 0,
+                  label: Text('${notificationCtrl.unreadCount}'),
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  child: const Icon(Icons.notifications_outlined),
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.notifications);
+                },
+              );
             },
           ),
           const SizedBox(width: 16),
@@ -107,32 +119,45 @@ class _WebHeaderState extends State<WebHeader> {
               final String userName = profileUser?.fullName ?? authUser?.fullName ?? "User";
               final String? imageUrl = profileUser?.image;
 
-              return Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: context.primaryColor.withOpacity(0.5), width: 1),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
-                      child: AppCachedImage(
-                        imageUrl: imageUrl ?? '',
-                        userName: userName,
+              return InkWell(
+                onTap: () {
+                  final bottomNavCtrl = context.read<BottomNavBarController>();
+                  if (bottomNavCtrl.currentIndex != 4) {
+                    bottomNavCtrl.setIndex(4);
+                    Navigator.pushReplacementNamed(context, AppRoutes.webProfile);
+                  }
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  child: Row(
+                    children: [
+                      Container(
                         width: 36,
                         height: 36,
-                        fit: BoxFit.cover,
-                        radius: 18,
-                        placeholderBgColor: context.primaryColor.withOpacity(0.2),
-                        placeholderTextColor: context.primaryColor,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: context.primaryColor.withOpacity(0.5), width: 1),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: AppCachedImage(
+                            imageUrl: imageUrl ?? '',
+                            userName: userName,
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
+                            radius: 18,
+                            placeholderBgColor: context.primaryColor.withOpacity(0.2),
+                            placeholderTextColor: context.primaryColor,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Text(userName, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(userName, style: const TextStyle(fontWeight: FontWeight.w600)),
-                ],
+                ),
               );
             },
           ),

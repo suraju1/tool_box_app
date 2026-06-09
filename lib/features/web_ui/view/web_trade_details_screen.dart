@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tool_bocs/features/chat/view/chat_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_chat_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
@@ -248,7 +248,7 @@ class _WebTradeDetailsScreenState extends State<WebTradeDetailsScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatScreen(
+            builder: (context) => WebChatScreen(
               otherUserId: otherUserId,
               otherUserName: otherUserName,
               otherUserImage: otherUserImage,

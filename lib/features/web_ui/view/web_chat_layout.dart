@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tool_bocs/features/chat/view/chat_list_screen.dart';
-import 'package:tool_bocs/features/chat/view/chat_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_chat_screen.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/util/colors.dart';
 
@@ -45,7 +45,7 @@ class _WebChatLayoutState extends State<WebChatLayout> {
         Expanded(
           child: selectedChatRoomId == null
               ? _buildPlaceholder()
-              : ChatScreen(
+              : WebChatScreen(
                   // Ensure a unique key so it completely rebuilds when switching chats
                   key: ValueKey(selectedChatRoomId),
                   chatRoomId: selectedChatRoomId!,
@@ -53,6 +53,7 @@ class _WebChatLayoutState extends State<WebChatLayout> {
                   otherUserName: selectedOtherUserName ?? 'User',
                   otherUserImage: selectedOtherUserImage,
                   tradeResponse: selectedTradeResponse,
+                  showBackButton: false,
                 ),
         ),
       ],
