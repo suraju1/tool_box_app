@@ -66,6 +66,7 @@ class PostModel {
   final double? distanceKm;
   final int? responseCount;
   final bool hasResponded;
+  final String? userCreatedAt;
 
   PostModel({
     required this.id,
@@ -105,6 +106,7 @@ class PostModel {
     this.distanceKm,
     this.responseCount,
     this.hasResponded = false,
+    this.userCreatedAt,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
@@ -160,6 +162,7 @@ class PostModel {
           json['is_responded'] == true ||
           json['has_responded'] == 1 ||
           json['has_responded'] == true,
+      userCreatedAt: json['user_created_at']?.toString(),
     );
   }
 }

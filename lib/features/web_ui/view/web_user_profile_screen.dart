@@ -148,10 +148,6 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                                     _buildBioCard(context, userProfile),
                                     const SizedBox(height: 24),
                                   ],
-                                  if (userProfile.isRated != true) ...[
-                                    _buildRateButton(context, userProfile),
-                                    const SizedBox(height: 24),
-                                  ],
                                   _buildReviewsCard(context, userProfile),
                                 ],
                               ),
@@ -402,30 +398,6 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
     );
   }
 
-  Widget _buildRateButton(BuildContext context, UserProfileModel profile) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (context) => UserReviewDialog(
-            userId: profile.userDetails.id,
-            userName: profile.userDetails.fullName,
-          ),
-        );
-      },
-      icon: const Icon(Icons.star_rate_rounded),
-      label: const Text('Rate This Person'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: context.primaryColor,
-        foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 64),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: 0.5),
-        elevation: 8,
-        shadowColor: context.primaryColor.withOpacity(0.4),
-      ),
-    );
-  }
 
   Widget _buildReviewsCard(BuildContext context, UserProfileModel profile) {
     final reviews = profile.reviews;
@@ -446,7 +418,35 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Reviews', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textColor)),
+              Row(
+                children: [
+                  Text('Reviews', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textColor)),
+                  if (profile.isRated != true) ...[
+                    const SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => UserReviewDialog(
+                            userId: profile.userDetails.id,
+                            userName: profile.userDetails.fullName,
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.star_rate_rounded, size: 18),
+                      label: const Text('Rate This Person'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                        elevation: 0,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
               Row(
                 children: [
                   const Icon(Icons.star, color: Colors.amber, size: 24),

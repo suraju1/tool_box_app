@@ -680,11 +680,13 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                           const Icon(Icons.verified, color: Colors.blue, size: 20),
                         ],
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Member since 2021', // Mock data as per reference
-                        style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                      ),
+                      if (post.userCreatedAt != null && post.userCreatedAt!.isNotEmpty && DateTime.tryParse(post.userCreatedAt!) != null) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          'Member since ${DateTime.tryParse(post.userCreatedAt!)!.year}',
+                          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                        ),
+                      ],
                     ],
                   ),
                 ),

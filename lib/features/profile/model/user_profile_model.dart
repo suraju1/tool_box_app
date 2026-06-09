@@ -26,11 +26,14 @@ class UserProfileModel {
     return UserProfileModel(
       userDetails: UserDetails.fromJson(userDetailsJson),
       tradeStats: TradeStats.fromJson(json['trade_stats'] ?? {}),
-      reviews:
-          (json['reviews'] as List?)?.map((e) => Review.fromJson(e)).toList() ??
-              [],
-      isSaved: json['isSaved'],
-      isRated: json['isRated'],
+      reviews: (json['reviews'] as List? ??
+              json['user_reviews'] as List? ??
+              json['recent_reviews'] as List?)
+              ?.map((e) => Review.fromJson(e))
+              .toList() ??
+          [],
+      isSaved: json['isSaved'] ?? json['is_saved'] == 1 || json['is_saved'] == true,
+      isRated: json['isRated'] ?? json['is_rated'] == 1 || json['is_rated'] == true,
       showTradeHistory: json['show_trade_history'] ?? 1,
     );
   }
