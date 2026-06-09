@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tool_bocs/core/api/api_client.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
@@ -17,8 +18,8 @@ class SplashController extends ChangeNotifier {
     BuildContext context,
     AuthController authController,
   ) async {
-    // Start minimum splash delay of 2 seconds
-    final delayFuture = Future.delayed(const Duration(seconds: 2));
+    // Start minimum splash delay of 2 seconds (skip on web)
+    final delayFuture = kIsWeb ? Future.value() : Future.delayed(const Duration(seconds: 2));
 
     // Request location permission on first launch in the background (non-blocking)
     final locationController = context.read<LocationController>();
