@@ -204,57 +204,62 @@ class ChatService {
   }
 
   // Get chat rooms stream for current user
-  Stream<QuerySnapshot> getChatRooms() {
-    return FirebaseAuth.instance
-        .authStateChanges()
-        .asyncExpand((firebaseUser) {
-          if (firebaseUser == null) {
-            debugPrint("getChatRooms: No Firebase user signed in.");
-            return Stream.error('permission-denied');
-          }
+  Stream<QuerySnapshot> getChatRooms() async* {
+    try {
+      final currentUser = await getCurrentUser();
+      if (currentUser == null) {
+        debugPrint("getChatRooms: No local user data found.");
+        yield* Stream.error('permission-denied');
+        return;
+      }
 
-          return Stream.fromFuture(getCurrentUser()).asyncExpand((currentUser) {
-            if (currentUser == null) {
-              debugPrint("getChatRooms: No local user data found.");
-              return Stream.error('permission-denied');
-            }
+      if (FirebaseAuth.instance.currentUser == null) {
+        debugPrint("getChatRooms: No Firebase user signed in. Attempting anonymous sign-in...");
+        try {
+          await FirebaseAuth.instance.signInAnonymously();
+        } catch (error) {
+          debugPrint("getChatRooms anonymous sign-in error: $error");
+          yield* Stream.error('permission-denied');
+          return;
+        }
+      }
 
-            final String userId = currentUser.id.toString();
-            debugPrint(
-                "getChatRooms: Auth ready. Fetching rooms where 'users' contains $userId");
+      final String userId = currentUser.id.toString();
+      debugPrint("getChatRooms: Auth ready. Fetching rooms where 'users' contains $userId");
 
-            return _firestore
-                .collection('chat_rooms')
-                .where('users', arrayContains: userId)
-                .orderBy('updatedAt', descending: true)
-                .snapshots()
-                .map((snapshot) {
-              debugPrint(
-                  "getChatRooms FULL LOG: ${snapshot.docs.map((e) => e.data()).toList()}");
-              return snapshot;
-            });
-          });
-        })
-        .cast<QuerySnapshot>()
-        .asBroadcastStream();
+      yield* _firestore
+          .collection('chat_rooms')
+          .where('users', arrayContains: userId)
+          .orderBy('updatedAt', descending: true)
+          .snapshots()
+          .map((snapshot) {
+        debugPrint("getChatRooms FULL LOG: ${snapshot.docs.map((e) => e.data()).toList()}");
+        return snapshot;
+      });
+    } catch (e) {
+      debugPrint("getChatRooms Error: $e");
+      yield* Stream.error('permission-denied');
+    }
   }
 
   // Get total unread count stream
-  Stream<int> getTotalUnreadCount() {
-    return Stream.fromFuture(getCurrentUser()).asyncExpand((currentUser) {
+  Stream<int> getTotalUnreadCount() async* {
+    try {
+      final currentUser = await getCurrentUser();
       if (currentUser == null) {
-        return Stream.value(0);
+        yield 0;
+        return;
       }
 
-      final firebaseUser = FirebaseAuth.instance.currentUser;
-      if (firebaseUser == null) {
+      if (FirebaseAuth.instance.currentUser == null) {
         debugPrint("getTotalUnreadCount: No Firebase user. Yielding 0.");
-        return Stream.value(0);
+        yield 0;
+        return;
       }
 
       String currentUserId = currentUser.id.toString();
 
-      return _firestore
+      yield* _firestore
           .collection('chat_rooms')
           .where('users', arrayContains: currentUserId)
           .snapshots()
@@ -269,7 +274,10 @@ class ChatService {
         }
         return total;
       });
-    }).asBroadcastStream();
+    } catch (e) {
+      debugPrint("getTotalUnreadCount Error: $e");
+      yield 0;
+    }
   }
 
   // Generate chat room ID (for 1-on-1 chat)

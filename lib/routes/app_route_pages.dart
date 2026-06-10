@@ -60,7 +60,16 @@ import 'package:tool_bocs/features/web_ui/layout/web_dashboard_wrapper.dart';
 import 'package:tool_bocs/routes/all_reviews_wrapper.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/features/shimmer_test/view/shimmer_test_screen.dart';
-import 'app_routes.dart';
+import 'package:tool_bocs/features/web_ui/view/web_signup_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_choose_plan_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_my_subscription_status_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_my_subscriptions_list_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_trade_return_search_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_trade_completion_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_trade_success_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_theme_change_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_no_internet_screen.dart';
+import 'package:tool_bocs/routes/app_routes.dart';
 
 class AppPages {
   static Map<String, WidgetBuilder> routes = {
@@ -90,13 +99,17 @@ class AppPages {
           mobileScreen: CreateGivePostScreen(),
           webScreen: WebDashboardWrapper(child: WebCreateGivePostScreen()),
         ),
-    AppRoutes.signUp: (_) => const SignUpScreen(),
+    AppRoutes.signUp: (_) => const ResponsiveLayout(
+          mobileScreen: SignUpScreen(),
+          webScreen: WebSignUpScreen(),
+        ),
     AppRoutes.productDetails: (context) {
       final args = ModalRoute.of(context)?.settings.arguments;
       final int postId = args is int ? args : 0;
       return ResponsiveLayout(
         mobileScreen: ProductDetailsScreen(postId: postId),
-        webScreen: WebDashboardWrapper(child: WebProductDetailsScreen(postId: postId)),
+        webScreen:
+            WebDashboardWrapper(child: WebProductDetailsScreen(postId: postId)),
       );
     },
     AppRoutes.notifications: (context) {
@@ -104,7 +117,8 @@ class AppPages {
       if (args is int) {
         return ResponsiveLayout(
           mobileScreen: NotificationsScreen(postId: args),
-          webScreen: WebDashboardWrapper(child: WebNotificationsScreen(postId: args)),
+          webScreen:
+              WebDashboardWrapper(child: WebNotificationsScreen(postId: args)),
         );
       }
       return const ResponsiveLayout(
@@ -140,15 +154,25 @@ class AppPages {
           mobileScreen: TradeOfferScreen(),
           webScreen: WebDashboardWrapper(child: WebTradeOfferScreen()),
         ),
-    AppRoutes.tradeStep1: (_) => const TradeReturnSearchScreen(),
-    AppRoutes.tradeCompletion: (_) => const TradeCompletionScreen(),
-    AppRoutes.tradeSuccess: (_) => const TradeSuccessScreen(),
+    AppRoutes.tradeStep1: (_) => const ResponsiveLayout(
+          mobileScreen: TradeReturnSearchScreen(),
+          webScreen: WebDashboardWrapper(child: WebTradeReturnSearchScreen()),
+        ),
+    AppRoutes.tradeCompletion: (_) => const ResponsiveLayout(
+          mobileScreen: TradeCompletionScreen(),
+          webScreen: WebDashboardWrapper(child: WebTradeCompletionScreen()),
+        ),
+    AppRoutes.tradeSuccess: (_) => const ResponsiveLayout(
+          mobileScreen: TradeSuccessScreen(),
+          webScreen: WebDashboardWrapper(child: WebTradeSuccessScreen()),
+        ),
     AppRoutes.tradeDetails: (context) {
       final args = ModalRoute.of(context)?.settings.arguments;
       final int? tradeId = args is int ? args : null;
       return ResponsiveLayout(
         mobileScreen: TradeDetailsScreen(tradeId: tradeId),
-        webScreen: WebDashboardWrapper(child: WebTradeDetailsScreen(tradeId: tradeId)),
+        webScreen:
+            WebDashboardWrapper(child: WebTradeDetailsScreen(tradeId: tradeId)),
       );
     },
     AppRoutes.termsConditions: (_) => const ResponsiveLayout(
@@ -159,11 +183,27 @@ class AppPages {
           mobileScreen: PrivacyPolicyScreen(),
           webScreen: WebDashboardWrapper(child: WebPrivacyPolicyScreen()),
         ),
-    AppRoutes.themeChange: (_) => const ThemeChangeScreen(),
-    AppRoutes.noInternet: (_) => const NoInternetScreen(),
-    AppRoutes.mySubscription: (_) => const MySubscriptionStatusScreen(),
-    AppRoutes.subscriptionHistory: (_) => const MySubscriptionsListScreen(),
-    AppRoutes.choosePlan: (_) => const ChoosePlanScreen(),
+    AppRoutes.themeChange: (_) => const ResponsiveLayout(
+          mobileScreen: ThemeChangeScreen(),
+          webScreen: WebDashboardWrapper(child: WebThemeChangeScreen()),
+        ),
+    AppRoutes.noInternet: (_) => const ResponsiveLayout(
+          mobileScreen: NoInternetScreen(),
+          webScreen: WebNoInternetScreen(),
+        ),
+    AppRoutes.mySubscription: (_) => const ResponsiveLayout(
+          mobileScreen: MySubscriptionStatusScreen(),
+          webScreen:
+              WebDashboardWrapper(child: WebMySubscriptionStatusScreen()),
+        ),
+    AppRoutes.subscriptionHistory: (_) => const ResponsiveLayout(
+          mobileScreen: MySubscriptionsListScreen(),
+          webScreen: WebDashboardWrapper(child: WebMySubscriptionsListScreen()),
+        ),
+    AppRoutes.choosePlan: (_) => const ResponsiveLayout(
+          mobileScreen: ChoosePlanScreen(),
+          webScreen: WebDashboardWrapper(child: WebChoosePlanScreen()),
+        ),
     AppRoutes.settings: (_) => const ResponsiveLayout(
           mobileScreen: SettingScreen(),
           webScreen: WebDashboardWrapper(child: WebSettingScreen()),
@@ -177,7 +217,8 @@ class AppPages {
       if (args is Map<String, dynamic> && args.containsKey('initialFilter')) {
         return ResponsiveLayout(
           mobileScreen: MyPostsScreen(initialFilter: args['initialFilter']),
-          webScreen: WebDashboardWrapper(child: WebMyPostsScreen(initialFilter: args['initialFilter'])),
+          webScreen: WebDashboardWrapper(
+              child: WebMyPostsScreen(initialFilter: args['initialFilter'])),
         );
       }
       return const ResponsiveLayout(
@@ -194,6 +235,7 @@ class AppPages {
     AppRoutes.shimmerTest: (_) => const ShimmerTestScreen(),
     AppRoutes.webGive: (_) => const WebDashboardWrapper(child: WebGiveScreen()),
     AppRoutes.webTake: (_) => const WebDashboardWrapper(child: WebTakeScreen()),
-    AppRoutes.webProfile: (_) => const WebDashboardWrapper(child: WebProfileScreen()),
+    AppRoutes.webProfile: (_) =>
+        const WebDashboardWrapper(child: WebProfileScreen()),
   };
 }

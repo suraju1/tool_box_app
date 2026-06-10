@@ -32,6 +32,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Stream<QuerySnapshot>? _chatRoomsStream;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  bool _isLoadingUser = true;
 
   @override
   void dispose() {
@@ -49,10 +50,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
     final userData = await StorageService.getUserData();
     if (userData != null) {
       final user = UserModel.fromJson(jsonDecode(userData));
-      setState(() {
-        _currentUserId = user.id.toString();
-        _chatRoomsStream = _chatService.getChatRooms();
-      });
+      if (mounted) {
+        setState(() {
+          _currentUserId = user.id.toString();
+          _chatRoomsStream = _chatService.getChatRooms();
+          _isLoadingUser = false;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _isLoadingUser = false;
+        });
+      }
     }
   }
 
@@ -83,46 +93,48 @@ class _ChatListScreenState extends State<ChatListScreen> {
           ),
           _buildSearchBox(context),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _chatRoomsStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  final error = snapshot.error.toString();
-                  if (error.contains('permission-denied')) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Text(
-                          'Your chats will appear here once you are logged in.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: context.subTextColor,
-                            fontSize: 16.0,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
+            child: _isLoadingUser
+                ? _buildShimmer(context)
+                : StreamBuilder<QuerySnapshot>(
+                    stream: _chatRoomsStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        final error = snapshot.error.toString();
+                        if (error.contains('permission-denied')) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Text(
+                                'Your chats will appear here once you are logged in.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: context.subTextColor,
+                                  fontSize: 16.0,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
 
-                if (_currentUserId == null) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Text(
-                        'Your chats will appear here once you are logged in.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: context.subTextColor,
-                          fontSize: 16.0,
-                          fontFamily: FontFamily.openSans,
-                        ),
-                      ),
-                    ),
-                  );
-                }
+                      if (_currentUserId == null) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Text(
+                              'Your chats will appear here once you are logged in.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: context.subTextColor,
+                                fontSize: 16.0,
+                                fontFamily: FontFamily.openSans,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return _buildShimmer(context);
@@ -410,13 +422,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
         Container(
           color: context.appBarColor,
           padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
-          child: ShimmerBox(height: 50.h, width: double.infinity, radius: 10.r),
+          child: Container(
+            height: 50.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: context.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+          ),
         ),
-        Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            itemCount: 8,
-            itemBuilder: (context, index) => const ListTileSkeleton(),
+        const Expanded(
+          child: Center(
+            child: CircularProgressIndicator(),
           ),
         ),
       ],

@@ -54,7 +54,7 @@ class WebSidebar extends StatelessWidget {
               color: context.textColor,
             ),
           ),
-          const Divider(),
+          const SizedBox(height: 16),
           
           _NavItem(
             icon: Icons.dashboard_outlined, 
@@ -106,7 +106,7 @@ class WebSidebar extends StatelessWidget {
           ),
           
           const Spacer(),
-          const Divider(),
+          const SizedBox(height: 16),
           _NavItem(
             icon: Icons.person_outline, 
             activeIcon: Icons.person,
