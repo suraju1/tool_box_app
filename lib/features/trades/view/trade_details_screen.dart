@@ -679,7 +679,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
         : (response.givingItemImages ?? []);
     final imageUrl = images.isNotEmpty
         ? (images.first.startsWith('http')
-            ? images.first
+            ? images.first.replaceFirst('http://88.222.245.145:4000', 'https://toolucs.com').replaceFirst('http://', 'https://')
             : '${ApiConstants.baseUrl2}${images.first}')
         : '';
 

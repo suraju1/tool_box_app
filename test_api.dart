@@ -4,7 +4,7 @@ void main() async {
   final dio = Dio();
   try {
     final response = await dio.get(
-      'http://88.222.245.145:4000/api/get_posts',
+      'https://toolucs.com/api/get_posts',
       queryParameters: {
         'type': 'take',
         'page': 1,

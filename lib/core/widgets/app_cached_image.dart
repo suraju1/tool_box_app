@@ -44,7 +44,10 @@ class AppCachedImage extends StatelessWidget {
 
     String formattedUrl;
     if (url.startsWith('http')) {
-      formattedUrl = url;
+      formattedUrl = url.replaceFirst('http://88.222.245.145:4000', 'https://toolucs.com');
+      if (formattedUrl.startsWith('http://')) {
+        formattedUrl = formattedUrl.replaceFirst('http://', 'https://');
+      }
     } else {
       // Remove leading slash if present to avoid double slashes
       final path = url.startsWith('/') ? url.substring(1) : url;
