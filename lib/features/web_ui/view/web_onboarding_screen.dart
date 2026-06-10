@@ -18,6 +18,7 @@ class WebOnboardingScreen extends StatefulWidget {
 class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
   late PageController _pageController;
   Timer? _redirectTimer;
+  Timer? _autoPlayTimer;
 
   @override
   void initState() {
@@ -28,6 +29,24 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
       final controller = context.read<OnBoardingController>();
       controller.addListener(_onControllerUpdate);
       controller.fetchOnboardingData();
+    });
+  }
+
+  void _startAutoPlay() {
+    _autoPlayTimer?.cancel();
+    _autoPlayTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      final controller = context.read<OnBoardingController>();
+      if (controller.onBoardingList.isNotEmpty && _pageController.hasClients) {
+        int nextPage = controller.currentPage + 1;
+        if (nextPage >= controller.onBoardingList.length) {
+          nextPage = 0;
+        }
+        _pageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.fastOutSlowIn,
+        );
+      }
     });
   }
 
@@ -43,12 +62,15 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
           Navigator.pushReplacementNamed(context, AppRoutes.login);
         }
       });
+    } else if (controller.onBoardingList.isNotEmpty && _autoPlayTimer == null) {
+      _startAutoPlay();
     }
   }
 
   @override
   void dispose() {
     _redirectTimer?.cancel();
+    _autoPlayTimer?.cancel();
     final controller = context.read<OnBoardingController>();
     controller.removeListener(_onControllerUpdate);
     _pageController.dispose();
@@ -57,19 +79,24 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
 
   void _handlingOnPageChanged(int page) {
     context.read<OnBoardingController>().setCurrentPage(page);
+    _startAutoPlay(); // Reset timer on manual swipe
   }
 
   Widget _buildPageIndicator(int count, int currentPage) {
     List<Widget> children = [];
     for (int i = 0; i < count; i++) {
       children.add(
-        Container(
-          width: i == currentPage ? 24.0 : 8.0,
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          width: i == currentPage ? 32.0 : 8.0,
           height: 8.0,
-          margin: const EdgeInsets.symmetric(horizontal: 4.0),
+          margin: const EdgeInsets.symmetric(horizontal: 6.0),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4.0),
-            color: i == currentPage ? context.primaryColor : context.primaryColor.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(8.0),
+            color: i == currentPage
+                ? context.primaryColor
+                : context.primaryColor.withOpacity(0.2),
           ),
         ),
       );
@@ -152,9 +179,17 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
             children: [
               // Left Pane: Illustration Carousel
               Expanded(
-                flex: 1,
+                flex: 5,
                 child: Container(
-                  color: context.isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF0F4FF),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: context.isDarkMode
+                          ? [const Color(0xFF1A1A1D), const Color(0xFF2D2D35)]
+                          : [const Color(0xFFF0F4FF), const Color(0xFFE2E9FB)],
+                    ),
+                  ),
                   child: Column(
                     children: [
                       Expanded(
@@ -164,57 +199,74 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
                           onPageChanged: _handlingOnPageChanged,
                           itemBuilder: (context, index) {
                             final slide = onboardingList[index];
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(40.0),
-                                  child: slide.imageUrl.startsWith('assets/')
-                                      ? Image.asset(slide.imageUrl, height: 400, fit: BoxFit.contain)
-                                      : AppCachedImage(
-                                          imageUrl: slide.imageUrl,
-                                          height: 400.0,
-                                          width: 400.0,
-                                          fit: BoxFit.contain,
-                                        ),
-                                ),
-                                const SizedBox(height: 32),
-                                if (slide.title.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                                    child: Text(
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 64.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Animated wrapper for image
+                                  TweenAnimationBuilder<double>(
+                                    key: ValueKey(index),
+                                    tween: Tween(begin: 0.8, end: 1.0),
+                                    duration: const Duration(milliseconds: 600),
+                                    curve: Curves.easeOutBack,
+                                    builder: (context, value, child) {
+                                      return Transform.scale(
+                                        scale: value,
+                                        child: child,
+                                      );
+                                    },
+                                    child: Container(
+                                      height: 400,
+                                      constraints: const BoxConstraints(maxWidth: 500),
+                                      child: slide.imageUrl.startsWith('assets/')
+                                          ? Image.asset(slide.imageUrl, fit: BoxFit.contain)
+                                          : AppCachedImage(
+                                              imageUrl: slide.imageUrl,
+                                              height: 400.0,
+                                              width: double.infinity,
+                                              fit: BoxFit.contain,
+                                            ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 48),
+                                  if (slide.title.isNotEmpty)
+                                    Text(
                                       slide.title,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        fontSize: 28,
+                                        fontSize: 36,
                                         fontFamily: FontFamily.openSans,
-                                        fontWeight: FontWeight.w700,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.5,
                                         color: context.textColor,
                                       ),
                                     ),
-                                  ),
-                                if (slide.description.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 16.0, left: 40.0, right: 40.0),
-                                    child: Text(
-                                      slide.description,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: context.subTextColor,
-                                        fontFamily: FontFamily.openSans,
-                                        height: 1.5,
+                                  if (slide.description.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 20.0, left: 32.0, right: 32.0),
+                                      child: Text(
+                                        slide.description,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          color: context.subTextColor,
+                                          fontFamily: FontFamily.openSans,
+                                          height: 1.6,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                              ],
+                                ],
+                              ),
                             );
                           },
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 60.0),
-                        child: _buildPageIndicator(onboardingList.length, controller.currentPage),
+                        child: _buildPageIndicator(
+                            onboardingList.length, controller.currentPage),
                       ),
                     ],
                   ),
@@ -223,74 +275,112 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
 
               // Right Pane: Welcome & Action
               Expanded(
-                flex: 1,
+                flex: 4,
                 child: Container(
                   color: context.surfaceColor,
                   child: Center(
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 400),
-                      padding: const EdgeInsets.all(32.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            height: 100,
-                            width: 100,
-                            margin: const EdgeInsets.only(bottom: 32),
-                            decoration: const BoxDecoration(shape: BoxShape.circle),
-                            child: ClipOval(
-                              child: Image.asset(
-                                'assets/logo_transperant.png',
-                                color: context.isDarkMode ? Colors.white : Colors.black,
+                    child: SingleChildScrollView(
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 480),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 48.0, vertical: 32.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                height: 80,
+                                width: 80,
+                                margin: const EdgeInsets.only(bottom: 32),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: context.isDarkMode
+                                      ? Colors.grey[850]
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.06),
+                                      blurRadius: 24,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: Image.asset(
+                                  'assets/logo_transperant.png',
+                                  color: context.isDarkMode
+                                      ? Colors.white
+                                      : context.primaryColor,
+                                ),
                               ),
                             ),
-                          ),
-                          Text(
-                            'Welcome to ToolBocs',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                              fontFamily: FontFamily.openSans,
-                              color: context.primaryColor,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'The ultimate platform to trade, lend, and borrow tools in your community.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: FontFamily.openSans,
-                              color: context.subTextColor,
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 64),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushReplacementNamed(context, AppRoutes.login);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: context.primaryColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
+                            Text(
+                              'Welcome to ToolBocs',
+                              style: TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.w900,
+                                fontFamily: FontFamily.openSans,
+                                letterSpacing: -1,
+                                height: 1.15,
+                                color: context.textColor,
                               ),
-                              elevation: 4,
                             ),
-                            child: const Text(
-                              'Get Started',
+                            const SizedBox(height: 20),
+                            Text(
+                              'The ultimate platform to trade, lend, and borrow tools in your community.',
                               style: TextStyle(
                                 fontSize: 18,
-                                fontWeight: FontWeight.bold,
                                 fontFamily: FontFamily.openSans,
+                                color: context.subTextColor,
+                                height: 1.6,
                               ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 56),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushReplacementNamed(
+                                    context, AppRoutes.login);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: context.primaryColor,
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16.0),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Get Started',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: FontFamily.openSans,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.arrow_forward_rounded, size: 20),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            Text(
+                              'By continuing, you agree to our Terms of Service and Privacy Policy.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: context.subTextColor.withOpacity(0.6),
+                                height: 1.5,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
