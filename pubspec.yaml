@@ -36,7 +36,7 @@ dependencies:
   firebase_auth: ^6.1.4
   firebase_storage: ^13.0.6
   flutter_local_notifications: ^20.1.0
-  google_fonts: ^8.0.1
+  google_fonts: ^8.1.0
   image_picker: ^1.2.1
   file_picker: ^10.3.10
   cached_network_image: ^3.4.1

@@ -19,7 +19,18 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TradeController>().fetchHomePosts();
+      final locationController = context.read<LocationController>();
+      final tradeController = context.read<TradeController>();
+      
+      // Sync user-selected location
+      if (locationController.hasLocation) {
+        tradeController.setLocation(
+          locationController.latitude,
+          locationController.longitude,
+        );
+      }
+      
+      tradeController.fetchHomePosts();
     });
   }
 
@@ -32,6 +43,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<TradeController>();
+    final locationController = context.watch<LocationController>();
+    
+    // Proactively sync location from LocationController if it exists but is missing in TradeController
+    if (locationController.hasLocation && !controller.hasLocation) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<TradeController>().setLocation(
+          locationController.latitude,
+          locationController.longitude,
+        );
+      });
+    }
 
     return Scrollbar(
       controller: _scrollController,

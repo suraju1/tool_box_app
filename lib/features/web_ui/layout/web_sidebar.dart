@@ -4,6 +4,7 @@ import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navba
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WebSidebar extends StatelessWidget {
   const WebSidebar({super.key});
@@ -55,13 +56,11 @@ class WebSidebar extends StatelessWidget {
           ),
           const Divider(),
           
-          _buildNavItem(
-            context, 
+          _NavItem(
             icon: Icons.dashboard_outlined, 
             activeIcon: Icons.dashboard,
             title: AppLocalizations.of(context)?.home ?? "Dashboard", 
-            index: 0, 
-            currentIndex: activeIndex,
+            isSelected: activeIndex == 0,
             onTap: () {
               if (activeIndex != 0) {
                 controller.setIndex(0);
@@ -69,13 +68,11 @@ class WebSidebar extends StatelessWidget {
               }
             },
           ),
-          _buildNavItem(
-            context, 
+          _NavItem(
             icon: Icons.card_giftcard_outlined, 
             activeIcon: Icons.card_giftcard,
             title: AppLocalizations.of(context)?.give ?? "Give Tools", 
-            index: 1, 
-            currentIndex: activeIndex,
+            isSelected: activeIndex == 1,
             onTap: () {
               if (activeIndex != 1) {
                 controller.setIndex(1);
@@ -83,13 +80,11 @@ class WebSidebar extends StatelessWidget {
               }
             },
           ),
-          _buildNavItem(
-            context, 
+          _NavItem(
             icon: Icons.save_alt_outlined, 
             activeIcon: Icons.save_alt,
             title: AppLocalizations.of(context)?.take ?? "Take Tools", 
-            index: 2, 
-            currentIndex: activeIndex,
+            isSelected: activeIndex == 2,
             onTap: () {
               if (activeIndex != 2) {
                 controller.setIndex(2);
@@ -97,13 +92,11 @@ class WebSidebar extends StatelessWidget {
               }
             },
           ),
-          _buildNavItem(
-            context, 
+          _NavItem(
             icon: Icons.chat_bubble_outline, 
             activeIcon: Icons.chat_bubble,
             title: AppLocalizations.of(context)?.chat ?? "Messages", 
-            index: 3, 
-            currentIndex: activeIndex,
+            isSelected: activeIndex == 3,
             onTap: () {
               if (activeIndex != 3) {
                 controller.setIndex(3);
@@ -114,13 +107,11 @@ class WebSidebar extends StatelessWidget {
           
           const Spacer(),
           const Divider(),
-          _buildNavItem(
-            context, 
+          _NavItem(
             icon: Icons.person_outline, 
             activeIcon: Icons.person,
             title: "My Profile", 
-            index: 4, 
-            currentIndex: activeIndex,
+            isSelected: activeIndex == 4,
             onTap: () {
               if (activeIndex != 4) {
                 controller.setIndex(4);
@@ -134,41 +125,71 @@ class WebSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, {
-    required IconData icon,
-    required IconData activeIcon,
-    required String title,
-    required int index,
-    required int currentIndex,
-    required VoidCallback onTap,
-  }) {
-    bool isSelected = index == currentIndex;
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? context.primaryColor.withOpacity(0.08) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              isSelected ? activeIcon : icon,
-              color: isSelected ? context.primaryColor : greyColor,
-              size: 22,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? context.primaryColor : greyColor,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                fontSize: 15,
+}
+
+class _NavItem extends StatefulWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final String title;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  State<_NavItem> createState() => _NavItemState();
+}
+
+class _NavItemState extends State<_NavItem> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() => isHovered = false),
+      child: InkWell(
+        onTap: widget.onTap,
+        borderRadius: BorderRadius.circular(12),
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: widget.isSelected 
+                ? context.primaryColor.withOpacity(0.08) 
+                : isHovered 
+                    ? Colors.grey.withOpacity(0.05) 
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                widget.isSelected ? widget.activeIcon : widget.icon,
+                color: widget.isSelected ? context.primaryColor : (isHovered ? context.textColor : greyColor),
+                size: 22,
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Text(
+                widget.title,
+                style: GoogleFonts.inter(
+                  color: widget.isSelected ? context.primaryColor : (isHovered ? context.textColor : greyColor),
+                  fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
