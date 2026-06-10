@@ -17,6 +17,7 @@ import 'package:intl/intl.dart';
 import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/view/profile_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WebNotificationsScreen extends StatefulWidget {
   final int? postId;
@@ -147,7 +148,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
         appBar: _buildAppBar(context),
         body: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
+            constraints: const BoxConstraints(maxWidth: 1000),
             child: TabBarView(
               children: [
                 _buildGeneralNotificationsView(context),
@@ -166,7 +167,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
       appBar: _buildAppBar(context),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
+          constraints: const BoxConstraints(maxWidth: 1000),
           child: _buildResponsesListView(context, isIncoming: true),
         ),
       ),
@@ -304,7 +305,10 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
     final totalActiveIncoming = incomingActive.length;
     final totalActiveOutgoing = outgoingActive.length;
 
-    if (totalActiveIncoming == 0 && totalActiveOutgoing == 0 && incomingHistory.isEmpty && outgoingHistory.isEmpty) {
+    if (totalActiveIncoming == 0 &&
+        totalActiveOutgoing == 0 &&
+        incomingHistory.isEmpty &&
+        outgoingHistory.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(40),
@@ -342,8 +346,8 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                   '📥 INCOMING',
                   '${incomingActive.length} Offers on your posts',
                 ),
-                ...incomingActive.map((response) =>
-                    _buildResponseCard(context, response, true)),
+                ...incomingActive.map(
+                    (response) => _buildResponseCard(context, response, true)),
               ],
             ),
           if (outgoingActive.isNotEmpty)
@@ -356,30 +360,34 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                   '📤 OUTGOING',
                   '${outgoingActive.length} Offers you sent',
                 ),
-                ...outgoingActive.map((response) =>
-                    _buildResponseCard(context, response, false)),
+                ...outgoingActive.map(
+                    (response) => _buildResponseCard(context, response, false)),
               ],
             ),
           if (incomingHistory.isNotEmpty || outgoingHistory.isNotEmpty) ...[
-            SizedBox(height: (incomingActive.isNotEmpty || outgoingActive.isNotEmpty) ? 20 : 0),
+            SizedBox(
+                height: (incomingActive.isNotEmpty || outgoingActive.isNotEmpty)
+                    ? 20
+                    : 0),
             _buildMatchSectionHeader(
               context,
               '⏱️ HISTORY',
               'Past matches',
             ),
             if (incomingHistory.isNotEmpty)
-              ...incomingHistory.map((response) =>
-                  _buildResponseCard(context, response, true)),
+              ...incomingHistory.map(
+                  (response) => _buildResponseCard(context, response, true)),
             if (outgoingHistory.isNotEmpty)
-              ...outgoingHistory.map((response) =>
-                  _buildResponseCard(context, response, false)),
+              ...outgoingHistory.map(
+                  (response) => _buildResponseCard(context, response, false)),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildMatchSectionHeader(BuildContext context, String title, String subtitle) {
+  Widget _buildMatchSectionHeader(
+      BuildContext context, String title, String subtitle) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(15, 0, 15, 12),
       child: Column(
@@ -387,20 +395,18 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              fontFamily: FontFamily.openSans,
               color: context.textColor,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: TextStyle(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              fontFamily: FontFamily.openSans,
               color: context.subTextColor,
             ),
           ),
@@ -431,7 +437,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
       ];
       final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
       final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-      subText = startPrice == endPrice 
+      subText = startPrice == endPrice
           ? '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice in return'
           : '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice - ₹$endPrice in return';
     } else {
@@ -445,9 +451,12 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold)),
         TextSpan(text: ' ~ $timeAgo'),
       ];
-      if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
-        subText = '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ${response.returnItemName} in return';
-      } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+      if (response.returnItemName != null &&
+          response.returnItemName!.isNotEmpty) {
+        subText =
+            '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ${response.returnItemName} in return';
+      } else if ((response.priceRangeStart ?? 0) > 0 ||
+          (response.priceRangeEnd ?? 0) > 0) {
         final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
         final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
         subText = startPrice == endPrice
@@ -471,9 +480,11 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
               style: const TextStyle(fontWeight: FontWeight.bold)),
           TextSpan(text: ' ~ $timeAgo'),
         ];
-        if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
+        if (response.returnItemName != null &&
+            response.returnItemName!.isNotEmpty) {
           subText = '⬇️ Giving you ${response.returnItemName} in return';
-        } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+        } else if ((response.priceRangeStart ?? 0) > 0 ||
+            (response.priceRangeEnd ?? 0) > 0) {
           final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
           final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
           subText = startPrice == endPrice
@@ -494,7 +505,8 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
         ];
         if (response.itemName != null && response.itemName!.isNotEmpty) {
           subText = '⬇️ Offering: ${response.itemName}';
-        } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+        } else if ((response.priceRangeStart ?? 0) > 0 ||
+            (response.priceRangeEnd ?? 0) > 0) {
           final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
           final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
           subText = startPrice == endPrice
@@ -575,10 +587,9 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
             children: [
               Text(
                 'History',
-                style: TextStyle(
+                style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  fontFamily: FontFamily.openSans,
                   color: context.textColor,
                 ),
               ),
@@ -588,11 +599,10 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                   const SizedBox(width: 4),
                   Text(
                     'Recent',
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: context.textColor,
-                      fontFamily: FontFamily.openSans,
                     ),
                   ),
                 ],
@@ -614,16 +624,15 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
       centerTitle: true,
       title: Text(
         'Match Offers',
-        style: TextStyle(
+        style: GoogleFonts.inter(
           color: context.textColor,
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          fontFamily: FontFamily.openSans,
         ),
       ),
       actions: [
         PopupMenuButton<void>(
-          offset: const Offset(-200, 50),
+          offset: const Offset(-50, 60),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -730,13 +739,17 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
       bottom: widget.postId == null
           ? TabBar(
               dividerColor: Colors.transparent,
-              indicatorColor: context.primaryColor,
+              indicator: BoxDecoration(
+                color: context.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              splashBorderRadius: BorderRadius.circular(30),
               labelColor: context.primaryColor,
               unselectedLabelColor: context.subTextColor,
-              labelStyle: const TextStyle(
+              labelStyle: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                fontFamily: FontFamily.openSans,
               ),
               tabs: [
                 context.watch<NotificationController>().unreadCount > 0
@@ -778,18 +791,15 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
             ),
     );
   }
-  
-
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(15, 0, 15, 12),
       child: Text(
         title,
-        style: TextStyle(
+        style: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          fontFamily: FontFamily.openSans,
           color: context.textColor,
         ),
       ),
@@ -806,24 +816,10 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
     required List<Widget> actions,
     VoidCallback? onTap,
   }) {
-    return InkWell(
+    return _HoverCard(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: context.isDarkMode
-              ? []
-              : [
-                  BoxShadow(
-                    color: context.dividerColor.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-        ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -833,8 +829,8 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                   borderRadius: BorderRadius.circular(12),
                   child: AppCachedImage(
                     imageUrl: imageUrl ?? imagePath ?? '',
-                    width: 85,
-                    height: 85,
+                    width: 100,
+                    height: 100,
                     fit: BoxFit.cover,
                     errorWidget: _buildImageErrorPlaceholder(context),
                   ),
@@ -843,7 +839,8 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                   top: 6,
                   left: 6,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(4),
@@ -867,10 +864,9 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 15,
                         color: context.textColor,
-                        fontFamily: FontFamily.openSans,
                       ),
                       children: message,
                     ),
@@ -878,10 +874,9 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                   const SizedBox(height: 4),
                   RichText(
                     text: TextSpan(
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         color: context.subTextColor,
-                        fontFamily: FontFamily.openSans,
                       ),
                       children: subMessage,
                     ),
@@ -899,8 +894,8 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
 
   Widget _buildImageErrorPlaceholder(BuildContext context) {
     return Container(
-      width: 85,
-      height: 85,
+      width: 100,
+      height: 100,
       color: context.surfaceColor,
       child: Icon(Icons.image,
           color: context.isDarkMode ? Colors.white10 : Colors.grey.shade400),
@@ -911,19 +906,19 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
       String label, Color bgColor, Color textColor, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(30),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(30),
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: GoogleFonts.inter(
             color: textColor,
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            fontFamily: FontFamily.openSans,
           ),
         ),
       ),
@@ -993,7 +988,10 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
               itemBuilder: (context, index) {
                 if (index == notificationController.notifications.length) {
                   notificationController.loadMore();
-                  return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
+                  return const Center(
+                      child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator()));
                 }
 
                 final notification =
@@ -1012,7 +1010,8 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
     final notificationController = context.read<NotificationController>();
     final isUnread = notification.isRead == 0;
 
-    return InkWell(
+    return _HoverCard(
+      isUnread: isUnread,
       onTap: () {
         if (isUnread) {
           notificationController.markAsRead(notification.id);
@@ -1076,179 +1075,149 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
             }
         }
       },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-        decoration: BoxDecoration(
-          color: isUnread
-              ? context.primaryColor.withOpacity(0.06)
-              : context.surfaceColor,
-          borderRadius: BorderRadius.circular(12),
-          border: isUnread
-              ? Border.all(
-                  color: context.primaryColor.withOpacity(0.1), width: 1)
-              : Border.all(color: Colors.transparent, width: 1),
-          boxShadow: context.isDarkMode
-              ? []
-              : [
-                  BoxShadow(
-                    color: isUnread
-                        ? context.primaryColor.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (isUnread)
-                  Container(
-                    width: 5,
-                    color: context.primaryColor,
-                  ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(8),
-                                    child: Image.asset(
-                                      'assets/logo_transperant.png',
-                                      fit: BoxFit.contain,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          notification.notificationTitle,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: isUnread
-                                                ? FontWeight.w800
-                                                : FontWeight.w600,
-                                            color: context.textColor,
-                                            fontFamily: FontFamily.openSans,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        if (isUnread)
-                                          Container(
-                                            margin: const EdgeInsets.only(top: 4),
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: context.primaryColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            child: const Text(
-                                              'NEW',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => notificationController
-                                  .deleteNotification(notification.id),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                child: Icon(Icons.close,
-                                    size: 20,
-                                    color:
-                                        context.subTextColor.withOpacity(0.4)),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          notification.notificationMessage,
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: isUnread
-                                ? context.textColor
-                                : context.subTextColor.withOpacity(0.8),
-                            fontFamily: FontFamily.openSans,
-                            fontWeight:
-                                isUnread ? FontWeight.w500 : FontWeight.normal,
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isUnread)
+                Container(
+                  width: 5,
+                  color: context.primaryColor,
+                ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Row(
                               children: [
-                                Icon(Icons.access_time,
-                                    size: 14, color: context.subTextColor),
-                                const SizedBox(width: 6),
-                                Text(
-                                  notification.createdAt != null
-                                      ? _formatDate(notification.createdAt!)
-                                      : '',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: context.subTextColor,
-                                    fontFamily: FontFamily.openSans,
-                                    fontWeight: FontWeight.w500,
+                                Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  padding: const EdgeInsets.all(8),
+                                  child: Image.asset(
+                                    'assets/logo_transperant.png',
+                                    fit: BoxFit.contain,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        notification.notificationTitle,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: isUnread
+                                              ? FontWeight.w800
+                                              : FontWeight.w600,
+                                          color: context.textColor,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (isUnread)
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: context.primaryColor,
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                          child: const Text(
+                                            'NEW',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                            if (isUnread)
+                          ),
+                          GestureDetector(
+                            onTap: () => notificationController
+                                .deleteNotification(notification.id),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              child: Icon(Icons.close,
+                                  size: 20,
+                                  color: context.subTextColor.withOpacity(0.4)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        notification.notificationMessage,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: isUnread
+                              ? context.textColor
+                              : context.subTextColor.withOpacity(0.8),
+                          fontWeight:
+                              isUnread ? FontWeight.w500 : FontWeight.normal,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.access_time,
+                                  size: 14, color: context.subTextColor),
+                              const SizedBox(width: 6),
                               Text(
-                                'Tap to read',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: context.primaryColor,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: FontFamily.openSans,
+                                notification.createdAt != null
+                                    ? _formatDate(notification.createdAt!)
+                                    : '',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: context.subTextColor,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            ],
+                          ),
+                          if (isUnread)
+                            Text(
+                              'Tap to read',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: context.primaryColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1340,8 +1309,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           notification.notificationTitle,
           style: TextStyle(
@@ -1364,6 +1332,63 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
             child: const Text('Close'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HoverCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final bool isUnread;
+
+  const _HoverCard(
+      {super.key, required this.child, this.onTap, this.isUnread = false});
+
+  @override
+  State<_HoverCard> createState() => _HoverCardState();
+}
+
+class _HoverCardState extends State<_HoverCard> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() => isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+          transform: Matrix4.translationValues(0, isHovered ? -2 : 0, 0),
+          decoration: BoxDecoration(
+            color: widget.isUnread
+                ? context.primaryColor.withOpacity(0.04)
+                : context.isDarkMode
+                    ? const Color(0xFF1A1A1A)
+                    : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: widget.isUnread
+                ? Border.all(
+                    color: context.primaryColor.withOpacity(0.15), width: 1)
+                : Border.all(color: Colors.transparent, width: 1),
+            boxShadow: context.isDarkMode
+                ? []
+                : [
+                    BoxShadow(
+                      color: widget.isUnread
+                          ? context.primaryColor.withOpacity(0.08)
+                          : Colors.black.withOpacity(isHovered ? 0.08 : 0.03),
+                      blurRadius: isHovered ? 20 : 10,
+                      offset: Offset(0, isHovered ? 8 : 4),
+                    ),
+                  ],
+          ),
+          child: widget.child,
+        ),
       ),
     );
   }

@@ -10,6 +10,7 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WebHeader extends StatefulWidget {
   const WebHeader({super.key});
@@ -37,23 +38,30 @@ class _WebHeaderState extends State<WebHeader> {
     final controller = context.watch<BottomNavBarController>();
 
     return Container(
-      height: 70,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      height: 76,
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+        color: theme.cardColor.withOpacity(0.98),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
       ),
       child: Row(
         children: [
           // Search Bar
           Expanded(
             child: Container(
-              height: 40,
-              margin: const EdgeInsets.only(right: 40),
+              height: 44,
+              margin: const EdgeInsets.only(right: 40, left: 16),
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: greyColor.withOpacity(0.2)),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: greyColor.withOpacity(0.15)),
               ),
               child: _WebSearchBar(
                 tabIndex: controller.currentIndex,
@@ -133,28 +141,42 @@ class _WebHeaderState extends State<WebHeader> {
                   child: Row(
                     children: [
                       Container(
-                        width: 36,
-                        height: 36,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: context.primaryColor.withOpacity(0.5), width: 1),
+                          boxShadow: [
+                            BoxShadow(
+                              color: context.primaryColor.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
+                          border: Border.all(color: Colors.white, width: 2),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(20),
                           child: AppCachedImage(
                             imageUrl: imageUrl ?? '',
                             userName: userName,
-                            width: 36,
-                            height: 36,
+                            width: 40,
+                            height: 40,
                             fit: BoxFit.cover,
-                            radius: 18,
-                            placeholderBgColor: context.primaryColor.withOpacity(0.2),
+                            radius: 20,
+                            placeholderBgColor: context.primaryColor.withOpacity(0.1),
                             placeholderTextColor: context.primaryColor,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(userName, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      const SizedBox(width: 12),
+                      Text(
+                        userName, 
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          color: context.textColor,
+                          fontSize: 14,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -306,7 +328,7 @@ class _WebSearchBarState extends State<_WebSearchBar> {
       decoration: InputDecoration(
         isDense: true,
         hintText: _currentHint,
-        hintStyle: TextStyle(fontSize: 14, color: greyColor),
+        hintStyle: GoogleFonts.inter(fontSize: 14, color: greyColor),
         prefixIcon: Icon(Icons.search, color: greyColor, size: 20),
         prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
         border: InputBorder.none,
