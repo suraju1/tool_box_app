@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'web_sidebar.dart';
 import 'web_header.dart';
+import 'web_profile_drawer.dart';
 
 class WebDashboardWrapper extends StatelessWidget {
   final Widget child;
@@ -12,6 +13,7 @@ class WebDashboardWrapper extends StatelessWidget {
     
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      endDrawer: const WebProfileDrawer(),
       body: Row(
         children: [
           // 1. LEFT SIDEBAR

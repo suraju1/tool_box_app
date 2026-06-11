@@ -69,25 +69,30 @@ class _WebHeaderState extends State<WebHeader> {
               ),
             ),
           ),
-          
+
           // Theme Toggle
           Consumer<ThemeController>(
             builder: (context, themeController, child) {
-              final isDark = themeController.themeMode == ThemeMode.dark || 
-                  (themeController.themeMode == ThemeMode.system && 
-                   MediaQuery.platformBrightnessOf(context) == Brightness.dark);
-              
+              final isDark = themeController.themeMode == ThemeMode.dark ||
+                  (themeController.themeMode == ThemeMode.system &&
+                      MediaQuery.platformBrightnessOf(context) ==
+                          Brightness.dark);
+
               return IconButton(
                 onPressed: () {
-                  themeController.setTheme(isDark ? ThemeMode.light : ThemeMode.dark);
+                  themeController
+                      .setTheme(isDark ? ThemeMode.light : ThemeMode.dark);
                 },
                 icon: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
                     return RotationTransition(
                       turns: child.key == const ValueKey('dark')
-                          ? Tween<double>(begin: 0.5, end: 1.0).animate(animation)
-                          : Tween<double>(begin: 0.5, end: 1.0).animate(animation),
+                          ? Tween<double>(begin: 0.5, end: 1.0)
+                              .animate(animation)
+                          : Tween<double>(begin: 0.5, end: 1.0)
+                              .animate(animation),
                       child: ScaleTransition(scale: animation, child: child),
                     );
                   },
@@ -101,7 +106,7 @@ class _WebHeaderState extends State<WebHeader> {
             },
           ),
           const SizedBox(width: 8),
-          
+
           // Action Icons
           Consumer<NotificationController>(
             builder: (context, notificationCtrl, child) {
@@ -120,26 +125,42 @@ class _WebHeaderState extends State<WebHeader> {
             },
           ),
           const SizedBox(width: 16),
+          Container(
+            width: 2,
+            height: 32,
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
           Consumer2<AuthController, ProfileController>(
             builder: (context, authController, profileController, child) {
               final authUser = authController.currentUser;
               final profileUser = profileController.ownProfile?.userDetails;
-              final String userName = profileUser?.fullName ?? authUser?.fullName ?? "User";
+              final String userName =
+                  profileUser?.fullName ?? authUser?.fullName ?? "User";
               final String? imageUrl = profileUser?.image;
 
               return InkWell(
                 onTap: () {
-                  final bottomNavCtrl = context.read<BottomNavBarController>();
-                  if (bottomNavCtrl.currentIndex != 4) {
-                    bottomNavCtrl.setIndex(4);
-                    Navigator.pushReplacementNamed(context, AppRoutes.webProfile);
-                  }
+                  Scaffold.of(context).openEndDrawer();
                 },
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 4.0),
                   child: Row(
                     children: [
+                      Text(
+                        userName,
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          color: context.textColor,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Container(
                         width: 40,
                         height: 40,
@@ -163,18 +184,10 @@ class _WebHeaderState extends State<WebHeader> {
                             height: 40,
                             fit: BoxFit.cover,
                             radius: 20,
-                            placeholderBgColor: context.primaryColor.withOpacity(0.1),
+                            placeholderBgColor:
+                                context.primaryColor.withOpacity(0.1),
                             placeholderTextColor: context.primaryColor,
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        userName, 
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w600,
-                          color: context.textColor,
-                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -191,7 +204,7 @@ class _WebHeaderState extends State<WebHeader> {
 
 class _WebSearchBar extends StatefulWidget {
   final int tabIndex;
-  
+
   const _WebSearchBar({required this.tabIndex, super.key});
 
   @override
@@ -201,7 +214,7 @@ class _WebSearchBar extends StatefulWidget {
 class _WebSearchBarState extends State<_WebSearchBar> {
   late TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
-  
+
   Timer? _timer;
   int _currentItemIndex = 0;
   int _currentCharIndex = 0;
@@ -209,15 +222,53 @@ class _WebSearchBarState extends State<_WebSearchBar> {
   String _currentHint = "Search...";
 
   final List<String> _hintItems = [
-    "iPhone", "Android Phones", "Tablets", "Smart Watches", "Laptops",
-    "Gaming Consoles", "Cameras", "Earbuds & Headphones", "Speakers",
-    "Power Banks", "Vehicles", "Cars", "Bikes", "Scooters", "Trucks",
-    "Bicycles", "Auto Rickshaw", "Tractors", "Property", "Flats", "Houses",
-    "Shops", "Offices", "Land/Plots", "PG & Hostel Rooms", "Fashion", "Shoes",
-    "Watches", "Clothes", "Jackets", "Bags", "Sunglasses", "Home & Furniture",
-    "Sofa", "Bed", "Dining Table", "Chair", "Cupboard", "Mattress", "TV Unit",
-    "Appliances", "Refrigerator", "Washing Machine", "AC", "Cooler",
-    "Microwave", "TV"
+    "iPhone",
+    "Android Phones",
+    "Tablets",
+    "Smart Watches",
+    "Laptops",
+    "Gaming Consoles",
+    "Cameras",
+    "Earbuds & Headphones",
+    "Speakers",
+    "Power Banks",
+    "Vehicles",
+    "Cars",
+    "Bikes",
+    "Scooters",
+    "Trucks",
+    "Bicycles",
+    "Auto Rickshaw",
+    "Tractors",
+    "Property",
+    "Flats",
+    "Houses",
+    "Shops",
+    "Offices",
+    "Land/Plots",
+    "PG & Hostel Rooms",
+    "Fashion",
+    "Shoes",
+    "Watches",
+    "Clothes",
+    "Jackets",
+    "Bags",
+    "Sunglasses",
+    "Home & Furniture",
+    "Sofa",
+    "Bed",
+    "Dining Table",
+    "Chair",
+    "Cupboard",
+    "Mattress",
+    "TV Unit",
+    "Appliances",
+    "Refrigerator",
+    "Washing Machine",
+    "AC",
+    "Cooler",
+    "Microwave",
+    "TV"
   ];
 
   @override
@@ -226,7 +277,7 @@ class _WebSearchBarState extends State<_WebSearchBar> {
     _hintItems.shuffle();
     _controller = TextEditingController();
     _focusNode.addListener(_onFocusChange);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final tradeController = context.read<TradeController>();
@@ -238,9 +289,9 @@ class _WebSearchBarState extends State<_WebSearchBar> {
       } else {
         query = tradeController.homeSearchQuery;
       }
-      
+
       _controller.text = query;
-      
+
       if (!_focusNode.hasFocus && query.isEmpty) {
         _startAnimation();
       } else {
@@ -322,7 +373,7 @@ class _WebSearchBarState extends State<_WebSearchBar> {
         } else if (widget.tabIndex == 2) {
           type = 'take';
         }
-        
+
         context.read<TradeController>().setSearchQuery(val, type: type);
       },
       decoration: InputDecoration(
@@ -330,7 +381,8 @@ class _WebSearchBarState extends State<_WebSearchBar> {
         hintText: _currentHint,
         hintStyle: GoogleFonts.inter(fontSize: 14, color: greyColor),
         prefixIcon: Icon(Icons.search, color: greyColor, size: 20),
-        prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+        prefixIconConstraints:
+            const BoxConstraints(minWidth: 40, minHeight: 40),
         border: InputBorder.none,
         contentPadding: EdgeInsets.zero,
       ),
