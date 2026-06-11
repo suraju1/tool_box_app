@@ -142,55 +142,58 @@ class _WebHeaderState extends State<WebHeader> {
                   profileUser?.fullName ?? authUser?.fullName ?? "User";
               final String? imageUrl = profileUser?.image;
 
-              return InkWell(
-                onTap: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0, vertical: 4.0),
-                  child: Row(
-                    children: [
-                      Text(
-                        userName,
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w600,
-                          color: context.textColor,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: context.primaryColor.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            )
-                          ],
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: AppCachedImage(
-                            imageUrl: imageUrl ?? '',
-                            userName: userName,
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
-                            radius: 20,
-                            placeholderBgColor:
-                                context.primaryColor.withOpacity(0.1),
-                            placeholderTextColor: context.primaryColor,
+              return Tooltip(
+                message: 'Open Profile Menu',
+                child: InkWell(
+                  onTap: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 4.0),
+                    child: Row(
+                      children: [
+                        Text(
+                          userName,
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            color: context.textColor,
+                            fontSize: 14,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: context.primaryColor.withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              )
+                            ],
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: AppCachedImage(
+                              imageUrl: imageUrl ?? '',
+                              userName: userName,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                              radius: 20,
+                              placeholderBgColor:
+                                  context.primaryColor.withOpacity(0.1),
+                              placeholderTextColor: context.primaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
