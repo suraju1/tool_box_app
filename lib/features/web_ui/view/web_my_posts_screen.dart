@@ -7,6 +7,7 @@ import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/date_util.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebMyPostsScreen extends StatefulWidget {
   final String? initialFilter;
@@ -58,7 +59,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context),
+              const WebScreenHeader(title: 'My Posts'),
               Expanded(
                 child: Consumer<ProfileController>(
                   builder: (context, controller, child) {
@@ -107,38 +108,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          )
-        ],
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back),
-            splashRadius: 24,
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            'My Posts',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildPostSummary(ProfileController controller) {
     return Column(
@@ -474,21 +444,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(Icons.label_outline,
-                                color: Colors.grey, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              post.itemCategory,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
+
                       ],
                     ),
                   ),
@@ -516,27 +472,67 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
             
             // Image Section
             Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  border: Border.symmetric(
-                      horizontal: BorderSide(color: Color(0xFFEEEEEE))),
-                ),
-                child: imagePath.isNotEmpty
-                    ? AppCachedImage(
-                        imageUrl: imagePath,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        radius: 0,
-                        errorWidget: Icon(Icons.image_outlined,
-                            size: 48, color: Colors.grey.shade400),
-                      )
-                    : Container(
-                        color: Colors.grey.shade100,
-                        child: Icon(Icons.image_outlined,
-                            size: 48, color: Colors.grey.shade400),
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      border: Border.symmetric(
+                          horizontal: BorderSide(color: Color(0xFFEEEEEE))),
+                    ),
+                    child: imagePath.isNotEmpty
+                        ? AppCachedImage(
+                            imageUrl: imagePath,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            radius: 0,
+                            errorWidget: Icon(Icons.image_outlined,
+                                size: 48, color: Colors.grey.shade400),
+                          )
+                        : Container(
+                            color: Colors.grey.shade100,
+                            child: Icon(Icons.image_outlined,
+                                size: 48, color: Colors.grey.shade400),
+                          ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
+                      decoration: BoxDecoration(
+                        color: post.itemCategory.toLowerCase().contains('goods')
+                            ? Colors.blue.shade700
+                            : post.itemCategory.toLowerCase().contains('services')
+                                ? Colors.green.shade700
+                                : post.itemCategory.toLowerCase().contains('money')
+                                    ? Colors.orange.shade700
+                                    : Theme.of(context).brightness == Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        post.itemCategory,
+                        style: TextStyle(
+                          color: (post.itemCategory.toLowerCase().contains('goods') ||
+                                  post.itemCategory.toLowerCase().contains('services') ||
+                                  post.itemCategory.toLowerCase().contains('money'))
+                              ? Colors.white
+                              : Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.black
+                                  : Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 

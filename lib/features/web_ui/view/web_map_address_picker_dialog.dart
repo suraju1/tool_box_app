@@ -430,9 +430,9 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
             ),
             child: Slider(
-              value: _radius,
+              value: _radius.clamp(0.01, 10.0),
               min: 0.01,
-              max: 50,
+              max: 10.0,
               activeColor: context.primaryColor,
               inactiveColor: context.dividerColor,
               onChanged: (val) {

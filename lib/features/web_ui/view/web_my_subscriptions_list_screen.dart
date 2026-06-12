@@ -6,6 +6,7 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
 import 'package:tool_bocs/features/subscription/model/subscription_history_model.dart';
 import 'package:tool_bocs/features/subscription/model/subscription_model.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebMySubscriptionsListScreen extends StatefulWidget {
   const WebMySubscriptionsListScreen({super.key});
@@ -31,27 +32,7 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      appBar: AppBar(
-        backgroundColor: context.scaffoldBg,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back, color: context.textColor),
-        ),
-        title: Text(
-          'Payment History',
-          style: TextStyle(
-            color: context.textColor,
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            fontFamily: FontFamily.openSans,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, color: context.dividerColor.withOpacity(0.5)),
-        ),
-      ),
+      appBar: const WebScreenHeader(title: 'Payment History'),
       body: Consumer<SubscriptionController>(
         builder: (context, controller, child) {
           final subscription = controller.mySubscription;

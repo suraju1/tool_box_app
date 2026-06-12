@@ -53,19 +53,18 @@ class _WebHeaderState extends State<WebHeader> {
       ),
       child: Row(
         children: [
-          // Search Bar
+          // Quote text
           Expanded(
-            child: Container(
-              height: 44,
-              margin: const EdgeInsets.only(right: 40, left: 16),
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: greyColor.withOpacity(0.15)),
-              ),
-              child: _WebSearchBar(
-                tabIndex: controller.currentIndex,
-                key: ValueKey(controller.currentIndex),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: Text(
+                "“Because everything you need is already nearby.”",
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w500,
+                  color: context.textColor.withOpacity(0.8),
+                ),
               ),
             ),
           ),
@@ -134,19 +133,24 @@ class _WebHeaderState extends State<WebHeader> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          Consumer2<AuthController, ProfileController>(
-            builder: (context, authController, profileController, child) {
-              final authUser = authController.currentUser;
-              final profileUser = profileController.ownProfile?.userDetails;
-              final String userName =
-                  profileUser?.fullName ?? authUser?.fullName ?? "User";
-              final String? imageUrl = profileUser?.image;
+          Flexible(
+            child: Consumer2<AuthController, ProfileController>(
+              builder: (context, authController, profileController, child) {
+                final authUser = authController.currentUser;
+                final profileUser = profileController.ownProfile?.userDetails;
+                final String userName =
+                    profileUser?.fullName ?? authUser?.fullName ?? "User";
+                final String? imageUrl = profileUser?.image;
 
-              return Tooltip(
+                return Tooltip(
                 message: 'Open Profile Menu',
                 child: InkWell(
                   onTap: () {
-                    Scaffold.of(context).openEndDrawer();
+                    showDialog(
+                      context: context,
+                      barrierColor: Colors.transparent,
+                      builder: (context) => const _ProfilePopup(),
+                    );
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
@@ -154,15 +158,6 @@ class _WebHeaderState extends State<WebHeader> {
                         horizontal: 8.0, vertical: 4.0),
                     child: Row(
                       children: [
-                        Text(
-                          userName,
-                          style: GoogleFonts.inter(
-                            fontWeight: FontWeight.w600,
-                            color: context.textColor,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
                         Container(
                           width: 40,
                           height: 40,
@@ -192,6 +187,18 @@ class _WebHeaderState extends State<WebHeader> {
                             ),
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            userName,
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w600,
+                              color: context.textColor,
+                              fontSize: 14,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -199,196 +206,146 @@ class _WebHeaderState extends State<WebHeader> {
               );
             },
           ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _WebSearchBar extends StatefulWidget {
-  final int tabIndex;
-
-  const _WebSearchBar({required this.tabIndex, super.key});
-
-  @override
-  State<_WebSearchBar> createState() => _WebSearchBarState();
-}
-
-class _WebSearchBarState extends State<_WebSearchBar> {
-  late TextEditingController _controller;
-  final FocusNode _focusNode = FocusNode();
-
-  Timer? _timer;
-  int _currentItemIndex = 0;
-  int _currentCharIndex = 0;
-  bool _isDeleting = false;
-  String _currentHint = "Search...";
-
-  final List<String> _hintItems = [
-    "iPhone",
-    "Android Phones",
-    "Tablets",
-    "Smart Watches",
-    "Laptops",
-    "Gaming Consoles",
-    "Cameras",
-    "Earbuds & Headphones",
-    "Speakers",
-    "Power Banks",
-    "Vehicles",
-    "Cars",
-    "Bikes",
-    "Scooters",
-    "Trucks",
-    "Bicycles",
-    "Auto Rickshaw",
-    "Tractors",
-    "Property",
-    "Flats",
-    "Houses",
-    "Shops",
-    "Offices",
-    "Land/Plots",
-    "PG & Hostel Rooms",
-    "Fashion",
-    "Shoes",
-    "Watches",
-    "Clothes",
-    "Jackets",
-    "Bags",
-    "Sunglasses",
-    "Home & Furniture",
-    "Sofa",
-    "Bed",
-    "Dining Table",
-    "Chair",
-    "Cupboard",
-    "Mattress",
-    "TV Unit",
-    "Appliances",
-    "Refrigerator",
-    "Washing Machine",
-    "AC",
-    "Cooler",
-    "Microwave",
-    "TV"
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _hintItems.shuffle();
-    _controller = TextEditingController();
-    _focusNode.addListener(_onFocusChange);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final tradeController = context.read<TradeController>();
-      String query = '';
-      if (widget.tabIndex == 1) {
-        query = tradeController.giveSearchQuery;
-      } else if (widget.tabIndex == 2) {
-        query = tradeController.takeSearchQuery;
-      } else {
-        query = tradeController.homeSearchQuery;
-      }
-
-      _controller.text = query;
-
-      if (!_focusNode.hasFocus && query.isEmpty) {
-        _startAnimation();
-      } else {
-        setState(() {
-          _currentHint = "Search...";
-        });
-      }
-    });
-  }
-
-  void _onFocusChange() {
-    if (_focusNode.hasFocus) {
-      _timer?.cancel();
-      setState(() {
-        _currentHint = "Search...";
-      });
-    } else {
-      if (_controller.text.isEmpty) {
-        _startAnimation();
-      }
-    }
-  }
-
-  void _startAnimation() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (!mounted || _focusNode.hasFocus) {
-        timer.cancel();
-        return;
-      }
-
-      final targetWord = "Search \"${_hintItems[_currentItemIndex]}\"";
-
-      setState(() {
-        if (_isDeleting) {
-          if (_currentCharIndex > 0) {
-            _currentCharIndex--;
-            _currentHint = targetWord.substring(0, _currentCharIndex);
-          } else {
-            _isDeleting = false;
-            _currentItemIndex = (_currentItemIndex + 1) % _hintItems.length;
-          }
-        } else {
-          if (_currentCharIndex < targetWord.length) {
-            _currentCharIndex++;
-            _currentHint = targetWord.substring(0, _currentCharIndex);
-          } else {
-            _isDeleting = true;
-            _timer?.cancel();
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted && !_focusNode.hasFocus && _controller.text.isEmpty) {
-                _startAnimation();
-              }
-            });
-          }
-        }
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _focusNode.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
+class _ProfilePopup extends StatelessWidget {
+  const _ProfilePopup();
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      focusNode: _focusNode,
-      textAlignVertical: TextAlignVertical.center,
-      onChanged: (val) {
-        String type = 'all';
-        if (widget.tabIndex == 1) {
-          type = 'give';
-        } else if (widget.tabIndex == 2) {
-          type = 'take';
-        }
+    final profileController = context.watch<ProfileController>();
+    final profile = profileController.ownProfile;
+    final theme = Theme.of(context);
+    final user = profile?.userDetails;
 
-        context.read<TradeController>().setSearchQuery(val, type: type);
-      },
-      decoration: InputDecoration(
-        isDense: true,
-        hintText: _currentHint,
-        hintStyle: GoogleFonts.inter(fontSize: 14, color: greyColor),
-        prefixIcon: Icon(Icons.search, color: greyColor, size: 20),
-        prefixIconConstraints:
-            const BoxConstraints(minWidth: 40, minHeight: 40),
-        border: InputBorder.none,
-        contentPadding: EdgeInsets.zero,
+    if (user == null) return const SizedBox.shrink();
+
+    return Align(
+      alignment: Alignment.topRight,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          width: 280,
+          margin: const EdgeInsets.only(top: 86, right: 32),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+              ),
+            ],
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Avatar
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.primaryColor.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    )
+                  ],
+                  border: Border.all(color: Colors.grey.shade100, width: 2),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: AppCachedImage(
+                    imageUrl: user.image ?? '',
+                    userName: user.fullName,
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                    radius: 28,
+                    placeholderBgColor: theme.primaryColor.withOpacity(0.1),
+                    placeholderTextColor: theme.primaryColor,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Name
+              Text(
+                user.fullName,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: context.textColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Bio
+              Text(
+                (user.bio != null && user.bio!.trim().isNotEmpty) 
+                    ? user.bio!.trim() 
+                    : "Passionate about buying & selling new and used products. Exploring the best deals and connecting with trusted sellers on Trylt Marketplace.",
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Instagram
+              Row(
+                children: [
+                  Icon(Icons.mail_outline, size: 16, color: Colors.grey.shade700),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Instagram: @surajubale_1",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Credit Balance
+              Row(
+                children: [
+                  Text(
+                    "Credit Balance: ",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: context.textColor,
+                    ),
+                  ),
+                  Text(
+                    user.remainingBalance ?? '50.00',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: context.textColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
+

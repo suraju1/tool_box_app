@@ -6,6 +6,7 @@ import 'package:tool_bocs/features/profile/model/blocked_user_model.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:intl/intl.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebBlockedUsersScreen extends StatefulWidget {
   const WebBlockedUsersScreen({super.key});
@@ -36,7 +37,17 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
           constraints: const BoxConstraints(maxWidth: 1000),
           child: Column(
             children: [
-              _buildHeader(context),
+              WebScreenHeader(
+                title: 'Blocked Users',
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    tooltip: 'Refresh',
+                    onPressed: () =>
+                        context.read<ProfileController>().getBlockedUsers(),
+                  )
+                ],
+              ),
               const Divider(height: 1),
               _buildInfoBanner(context),
               Expanded(
@@ -53,35 +64,7 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, size: 24),
-            splashRadius: 24,
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            'Blocked Users',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: () => context.read<ProfileController>().getBlockedUsers(),
-          )
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildInfoBanner(BuildContext context) {
     return Container(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebPrivacyPolicyScreen extends StatefulWidget {
   const WebPrivacyPolicyScreen({super.key});
@@ -39,7 +40,7 @@ class _WebPrivacyPolicyScreenState extends State<WebPrivacyPolicyScreen> {
           constraints: const BoxConstraints(maxWidth: 1000),
           child: Column(
             children: [
-              _buildHeader(context),
+              const WebScreenHeader(title: 'Privacy Policy'),
               const Divider(height: 1),
               Expanded(
                 child: Stack(
@@ -64,27 +65,5 @@ class _WebPrivacyPolicyScreenState extends State<WebPrivacyPolicyScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, size: 24),
-            splashRadius: 24,
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            'Privacy Policy',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

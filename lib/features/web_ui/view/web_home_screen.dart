@@ -64,89 +64,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // PROMOTIONAL BANNER
-          if (controller.selectedCategories.isEmpty)
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).brightness == Brightness.dark 
-                          ? Colors.white 
-                          : context.primaryColor,
-                      Theme.of(context).brightness == Brightness.dark 
-                          ? Colors.grey.shade200 
-                          : context.primaryColor.withOpacity(0.7)
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.primaryColor.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    )
-                  ]),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(40.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Welcome to Pro Tools",
-                            style: TextStyle(
-                              color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            "Discover and trade the best tools available in your area.",
-                            style: TextStyle(
-                              color: Theme.of(context).brightness == Brightness.dark ? Colors.black87 : Colors.white70,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
-                              foregroundColor: Theme.of(context).brightness == Brightness.dark 
-                                  ? Colors.white 
-                                  : context.primaryColor,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                            ),
-                            child: const Text("Explore Now",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Graphic placeholder
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Icon(Icons.handyman, size: 100, color: Theme.of(context).brightness == Brightness.dark ? Colors.black12 : Colors.white24),
-                  )
-                ],
-              ),
-            ),
 
-          const SizedBox(height: 20),
-          _buildLocationHeader(context),
-          const SizedBox(height: 20),
-          _buildDistanceSection(context),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: _buildLocationHeader(context)),
+                const SizedBox(width: 16),
+                Expanded(child: _buildDistanceSection(context)),
+              ],
+            ),
+          ),
           const SizedBox(height: 40),
 
           // CATEGORY OR SECTION TITLE
@@ -200,46 +128,42 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 );
             context.read<TradeController>().fetchHomePosts();
           },
+          borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey.shade900 
+                  : const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: greyColor.withOpacity(0.1)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                )
-              ],
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: RichText(
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'HOME - ',
-                          style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16,
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Home',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
                         ),
-                        TextSpan(
-                          text: locationController.address ?? 'NA',
-                          style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                            fontWeight: FontWeight.normal,
-                            fontSize: 15,
-                          ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        locationController.address ?? 'Set your location',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 Icon(
@@ -258,75 +182,90 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Widget _buildDistanceSection(BuildContext context) {
     return Consumer<TradeController>(
       builder: (context, controller, child) {
+        String displayDistance;
+        if (controller.distanceKm < 1) {
+          displayDistance = '${(controller.distanceKm * 1000).round()} m';
+        } else {
+          displayDistance = '${controller.distanceKm.toStringAsFixed(1)} km';
+        }
+
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.grey.shade900 
+                : const Color(0xFFF5F5F5),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: greyColor.withOpacity(0.1)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Row(
                 children: [
-                  Expanded(
-                    child: Slider(
-                      padding: EdgeInsets.zero,
-                      value: controller.distanceKm,
-                      min: 0,
-                      max: 50,
-                      activeColor: context.primaryColor,
-                      inactiveColor: Colors.grey.shade200,
-                      thumbColor: context.primaryColor,
-                      onChanged: (val) {
-                        controller.setDistance(
-                          val,
-                          triggerFetch: true,
-                          fetchType: 'all',
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
                   Text(
-                    '${controller.distanceKm.round()} km',
+                    'Distance',
                     style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                       color: Theme.of(context).textTheme.bodyLarge?.color,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
+                  const Spacer(),
+                  Text(
+                    controller.hasLocation
+                        ? 'Show items near you'
+                        : 'Set your location',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: controller.hasLocation ? Colors.grey.shade600 : Colors.orange,
+                      fontWeight: controller.hasLocation ? FontWeight.normal : FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 61), // 16px gap + 45px width for the distance text
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                'Distance',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                controller.hasLocation
-                    ? 'Show items near you'
-                    : 'Set your location to enable distance filtering',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: controller.hasLocation ? Colors.grey : Colors.orange,
-                  fontWeight: controller.hasLocation
-                      ? FontWeight.normal
-                      : FontWeight.w600,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: SliderTheme(
+                      data: SliderThemeData(
+                        trackHeight: 4,
+                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                      ),
+                      child: Slider(
+                        value: controller.distanceKm.clamp(0.01, 10.0),
+                        min: 0.01,
+                        max: 10.0,
+                        activeColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+                        inactiveColor: Colors.grey.shade300,
+                        thumbColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+                        onChanged: (val) {
+                          controller.setDistance(
+                            val,
+                            triggerFetch: true,
+                            fetchType: 'all',
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: 55,
+                    child: Text(
+                      displayDistance,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

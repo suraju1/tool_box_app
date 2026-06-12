@@ -8,6 +8,7 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebTransactionHistoryScreen extends StatefulWidget {
   const WebTransactionHistoryScreen({super.key});
@@ -30,7 +31,7 @@ class _WebTransactionHistoryScreenState extends State<WebTransactionHistoryScree
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      appBar: _buildAppBar(context),
+      appBar: const WebScreenHeader(title: 'Transaction History'),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
@@ -93,34 +94,7 @@ class _WebTransactionHistoryScreenState extends State<WebTransactionHistoryScree
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: context.surfaceColor,
-      elevation: 0,
-      leading: IconButton(
-        onPressed: () => Navigator.pop(context),
-        icon: Icon(Icons.arrow_back_ios, color: context.textColor),
-      ),
-      centerTitle: true,
-      title: Text(
-        'Transaction History',
-        style: TextStyle(
-          color: context.textColor,
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          fontFamily: FontFamily.openSans,
-        ),
-      ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(10),
-        child: Divider(
-          height: 1,
-          color: context.dividerColor,
-          thickness: 1,
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildTransactionCard(WalletHistory transaction) {
     final post = transaction.post;

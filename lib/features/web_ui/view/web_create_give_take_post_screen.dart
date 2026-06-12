@@ -292,14 +292,14 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Select Area Diameter', style: _labelStyle()),
-            Text('${_diameter.toInt()} km', style: _labelStyle()),
+            Text(_diameter < 1 ? '${(_diameter * 1000).round()} m' : '${_diameter.toStringAsFixed(1)} km', style: _labelStyle()),
           ],
         ),
         const SizedBox(height: 16),
         Slider(
-          value: _diameter,
-          min: 1,
-          max: 50,
+          value: _diameter.clamp(0.01, 10.0),
+          min: 0.01,
+          max: 10.0,
           activeColor: Theme.of(context).primaryColor,
           inactiveColor: Theme.of(context).dividerColor,
           onChanged: (val) {

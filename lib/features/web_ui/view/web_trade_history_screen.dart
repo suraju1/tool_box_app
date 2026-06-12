@@ -6,6 +6,7 @@ import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebTradeHistoryScreen extends StatefulWidget {
   const WebTradeHistoryScreen({super.key});
@@ -52,7 +53,7 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context),
+              const WebScreenHeader(title: 'Trade History'),
               Expanded(
                 child: isLoading
                     ? _buildShimmer(context)
@@ -77,38 +78,7 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          )
-        ],
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back),
-            splashRadius: 24,
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            'Trade History',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildTradeSummary() {
     final tradeController = context.watch<TradeController>();

@@ -7,6 +7,7 @@ import 'package:tool_bocs/core/controller/language_controller.dart';
 import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebSettingScreen extends StatefulWidget {
   const WebSettingScreen({super.key});
@@ -20,27 +21,7 @@ class _WebSettingScreenState extends State<WebSettingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'Settings & Preferences',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            fontFamily: FontFamily.openSans,
-          ),
-        ),
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, size: 24),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, color: Theme.of(context).dividerColor),
-        ),
-      ),
+      appBar: const WebScreenHeader(title: 'Settings & Preferences'),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),

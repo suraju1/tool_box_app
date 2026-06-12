@@ -7,6 +7,7 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
 import 'package:tool_bocs/features/subscription/model/subscription_model.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebMySubscriptionStatusScreen extends StatefulWidget {
   const WebMySubscriptionStatusScreen({super.key});
@@ -30,13 +31,8 @@ class _WebMySubscriptionStatusScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      appBar: AppBar(
-        backgroundColor: context.scaffoldBg,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back, color: context.textColor),
-        ),
+      appBar: WebScreenHeader(
+        title: 'My Subscription',
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -56,21 +52,6 @@ class _WebMySubscriptionStatusScreenState
             ),
           ),
         ],
-        centerTitle: false,
-        title: Text(
-          'My Subscription',
-          style: TextStyle(
-            color: context.textColor,
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            fontFamily: FontFamily.openSans,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child:
-              Divider(height: 1, color: context.dividerColor.withOpacity(0.5)),
-        ),
       ),
       body: Consumer<SubscriptionController>(
         builder: (context, controller, child) {

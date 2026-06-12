@@ -5,6 +5,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebSavedUsersScreen extends StatefulWidget {
   const WebSavedUsersScreen({super.key});
@@ -35,7 +36,17 @@ class _WebSavedUsersScreenState extends State<WebSavedUsersScreen> {
           constraints: const BoxConstraints(maxWidth: 1000),
           child: Column(
             children: [
-              _buildHeader(context),
+              WebScreenHeader(
+                title: 'Saved Users',
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    tooltip: 'Refresh',
+                    onPressed: () =>
+                        context.read<ProfileController>().getSavedUsers(),
+                  )
+                ],
+              ),
               const Divider(height: 1),
               Expanded(
                 child: isLoading
@@ -51,35 +62,7 @@ class _WebSavedUsersScreenState extends State<WebSavedUsersScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, size: 24),
-            splashRadius: 24,
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            'Saved Users',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: () => context.read<ProfileController>().getSavedUsers(),
-          )
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildWebGrid(BuildContext context, List<SavedUserModel> savedUsers) {
     // Determine cross axis count based on screen width directly

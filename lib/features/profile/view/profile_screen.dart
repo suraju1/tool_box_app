@@ -112,11 +112,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Column(
                               children: [
                                 SizedBox(height: 10.h),
-                                _buildReviewsSection(profile),
+                                _buildMarksOfSurajSection(profile),
                                 SizedBox(height: 10.h),
-                                _buildTradeHistoryStats(context, profile),
-                                SizedBox(height: 10.h),
-                                _buildSettingsList(context),
+                                _buildNewTradeHistoryStats(context, profile),
                                 SizedBox(height: 40.h),
                               ],
                             ),
@@ -370,13 +368,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
 
               IconButton(
-                tooltip: 'Edit Profile',
-                onPressed: () => Navigator.pushNamed(
-                  context,
-                  AppRoutes.editProfile,
-                ),
+                tooltip: 'Settings',
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
                 icon: Icon(
-                  Icons.edit_outlined,
+                  Icons.settings_outlined,
                   size: 22.sp,
                   color: context.textColor,
                 ),
@@ -472,41 +467,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         softWrap: true,
                       ),
                     ],
-                    SizedBox(height: 7.h),
-
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(10.r),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.wallet, color: Colors.orange, size: 16.sp),
-                          SizedBox(width: 4.w),
-                          Text(
-                            'Credit Balance : ',
-                            style: TextStyle(
-                              color: context.textColor,
-                              fontSize: 12.sp,
-                              fontFamily: FontFamily.openSans,
-                              fontWeight: FontWeight.w600,
+                    SizedBox(height: 16.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pushNamed(context, AppRoutes.editProfile);
+                            },
+                            icon: Icon(Icons.edit, size: 14.sp),
+                            label: Text("Edit Profile", style: TextStyle(fontSize: 12.sp)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 8.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.r),
+                              ),
+                              elevation: 0,
                             ),
                           ),
-                          Text(
-                            user.remainingBalance ?? '0.00',
-                            style: TextStyle(
-                              color: context.textColor,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w900,
-                              fontFamily: FontFamily.openSans,
+                        ),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black, width: 1.5),
+                              borderRadius: BorderRadius.circular(30.r),
+                              color: Colors.transparent,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.credit_card, size: 14.sp, color: Colors.black),
+                                SizedBox(width: 4.w),
+                                Flexible(
+                                  child: Text(
+                                    "Bal: ${user.remainingBalance ?? '50.00'}",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      fontSize: 12.sp,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -590,22 +602,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildReviewsSection(UserProfileModel profile) {
+  Widget _buildMarksOfSurajSection(UserProfileModel profile) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
+        color: context.isDarkMode ? Colors.grey.shade900 : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(15.r),
-        border: Border.all(color: context.dividerColor),
+        border: Border.all(color: context.dividerColor.withOpacity(0.5)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Reviews & Ratings',
+                'Marks of ${profile.userDetails.fullName.split(' ').first}',
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
@@ -614,316 +627,179 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               Row(
                 children: [
-                  Icon(Icons.star, color: Colors.amber, size: 16.sp),
+                  Icon(Icons.thumb_up_alt_outlined, size: 18.sp, color: context.textColor),
                   SizedBox(width: 4.w),
-                  Text(
-                    '${profile.userDetails.averageRating} (${profile.userDetails.totalReviews} Reviews)',
-                    style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                        color: context.textColor),
-                  ),
+                  Text("23", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: context.textColor)),
+                  SizedBox(width: 12.w),
+                  Icon(Icons.thumb_down_alt_outlined, size: 18.sp, color: context.textColor),
+                  SizedBox(width: 4.w),
+                  Text("23", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: context.textColor)),
                 ],
-              ),
+              )
             ],
           ),
-          if (profile.reviews.isEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Text(
-                'No reviews yet',
-                style: TextStyle(color: greyColor, fontSize: 13.sp),
-              ),
-            )
-          else ...[
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 200.h),
-              child: ListView.separated(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: profile.reviews.length > 3 ? 3 : profile.reviews.length,
-                separatorBuilder: (_, __) => const Divider(),
-                itemBuilder: (context, index) =>
-                    ReviewItemWidget(review: profile.reviews[index]),
-              ),
-            ),
-            if (profile.reviews.length > 3) ...[
-              //SizedBox(height: 2.h),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    AppRoutes.allReviews,
-                    arguments: profile,
-                  );
-                },
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w),
-                  child: Text(
-                    'View All Reviews',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14.sp,
-                      fontFamily: FontFamily.openSans,
-                      color: context.primaryColor,
-                    ),
-                  ),
+          SizedBox(height: 16.h),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 4,
+            separatorBuilder: (_, __) => SizedBox(height: 12.h),
+            itemBuilder: (context, index) {
+              return Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: context.surfaceColor,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: greyColor.withOpacity(0.2)),
                 ),
-              ),
-            ],
-          ],
-          SizedBox(height: 8.h),
-          _buildMarksRow(profile),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF65B741),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.check, color: Colors.white, size: 20.sp),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Professional",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: context.textColor),
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            "- Best cook ever!!",
+                            style: TextStyle(color: Colors.grey.shade500, fontSize: 11.sp),
+                          ),
+                          SizedBox(height: 8.h),
+                          Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                child: Text("True:2", style: TextStyle(color: Colors.white, fontSize: 9.sp, fontWeight: FontWeight.bold)),
+                              ),
+                              SizedBox(width: 6.w),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black),
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                child: Text("False: 6", style: TextStyle(color: Colors.black, fontSize: 9.sp, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          )
         ],
       ),
     );
   }
 
-  Widget _buildMarksRow(UserProfileModel profile) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.white10 : greyColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: context.dividerColor),
-      ),
-      child: Row(
-        children: [
-          Text(
-            'Marks',
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-          const Spacer(),
-          _buildMarkCount(
-              Icons.thumb_up_alt_outlined, profile.userDetails.totalLikes, Colors.green),
-          SizedBox(width: 14.w),
-          _buildMarkCount(Icons.thumb_down_alt_outlined,
-              profile.userDetails.totalDislikes, Colors.red),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMarkCount(IconData icon, int count, Color color) {
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 15.sp),
-        SizedBox(width: 4.w),
-        Text(
-          count.toString(),
-          style: TextStyle(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w700,
-            color: context.textColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTradeHistoryStats(
-      BuildContext context, UserProfileModel profile) {
-    final stats = profile.tradeStats;
+  Widget _buildNewTradeHistoryStats(BuildContext context, UserProfileModel profile) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
+        color: context.isDarkMode ? Colors.grey.shade900 : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: context.dividerColor),
+        border: Border.all(color: context.dividerColor.withOpacity(0.5)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Trade History',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w700,
-                fontFamily: FontFamily.openSans,
-                color: context.textColor,
-              ),
+          Text(
+            'Trade History',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: context.textColor,
             ),
           ),
-          SizedBox(height: 15.h),
+          SizedBox(height: 16.h),
           Row(
             children: [
-              Expanded(
-                child: _buildStatCard(
-                  'Total Trades',
-                  stats.totalTrades.toString(),
-                  Colors.blue,
-                  Icons.handshake,
-                  onTap: () =>
-                      Navigator.pushNamed(context, AppRoutes.tradeHistory),
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: _buildStatCard(
-                  'Sent Offers',
-                  stats.sentOffers.toString(),
-                  Colors.red,
-                  Icons.outbox_outlined,
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: _buildStatCard(
-                  'Received Offers',
-                  stats.receivedOffers.toString(),
-                  Colors.orange,
-                  Icons.move_to_inbox_outlined,
-                ),
-              ),
+              Expanded(child: _buildNewTradeHistoryCard(Icons.sync, Colors.greenAccent.shade700, "100", "Total Trades")),
+              SizedBox(width: 8.w),
+              Expanded(child: _buildNewTradeHistoryCard(Icons.thumb_up_alt_outlined, Colors.orange, "100", "Total Like")),
+              SizedBox(width: 8.w),
+              Expanded(child: _buildNewTradeHistoryCard(Icons.thumb_down_alt_outlined, Colors.red, "100", "Total Dislike")),
             ],
           ),
-          SizedBox(height: 20.h),
-          InkWell(
-            onTap: () {
-              Navigator.pushNamed(context, AppRoutes.tradeHistory);
-            },
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 50.w),
-              alignment: Alignment.center,
-              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
+          SizedBox(height: 24.h),
+          Center(
+            child: SizedBox(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: context.primaryColor,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Text(
-                'View Trade History',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14.sp,
-                  color: context.onPrimaryColor,
+              child: ElevatedButton.icon(
+                onPressed: () {},
+                icon: Icon(Icons.bookmark_border, size: 20.sp),
+                label: Text("Save Profile"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
           ),
+          SizedBox(height: 16.h),
+          Center(
+            child: Text(
+              "Your profile is saved by 22 users",
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+          )
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String label, String value, Color color, IconData icon,
-      {VoidCallback? onTap}) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 10.w),
-        decoration: BoxDecoration(
-          color:
-              context.isDarkMode ? Colors.white10 : greyColor.withOpacity(0.1),
-          border: Border.all(color: context.dividerColor),
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28.sp),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w800,
-                color: context.primaryColor,
-                fontFamily: FontFamily.openSans,
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10.sp,
-                color: context.textColor,
-                fontWeight: FontWeight.w500,
-                fontFamily: FontFamily.openSans,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSettingsList(BuildContext context) {
+  Widget _buildNewTradeHistoryCard(IconData icon, Color iconColor, String value, String title) {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 4.w),
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: context.dividerColor),
-        boxShadow: context.isDarkMode
-            ? []
-            : [
-                BoxShadow(
-                  color: greyColorWithOpacity0_4,
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+        border: Border.all(color: greyColor.withOpacity(0.2)),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildProfileSettingItem(
-            context,
-            icon: Icons.post_add_outlined,
-            label: AppLocalizations.of(context)!.myPosts,
-            onTap: () => Navigator.pushNamed(context, AppRoutes.myPosts),
+          Icon(icon, color: iconColor, size: 28.sp),
+          SizedBox(height: 12.h),
+          Text(
+            value,
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: context.textColor),
           ),
-          _buildDivider(),
-          _buildProfileSettingItem(
-            context,
-            icon: Icons.card_membership_outlined,
-            label: AppLocalizations.of(context)!.mySubscription,
-            onTap: () => Navigator.pushNamed(context, AppRoutes.mySubscription),
-          ),
-          _buildDivider(),
-          _buildProfileSettingItem(
-            context,
-            icon: Icons.sync_alt,
-            label: AppLocalizations.of(context)!.transactionHistory,
-            onTap: () =>
-                Navigator.pushNamed(context, AppRoutes.transactionHistory),
-          ),
-          _buildDivider(),
-          _buildProfileSettingItem(
-            context,
-            icon: Icons.bookmark_border,
-            label: AppLocalizations.of(context)!.savedProfiles,
-            onTap: () => Navigator.pushNamed(context, AppRoutes.savedUsers),
-          ),
-          _buildDivider(),
-          _buildProfileSettingItem(
-            context,
-            icon: Icons.block_outlined,
-            label: AppLocalizations.of(context)!.blockedUsers,
-            onTap: () => Navigator.pushNamed(context, AppRoutes.blockedUsers),
-          ),
-          _buildDivider(),
-          _buildProfileSettingItem(
-            context,
-            icon: Icons.settings_outlined,
-            label: AppLocalizations.of(context)!.settings,
-            onTap: () => Navigator.pushNamed(context, AppRoutes.settings),
-          ),
-          _buildDivider(),
-          _buildProfileSettingItem(
-            context,
-            icon: Icons.login_outlined,
-            label: AppLocalizations.of(context)!.logout,
-            onTap: () => showDialog(
-              context: context,
-              builder: (context) => const LogoutDialog(),
-            ),
+          SizedBox(height: 4.h),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
           ),
         ],
       ),

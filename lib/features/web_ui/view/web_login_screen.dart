@@ -155,25 +155,13 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Container(
-                        width: 80,
-                        height: 80,
-                        alignment: Alignment.centerLeft,
-                        margin: const EdgeInsets.only(bottom: 24),
-                        decoration: const BoxDecoration(shape: BoxShape.circle),
-                        child: ClipOval(
-                          child: Image.asset(
-                            'assets/logo_transperant.png',
-                            color: context.isDarkMode ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'Welcome Back',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w800,
-                          fontFamily: FontFamily.openSans,
-                          color: context.primaryColor,
+                        alignment: Alignment.center,
+                        margin: const EdgeInsets.only(bottom: 32),
+                        child: Image.asset(
+                          'assets/logo_transperant.png',
+                          color: context.isDarkMode ? Colors.white : Colors.black,
+                          height: 60,
+                          fit: BoxFit.contain,
                         ),
                       ),
                       const SizedBox(height: 12),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
 
 class WebTermsConditionsScreen extends StatefulWidget {
   const WebTermsConditionsScreen({super.key});
@@ -40,7 +41,7 @@ class _WebTermsConditionsScreenState extends State<WebTermsConditionsScreen> {
           constraints: const BoxConstraints(maxWidth: 1000),
           child: Column(
             children: [
-              _buildHeader(context),
+              const WebScreenHeader(title: 'Terms & Conditions'),
               const Divider(height: 1),
               Expanded(
                 child: Stack(
@@ -65,27 +66,5 @@ class _WebTermsConditionsScreenState extends State<WebTermsConditionsScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, size: 24),
-            splashRadius: 24,
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            'Terms & Conditions',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
