@@ -52,9 +52,10 @@ class _WebHeaderState extends State<WebHeader> {
         border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Quote text
-          Expanded(
+          // Left Side: Quote text
+          Flexible(
             child: Padding(
               padding: const EdgeInsets.only(left: 16),
               child: Text(
@@ -65,147 +66,138 @@ class _WebHeaderState extends State<WebHeader> {
                   fontWeight: FontWeight.w500,
                   color: context.textColor.withOpacity(0.8),
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
 
-          // Theme Toggle
-          Consumer<ThemeController>(
-            builder: (context, themeController, child) {
-              final isDark = themeController.themeMode == ThemeMode.dark ||
-                  (themeController.themeMode == ThemeMode.system &&
-                      MediaQuery.platformBrightnessOf(context) ==
-                          Brightness.dark);
+          // Right Side: Action Icons and Profile
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Theme Toggle
+              Consumer<ThemeController>(
+                builder: (context, themeController, child) {
+                  final isDark = themeController.themeMode == ThemeMode.dark ||
+                      (themeController.themeMode == ThemeMode.system &&
+                          MediaQuery.platformBrightnessOf(context) ==
+                              Brightness.dark);
 
-              return IconButton(
-                onPressed: () {
-                  themeController
-                      .setTheme(isDark ? ThemeMode.light : ThemeMode.dark);
-                },
-                icon: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) {
-                    return RotationTransition(
-                      turns: child.key == const ValueKey('dark')
-                          ? Tween<double>(begin: 0.5, end: 1.0)
-                              .animate(animation)
-                          : Tween<double>(begin: 0.5, end: 1.0)
-                              .animate(animation),
-                      child: ScaleTransition(scale: animation, child: child),
-                    );
-                  },
-                  child: Icon(
-                    isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                    key: ValueKey(isDark ? 'light' : 'dark'),
-                    color: isDark ? Colors.amber : Colors.grey.shade700,
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-
-          // Action Icons
-          Consumer<NotificationController>(
-            builder: (context, notificationCtrl, child) {
-              return IconButton(
-                icon: Badge(
-                  isLabelVisible: notificationCtrl.unreadCount > 0,
-                  label: Text('${notificationCtrl.unreadCount}'),
-                  backgroundColor: Colors.red,
-                  textColor: Colors.white,
-                  child: const Icon(Icons.notifications_outlined),
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.notifications);
-                },
-              );
-            },
-          ),
-          const SizedBox(width: 16),
-          Container(
-            width: 2,
-            height: 32,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          Flexible(
-            child: Consumer2<AuthController, ProfileController>(
-              builder: (context, authController, profileController, child) {
-                final authUser = authController.currentUser;
-                final profileUser = profileController.ownProfile?.userDetails;
-                final String userName =
-                    profileUser?.fullName ?? authUser?.fullName ?? "User";
-                final String? imageUrl = profileUser?.image;
-
-                return Tooltip(
-                message: 'Open Profile Menu',
-                child: InkWell(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      barrierColor: Colors.transparent,
-                      builder: (context) => const _ProfilePopup(),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0, vertical: 4.0),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: context.primaryColor.withOpacity(0.2),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              )
-                            ],
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: AppCachedImage(
-                              imageUrl: imageUrl ?? '',
-                              userName: userName,
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
-                              radius: 20,
-                              placeholderBgColor:
-                                  context.primaryColor.withOpacity(0.1),
-                              placeholderTextColor: context.primaryColor,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: Text(
-                            userName,
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                              color: context.textColor,
-                              fontSize: 14,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                  return IconButton(
+                    onPressed: () {
+                      themeController
+                          .setTheme(isDark ? ThemeMode.light : ThemeMode.dark);
+                    },
+                    icon: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                        return RotationTransition(
+                          turns: child.key == const ValueKey('dark')
+                              ? Tween<double>(begin: 0.5, end: 1.0)
+                                  .animate(animation)
+                              : Tween<double>(begin: 0.5, end: 1.0)
+                                  .animate(animation),
+                          child: ScaleTransition(scale: animation, child: child),
+                        );
+                      },
+                      child: Icon(
+                        isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                        key: ValueKey(isDark ? 'light' : 'dark'),
+                        color: isDark ? Colors.amber : Colors.grey.shade700,
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+
+              // Action Icons
+              Consumer<NotificationController>(
+                builder: (context, notificationCtrl, child) {
+                  return IconButton(
+                    icon: Badge(
+                      isLabelVisible: notificationCtrl.unreadCount > 0,
+                      label: Text('${notificationCtrl.unreadCount}'),
+                      backgroundColor: Colors.red,
+                      textColor: Colors.white,
+                      child: const Icon(Icons.notifications_outlined),
+                    ),
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRoutes.notifications);
+                    },
+                  );
+                },
+              ),
+              const SizedBox(width: 16),
+              Container(
+                width: 1,
+                height: 32,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                color: Colors.grey.shade300,
+              ),
+              
+              // Profile Menu
+              Consumer2<AuthController, ProfileController>(
+                builder: (context, authController, profileController, child) {
+                  final authUser = authController.currentUser;
+                  final profileUser = profileController.ownProfile?.userDetails;
+                  final String userName =
+                      (profileUser?.fullName ?? authUser?.fullName ?? "User").trim();
+                  final String? imageUrl = profileUser?.image;
+
+                  return Tooltip(
+                    message: 'Open Profile Menu',
+                    child: InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierColor: Colors.transparent,
+                          builder: (context) => const _ProfilePopup(),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 4.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(18),
+                              child: AppCachedImage(
+                                imageUrl: imageUrl ?? '',
+                                userName: userName,
+                                width: 36,
+                                height: 36,
+                                fit: BoxFit.cover,
+                                radius: 18,
+                                placeholderBgColor:
+                                    context.primaryColor.withOpacity(0.1),
+                                placeholderTextColor: context.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 150),
+                              child: Text(
+                                userName,
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                  color: context.textColor,
+                                  fontSize: 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),

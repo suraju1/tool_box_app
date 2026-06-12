@@ -11,9 +11,8 @@ import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/app_success_dialog.dart';
 import 'package:tool_bocs/core/widgets/app_image_picker_bs.dart';
 import 'package:tool_bocs/util/font_family.dart';
-import 'package:tool_bocs/core/widgets/premium_card.dart';
-import 'package:tool_bocs/core/widgets/premium_text_field.dart';
-import 'package:tool_bocs/core/widgets/animated_switch.dart';
+import 'package:tool_bocs/core/constants/app_theme.dart';
+import 'package:tool_bocs/util/colors.dart';
 
 class WebEditProfileScreen extends StatefulWidget {
   const WebEditProfileScreen({super.key});
@@ -95,8 +94,6 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     });
   }
 
-
-
   Future<void> _pickImage() async {
     final List<XFile>? images = await AppImagePickerBS.show(context);
     if (images != null && images.isNotEmpty) {
@@ -109,8 +106,6 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
       });
     }
   }
-
-
 
   double? _parseCoordinate(dynamic value) {
     if (value == null) return null;
@@ -173,112 +168,90 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     }
 
     final isDesktop = MediaQuery.of(context).size.width > 900;
-    final theme = Theme.of(context);
+    // Main grey background respecting dark mode
+    final Color bgColor = context.scaffoldBg;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: bgColor,
       body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: _buildDashboardHeader(context),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(32, 24, 32, 120),
-                sliver: SliverToBoxAdapter(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1200),
-                      child: isDesktop 
-                          ? _buildDesktopGrid(controller)
-                          : _buildMobileLayout(controller),
-                    ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 120), // For sticky bar
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Back Button
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back, color: context.textColor, size: 24),
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
-              ),
-            ],
-          ),
-          _buildStickyActionBar(controller),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDashboardHeader(BuildContext context) {
-    final theme = Theme.of(context);
-    final profile = context.watch<ProfileController>().ownProfile?.userDetails;
-    
-    return Container(
-      width: double.infinity,
-      height: 280,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.primaryColor.withOpacity(0.8),
-            theme.primaryColorDark,
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 24,
-            left: 24,
-            child: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-              splashRadius: 28,
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(32),
-                  topRight: Radius.circular(32),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 48,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _buildPremiumProfileImage(),
-                const SizedBox(width: 24),
+                // Overlapping Stack
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 48.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                  padding: const EdgeInsets.symmetric(horizontal: 48),
+                  child: Stack(
+                    clipBehavior: Clip.none,
                     children: [
-                      Text(
-                        _nameController.text.isNotEmpty ? _nameController.text : (profile?.fullName ?? 'User'),
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontFamily: FontFamily.openSans,
-                          letterSpacing: -0.5,
+                      // Main Card
+                      Container(
+                        margin: const EdgeInsets.only(top: 80), // Offset for avatar
+                        padding: EdgeInsets.fromLTRB(isDesktop ? 64 : 32, isDesktop ? 64 : 100, isDesktop ? 64 : 32, 48),
+                        decoration: BoxDecoration(
+                          color: context.surfaceColor,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: context.isDarkMode
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.02),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                         ),
+                        child: isDesktop ? _buildDesktopGrid() : _buildMobileLayout(),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _locationController.text.isNotEmpty ? _locationController.text : 'No location set',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white.withOpacity(0.8),
-                          fontFamily: FontFamily.openSans,
+
+                      // Avatar & Name Overlay
+                      Positioned(
+                        top: 0,
+                        left: 16,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _buildPremiumProfileImage(),
+                            const SizedBox(width: 24),
+                            // Text aligned above the white card
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 60),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _nameController.text.isNotEmpty ? _nameController.text : (profile?.fullName ?? 'User'),
+                                    style: TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                      color: context.textColor,
+                                      fontFamily: FontFamily.openSans,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    _locationController.text.isNotEmpty ? _locationController.text : 'No location set',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: context.subTextColor,
+                                      fontFamily: FontFamily.openSans,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -287,6 +260,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
               ],
             ),
           ),
+          _buildStickyActionBar(controller),
         ],
       ),
     );
@@ -302,21 +276,23 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
           alignment: Alignment.center,
           children: [
             Container(
-              width: 160,
-              height: 160,
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 6),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+                border: Border.all(color: context.surfaceColor, width: 6),
+                boxShadow: context.isDarkMode
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(80),
+                borderRadius: BorderRadius.circular(70),
                 child: _selectedWebImageBytes != null
                     ? Image.memory(
                         _selectedWebImageBytes!,
@@ -325,8 +301,8 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                     : AppCachedImage(
                         imageUrl: user?.image ?? '',
                         userName: user?.fullName ?? '',
-                        width: 160,
-                        height: 160,
+                        width: 140,
+                        height: 140,
                         fit: BoxFit.cover,
                       ),
               ),
@@ -335,20 +311,13 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
               bottom: 12,
               right: 12,
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: context.textColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  border: Border.all(color: context.surfaceColor, width: 2),
                 ),
-                child: Icon(Icons.edit, size: 20, color: Theme.of(context).scaffoldBackgroundColor),
+                child: Icon(Icons.edit, size: 14, color: context.scaffoldBg),
               ),
             ),
           ],
@@ -357,210 +326,299 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     );
   }
 
-  Widget _buildDesktopGrid(ProfileController controller) {
+  Widget _buildDesktopGrid() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          flex: 7,
-          child: Column(
-            children: [
-              _buildPersonalInfoCard(),
-              const SizedBox(height: 24),
-              _buildContactInfoCard(),
-            ],
-          ),
+          flex: 6,
+          child: _buildLeftColumn(),
         ),
-        const SizedBox(width: 32),
+        const SizedBox(width: 48),
         Expanded(
           flex: 5,
-          child: Column(
-            children: [
-              _buildPreferencesCard(),
-            ],
-          ),
+          child: _buildRightColumn(),
         ),
       ],
     );
   }
 
-  Widget _buildMobileLayout(ProfileController controller) {
+  Widget _buildMobileLayout() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildPersonalInfoCard(),
-        const SizedBox(height: 24),
-        _buildContactInfoCard(),
-        const SizedBox(height: 24),
-        _buildPreferencesCard(),
+        _buildLeftColumn(),
+        const SizedBox(height: 48),
+        _buildRightColumn(),
       ],
     );
   }
 
-  Widget _buildPersonalInfoCard() {
-    return PremiumCard(
-      title: 'Personal Information',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: PremiumTextField(
-                  label: 'Full Name',
-                  controller: _nameController,
-                  icon: Icons.person_outline,
-                  hintText: 'Enter your full name',
-                ),
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: PremiumTextField(
-                  label: 'Date of Birth',
-                  controller: _dobController,
-                  icon: Icons.calendar_today_outlined,
-                  readOnly: true,
-                  hintText: 'DD/MM/YYYY',
-                  onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedDate ??
-                          DateTime.now().subtract(const Duration(days: 6570)),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        _selectedDate = pickedDate;
-                        _dobController.text =
-                            "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
-                        _hasUnsavedChanges = true;
-                      });
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Gender',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildGenderRadio('Male'),
-              const SizedBox(width: 24),
-              _buildGenderRadio('Female'),
-              const SizedBox(width: 24),
-              _buildGenderRadio('Other'),
-            ],
-          ),
-          const SizedBox(height: 24),
-          PremiumTextField(
-            label: 'Bio',
-            controller: _bioController,
-            maxLines: 4,
-            hintText: 'Tell others about yourself...',
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '${_bioController.text.length}/150',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+  Widget _buildLeftColumn() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Personal Information", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
+        const SizedBox(height: 16),
+        Divider(color: context.dividerColor, thickness: 1.5),
+        const SizedBox(height: 32),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _buildModernTextField(
+                label: "Full Name",
+                controller: _nameController,
+                hintText: "Enter full name",
+                icon: Icons.person_outline,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContactInfoCard() {
-    return PremiumCard(
-      title: 'Contact Information',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: PremiumTextField(
-                  label: 'Email Address',
-                  controller: _emailController,
-                  icon: Icons.email_outlined,
-                  helperText: 'Used for notifications and recovery',
-                ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: _buildModernTextField(
+                label: "Date of Birth",
+                controller: _dobController,
+                hintText: "DD/MM/YYYY",
+                icon: Icons.calendar_today_outlined,
+                readOnly: true,
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate ?? DateTime.now().subtract(const Duration(days: 6570)),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _selectedDate = pickedDate;
+                      _dobController.text =
+                          "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+                      _hasUnsavedChanges = true;
+                    });
+                  }
+                },
               ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: PremiumTextField(
-                  label: 'Mobile Number',
-                  controller: _mobileController,
-                  icon: Icons.phone_android_outlined,
-                  helperText: 'Verified mobile number',
-                  readOnly: true,
-                ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _buildModernDropdown(
+          label: "Gender",
+          value: _selectedGender ?? 'Male',
+          items: ['Male', 'Female', 'Other'],
+          onChanged: (val) {
+            setState(() {
+              _selectedGender = val;
+              _hasUnsavedChanges = true;
+            });
+          },
+        ),
+        const SizedBox(height: 24),
+        _buildModernTextField(
+          label: "Bio",
+          controller: _bioController,
+          hintText: "Tell others about yourself...",
+          maxLines: 5,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRightColumn() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Preferences", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
+        const SizedBox(height: 16),
+        Divider(color: context.dividerColor, thickness: 1.5),
+        const SizedBox(height: 32),
+        _buildPreferenceBox(
+          title: "Profile Visibility",
+          subtitle: "Public: Anyone can view your profile.",
+          value: _profileVisibility,
+          onChanged: (val) {
+            setState(() {
+              _profileVisibility = val;
+              _hasUnsavedChanges = true;
+            });
+          },
+        ),
+        _buildPreferenceBox(
+          title: "Show Trade History",
+          subtitle: "Public: Anyone can view your profile.",
+          value: _showTradeHistory,
+          onChanged: (val) {
+            setState(() {
+              _showTradeHistory = val;
+              _hasUnsavedChanges = true;
+            });
+          },
+        ),
+        const SizedBox(height: 48),
+        Text("Contact Information", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
+        const SizedBox(height: 16),
+        Divider(color: context.dividerColor, thickness: 1.5),
+        const SizedBox(height: 32),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _buildModernTextField(
+                label: "Email Address",
+                controller: _emailController,
+                hintText: "Email",
+                icon: Icons.email_outlined,
+                helperText: "Used for notifications and recovery",
               ),
-            ],
-          ),
-          PremiumTextField(
-            label: 'Location',
-            controller: _locationController,
-            icon: Icons.location_on_outlined,
-            readOnly: true,
-            hintText: 'Pick your location',
-            onTap: () {
-              WebMapAddressPickerDialog.show(context, isPickOnly: true)
-                  .then((_) => _updateLocationFromController());
-            },
-          ),
-        ],
-      ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: _buildModernTextField(
+                label: "Mobile Number",
+                controller: _mobileController,
+                hintText: "Mobile",
+                icon: Icons.phone_android_outlined,
+                helperText: "Verified mobile number",
+                readOnly: true,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _buildModernTextField(
+          label: "Location",
+          controller: _locationController,
+          hintText: "Pick your location",
+          icon: Icons.location_on_outlined,
+          readOnly: true,
+          onTap: () {
+            WebMapAddressPickerDialog.show(context, isPickOnly: true)
+                .then((_) => _updateLocationFromController());
+          },
+        ),
+      ],
     );
   }
 
-  Widget _buildPreferencesCard() {
-    return PremiumCard(
-      title: 'Preferences',
-      child: Column(
+  Widget _buildModernTextField({
+    required String label,
+    required String hintText,
+    required TextEditingController controller,
+    IconData? icon,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    int maxLines = 1,
+    String? helperText,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 13, color: context.subTextColor, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          readOnly: readOnly,
+          onTap: onTap,
+          maxLines: maxLines,
+          style: TextStyle(fontSize: 15, color: context.textColor),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(color: context.dividerColor, fontSize: 14),
+            prefixIcon: icon != null ? Icon(icon, color: context.subTextColor, size: 20) : null,
+            filled: true,
+            fillColor: context.surfaceColor,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: context.dividerColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: context.textColor, width: 1.2),
+            ),
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 6),
+          Text(helperText, style: TextStyle(fontSize: 11, color: context.subTextColor)),
+        ]
+      ],
+    );
+  }
+
+  Widget _buildModernDropdown({
+    required String label,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 13, color: context.subTextColor, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: items.contains(value) ? value : items.first,
+          onChanged: onChanged,
+          icon: Icon(Icons.keyboard_arrow_down, color: context.subTextColor),
+          style: TextStyle(fontSize: 15, color: context.textColor),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: context.surfaceColor,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: context.dividerColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: context.textColor, width: 1.2),
+            ),
+          ),
+          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPreferenceBox({
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        border: Border.all(color: context.dividerColor, width: 1.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          AnimatedSwitch(
-            title: 'Profile Visibility',
-            subtitle: 'Public: Anyone can view your profile.',
-            value: _profileVisibility,
-            onChanged: (val) {
-              setState(() {
-                _profileVisibility = val;
-                _hasUnsavedChanges = true;
-              });
-            },
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: context.textColor)),
+                const SizedBox(height: 4),
+                Text(subtitle, style: TextStyle(color: context.subTextColor, fontSize: 13)),
+              ],
+            ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Divider(height: 1),
-          ),
-          AnimatedSwitch(
-            title: 'Show Trade History',
-            subtitle: 'Your trade history is hidden from others.',
-            value: _showTradeHistory,
-            onChanged: (val) {
-              setState(() {
-                _showTradeHistory = val;
-                _hasUnsavedChanges = true;
-              });
-            },
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: context.textColor,
+            inactiveThumbColor: context.dividerColor,
+            inactiveTrackColor: context.surfaceColor,
           ),
         ],
       ),
     );
   }
-
-
 
   Widget _buildStickyActionBar(ProfileController controller) {
     return AnimatedPositioned(
@@ -572,14 +630,16 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
       child: Container(
         height: 80,
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 16,
-              offset: const Offset(0, -4),
-            ),
-          ],
+          color: context.surfaceColor,
+          boxShadow: context.isDarkMode
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 16,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
         ),
         child: Center(
           child: ConstrainedBox(
@@ -601,13 +661,12 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                   const Spacer(),
                   TextButton(
                     onPressed: controller.isLoading ? null : () {
-                      // Discard changes by popping and reopening or resetting state
                       Navigator.pop(context);
                     },
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     ),
-                    child: const Text('Cancel', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    child: Text('Cancel', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: context.textColor)),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
@@ -656,11 +715,11 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      foregroundColor: Theme.of(context).scaffoldBackgroundColor,
+                      backgroundColor: context.textColor,
+                      foregroundColor: context.scaffoldBg,
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       elevation: 0,
                     ),
@@ -668,7 +727,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                         ? SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).scaffoldBackgroundColor),
+                            child: CircularProgressIndicator(strokeWidth: 2, color: context.scaffoldBg),
                           )
                         : const Text(
                             'Save Changes',
@@ -680,39 +739,6 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildGenderRadio(String label) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedGender = label;
-          _hasUnsavedChanges = true;
-        });
-      },
-      borderRadius: BorderRadius.circular(20),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Radio<String>(
-            value: label,
-            groupValue: _selectedGender,
-            activeColor: Theme.of(context).primaryColor,
-            onChanged: (v) {
-              setState(() {
-                _selectedGender = v;
-                _hasUnsavedChanges = true;
-              });
-            },
-          ),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
     );
   }
