@@ -268,6 +268,23 @@ class ProfileController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void reset() {
+    _ownProfile = null;
+    _viewedProfile = null;
+    _blockedUsers = [];
+    _savedUsers = [];
+    _faqs = [];
+    _myPosts = [];
+    _totalMyPostsCount = 0;
+    _totalMyGivesCount = 0;
+    _totalMyTakesCount = 0;
+    _selectedMyPostsFilter = ' All ';
+    _myPostsPagination = null;
+    _currentMyPostsPage = 1;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   Future<ApiResponse<dynamic>> updateProfile({
     String? fullName,
     String? location,

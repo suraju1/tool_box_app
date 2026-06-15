@@ -112,6 +112,24 @@ class TradeController extends ChangeNotifier {
     });
   }
 
+  void reset() {
+    _givePosts = [];
+    _takePosts = [];
+    _homePosts = [];
+    _myTrades = [];
+    _myTradeStats = null;
+    _postResponses = [];
+    _sentResponses = [];
+    _selectedPost = null;
+    _selectedResponse = null;
+    _lastTradeCompletion = null;
+    _hiddenPostIds = [];
+    _categories = [];
+    _errorMessage = null;
+    _categoryErrorMessage = null;
+    resetFilters();
+  }
+
   Future<void> fetchCategories() async {
     _isLoading = true;
     _categoryErrorMessage = null;

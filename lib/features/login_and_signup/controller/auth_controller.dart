@@ -14,6 +14,8 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/routes/navigator_key.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
+import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 
 /// Controller for authentication state management
 class AuthController extends ChangeNotifier {
@@ -374,6 +376,8 @@ class AuthController extends ChangeNotifier {
     final context = navigatorKey.currentContext;
     if (context != null) {
       Provider.of<BottomNavBarController>(context, listen: false).reset();
+      Provider.of<ProfileController>(context, listen: false).reset();
+      Provider.of<TradeController>(context, listen: false).reset();
     }
 
     notifyListeners();

@@ -218,13 +218,13 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
 
   String _getButtonName(bool isGivePost) {
     if (_selectedReturnType == ReturnType.existing) {
-      return isGivePost ? 'Make Offer (Give it)' : 'Make Offer (Take it)';
+      return isGivePost ? 'Make Offer (Take It)' : 'Make Offer (Give It)';
     } else if (_selectedReturnType == ReturnType.customItem) {
-      return isGivePost ? 'Make Custom Offer (Give)' : 'Make Custom Offer (Take)';
+      return isGivePost ? 'Make Custom Offer (Take)' : 'Make Custom Offer (Give)';
     } else if (_selectedReturnType == ReturnType.money) {
-      return isGivePost ? 'Make Money Offer' : 'Offer Money';
+      return isGivePost ? 'Offer Money' : 'Ask for Money';
     } else {
-      return 'Ask for Free';
+      return isGivePost ? 'Ask for Free' : 'Give for Free';
     }
   }
 
