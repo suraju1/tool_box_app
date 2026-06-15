@@ -1,0 +1,667 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:tool_bocs/core/widgets/shimmer_box.dart';
+import 'package:tool_bocs/features/chat/controller/chat_service.dart';
+import 'package:tool_bocs/features/chat/view/chat_screen.dart';
+import 'package:tool_bocs/util/colors.dart';
+import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/core/services/storage_service.dart';
+import 'package:tool_bocs/features/login_and_signup/model/user_model.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
+import 'dart:convert';
+import 'package:tool_bocs/core/widgets/app_cached_image.dart';
+import 'package:tool_bocs/core/widgets/skeleton_widgets.dart';
+
+class WebChatListScreen extends StatefulWidget {
+  final Function(String chatRoomId, String otherUserId, String otherUserName,
+      String? otherUserImage, TradeResponseModel? tradeResponse)? onChatTap;
+
+  const WebChatListScreen({super.key, this.onChatTap});
+
+  @override
+  State<WebChatListScreen> createState() => _WebChatListScreenState();
+}
+
+class _WebChatListScreenState extends State<WebChatListScreen> {
+  final ChatService _chatService = ChatService();
+  String? _currentUserId;
+  Stream<QuerySnapshot>? _chatRoomsStream;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isLoadingUser = true;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUser();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final userData = await StorageService.getUserData();
+    if (userData != null) {
+      final user = UserModel.fromJson(jsonDecode(userData));
+      if (mounted) {
+        setState(() {
+          _currentUserId = user.id.toString();
+          _chatRoomsStream = _chatService.getChatRooms();
+          _isLoadingUser = false;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _isLoadingUser = false;
+        });
+      }
+    }
+  }
+
+  String _formatMessageTime(DateTime time) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final dateToCheck = DateTime(time.year, time.month, time.day);
+
+    if (dateToCheck == today) {
+      return DateFormat('hh:mm a').format(time);
+    } else if (dateToCheck == yesterday) {
+      return "Yesterday";
+    } else {
+      return DateFormat('MMM dd').format(time);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: context.scaffoldBg,
+      body: Column(
+        children: [
+          Container(
+            height: 65,
+            color: context.appBarColor,
+          ),
+          _buildSearchBox(context),
+          Expanded(
+            child: _isLoadingUser
+                ? _buildShimmer(context)
+                : StreamBuilder<QuerySnapshot>(
+                    stream: _chatRoomsStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        final error = snapshot.error.toString();
+                        if (error.contains('permission-denied')) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Text(
+                                'Your chats will appear here once you are logged in.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: context.subTextColor,
+                                  fontSize: 16.0,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
+
+                      if (_currentUserId == null) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Text(
+                              'Your chats will appear here once you are logged in.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: context.subTextColor,
+                                fontSize: 16.0,
+                                fontFamily: FontFamily.openSans,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return _buildShimmer(context);
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+
+                if (docs.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No chats yet',
+                      style: TextStyle(
+                        color: context.textColor,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    final lastMessage =
+                        data['lastMessage'] as Map<String, dynamic>?;
+
+                    if (lastMessage == null) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final timestamp = lastMessage['timestamp'] as Timestamp?;
+                    final timeString = timestamp != null
+                        ? _formatMessageTime(timestamp.toDate())
+                        : '';
+
+                    String text = lastMessage['text'] as String? ?? '';
+                    if (lastMessage['senderId'] == _currentUserId) {
+                      text = "You: $text";
+                    }
+
+                    final isRead = lastMessage['isRead'] as bool? ??
+                        true; // Default to true if not present for logic sake
+                    // Get unread count
+                    final unreadCounts =
+                        data['unreadCounts'] as Map<String, dynamic>?;
+                    int unreadCountInt = 0;
+                    if (unreadCounts != null && _currentUserId != null) {
+                      debugPrint("UnreadCounts Map: $unreadCounts");
+                      debugPrint("Current User ID: $_currentUserId");
+                      debugPrint(
+                          "Value for Key: ${unreadCounts[_currentUserId]}");
+                      unreadCountInt = unreadCounts[_currentUserId] ?? 0;
+                    } else {
+                      debugPrint(
+                          "UnreadCounts is null or Current User ID is null");
+                      debugPrint("Data: $data");
+                    }
+
+                    String unreadCountStr = '';
+                    if (unreadCountInt > 0) {
+                      unreadCountStr = unreadCountInt.toString();
+                    } else if (unreadCounts == null &&
+                        !isRead &&
+                        lastMessage['senderId'] != _currentUserId) {
+                      // Fallback for old messages ONLY if unreadCounts doesn't exist
+                      unreadCountStr = '1';
+                    }
+
+                    // Determine other user ID (simple implementation assumes 2 users)
+                    final users = List<String>.from(data['users'] ?? []);
+                    final otherUserId = users.firstWhere(
+                        (id) => id != _currentUserId,
+                        orElse: () => 'Unknown');
+
+                    // Determine if chat is disabled (72 hours from first message)
+                    final firstMsgAt = data['firstMessageAt'] as Timestamp?;
+                    final lastUpdatedAt = data['updatedAt'] as Timestamp?;
+                    bool isDisabled = false;
+
+                    if (firstMsgAt != null) {
+                      isDisabled = DateTime.now()
+                              .difference(firstMsgAt.toDate())
+                              .inHours >=
+                          72;
+                    } else if (lastUpdatedAt != null) {
+                      // Fallback for existing chats without firstMessageAt:
+                      // If even the LAST update is > 72 hours ago, the chat is definitely disabled.
+                      isDisabled = DateTime.now()
+                              .difference(lastUpdatedAt.toDate())
+                              .inHours >=
+                          72;
+                    }
+
+                    // Fetch real user name from Firestore
+                    return StreamBuilder<DocumentSnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(otherUserId)
+                          .snapshots(),
+                      builder: (context, userSnapshot) {
+                        String displayName = "User $otherUserId";
+                        String? otherUserImage;
+                        if (userSnapshot.hasData && userSnapshot.data!.exists) {
+                          final userData = userSnapshot.data!.data()
+                              as Map<String, dynamic>?;
+                          if (userData != null &&
+                              userData.containsKey('fullName')) {
+                            displayName = userData['fullName'];
+                          }
+                          if (userData != null &&
+                              userData.containsKey('profileImage')) {
+                            otherUserImage =
+                                userData['profileImage'] as String?;
+                          }
+                        }
+
+                        // Apply search filter here
+                        if (_searchQuery.isNotEmpty &&
+                            !displayName.toLowerCase().contains(_searchQuery)) {
+                          return const SizedBox.shrink();
+                        }
+
+                        final tradeDetails =
+                            data['tradeDetails'] as Map<String, dynamic>?;
+                        TradeResponseModel? tradeResponse;
+                        if (tradeDetails != null && data['tradeId'] != null) {
+                          tradeResponse = TradeResponseModel(
+                            id: data['tradeId'],
+                            postId: tradeDetails['postId'] ?? 0,
+                            responderId: tradeDetails['responderId'] ?? 0,
+                            posterUserId: tradeDetails['posterUserId'] ?? 0,
+                            responderName: tradeDetails['responderName'] ?? '',
+                            responseType:
+                                tradeDetails['responseType'] ?? 'item',
+                            priceRangeStart:
+                                tradeDetails['priceRangeStart']?.toDouble(),
+                            priceRangeEnd:
+                                tradeDetails['priceRangeEnd']?.toDouble(),
+                            itemName: tradeDetails['itemName'],
+                            postItemName: tradeDetails['postItemName'],
+                            posterName: tradeDetails['posterName'],
+                            createdAt:
+                                '', // Not stored in details but required by model
+                            status:
+                                'accepted', // Assume accepted if they are chatting
+                            posterMobile: tradeDetails['posterMobile'],
+                            responderMobile: tradeDetails['responderMobile'],
+                            postType: tradeDetails['postType'],
+                          );
+                        }
+
+                        Widget? subtitleWidget;
+                        if (tradeResponse != null) {
+                          final isOwner =
+                              context.read<AuthController>().currentUser?.id ==
+                                  tradeResponse.posterUserId;
+                          final isGivePost =
+                              tradeResponse.postType?.toLowerCase() == 'give' ||
+                                  tradeResponse.postType?.toLowerCase() ==
+                                      'giving';
+
+                          String givingItem = '';
+                          String takingItem = '';
+
+                          if (isOwner) {
+                            if (isGivePost) {
+                              givingItem = tradeResponse.postItemName ?? 'Item';
+                              takingItem = tradeResponse.responseType
+                                          .toLowerCase() ==
+                                      'price'
+                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                  : (tradeResponse.itemName ?? 'Item');
+                            } else {
+                              givingItem = tradeResponse.responseType
+                                          .toLowerCase() ==
+                                      'price'
+                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                  : (tradeResponse.itemName ?? 'Item');
+                              takingItem = tradeResponse.postItemName ?? 'Item';
+                            }
+                          } else {
+                            if (isGivePost) {
+                              givingItem = tradeResponse.responseType
+                                          .toLowerCase() ==
+                                      'price'
+                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                  : (tradeResponse.itemName ?? 'Item');
+                              takingItem = tradeResponse.postItemName ?? 'Item';
+                            } else {
+                              givingItem = tradeResponse.postItemName ?? 'Item';
+                              takingItem = tradeResponse.responseType
+                                          .toLowerCase() ==
+                                      'price'
+                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                  : (tradeResponse.itemName ?? 'Item');
+                            }
+                          }
+
+                          subtitleWidget = Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    const TextSpan(text: "Trade: "),
+                                    TextSpan(
+                                      text: givingItem,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    const TextSpan(text: " for "),
+                                    TextSpan(
+                                      text: takingItem,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: context.subTextColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                text,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: context.subTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          subtitleWidget = Text(
+                            text,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: context.subTextColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        }
+
+                        return _buildChatItem(
+                          context,
+                          docs[index].id, // Pass chatRoomId
+                          displayName,
+                          subtitleWidget,
+                          timeString,
+                          unreadCountStr,
+                          false, // Online status not implemented
+                          otherUserImage ??
+                              '', // Actual profile image from Firestore
+                          otherUserId: otherUserId,
+                          tradeResponse: tradeResponse,
+                          isDisabled: isDisabled,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmer(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          height: 75,
+          color: context.appBarColor,
+        ),
+        Container(
+          color: context.appBarColor,
+          padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
+          child: Container(
+            height: 50,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: context.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+        const Expanded(
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBox(BuildContext context) {
+    return Container(
+      color: context.appBarColor,
+      padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        height: 50,
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: context.dividerColor),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.search, color: context.subTextColor),
+            SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.toLowerCase();
+                  });
+                },
+                style: TextStyle(color: context.textColor, fontSize: 16),
+                decoration: InputDecoration(
+                  hintText: 'Search chats...',
+                  hintStyle:
+                      TextStyle(color: context.subTextColor, fontSize: 16),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+            if (_searchQuery.isNotEmpty)
+              GestureDetector(
+                onTap: () {
+                  _searchController.clear();
+                  setState(() {
+                    _searchQuery = '';
+                  });
+                  FocusScope.of(context).unfocus();
+                },
+                child:
+                    Icon(Icons.clear, color: context.subTextColor, size: 20),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatItem(
+    BuildContext context,
+    String chatRoomId,
+    String name,
+    Widget messageWidget,
+    String time,
+    String unreadCount,
+    bool isOnline,
+    String imagePath, {
+    required String otherUserId,
+    TradeResponseModel? tradeResponse,
+    bool isDisabled = false,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        if (widget.onChatTap != null) {
+          widget.onChatTap!(chatRoomId, otherUserId, name,
+              imagePath.isNotEmpty ? imagePath : null, tradeResponse);
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                chatRoomId: chatRoomId,
+                otherUserId: otherUserId,
+                otherUserName: name,
+                otherUserImage: imagePath.isNotEmpty ? imagePath : null,
+                tradeResponse: tradeResponse,
+              ),
+            ),
+          );
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: isDisabled
+              ? (context.isDarkMode ? Colors.white12 : Colors.grey.shade100)
+              : null,
+          border: Border(bottom: BorderSide(color: context.dividerColor)),
+        ),
+        child: Opacity(
+          opacity: isDisabled ? 0.6 : 1.0,
+          child: isDisabled
+              ? ColorFiltered(
+                  colorFilter: const ColorFilter.matrix([
+                    0.2126,
+                    0.7152,
+                    0.0722,
+                    0,
+                    0,
+                    0.2126,
+                    0.7152,
+                    0.0722,
+                    0,
+                    0,
+                    0.2126,
+                    0.7152,
+                    0.0722,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                  ]),
+                  child: _buildChatItemContent(name, imagePath, time,
+                      isDisabled, messageWidget, unreadCount),
+                )
+              : _buildChatItemContent(name, imagePath, time, isDisabled,
+                  messageWidget, unreadCount),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatItemContent(String name, String imagePath, String time,
+      bool isDisabled, Widget messageWidget, String unreadCount) {
+    return Row(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: AppCachedImage(
+            imageUrl: imagePath,
+            userName: name,
+            width: 60,
+            height: 60,
+            radius: 30,
+            fit: BoxFit.cover,
+          ),
+        ),
+        SizedBox(width: 15),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: context.textColor,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            time,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: isDisabled ? Colors.grey : greenColor,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 5),
+              Row(
+                children: [
+                  Expanded(
+                    child: messageWidget,
+                  ),
+                  if (unreadCount.isNotEmpty &&
+                      unreadCount != '0' &&
+                      !isDisabled)
+                    Container(
+                      alignment: Alignment.center,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      margin: EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: context.primaryColor,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        unreadCount,
+                        style: TextStyle(
+                          color: context.onPrimaryColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: FontFamily.openSans,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tool_bocs/features/chat/view/chat_list_screen.dart';
+import 'package:tool_bocs/features/web_ui/view/web_chat_list_screen.dart';
 import 'package:tool_bocs/features/web_ui/view/web_chat_screen.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -28,7 +28,7 @@ class _WebChatLayoutState extends State<WebChatLayout> {
           decoration: BoxDecoration(
             border: Border(right: BorderSide(color: greyColor.withOpacity(0.2))),
           ),
-          child: ChatListScreen(
+          child: WebChatListScreen(
             onChatTap: (chatRoomId, otherUserId, otherUserName, otherUserImage, tradeResponse) {
               setState(() {
                 selectedChatRoomId = chatRoomId;

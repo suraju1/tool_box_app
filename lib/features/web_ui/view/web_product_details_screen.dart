@@ -567,6 +567,8 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
   }
 
   Widget _buildNewActionCard(PostModel post, LocationController locationController) {
+    final authController = context.read<AuthController>();
+    final isOwner = authController.currentUser?.id == post.userId;
     final bool isCompleted = post.status.toLowerCase() == 'completed';
     final bool isPrice = _isPriceReturn(post);
 
@@ -707,6 +709,23 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                         'This item is no longer available.',
                         style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
                       ),
+                    ),
+                  )
+                else if (isOwner)
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.notifications,
+                      arguments: post.id,
+                    ),
+                    icon: const Icon(Icons.inbox_rounded),
+                    label: const Text('View Offers'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 54),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                   )
                 else ...[
