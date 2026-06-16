@@ -269,7 +269,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
     String offeringText = '';
 
     if (isGivePost) {
-      String offeringType = response.responseType;
+      String offeringType = response.responseType.toLowerCase();
       double? ps = response.priceRangeStart;
       double? pe = response.priceRangeEnd;
       String? itm = response.itemName;
@@ -295,7 +295,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
         offeringText = 'Asking for free';
       }
     } else {
-      String offeringType = response.responseType;
+      String offeringType = response.responseType.toLowerCase();
       double? ps = response.priceRangeStart;
       double? pe = response.priceRangeEnd;
       String? itm = response.itemName;

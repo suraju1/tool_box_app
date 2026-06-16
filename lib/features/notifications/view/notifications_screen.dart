@@ -310,7 +310,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final totalActiveIncoming = incomingActive.length;
     final totalActiveOutgoing = outgoingActive.length;
 
-    if (totalActiveIncoming == 0 && totalActiveOutgoing == 0 && incomingHistory.isEmpty && outgoingHistory.isEmpty) {
+    if (totalActiveIncoming == 0 &&
+        totalActiveOutgoing == 0 &&
+        incomingHistory.isEmpty &&
+        outgoingHistory.isEmpty) {
       return Center(
         child: Padding(
           padding: EdgeInsets.all(40.w),
@@ -349,8 +352,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   '📥 INCOMING',
                   '${incomingActive.length} Offers on your posts',
                 ),
-                ...incomingActive.map((response) =>
-                    _buildResponseCard(context, response, true)),
+                ...incomingActive.map(
+                    (response) => _buildResponseCard(context, response, true)),
               ],
             ),
 
@@ -365,32 +368,36 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   '📤 OUTGOING',
                   '${outgoingActive.length} Offers you sent',
                 ),
-                ...outgoingActive.map((response) =>
-                    _buildResponseCard(context, response, false)),
+                ...outgoingActive.map(
+                    (response) => _buildResponseCard(context, response, false)),
               ],
             ),
 
           // HISTORY SECTION
           if (incomingHistory.isNotEmpty || outgoingHistory.isNotEmpty) ...[
-            SizedBox(height: (incomingActive.isNotEmpty || outgoingActive.isNotEmpty) ? 20.h : 0),
+            SizedBox(
+                height: (incomingActive.isNotEmpty || outgoingActive.isNotEmpty)
+                    ? 20.h
+                    : 0),
             _buildMatchSectionHeader(
               context,
               '⏱️ HISTORY',
               'Past matches',
             ),
             if (incomingHistory.isNotEmpty)
-              ...incomingHistory.map((response) =>
-                  _buildResponseCard(context, response, true)),
+              ...incomingHistory.map(
+                  (response) => _buildResponseCard(context, response, true)),
             if (outgoingHistory.isNotEmpty)
-              ...outgoingHistory.map((response) =>
-                  _buildResponseCard(context, response, false)),
+              ...outgoingHistory.map(
+                  (response) => _buildResponseCard(context, response, false)),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildMatchSectionHeader(BuildContext context, String title, String subtitle) {
+  Widget _buildMatchSectionHeader(
+      BuildContext context, String title, String subtitle) {
     return Padding(
       padding: EdgeInsets.fromLTRB(15.w, 0, 15.w, 12.h),
       child: Column(
@@ -445,7 +452,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ];
       final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
       final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-      subText = startPrice == endPrice 
+      subText = startPrice == endPrice
           ? '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice in return'
           : '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice - ₹$endPrice in return';
     } else {
@@ -460,9 +467,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         TextSpan(text: ' ~ $timeAgo'),
       ];
       // Show return item or price they want in return
-      if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
-        subText = '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ${response.returnItemName} in return';
-      } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+      if (response.returnItemName != null &&
+          response.returnItemName!.isNotEmpty) {
+        subText =
+            '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ${response.returnItemName} in return';
+      } else if ((response.priceRangeStart ?? 0) > 0 ||
+          (response.priceRangeEnd ?? 0) > 0) {
         final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
         final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
         subText = startPrice == endPrice
@@ -488,9 +498,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           TextSpan(text: ' ~ $timeAgo'),
         ];
         // Show what they're offering or want in return
-        if (response.returnItemName != null && response.returnItemName!.isNotEmpty) {
+        if (response.returnItemName != null &&
+            response.returnItemName!.isNotEmpty) {
           subText = '⬇️ Giving you ${response.returnItemName} in return';
-        } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+        } else if ((response.priceRangeStart ?? 0) > 0 ||
+            (response.priceRangeEnd ?? 0) > 0) {
           final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
           final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
           subText = startPrice == endPrice
@@ -511,7 +523,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ];
         if (response.itemName != null && response.itemName!.isNotEmpty) {
           subText = '⬇️ Offering: ${response.itemName}';
-        } else if ((response.priceRangeStart ?? 0) > 0 || (response.priceRangeEnd ?? 0) > 0) {
+        } else if ((response.priceRangeStart ?? 0) > 0 ||
+            (response.priceRangeEnd ?? 0) > 0) {
           final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
           final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
           subText = startPrice == endPrice
@@ -643,124 +656,116 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           fontFamily: FontFamily.openSans,
         ),
       ),
-    actions: [
-  PopupMenuButton<void>(
-    offset: const Offset(-200, 50),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12.r),
-    ),
-    color: Colors.white,
-    surfaceTintColor: Colors.transparent,
-
-    // ✅ Updated Detail / Info Icon
-    icon: Container(
-      padding: EdgeInsets.all(6.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4.r,
-            offset: const Offset(0, 2),
+      actions: [
+        PopupMenuButton<void>(
+          offset: const Offset(-200, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
           ),
-        ],
-      ),
-      child: Icon(
-        Icons.info_outline,
-        size: 18.sp,
-        color: Colors.black87,
-      ),
-    ),
+          color: Colors.white,
+          surfaceTintColor: Colors.transparent,
 
-    itemBuilder: (context) => [
-      PopupMenuItem<void>(
-        enabled: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 12.h,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'See what people want around you',
-                style: TextStyle(
-                  color: const Color(0xFF111311),
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: FontFamily.openSans,
+          // ✅ Updated Detail / Info Icon
+          icon: Container(
+            padding: EdgeInsets.all(6.r),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4.r,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-
-              SizedBox(height: 10.h),
-
-              Text(
-                '• See existing posts by givers around you',
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: FontFamily.openSans,
-                ),
-              ),
-
-              SizedBox(height: 6.h),
-
-              Text(
-                '• Respond to posts, mention what you can offer in return',
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: FontFamily.openSans,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-
-      const PopupMenuDivider(height: 1),
-
-      PopupMenuItem<void>(
-        onTap: () {
-          Future.delayed(Duration.zero, () {
-            Navigator.pushNamed(
-              context,
-              AppRoutes.helpSupport,
-            );
-          });
-        },
-
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.help_outline,
-              size: 18.sp,
-              color: context.primaryColor,
+              ],
             ),
+            child: Icon(
+              Icons.info_outline,
+              size: 18.sp,
+              color: Colors.black87,
+            ),
+          ),
 
-            SizedBox(width: 8.w),
-
-            Text(
-              'Help & Support',
-              style: TextStyle(
-                color: context.primaryColor,
-                fontSize: 13.sp,
-                fontWeight: FontWeight.bold,
-                fontFamily: FontFamily.openSans,
+          itemBuilder: (context) => [
+            PopupMenuItem<void>(
+              enabled: false,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 12.h,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'See what people want around you',
+                      style: TextStyle(
+                        color: const Color(0xFF111311),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Text(
+                      '• See existing posts by givers around you',
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    Text(
+                      '• Respond to posts, mention what you can offer in return',
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: FontFamily.openSans,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const PopupMenuDivider(height: 1),
+            PopupMenuItem<void>(
+              onTap: () {
+                Future.delayed(Duration.zero, () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.helpSupport,
+                  );
+                });
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.help_outline,
+                    size: 18.sp,
+                    color: context.primaryColor,
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    'Help & Support',
+                    style: TextStyle(
+                      color: context.primaryColor,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: FontFamily.openSans,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-      ),
-    ],
-  ),
-],  bottom: widget.postId == null
+      ],
+      bottom: widget.postId == null
           ? TabBar(
               dividerColor: Colors.transparent,
               indicatorColor: context.primaryColor,
@@ -868,26 +873,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     height: 75.w,
                     fit: BoxFit.cover,
                     errorWidget: _buildImageErrorPlaceholder(context),
-                  ),
-                ),
-                Positioned(
-                  top: 6.h,
-                  left: 6.w,
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                    child: Text(
-                      distance,
-                      style: TextStyle(
-                        color: context.onPrimaryColor,
-                        fontSize: 8.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                   ),
                 ),
               ],

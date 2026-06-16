@@ -173,7 +173,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
     String offeringText = '';
 
     if (isGivePost) {
-      String offeringType = response.responseType;
+      String offeringType = response.responseType.toLowerCase();
       double? ps = response.priceRangeStart;
       double? pe = response.priceRangeEnd;
       String? itm = response.itemName;
@@ -191,22 +191,25 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
         }
       }
 
-      if (isGivePost) {
-        if (offeringType == 'price') {
-          offeringText = 'Paying ₹${ps?.toInt()} - ₹${pe?.toInt()}';
-        } else if (offeringType == 'item') {
-          offeringText = 'Offering you ${itm ?? 'an item'}';
-        } else {
-          offeringText = 'Asking for free';
-        }
+      if (offeringType == 'price') {
+        offeringText = 'Paying ₹${ps?.toInt()} - ₹${pe?.toInt()}';
+      } else if (offeringType == 'item') {
+        offeringText = 'Offering you ${itm ?? 'an item'}';
       } else {
-        if (offeringType == 'price') {
-          offeringText = 'Asking for ₹${ps?.toInt()} - ₹${pe?.toInt()}';
-        } else if (offeringType == 'item') {
-          offeringText = 'Asking for ${itm ?? 'an item'}';
-        } else {
-          offeringText = 'Offering for free';
-        }
+        offeringText = 'Asking for free';
+      }
+    } else {
+      String offeringType = response.responseType.toLowerCase();
+      double? ps = response.priceRangeStart;
+      double? pe = response.priceRangeEnd;
+      String? itm = response.itemName;
+
+      if (offeringType == 'price') {
+        offeringText = 'Asking for ₹${ps?.toInt()} - ₹${pe?.toInt()}';
+      } else if (offeringType == 'item') {
+        offeringText = 'Asking for ${itm ?? 'an item'}';
+      } else {
+        offeringText = 'Offering for free';
       }
     }
 

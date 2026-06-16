@@ -835,26 +835,6 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                     errorWidget: _buildImageErrorPlaceholder(context),
                   ),
                 ),
-                Positioned(
-                  top: 6,
-                  left: 6,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'Unknown',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
             const SizedBox(width: 16),
