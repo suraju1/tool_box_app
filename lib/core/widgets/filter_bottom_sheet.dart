@@ -511,7 +511,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   Widget _buildSortBySection() {
     final sortOptions = [
-      {'label': AppLocalizations.of(context)!.distance, 'value': 'Nearest First'},
+      {'label': 'Nearest', 'value': 'Nearest First'},
+      {'label': 'Farthest', 'value': 'Farthest First'},
       {'label': AppLocalizations.of(context)!.newest, 'value': 'Newest First'},
       {'label': AppLocalizations.of(context)!.oldest, 'value': 'Oldest First'},
     ];
@@ -521,37 +522,28 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       children: [
         Text(AppLocalizations.of(context)!.sortBy, style: _sectionTitleStyle()),
         SizedBox(height: 10.h),
-        Row(
+        Wrap(
+          spacing: 12.w,
+          runSpacing: 12.h,
           children: sortOptions.map((option) {
             bool isSelected = selectedSort == option['value'];
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => setState(() => selectedSort = option['value']!),
-                child: Container(
-                  margin: EdgeInsets.only(
-                      right: option['label'] == 'Oldest' ? 0 : 10.w),
-                  padding: EdgeInsets.symmetric(vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? context.primaryColor
-                        : context.surfaceColor,
-                    borderRadius: BorderRadius.circular(22.r),
-                    border: Border.all(
-                      color: isSelected
-                          ? context.primaryColor
-                          : context.dividerColor,
-                    ),
+            return GestureDetector(
+              onTap: () => setState(() => selectedSort = option['value']!),
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: isSelected ? context.primaryColor : context.surfaceColor,
+                  borderRadius: BorderRadius.circular(22.r),
+                  border: Border.all(
+                    color: isSelected ? context.primaryColor : context.dividerColor,
                   ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    option['label']!,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: isSelected
-                          ? context.onPrimaryColor
-                          : context.subTextColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                ),
+                child: Text(
+                  option['label']!,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: isSelected ? context.onPrimaryColor : context.subTextColor,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

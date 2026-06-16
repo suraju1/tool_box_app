@@ -406,6 +406,9 @@ class TradeController extends ChangeNotifier {
     if (_selectedSort == 'Nearest First') {
       filtered.sort(
           (a, b) => (a.distanceKm ?? 9999.0).compareTo(b.distanceKm ?? 9999.0));
+    } else if (_selectedSort == 'Farthest First') {
+      filtered.sort(
+          (a, b) => (b.distanceKm ?? -1.0).compareTo(a.distanceKm ?? -1.0));
     } else if (_selectedSort == 'Newest First') {
       filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } else if (_selectedSort == 'Oldest First') {

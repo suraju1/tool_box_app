@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/web_ui/view/web_filter_dialog.dart';
 
 class WebGiveScreen extends StatefulWidget {
   const WebGiveScreen({super.key});
@@ -107,6 +108,24 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                                   "Search requests (e.g. Hammer, Drill)...",
                               border: InputBorder.none,
                             ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          WebFilterDialog.show(context, initialPostType: 'take');
+                        },
+                        icon: const Icon(Icons.filter_alt_outlined),
+                        label: const Text("Filter"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).cardColor,
+                          foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Colors.grey.shade300),
                           ),
                         ),
                       ),
