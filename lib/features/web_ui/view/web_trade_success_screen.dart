@@ -2,12 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+import 'package:tool_bocs/core/widgets/user_review_dialog.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 
-class WebTradeSuccessScreen extends StatelessWidget {
+class WebTradeSuccessScreen extends StatefulWidget {
   const WebTradeSuccessScreen({super.key});
+
+  @override
+  State<WebTradeSuccessScreen> createState() => _WebTradeSuccessScreenState();
+}
+
+class _WebTradeSuccessScreenState extends State<WebTradeSuccessScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showReviewDialog();
+    });
+  }
+
+  void _showReviewDialog() {
+    final tradeController = context.read<TradeController>();
+    final authController = context.read<AuthController>();
+    final response = tradeController.selectedResponse;
+    if (response == null) return;
+
+    final isOwner = authController.currentUser?.id == response.posterUserId;
+    final otherUserId = isOwner ? response.responderId : response.posterUserId;
+    final otherUserName = isOwner ? response.responderName : response.posterName;
+
+    if (otherUserId != null) {
+      showDialog(
+        context: context,
+        builder: (context) => UserReviewDialog(
+          userId: int.tryParse(otherUserId.toString()) ?? 0,
+          userName: otherUserName ?? 'User',
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +60,12 @@ class WebTradeSuccessScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Container(
-            padding: const EdgeInsets.all(48),
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 24),
+              padding: const EdgeInsets.all(48),
             decoration: BoxDecoration(
               color: context.surfaceColor,
               borderRadius: BorderRadius.circular(24),
@@ -134,6 +172,7 @@ class WebTradeSuccessScreen extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

@@ -256,7 +256,7 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
     bool isGivePost = post?.postType == 'give';
 
     String offeringText = '';
-    String offeringType = response.responseType;
+    String offeringType = response.responseType.toLowerCase();
     double? ps = response.priceRangeStart;
     double? pe = response.priceRangeEnd;
     String? itm = response.itemName;

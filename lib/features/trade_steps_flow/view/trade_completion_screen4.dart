@@ -230,7 +230,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
     bool isGivePost = post?.postType == 'give';
 
     String offeringText = '';
-    String offeringType = response.responseType;
+    String offeringType = response.responseType.toLowerCase();
     double? ps = response.priceRangeStart;
     double? pe = response.priceRangeEnd;
     String? itm = response.itemName;
