@@ -5,6 +5,7 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
+import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 
 class WebProfileScreen extends StatelessWidget {
@@ -89,9 +90,9 @@ class WebProfileScreen extends StatelessWidget {
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildMarksOfSuraj(fullName, innerCardBgColor, cardBgColor, isMobile),
+                    _buildMarksOfSuraj(fullName, innerCardBgColor, cardBgColor, isMobile, profileController.ownProfile?.reviews ?? [], profileUser),
                     SizedBox(height: isMobile ? 16 : 24),
-                    _buildTradeHistory(innerCardBgColor, cardBgColor, isMobile),
+                    _buildTradeHistory(innerCardBgColor, cardBgColor, isMobile, profileController.ownProfile?.tradeStats),
                   ],
                 )
               : Row(
@@ -99,12 +100,12 @@ class WebProfileScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       flex: 5,
-                      child: _buildMarksOfSuraj(fullName, innerCardBgColor, cardBgColor, isMobile),
+                      child: _buildMarksOfSuraj(fullName, innerCardBgColor, cardBgColor, isMobile, profileController.ownProfile?.reviews ?? [], profileUser),
                     ),
                     const SizedBox(width: 24),
                     Expanded(
                       flex: 4,
-                      child: _buildTradeHistory(innerCardBgColor, cardBgColor, isMobile),
+                      child: _buildTradeHistory(innerCardBgColor, cardBgColor, isMobile, profileController.ownProfile?.tradeStats),
                     ),
                   ],
                 ),
@@ -275,7 +276,7 @@ class WebProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMarksOfSuraj(String fullName, Color innerCardBgColor, Color cardBgColor, bool isMobile) {
+  Widget _buildMarksOfSuraj(String fullName, Color innerCardBgColor, Color cardBgColor, bool isMobile, List<Review> reviews, UserDetails? profileUser) {
     return Container(
       padding: EdgeInsets.all(isMobile ? 16 : 32),
       decoration: BoxDecoration(
@@ -301,97 +302,105 @@ class WebProfileScreen extends StatelessWidget {
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.thumb_up_alt_outlined, size: 24),
-                  SizedBox(width: 8),
-                  Text("23", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  SizedBox(width: 24),
-                  Icon(Icons.thumb_down_alt_outlined, size: 24),
-                  SizedBox(width: 8),
-                  Text("23", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                children: [
+                  const Icon(Icons.thumb_up_alt_outlined, size: 24),
+                  const SizedBox(width: 8),
+                  Text("${profileUser?.totalLikes ?? 0}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 24),
+                  const Icon(Icons.thumb_down_alt_outlined, size: 24),
+                  const SizedBox(width: 8),
+                  Text("${profileUser?.totalDislikes ?? 0}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 ],
               )
             ],
           ),
           const SizedBox(height: 24),
-          // List of hardcoded marks
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 4,
-            separatorBuilder: (_, __) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              return Container(
-                padding: EdgeInsets.all(isMobile ? 12 : 20),
-                decoration: BoxDecoration(
-                  color: innerCardBgColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: greyColor.withOpacity(0.2)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF65B741),
-                        shape: BoxShape.circle,
+          if (reviews.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text("No reviews found.", style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: reviews.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 16),
+              itemBuilder: (context, index) {
+                final review = reviews[index];
+                final bool isPositive = (review.userReaction ?? '').toLowerCase() != 'dislike' && (review.rating is int ? review.rating as int : int.tryParse(review.rating.toString()) ?? 0) >= 3;
+                
+                return Container(
+                  padding: EdgeInsets.all(isMobile ? 12 : 20),
+                  decoration: BoxDecoration(
+                    color: innerCardBgColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: greyColor.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isPositive ? const Color(0xFF65B741) : Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(isPositive ? Icons.check : Icons.close, color: Colors.white, size: 28),
                       ),
-                      child: const Icon(Icons.check, color: Colors.white, size: 28),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Professional",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "- Best cook ever!!",
-                            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-                          ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(12),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              review.feedbackLabel ?? "Review",
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              review.comment?.isNotEmpty == true ? "- ${review.comment}" : "- No comments",
+                              style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                            ),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text("True:${review.likesCount}",
+                                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                 ),
-                                child: const Text("True:2",
-                                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(color: Colors.black),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text("False: ${review.dislikesCount}",
+                                      style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
                                 ),
-                                child: const Text("False: 6",
-                                    style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
-          )
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              },
+            )
         ],
       ),
     );
   }
 
-  Widget _buildTradeHistory(Color innerCardBgColor, Color cardBgColor, bool isMobile) {
+  Widget _buildTradeHistory(Color innerCardBgColor, Color cardBgColor, bool isMobile, TradeStats? tradeStats) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 16 : 32),
@@ -420,13 +429,13 @@ class WebProfileScreen extends StatelessWidget {
                 children: [
                   SizedBox(
                       width: cardWidth,
-                      child: _buildTradeHistoryCard(Icons.sync, Colors.greenAccent.shade700, "100", "Total Trades", innerCardBgColor)),
+                      child: _buildTradeHistoryCard(Icons.handshake, Colors.blue, "${tradeStats?.totalTrades ?? 0}", "Total Trades", innerCardBgColor)),
                   SizedBox(
                       width: cardWidth,
-                      child: _buildTradeHistoryCard(Icons.thumb_up_alt_outlined, Colors.orange, "100", "Total Like", innerCardBgColor)),
+                      child: _buildTradeHistoryCard(Icons.outbox_outlined, Colors.red, "${tradeStats?.sentOffers ?? 0}", "Sent Offers", innerCardBgColor)),
                   SizedBox(
                       width: cardWidth,
-                      child: _buildTradeHistoryCard(Icons.thumb_down_alt_outlined, Colors.red, "100", "Total Dislike", innerCardBgColor)),
+                      child: _buildTradeHistoryCard(Icons.move_to_inbox_outlined, Colors.orange, "${tradeStats?.receivedOffers ?? 0}", "Received Offers", innerCardBgColor)),
                 ],
               );
             },

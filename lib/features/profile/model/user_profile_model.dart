@@ -213,6 +213,9 @@ class Review {
   final String? feedbackLabel;
   final String? comment;
   final String createdAt;
+  final int likesCount;
+  final int dislikesCount;
+  final String? userReaction;
 
   Review({
     required this.id,
@@ -224,6 +227,9 @@ class Review {
     this.feedbackLabel,
     this.comment,
     required this.createdAt,
+    this.likesCount = 0,
+    this.dislikesCount = 0,
+    this.userReaction,
   });
 
   factory Review.fromJson(Map<String, dynamic> json) {
@@ -237,6 +243,9 @@ class Review {
       feedbackLabel: json['feedback_label'],
       comment: json['comment'],
       createdAt: json['created_at'] ?? '',
+      likesCount: _parseInt(json['likes_count']),
+      dislikesCount: _parseInt(json['dislikes_count']),
+      userReaction: json['user_reaction'],
     );
   }
 
@@ -251,6 +260,9 @@ class Review {
       'feedback_label': feedbackLabel,
       'comment': comment,
       'created_at': createdAt,
+      'likes_count': likesCount,
+      'dislikes_count': dislikesCount,
+      'user_reaction': userReaction,
     };
   }
 }
