@@ -9,33 +9,32 @@ class WebScreenHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          )
-        ],
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
       ),
       child: SafeArea(
         child: Row(
           children: [
             IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back_ios_new, size: 20),
               splashRadius: 24,
             ),
-            const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+              child: Padding(
+                padding: EdgeInsets.only(right: actions == null ? 40 : 0),
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

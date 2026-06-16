@@ -5,6 +5,7 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tool_bocs/features/web_ui/view/web_logout_dialog.dart';
 
 class WebSidebar extends StatelessWidget {
   const WebSidebar({super.key});
@@ -200,7 +201,10 @@ class WebSidebar extends StatelessWidget {
                     title: "Logout",
                     isSelected: false,
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, AppRoutes.login);
+                      showDialog(
+                        context: context,
+                        builder: (context) => const WebLogoutDialog(),
+                      );
                     },
                   ),
                   const SizedBox(height: 20),

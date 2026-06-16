@@ -73,9 +73,80 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
+          PopupMenuButton<void>(
+            offset: const Offset(0, 50),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+            color: Theme.of(context).cardColor,
+            surfaceTintColor: Colors.transparent,
+            elevation: 4,
             icon: Icon(Icons.info_outline, color: context.textColor, size: 24.sp),
-            onPressed: () {},
+            itemBuilder: (context) => [
+              PopupMenuItem<void>(
+                enabled: false,
+                padding: EdgeInsets.zero,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Manage your posts',
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : const Color(0xFF111311),
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        '• See all your active and inactive posts',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 6.h),
+                      Text(
+                        '• View offers and notifications for your items',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const PopupMenuDivider(height: 1),
+              PopupMenuItem<void>(
+                onTap: () {
+                  Future.delayed(Duration.zero, () {
+                    Navigator.pushNamed(context, AppRoutes.helpSupport);
+                  });
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.help_outline,
+                        size: 18.sp, color: context.textColor),
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Help & Support',
+                      style: TextStyle(
+                        color: context.textColor,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -323,34 +394,39 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                     ),
                   ),
                   SizedBox(width: 12.w),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: isActive ? Colors.green : Colors.grey.shade400,
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          isActive ? 'Active' : 'Inactive',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: isActive ? Colors.green : Colors.grey.shade400,
+                          borderRadius: BorderRadius.circular(20.r),
                         ),
-                        SizedBox(width: 6.w),
-                        Container(
-                          width: 14.w,
-                          height: 14.w,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isActive ? 'Active' : 'Inactive',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 6.w),
+                            Container(
+                              width: 14.w,
+                              height: 14.w,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -406,7 +482,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                     },
                     child: Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                          EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                       decoration: BoxDecoration(
                         color: isDark ? Colors.white : Colors.black,
                         borderRadius: BorderRadius.circular(20.r),
@@ -416,7 +492,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                         style: TextStyle(
                           color: isDark ? Colors.black : Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ),

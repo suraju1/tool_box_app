@@ -59,7 +59,86 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const WebScreenHeader(title: 'My Posts'),
+              WebScreenHeader(
+                title: 'My Posts',
+                actions: [
+                  PopupMenuButton<void>(
+                    offset: const Offset(0, 50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    color: Theme.of(context).cardColor,
+                    surfaceTintColor: Colors.transparent,
+                    elevation: 4,
+                    icon: Icon(Icons.info_outline, color: context.primaryColor),
+                    itemBuilder: (context) => [
+                      PopupMenuItem<void>(
+                        enabled: false,
+                        padding: EdgeInsets.zero,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Manage your posts',
+                                style: TextStyle(
+                                  color: Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.white
+                                      : const Color(0xFF111311),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                '• See all your active and inactive posts',
+                                style: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                '• View offers and notifications for your items',
+                                style: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const PopupMenuDivider(height: 1),
+                      PopupMenuItem<void>(
+                        onTap: () {
+                          Future.delayed(Duration.zero, () {
+                            Navigator.pushNamed(context, AppRoutes.helpSupport);
+                          });
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.help_outline,
+                                size: 18, color: context.primaryColor),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Help & Support',
+                              style: TextStyle(
+                                color: context.primaryColor,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
               Expanded(
                 child: Consumer<ProfileController>(
                   builder: (context, controller, child) {
@@ -380,8 +459,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
   }
 
   Widget _buildPostCard(BuildContext context, PostModel post) {
-    final imagePath = post.itemImages.isNotEmpty ? post.itemImages.first : '';
-    final isActive = post.status.toLowerCase() == 'active';
+    bool isActive = post.status.toLowerCase() == 'active';
+    String imagePath = post.itemImages.isNotEmpty ? post.itemImages.first : '';
 
     return GestureDetector(
       onTap: () {
@@ -393,142 +472,160 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).cardColor
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: greyColor.withOpacity(0.2)),
+          border: Border.all(color: Colors.grey.shade300, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top Section (Title and Status Toggle)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      post.itemName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: context.primaryColor,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+        children: [
+          // Top Section (Title, Details Button, and Status Toggle)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    post.itemName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: context.primaryColor,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(width: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: isActive ? Colors.green : Colors.grey.shade400,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          isActive ? 'Active' : 'Inactive',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          width: 14,
-                          height: 14,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Image Section
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                  child: imagePath.isNotEmpty
-                      ? AppCachedImage(
-                          imageUrl: imagePath,
-                          fit: BoxFit.contain,
-                          width: double.infinity,
-                          height: double.infinity,
-                          radius: 0,
-                          errorWidget: Icon(Icons.image_outlined,
-                              size: 48, color: Colors.grey.shade400),
-                        )
-                      : Container(
-                          color: Colors.grey.shade100,
-                          child: Icon(Icons.image_outlined,
-                              size: 48, color: Colors.grey.shade400),
-                        ),
                 ),
+                const SizedBox(width: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isActive ? Colors.green : Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!isActive)
+                            Container(
+                              width: 14,
+                              height: 14,
+                              margin: const EdgeInsets.only(right: 6),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          Text(
+                            isActive ? 'Active' : 'Inactive',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (isActive)
+                            Container(
+                              width: 14,
+                              height: 14,
+                              margin: const EdgeInsets.only(left: 6),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          // Image Section
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: imagePath.isNotEmpty
+                    ? AppCachedImage(
+                        imageUrl: imagePath,
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        height: double.infinity,
+                        radius: 0,
+                        errorWidget: Icon(Icons.image_outlined,
+                            size: 48, color: Colors.grey.shade400),
+                      )
+                    : Container(
+                        color: Colors.grey.shade100,
+                        child: Icon(Icons.image_outlined,
+                            size: 48, color: Colors.grey.shade400),
+                      ),
               ),
             ),
+          ),
 
-            // Bottom Section
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.access_time, color: Colors.grey, size: 16),
-                      const SizedBox(width: 6),
-                      Text(
-                        DateUtil.formatTimeAgo(post.createdAt),
-                        style: const TextStyle(color: Colors.grey, fontSize: 14),
-                      ),
-                    ],
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.notifications,
-                        arguments: post.id,
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
+          // Bottom Section
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.access_time, color: Colors.grey, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      DateUtil.formatTimeAgo(post.createdAt),
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
-                    child: const Text(
-                      'View Offers',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.notifications,
+                      arguments: post.id,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)),
+                  ),
+                  child: const Text(
+                    'View Offers',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    ),
     );
   }
 
