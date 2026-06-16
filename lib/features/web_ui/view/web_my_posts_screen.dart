@@ -71,7 +71,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                       return _buildErrorState(controller.errorMessage!, controller);
                     }
 
-                    return RefreshIndicator(
+                      return RefreshIndicator(
                       onRefresh: () => controller.getMyPosts(
                         postType: _getPostTypeFromLabel(controller.selectedMyPostsFilter),
                         label: controller.selectedMyPostsFilter,
@@ -81,11 +81,9 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.all(24),
                         children: [
-                          _buildPostSummary(controller),
-                          const SizedBox(height: 32),
                           _buildFilters(controller),
                           const SizedBox(height: 24),
-                          if (controller.myPosts.isEmpty)
+                          if (_getFilteredPosts(controller).isEmpty)
                             _buildEmptyState(context)
                           else ...[
                             _buildPostList(controller),
@@ -110,32 +108,14 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
 
 
 
-  Widget _buildPostSummary(ProfileController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Post Summary',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            _buildSummaryCard('${controller.totalMyGivesCount}',
-                'Total Gives', Icons.outbox_outlined, Colors.red),
-            const SizedBox(width: 24),
-            _buildSummaryCard('${controller.totalMyTakesCount}',
-                'Total Takes', Icons.move_to_inbox_outlined, Colors.orange),
-            const SizedBox(width: 24),
-            _buildSummaryCard('${controller.totalMyPostsCount}',
-                'Total Posts', Icons.handshake, Colors.blue),
-          ],
-        ),
-      ],
-    );
+  List<PostModel> _getFilteredPosts(ProfileController controller) {
+    final allPosts = controller.myPosts;
+    if (controller.selectedMyPostsFilter == 'Active') {
+      return allPosts.where((p) => p.status.toLowerCase() == 'active').toList();
+    } else if (controller.selectedMyPostsFilter == 'Inactive') {
+      return allPosts.where((p) => p.status.toLowerCase() != 'active').toList();
+    }
+    return allPosts;
   }
 
   Widget _buildSummaryCard(
@@ -190,11 +170,11 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
   Widget _buildFilters(ProfileController controller) {
     return Row(
       children: [
-        _buildFilterChip(' All ', controller),
+        _buildFilterChip('All', controller),
         const SizedBox(width: 12),
-        _buildFilterChip(' Gives ', controller),
+        _buildFilterChip('Active', controller),
         const SizedBox(width: 12),
-        _buildFilterChip(' Takes ', controller),
+        _buildFilterChip('Inactive', controller),
       ],
     );
   }
@@ -255,6 +235,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
   }
 
   Widget _buildPostList(ProfileController controller) {
+    final filteredPosts = _getFilteredPosts(controller);
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -264,10 +245,24 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
         crossAxisSpacing: 24,
         mainAxisSpacing: 24,
       ),
-      itemCount: controller.myPosts.length,
+      itemCount: filteredPosts.length < 3 ? 3 : filteredPosts.length,
       itemBuilder: (context, index) {
-        return _buildPostCard(context, controller.myPosts[index]);
+        if (index < filteredPosts.length) {
+          return _buildPostCard(context, filteredPosts[index]);
+        } else {
+          return _buildEmptyCardPlaceholder();
+        }
       },
+    );
+  }
+
+  Widget _buildEmptyCardPlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: greyColor.withOpacity(0.2)),
+      ),
     );
   }
 
@@ -386,8 +381,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
 
   Widget _buildPostCard(BuildContext context, PostModel post) {
     final imagePath = post.itemImages.isNotEmpty ? post.itemImages.first : '';
-    final isTake = post.postType.toLowerCase() == 'take' ||
-        post.postType.toLowerCase() == 'taking';
+    final isActive = post.status.toLowerCase() == 'active';
 
     return GestureDetector(
       onTap: () {
@@ -400,70 +394,59 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: greyColor.withOpacity(0.2)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Section (Status and Title)
+            // Top Section (Title and Status Toggle)
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isTake ? 'Taking' : 'Giving',
-                          style: TextStyle(
-                            color: isTake ? Colors.orange : Colors.green,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          post.itemName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                            color: context.primaryColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-
-                      ],
+                    child: Text(
+                      post.itemName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: context.primaryColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  const SizedBox(width: 12),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(post.status).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                          color: _getStatusColor(post.status).withOpacity(0.5)),
+                      color: isActive ? Colors.green : Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
-                      post.status,
-                      style: TextStyle(
-                        color: _getStatusColor(post.status),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isActive ? 'Active' : 'Inactive',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          width: 14,
+                          height: 14,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -472,67 +455,31 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
             
             // Image Section
             Expanded(
-              child: Stack(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      border: Border.symmetric(
-                          horizontal: BorderSide(color: Color(0xFFEEEEEE))),
-                    ),
-                    child: imagePath.isNotEmpty
-                        ? AppCachedImage(
-                            imageUrl: imagePath,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            radius: 0,
-                            errorWidget: Icon(Icons.image_outlined,
-                                size: 48, color: Colors.grey.shade400),
-                          )
-                        : Container(
-                            color: Colors.grey.shade100,
-                            child: Icon(Icons.image_outlined,
-                                size: 48, color: Colors.grey.shade400),
-                          ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: post.itemCategory.toLowerCase().contains('goods')
-                            ? Colors.blue.shade700
-                            : post.itemCategory.toLowerCase().contains('services')
-                                ? Colors.green.shade700
-                                : post.itemCategory.toLowerCase().contains('money')
-                                    ? Colors.orange.shade700
-                                    : Theme.of(context).brightness == Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        post.itemCategory,
-                        style: TextStyle(
-                          color: (post.itemCategory.toLowerCase().contains('goods') ||
-                                  post.itemCategory.toLowerCase().contains('services') ||
-                                  post.itemCategory.toLowerCase().contains('money'))
-                              ? Colors.white
-                              : Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.black
-                                  : Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                  clipBehavior: Clip.hardEdge,
+                  child: imagePath.isNotEmpty
+                      ? AppCachedImage(
+                          imageUrl: imagePath,
+                          fit: BoxFit.contain,
+                          width: double.infinity,
+                          height: double.infinity,
+                          radius: 0,
+                          errorWidget: Icon(Icons.image_outlined,
+                              size: 48, color: Colors.grey.shade400),
+                        )
+                      : Container(
+                          color: Colors.grey.shade100,
+                          child: Icon(Icons.image_outlined,
+                              size: 48, color: Colors.grey.shade400),
                         ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
 
@@ -564,9 +511,9 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                       backgroundColor: Colors.black,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                          horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6)),
+                          borderRadius: BorderRadius.circular(20)),
                     ),
                     child: const Text(
                       'View Offers',

@@ -72,6 +72,12 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.info_outline, color: context.textColor, size: 24.sp),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: Consumer<ProfileController>(
         builder: (context, controller, child) {
@@ -92,9 +98,9 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                _buildPostSummary(controller),
+                SizedBox(height: 10.h),
                 _buildFilters(controller),
-                if (controller.myPosts.isEmpty)
+                if (_getFilteredPosts(controller).isEmpty)
                   _buildEmptyState()
                 else ...[
                   _buildPostList(controller),
@@ -113,90 +119,25 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
     );
   }
 
-  Widget _buildPostSummary(ProfileController controller) {
-    return Padding(
-      padding: EdgeInsets.all(10.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Post Summary',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: _buildSummaryCard('${controller.totalMyGivesCount}',
-                    'Total Gives', Icons.outbox_outlined, Colors.red),
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: _buildSummaryCard('${controller.totalMyTakesCount}',
-                    'Total Takes', Icons.move_to_inbox_outlined, Colors.orange),
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: _buildSummaryCard('${controller.totalMyPostsCount}',
-                    'Total Posts', Icons.handshake, Colors.blue),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard(
-      String count, String label, IconData icon, Color color) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
-      decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.white10 : greyColor.withOpacity(0.1),
-        border: Border.all(color: context.dividerColor),
-        borderRadius: BorderRadius.circular(10.r),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 28.sp),
-          Text(
-            count,
-            style: TextStyle(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-              color: context.primaryColor,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10.sp,
-              color: context.textColor,
-              fontWeight: FontWeight.w500,
-              fontFamily: FontFamily.openSans,
-            ),
-          ),
-        ],
-      ),
-    );
+  List<PostModel> _getFilteredPosts(ProfileController controller) {
+    final allPosts = controller.myPosts;
+    if (controller.selectedMyPostsFilter == 'Active') {
+      return allPosts.where((p) => p.status.toLowerCase() == 'active').toList();
+    } else if (controller.selectedMyPostsFilter == 'Inactive') {
+      return allPosts.where((p) => p.status.toLowerCase() != 'active').toList();
+    }
+    return allPosts;
   }
 
   Widget _buildFilters(ProfileController controller) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          _buildFilterChip(' All ', controller),
-          _buildFilterChip(' Gives ', controller),
-          _buildFilterChip(' Takes ', controller),
+          _buildFilterChip('All', controller),
+          _buildFilterChip('Active', controller),
+          _buildFilterChip('Inactive', controller),
         ],
       ),
     );
@@ -204,6 +145,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
 
   Widget _buildFilterChip(String label, ProfileController controller) {
     bool isSelected = controller.selectedMyPostsFilter == label;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () {
         if (_scrollController.hasClients) {
@@ -215,20 +158,24 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         );
       },
       child: Container(
-        margin: EdgeInsets.only(right: 8.w),
-        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+        margin: EdgeInsets.only(right: 12.w),
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? context.primaryColor : context.surfaceColor,
-          borderRadius: BorderRadius.circular(20.r),
+          color: isSelected ? (isDark ? Colors.white : Colors.black) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8.r),
           border: Border.all(
-            color: isSelected ? context.primaryColor : context.dividerColor,
+            color: isSelected 
+                ? (isDark ? Colors.white : Colors.black) 
+                : Colors.grey.withOpacity(0.5),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 14.sp,
-            color: isSelected ? context.onPrimaryColor : context.subTextColor,
+            color: isSelected 
+                ? (isDark ? Colors.black : Colors.white) 
+                : (isDark ? Colors.grey.shade300 : Colors.black),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -243,14 +190,15 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
   }
 
   Widget _buildPostList(ProfileController controller) {
+    final filteredPosts = _getFilteredPosts(controller);
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-      itemCount: controller.myPosts.length,
-      separatorBuilder: (context, index) => SizedBox(height: 6.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      itemCount: filteredPosts.length,
+      separatorBuilder: (context, index) => SizedBox(height: 16.h),
       itemBuilder: (context, index) {
-        return _buildPostCard(context, controller.myPosts[index]);
+        return _buildPostCard(context, filteredPosts[index]);
       },
     );
   }
@@ -337,8 +285,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
 
   Widget _buildPostCard(BuildContext context, PostModel post) {
     final imagePath = post.itemImages.isNotEmpty ? post.itemImages.first : '';
-    final isTake = post.postType.toLowerCase() == 'take' ||
-        post.postType.toLowerCase() == 'taking';
+    final isActive = post.status.toLowerCase() == 'active';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () {
@@ -350,121 +298,101 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: context.dividerColor),
-          boxShadow: context.isDarkMode
-              ? []
-              : [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    blurRadius: 8.r,
-                    offset: Offset(0, 4.h),
-                  ),
-                ],
+          color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: Colors.grey.withOpacity(0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.all(8.w),
+              padding: EdgeInsets.all(16.w),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isTake ? 'Taking' : 'Giving',
-                          style: TextStyle(
-                            color: isTake ? Colors.orange : Colors.green,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          post.itemName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.sp,
-                            color: context.primaryColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.label_outline,
-                                color: Colors.grey, size: 14.sp),
-                            SizedBox(width: 4.w),
-                            Text(
-                              post.itemCategory,
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    child: Text(
+                      post.itemName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.sp,
+                        color: context.textColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  SizedBox(width: 12.w),
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(post.status).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4.r),
-                      border: Border.all(
-                          color: _getStatusColor(post.status).withOpacity(0.5)),
+                      color: isActive ? Colors.green : Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(20.r),
                     ),
-                    child: Text(
-                      post.status,
-                      style: TextStyle(
-                        color: _getStatusColor(post.status),
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isActive ? 'Active' : 'Inactive',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 6.w),
+                        Container(
+                          width: 14.w,
+                          height: 14.w,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-            Container(
-              width: double.infinity,
-              height: 150.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.r),
-                //overflow: Overflow.hidden,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Container(
+                width: double.infinity,
+                height: 200.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: imagePath.isNotEmpty
+                    ? AppCachedImage(
+                        imageUrl: imagePath,
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        height: double.infinity,
+                        radius: 8.r,
+                        errorWidget:
+                            Image.asset('assets/iphone.png', fit: BoxFit.cover),
+                      )
+                    : Container(
+                        color: Colors.grey.shade100,
+                        child: Icon(Icons.image, size: 48.sp, color: Colors.grey),
+                      ),
               ),
-              child: imagePath.isNotEmpty
-                  ? AppCachedImage(
-                      imageUrl: imagePath,
-                      fit: BoxFit.contain,
-                      width: double.infinity,
-                      height: double.infinity,
-                      radius: 12.r,
-                      errorWidget:
-                          Image.asset('assets/iphone.png', fit: BoxFit.cover),
-                    )
-                  : Container(
-                      color: context.dividerColor,
-                      child: Icon(Icons.image, size: 48.sp, color: Colors.grey),
-                    ),
             ),
             Padding(
-              padding: EdgeInsets.all(8.w),
+              padding: EdgeInsets.all(16.w),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.access_time, color: Colors.grey, size: 14.sp),
-                      SizedBox(width: 4.w),
+                      Icon(Icons.access_time, color: Colors.grey, size: 16.sp),
+                      SizedBox(width: 6.w),
                       Text(
                         DateUtil.formatTimeAgo(post.createdAt),
-                        style: TextStyle(color: Colors.grey, fontSize: 12.sp),
+                        style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                       ),
                     ],
                   ),
@@ -478,17 +406,17 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                     },
                     child: Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                          EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
                       decoration: BoxDecoration(
-                        color: context.primaryColor,
-                        borderRadius: BorderRadius.circular(6.r),
+                        color: isDark ? Colors.white : Colors.black,
+                        borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Text(
                         'View Offers',
                         style: TextStyle(
-                          color: context.onPrimaryColor,
+                          color: isDark ? Colors.black : Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12.sp,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
