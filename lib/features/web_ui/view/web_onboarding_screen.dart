@@ -111,18 +111,21 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
         if (controller.isLoading && controller.onBoardingList.isEmpty) {
           return Scaffold(
             backgroundColor: context.scaffoldBg,
-            body: Center(child: CircularProgressIndicator(color: context.primaryColor)),
+            body: Center(
+                child: CircularProgressIndicator(color: context.primaryColor)),
           );
         }
 
-        if (controller.errorMessage != null && controller.onBoardingList.isEmpty) {
+        if (controller.errorMessage != null &&
+            controller.onBoardingList.isEmpty) {
           return Scaffold(
             backgroundColor: context.scaffoldBg,
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.cloud_off_outlined, size: 64, color: Colors.grey),
+                  const Icon(Icons.cloud_off_outlined,
+                      size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
                     'Server starting up...',
@@ -153,7 +156,8 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
                       TextButton(
                         onPressed: () {
                           _redirectTimer?.cancel();
-                          Navigator.pushReplacementNamed(context, AppRoutes.login);
+                          Navigator.pushReplacementNamed(
+                              context, AppRoutes.login);
                         },
                         child: const Text("Go to Login"),
                       ),
@@ -169,7 +173,8 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
         if (onboardingList.isEmpty) {
           return Scaffold(
             backgroundColor: context.scaffoldBg,
-            body: Center(child: CircularProgressIndicator(color: context.primaryColor)),
+            body: Center(
+                child: CircularProgressIndicator(color: context.primaryColor)),
           );
         }
 
@@ -200,7 +205,8 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
                           itemBuilder: (context, index) {
                             final slide = onboardingList[index];
                             return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 64.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 64.0),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -218,15 +224,18 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
                                     },
                                     child: Container(
                                       height: 400,
-                                      constraints: const BoxConstraints(maxWidth: 500),
-                                      child: slide.imageUrl.startsWith('assets/')
-                                          ? Image.asset(slide.imageUrl, fit: BoxFit.contain)
-                                          : AppCachedImage(
-                                              imageUrl: slide.imageUrl,
-                                              height: 400.0,
-                                              width: double.infinity,
-                                              fit: BoxFit.contain,
-                                            ),
+                                      constraints:
+                                          const BoxConstraints(maxWidth: 500),
+                                      child:
+                                          slide.imageUrl.startsWith('assets/')
+                                              ? Image.asset(slide.imageUrl,
+                                                  fit: BoxFit.contain)
+                                              : AppCachedImage(
+                                                  imageUrl: slide.imageUrl,
+                                                  height: 400.0,
+                                                  width: double.infinity,
+                                                  fit: BoxFit.contain,
+                                                ),
                                     ),
                                   ),
                                   const SizedBox(height: 48),

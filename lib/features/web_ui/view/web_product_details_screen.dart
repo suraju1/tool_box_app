@@ -586,7 +586,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: context.isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade50,
               borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
               border: Border(bottom: BorderSide(color: context.dividerColor.withOpacity(0.5))),
             ),
@@ -608,7 +608,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.w500, fontFamily: FontFamily.openSans, color: context.textColor),
                   ),
                   const SizedBox(height: 8),
-                  Text('Price in return', style: TextStyle(fontSize: 15, color: Colors.grey.shade600)),
+                  Text('Price in return', style: TextStyle(fontSize: 15, color: context.subTextColor)),
                 ] else ...[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -661,7 +661,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(margin: const EdgeInsets.only(top: 6, right: 10), width: 4, height: 4, decoration: BoxDecoration(color: Colors.grey.shade400, shape: BoxShape.circle)),
-                          Expanded(child: Text(l.trim(), style: TextStyle(color: Colors.grey.shade600, fontSize: 14, height: 1.4))),
+                          Expanded(child: Text(l.trim(), style: TextStyle(color: context.subTextColor, fontSize: 14, height: 1.4))),
                         ],
                       ),
                     )),
@@ -675,14 +675,14 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
 
                 Row(
                   children: [
-                    Icon(Icons.location_on_outlined, size: 18, color: Colors.grey.shade500),
+                    Icon(Icons.location_on_outlined, size: 18, color: context.subTextColor),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         post.distanceKm != null
                             ? '${post.distanceKm!.toStringAsFixed(1)} km away from ${locationController.address ?? 'Current Location'}'
                             : post.pickupArea,
-                        style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                        style: TextStyle(fontSize: 14, color: context.subTextColor),
                       ),
                     ),
                   ],
@@ -690,11 +690,11 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Icon(Icons.access_time_outlined, size: 18, color: Colors.grey.shade500),
+                    Icon(Icons.access_time_outlined, size: 18, color: context.subTextColor),
                     const SizedBox(width: 12),
                     Text(
                       'Posted ${DateUtil.formatTimeAgo(post.createdAt)}.',
-                      style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                      style: TextStyle(fontSize: 14, color: context.subTextColor),
                     ),
                   ],
                 ),
@@ -721,8 +721,8 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                     icon: const Icon(Icons.inbox_rounded),
                     label: const Text('View Offers'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.isDarkMode ? Colors.white : Colors.black,
+                      foregroundColor: context.isDarkMode ? Colors.black : Colors.white,
                       minimumSize: const Size(double.infinity, 54),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -732,8 +732,8 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                   ElevatedButton(
                     onPressed: () => Navigator.pushNamed(context, AppRoutes.tradeOffer),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.isDarkMode ? Colors.white : Colors.black,
+                      foregroundColor: context.isDarkMode ? Colors.black : Colors.white,
                       minimumSize: const Size(double.infinity, 54),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -758,8 +758,8 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                         label: Text(isSaved ? 'Seller Saved' : 'Save Seller'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(color: isSaved ? context.primaryColor : Colors.black87, width: 1),
-                          foregroundColor: isSaved ? context.primaryColor : Colors.black87,
+                          side: BorderSide(color: isSaved ? context.primaryColor : (context.isDarkMode ? Colors.white : Colors.black87), width: 1),
+                          foregroundColor: isSaved ? context.primaryColor : (context.isDarkMode ? Colors.white : Colors.black87),
                           minimumSize: const Size(double.infinity, 54),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),

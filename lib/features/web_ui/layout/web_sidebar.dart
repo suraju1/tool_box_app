@@ -37,7 +37,7 @@ class WebSidebar extends StatelessWidget {
       width: 250,
       decoration: BoxDecoration(
         color: theme.cardColor,
-        border: Border(right: BorderSide(color: Colors.grey.shade200)),
+        border: Border(right: BorderSide(color: context.isDarkMode ? Colors.white12 : Colors.grey.shade200)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,9 +105,9 @@ class WebSidebar extends StatelessWidget {
                     },
                   ),
                   
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    child: Divider(color: Color(0xFFEEEEEE), height: 1),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: Divider(color: context.isDarkMode ? Colors.white12 : const Color(0xFFEEEEEE), height: 1),
                   ),
                   
                   _NavItem(
@@ -178,9 +178,9 @@ class WebSidebar extends StatelessWidget {
                     },
                   ),
                   
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    child: Divider(color: Color(0xFFEEEEEE), height: 1),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: Divider(color: context.isDarkMode ? Colors.white12 : const Color(0xFFEEEEEE), height: 1),
                   ),
                   
                   _NavItem(
@@ -263,14 +263,14 @@ class _NavItemState extends State<_NavItem> {
             children: [
               Icon(
                 widget.isSelected ? widget.activeIcon : widget.icon,
-                color: widget.isSelected ? context.textColor : (isHovered ? context.textColor : Colors.grey.shade600),
+                color: widget.isSelected ? context.textColor : (isHovered ? context.textColor : context.subTextColor),
                 size: 20,
               ),
               const SizedBox(width: 16),
               Text(
                 widget.title,
                 style: GoogleFonts.inter(
-                  color: widget.isSelected ? context.textColor : (isHovered ? context.textColor : Colors.grey.shade600),
+                  color: widget.isSelected ? context.textColor : (isHovered ? context.textColor : context.subTextColor),
                   fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
                   fontSize: 14,
                 ),
