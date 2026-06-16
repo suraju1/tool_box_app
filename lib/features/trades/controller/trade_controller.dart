@@ -14,6 +14,11 @@ import 'package:tool_bocs/util/debouncer.dart';
 class TradeController extends ChangeNotifier {
   final TradeService _tradeService = TradeService();
   List<int> _hiddenPostIds = [];
+  int? _currentUserId;
+
+  void setCurrentUserId(int? id) {
+    _currentUserId = id;
+  }
 
   TradeController() {
     _loadHiddenPosts();
@@ -350,6 +355,11 @@ class TradeController extends ChangeNotifier {
 
     // Filter out hidden posts locally
     filtered = filtered.where((p) => !_hiddenPostIds.contains(p.id)).toList();
+
+    // Filter out current user's posts
+    if (_currentUserId != null) {
+      filtered = filtered.where((p) => p.userId != _currentUserId).toList();
+    }
 
     // 0. Filter out completed trades (they shouldn't be publicly visible)
     filtered =

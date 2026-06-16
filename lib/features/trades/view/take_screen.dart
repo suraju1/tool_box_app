@@ -38,6 +38,9 @@ class _TakeScreenState extends State<TakeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final locationController = context.read<LocationController>();
       final tradeController = context.read<TradeController>();
+      final authController = context.read<AuthController>();
+
+      tradeController.setCurrentUserId(authController.currentUser?.id);
 
       // Reset filters when navigating to this screen
       tradeController.resetFilters();

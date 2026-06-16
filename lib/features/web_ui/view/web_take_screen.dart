@@ -26,7 +26,11 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TradeController>().fetchGivePosts();
+      final tradeController = context.read<TradeController>();
+      final authController = context.read<AuthController>();
+
+      tradeController.setCurrentUserId(authController.currentUser?.id);
+      tradeController.fetchGivePosts();
     });
   }
 
@@ -352,6 +356,7 @@ class _WebTakeCard extends StatelessWidget {
     final imagePath = post.itemImages.isNotEmpty ? post.itemImages.first : '';
     final authController = context.read<AuthController>();
     final isOwner = authController.currentUser?.id == post.userId;
+    final actionLabel = isOwner ? 'Offers' : 'Take';
 
     return InkWell(
       onTap: () {
@@ -517,11 +522,19 @@ class _WebTakeCard extends StatelessWidget {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.productDetails,
-                            arguments: post.id,
-                          );
+                          if (isOwner) {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.notifications,
+                              arguments: post.id,
+                            );
+                          } else {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.productDetails,
+                              arguments: post.id,
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
@@ -531,7 +544,7 @@ class _WebTakeCard extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6)),
                         ),
-                        child: const Text("Take"),
+                        child: Text(actionLabel),
                       )
                     ],
                   )

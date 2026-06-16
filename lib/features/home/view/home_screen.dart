@@ -40,6 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final locationController = context.read<LocationController>();
       final tradeController = context.read<TradeController>();
+      final authController = context.read<AuthController>();
+
+      tradeController.setCurrentUserId(authController.currentUser?.id);
 
       // Check for first-time user to show theme selection
       final firstUser = await StorageService.getFirstuser();

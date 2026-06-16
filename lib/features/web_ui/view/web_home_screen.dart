@@ -5,6 +5,8 @@ import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/features/web_ui/view/web_location_selection_dialog.dart';
 import 'package:tool_bocs/features/web_ui/widgets/web_product_card.dart';
+import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
+
 class WebHomeScreen extends StatefulWidget {
   const WebHomeScreen({super.key});
 
@@ -21,7 +23,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final locationController = context.read<LocationController>();
       final tradeController = context.read<TradeController>();
-      
+      final authController = context.read<AuthController>();
+
+      tradeController.setCurrentUserId(authController.currentUser?.id);
+
       // Sync user-selected location
       if (locationController.hasLocation) {
         tradeController.setLocation(

@@ -19,8 +19,8 @@ class ApiConstants {
   static const String completeProfile = 'complete-profile'; //post
   static const String login = 'login'; //post
   static const String verifyOtp = 'verify-otp'; //post
-  static const String logout = 'logout'; //post
 
+  static const String logout = 'logout'; //post
   //2. Categories types
   static const String getCategoryTypes = 'get_categories'; //get
 
