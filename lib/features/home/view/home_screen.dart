@@ -804,6 +804,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   context, success.message ?? 'Error blocking user');
             }
             break;
+          case 'delete':
+            final success =
+                await context.read<TradeController>().deletePost(post.id);
+            if (success && mounted) {
+              ToastService.showSuccessToast(
+                  context, 'Post deleted successfully');
+            } else if (mounted) {
+              ToastService.showErrorToast(
+                  context,
+                  context.read<TradeController>().errorMessage ??
+                      'Error deleting post');
+            }
+            break;
         }
       },
       itemBuilder: (BuildContext context) {
@@ -830,6 +843,11 @@ class _HomeScreenState extends State<HomeScreen> {
             const PopupMenuItem<String>(
               value: 'block',
               child: Text('Block User'),
+            ),
+          if (isOwner)
+            const PopupMenuItem<String>(
+              value: 'delete',
+              child: Text('Delete Post', style: TextStyle(color: Colors.red)),
             ),
         ];
       },

@@ -8,6 +8,8 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
+import 'package:tool_bocs/core/services/toast_service.dart';
 
 class WebMyPostsScreen extends StatefulWidget {
   final String? initialFilter;
@@ -64,7 +66,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                 actions: [
                   PopupMenuButton<void>(
                     offset: const Offset(0, 50),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     color: Theme.of(context).cardColor,
                     surfaceTintColor: Colors.transparent,
                     elevation: 4,
@@ -82,7 +85,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                               Text(
                                 'Manage your posts',
                                 style: TextStyle(
-                                  color: Theme.of(context).brightness == Brightness.dark
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
                                       ? Colors.white
                                       : const Color(0xFF111311),
                                   fontSize: 14,
@@ -146,13 +150,16 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                       return _buildLoadingState();
                     }
 
-                    if (controller.errorMessage != null && controller.myPosts.isEmpty) {
-                      return _buildErrorState(controller.errorMessage!, controller);
+                    if (controller.errorMessage != null &&
+                        controller.myPosts.isEmpty) {
+                      return _buildErrorState(
+                          controller.errorMessage!, controller);
                     }
 
-                      return RefreshIndicator(
+                    return RefreshIndicator(
                       onRefresh: () => controller.getMyPosts(
-                        postType: _getPostTypeFromLabel(controller.selectedMyPostsFilter),
+                        postType: _getPostTypeFromLabel(
+                            controller.selectedMyPostsFilter),
                         label: controller.selectedMyPostsFilter,
                       ),
                       child: ListView(
@@ -169,7 +176,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                             if (controller.isPaginationLoading)
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 24),
-                                child: Center(child: CircularProgressIndicator()),
+                                child:
+                                    Center(child: CircularProgressIndicator()),
                               ),
                           ],
                         ],
@@ -184,8 +192,6 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
       ),
     );
   }
-
-
 
   List<PostModel> _getFilteredPosts(ProfileController controller) {
     final allPosts = controller.myPosts;
@@ -261,7 +267,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
   Widget _buildFilterChip(String label, ProfileController controller) {
     bool isSelected = controller.selectedMyPostsFilter == label;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: () {
         if (_scrollController.hasClients) {
@@ -286,7 +292,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: (isDark ? Colors.white : Colors.black).withOpacity(0.15),
+                    color: (isDark ? Colors.white : Colors.black)
+                        .withOpacity(0.15),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   )
@@ -357,7 +364,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
             (index) => Expanded(
               child: Padding(
                 padding: EdgeInsets.only(right: index < 2 ? 24.0 : 0),
-                child: const ShimmerBox(height: 120, width: double.infinity, radius: 16),
+                child: const ShimmerBox(
+                    height: 120, width: double.infinity, radius: 16),
               ),
             ),
           ),
@@ -450,7 +458,9 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
             child: const Text(
               'Create Post',
               style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
             ),
           ),
         ],
@@ -480,152 +490,216 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top Section (Title, Details Button, and Status Toggle)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    post.itemName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: context.primaryColor,
+          children: [
+            // Top Section (Title, Details Button, and Status Toggle)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      post.itemName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: context.primaryColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(width: 12),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isActive ? Colors.green : Colors.grey.shade400,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (!isActive)
-                            Container(
-                              width: 14,
-                              height: 14,
-                              margin: const EdgeInsets.only(right: 6),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
+                  const SizedBox(width: 12),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          if (isActive) {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Deactivate Post'),
+                                content: const Text(
+                                    'Are you sure you want to deactivate this post? Deactivating it will permanently delete your post.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text('Deactivate',
+                                        style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
                               ),
-                            ),
-                          Text(
-                            isActive ? 'Active' : 'Inactive',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            );
+                            if (confirm == true && context.mounted) {
+                              final success = await context
+                                  .read<TradeController>()
+                                  .deletePost(post.id);
+                              if (success && context.mounted) {
+                                ToastService.showSuccessToast(
+                                    context, 'Post deactivated successfully');
+                                context.read<ProfileController>().getMyPosts();
+                              } else if (context.mounted) {
+                                ToastService.showErrorToast(
+                                    context,
+                                    context
+                                            .read<TradeController>()
+                                            .errorMessage ??
+                                        'Error deactivating post');
+                              }
+                            }
+                          } else {
+                            final success = await context
+                                .read<TradeController>()
+                                .reactivatePost(post.id);
+                            if (success && context.mounted) {
+                              ToastService.showSuccessToast(
+                                  context, 'Post reactivated successfully');
+                              context.read<ProfileController>().getMyPosts();
+                            } else if (context.mounted) {
+                              ToastService.showErrorToast(
+                                  context,
+                                  context
+                                          .read<TradeController>()
+                                          .errorMessage ??
+                                      'Error reactivating post');
+                            }
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color:
+                                isActive ? Colors.green : Colors.grey.shade400,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          if (isActive)
-                            Container(
-                              width: 14,
-                              height: 14,
-                              margin: const EdgeInsets.only(left: 6),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (!isActive)
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  margin: const EdgeInsets.only(right: 6),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              Text(
+                                isActive ? 'Active' : 'Inactive',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                        ],
+                              if (isActive)
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  margin: const EdgeInsets.only(left: 6),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          
-          // Image Section
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                clipBehavior: Clip.hardEdge,
-                child: imagePath.isNotEmpty
-                    ? AppCachedImage(
-                        imageUrl: imagePath,
-                        fit: BoxFit.contain,
-                        width: double.infinity,
-                        height: double.infinity,
-                        radius: 0,
-                        errorWidget: Icon(Icons.image_outlined,
-                            size: 48, color: Colors.grey.shade400),
-                      )
-                    : Container(
-                        color: Colors.grey.shade100,
-                        child: Icon(Icons.image_outlined,
-                            size: 48, color: Colors.grey.shade400),
-                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ),
 
-          // Bottom Section
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.access_time, color: Colors.grey, size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      DateUtil.formatTimeAgo(post.createdAt),
-                      style: const TextStyle(color: Colors.grey, fontSize: 14),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.notifications,
-                      arguments: post.id,
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
+            // Image Section
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'View Offers',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: imagePath.isNotEmpty
+                      ? AppCachedImage(
+                          imageUrl: imagePath,
+                          fit: BoxFit.contain,
+                          width: double.infinity,
+                          height: double.infinity,
+                          radius: 0,
+                          errorWidget: Icon(Icons.image_outlined,
+                              size: 48, color: Colors.grey.shade400),
+                        )
+                      : Container(
+                          color: Colors.grey.shade100,
+                          child: Icon(Icons.image_outlined,
+                              size: 48, color: Colors.grey.shade400),
+                        ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+
+            // Bottom Section
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.access_time,
+                          color: Colors.grey, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        DateUtil.formatTimeAgo(post.createdAt),
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.notifications,
+                        arguments: post.id,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                    ),
+                    child: const Text(
+                      'View Offers',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 

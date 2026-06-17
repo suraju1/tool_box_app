@@ -658,6 +658,64 @@ class TradeController extends ChangeNotifier {
     }
   }
 
+  Future<bool> deletePost(int id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.deletePost(id);
+      if (response.success) {
+        // Remove from local lists
+        _homePosts.removeWhere((p) => p.id == id);
+        _givePosts.removeWhere((p) => p.id == id);
+        _takePosts.removeWhere((p) => p.id == id);
+        if (_selectedPost?.id == id) {
+          _selectedPost = null;
+        }
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'An error occurred: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> reactivatePost(int id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.reactivatePost(id);
+      if (response.success) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'An error occurred: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   // --- 4-Step Trade Flow Controller Methods ---
 
   Future<bool> respondToPost(TradeResponseRequestModel request) async {

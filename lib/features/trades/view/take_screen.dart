@@ -523,9 +523,13 @@ class _TakeScreenState extends State<TakeScreen> {
                       decoration: BoxDecoration(
                         color: post.itemCategory.toLowerCase().contains('goods')
                             ? Colors.blue.shade700
-                            : post.itemCategory.toLowerCase().contains('services')
+                            : post.itemCategory
+                                    .toLowerCase()
+                                    .contains('services')
                                 ? Colors.green.shade700
-                                : post.itemCategory.toLowerCase().contains('money')
+                                : post.itemCategory
+                                        .toLowerCase()
+                                        .contains('money')
                                     ? Colors.orange.shade700
                                     : context.isDarkMode
                                         ? Colors.white
@@ -535,9 +539,15 @@ class _TakeScreenState extends State<TakeScreen> {
                       child: Text(
                         post.itemCategory,
                         style: TextStyle(
-                          color: (post.itemCategory.toLowerCase().contains('goods') ||
-                                  post.itemCategory.toLowerCase().contains('services') ||
-                                  post.itemCategory.toLowerCase().contains('money'))
+                          color: (post.itemCategory
+                                      .toLowerCase()
+                                      .contains('goods') ||
+                                  post.itemCategory
+                                      .toLowerCase()
+                                      .contains('services') ||
+                                  post.itemCategory
+                                      .toLowerCase()
+                                      .contains('money'))
                               ? Colors.white
                               : context.isDarkMode
                                   ? Colors.black
@@ -823,6 +833,19 @@ class _TakeScreenState extends State<TakeScreen> {
                   context, success.message ?? 'Error blocking user');
             }
             break;
+          case 'delete':
+            final success =
+                await context.read<TradeController>().deletePost(postId);
+            if (success && mounted) {
+              ToastService.showSuccessToast(
+                  context, 'Post deleted successfully');
+            } else if (mounted) {
+              ToastService.showErrorToast(
+                  context,
+                  context.read<TradeController>().errorMessage ??
+                      'Error deleting post');
+            }
+            break;
         }
       },
       itemBuilder: (BuildContext context) {
@@ -849,6 +872,11 @@ class _TakeScreenState extends State<TakeScreen> {
             const PopupMenuItem<String>(
               value: 'block',
               child: Text('Block User'),
+            ),
+          if (isOwner)
+            const PopupMenuItem<String>(
+              value: 'delete',
+              child: Text('Delete Post', style: TextStyle(color: Colors.red)),
             ),
         ];
       },

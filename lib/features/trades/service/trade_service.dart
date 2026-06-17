@@ -174,6 +174,52 @@ class TradeService {
     }
   }
 
+  Future<ApiResponse<dynamic>> deletePost(int id) async {
+    try {
+      final response = await _apiClient.put(
+        ApiConstants.deleteGiveTakePost.replaceAll('{{postid}}', id.toString()),
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Post deleted successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> reactivatePost(int id) async {
+    try {
+      final response = await _apiClient.put(
+        ApiConstants.reactivatePost.replaceAll('{{postId}}', id.toString()),
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Post reactivated successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
   // --- 4-Step Trade Flow Methods ---
 
   Future<ApiResponse<dynamic>> respondToPost(

@@ -9,6 +9,7 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/util/date_util.dart';
+import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 
 class MyPostsScreen extends StatefulWidget {
   final String? initialFilter;
@@ -75,11 +76,13 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         actions: [
           PopupMenuButton<void>(
             offset: const Offset(0, 50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r)),
             color: Theme.of(context).cardColor,
             surfaceTintColor: Colors.transparent,
             elevation: 4,
-            icon: Icon(Icons.info_outline, color: context.textColor, size: 24.sp),
+            icon:
+                Icon(Icons.info_outline, color: context.textColor, size: 24.sp),
             itemBuilder: (context) => [
               PopupMenuItem<void>(
                 enabled: false,
@@ -232,11 +235,13 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         margin: EdgeInsets.only(right: 12.w),
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? (isDark ? Colors.white : Colors.black) : Colors.transparent,
+          color: isSelected
+              ? (isDark ? Colors.white : Colors.black)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8.r),
           border: Border.all(
-            color: isSelected 
-                ? (isDark ? Colors.white : Colors.black) 
+            color: isSelected
+                ? (isDark ? Colors.white : Colors.black)
                 : Colors.grey.withOpacity(0.5),
           ),
         ),
@@ -244,8 +249,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
           label,
           style: TextStyle(
             fontSize: 14.sp,
-            color: isSelected 
-                ? (isDark ? Colors.black : Colors.white) 
+            color: isSelected
+                ? (isDark ? Colors.black : Colors.white)
                 : (isDark ? Colors.grey.shade300 : Colors.black),
             fontWeight: FontWeight.w600,
           ),
@@ -397,34 +402,146 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                        decoration: BoxDecoration(
-                          color: isActive ? Colors.green : Colors.grey.shade400,
-                          borderRadius: BorderRadius.circular(20.r),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              isActive ? 'Active' : 'Inactive',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.bold,
+                      GestureDetector(
+                        onTap: () async {
+                          if (isActive) {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Deactivate Post'),
+                                content: const Text('Are you sure you want to deactivate this post? Deactivating it will permanently delete your post.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text('Deactivate',
+                                        style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
                               ),
-                            ),
-                            SizedBox(width: 6.w),
-                            Container(
-                              width: 14.w,
-                              height: 14.w,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
+                            );
+                            if (confirm == true && context.mounted) {
+                              final success = await context
+                                  .read<TradeController>()
+                                  .deletePost(post.id);
+                              if (success && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Post deactivated successfully')));
+                                context.read<ProfileController>().getMyPosts();
+                              } else if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(context
+                                                .read<TradeController>()
+                                                .errorMessage ??
+                                            'Error deactivating post')));
+                              }
+                            }
+                          } else {
+                            final success = await context
+                                .read<TradeController>()
+                                .reactivatePost(post.id);
+                            if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Post reactivated successfully')));
+                              context.read<ProfileController>().getMyPosts();
+                            } else if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(context
+                                              .read<TradeController>()
+                                              .errorMessage ??
+                                          'Error reactivating post')));
+                            }
+                          }
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color:
+                                isActive ? Colors.green : Colors.grey.shade400,
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                isActive ? 'Active' : 'Inactive',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 6.w),
+                              Container(
+                                width: 14.w,
+                                height: 14.w,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                      ),
+                      SizedBox(width: 8.w),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Delete Post'),
+                              content: const Text(
+                                  'Are you sure you want to delete this post?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Delete',
+                                      style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true && context.mounted) {
+                            final success = await context
+                                .read<TradeController>()
+                                .deletePost(post.id);
+                            if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Post deleted successfully')));
+                              context
+                                  .read<ProfileController>()
+                                  .getMyPosts(); // Refresh list
+                            } else if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(context
+                                              .read<TradeController>()
+                                              .errorMessage ??
+                                          'Error deleting post')));
+                            }
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -453,7 +570,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                       )
                     : Container(
                         color: Colors.grey.shade100,
-                        child: Icon(Icons.image, size: 48.sp, color: Colors.grey),
+                        child:
+                            Icon(Icons.image, size: 48.sp, color: Colors.grey),
                       ),
               ),
             ),
