@@ -33,11 +33,11 @@ class _WebSavedUsersScreenState extends State<WebSavedUsersScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1000),
+          constraints: const BoxConstraints(maxWidth: 1200),
           child: Column(
             children: [
               WebScreenHeader(
-                title: 'Saved Users',
+                title: 'Saved Profiles',
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.refresh),
@@ -47,13 +47,10 @@ class _WebSavedUsersScreenState extends State<WebSavedUsersScreen> {
                   )
                 ],
               ),
-              const Divider(height: 1),
               Expanded(
                 child: isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : savedUsers.isEmpty
-                        ? _buildEmptyState(context)
-                        : _buildWebGrid(context, savedUsers),
+                    : _buildContentArea(context, savedUsers),
               ),
             ],
           ),
@@ -62,156 +59,112 @@ class _WebSavedUsersScreenState extends State<WebSavedUsersScreen> {
     );
   }
 
-
-
-  Widget _buildWebGrid(BuildContext context, List<SavedUserModel> savedUsers) {
-    // Determine cross axis count based on screen width directly
-    // to make it more responsive within the 1000px max width.
-    int crossAxisCount = 3;
-    if (MediaQuery.of(context).size.width < 600) {
-      crossAxisCount = 2;
-    } else if (MediaQuery.of(context).size.width > 900) {
-      crossAxisCount = 4;
-    }
-
-    return GridView.builder(
+  Widget _buildContentArea(BuildContext context, List<SavedUserModel> savedUsers) {
+    return Padding(
       padding: const EdgeInsets.all(32.0),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.8,
-        crossAxisSpacing: 24,
-        mainAxisSpacing: 24,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildLeftSidebar(context, savedUsers),
+          const SizedBox(width: 24),
+          _buildRightContentArea(context),
+        ],
       ),
-      itemCount: savedUsers.length,
-      itemBuilder: (context, index) {
-        return _buildUserCard(context, savedUsers[index]);
-      },
     );
   }
 
-  Widget _buildUserCard(BuildContext context, SavedUserModel user) {
+  Widget _buildLeftSidebar(BuildContext context, List<SavedUserModel> savedUsers) {
+    final dividerColor = Theme.of(context).dividerColor.withOpacity(0.3);
+    return Container(
+      width: 360,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: dividerColor),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'All Saved',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    fontFamily: FontFamily.openSans,
+                  ),
+                ),
+                Text(
+                  '${savedUsers.length}',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
+                    fontFamily: FontFamily.openSans,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: dividerColor),
+          Expanded(
+            child: savedUsers.isEmpty 
+              ? _buildEmptyState(context)
+              : ListView.separated(
+                  padding: const EdgeInsets.all(20.0),
+                  itemCount: savedUsers.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final user = savedUsers[index];
+                    return _buildProfileListItem(context, user);
+                  },
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileListItem(BuildContext context, SavedUserModel user) {
+    final dividerColor = Theme.of(context).dividerColor.withOpacity(0.3);
     return InkWell(
       onTap: () {
         ProfileController.navigateToUserProfile(context, user.id);
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Theme.of(context).dividerColor),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: dividerColor),
         ),
-        child: Column(
+        child: Row(
           children: [
-            Expanded(
-              flex: 3,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                    child: AppCachedImage(
-                      imageUrl: user.profileImage ?? '',
-                      userName: user.fullName,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: () async {
-                        final response = await context
-                            .read<ProfileController>()
-                            .toggleSaveUser(user.id);
-                        if (!context.mounted) return;
-                        if (response.success) {
-                          ToastService.showSuccessToast(context, response.message);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor.withOpacity(0.9),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.bookmark,
-                          color: Theme.of(context).primaryColor,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: AppCachedImage(
+                imageUrl: user.profileImage ?? '',
+                userName: user.fullName,
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+                radius: 24,
               ),
             ),
+            const SizedBox(width: 16),
             Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      user.fullName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on, color: Colors.grey, size: 14),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            user.location ?? 'Unknown',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          user.avgStars,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          ' (${user.totalRatings})',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              child: Text(
+                user.fullName,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: FontFamily.openSans,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ),
@@ -221,25 +174,75 @@ class _WebSavedUsersScreenState extends State<WebSavedUsersScreen> {
     );
   }
 
+  Widget _buildRightContentArea(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dividerColor = Theme.of(context).dividerColor.withOpacity(0.3);
+    
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white10 : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: dividerColor),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                onTap: () {
+                  ToastService.showSuccessToast(context, "Create folder feature coming soon!");
+                },
+                borderRadius: BorderRadius.circular(50),
+                child: Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    size: 32,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Create New Folder',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.bookmark_border, size: 80, color: Colors.grey.shade400),
-        const SizedBox(height: 24),
+        Icon(Icons.bookmark_border, size: 60, color: Colors.grey.shade400),
+        const SizedBox(height: 16),
         const Text(
           'No saved users yet',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Profiles you save will appear here',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey.shade600,
           ),
         ),
       ],

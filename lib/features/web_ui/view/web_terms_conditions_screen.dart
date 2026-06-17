@@ -19,7 +19,6 @@ class _WebTermsConditionsScreenState extends State<WebTermsConditionsScreen> {
   void initState() {
     super.initState();
     _controller = WebViewController()
-      ..setBackgroundColor(Colors.transparent)
       ..loadRequest(Uri.parse(ApiConstants.termsConditionsUrl));
     
     // Web iframe loads almost immediately and manages its own loading state
@@ -47,7 +46,7 @@ class _WebTermsConditionsScreenState extends State<WebTermsConditionsScreen> {
                 child: Stack(
                   children: [
                     Container(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: Colors.white,
                       child: WebViewWidget(controller: _controller),
                     ),
                     if (_isLoading)
