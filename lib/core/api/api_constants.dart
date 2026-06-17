@@ -51,6 +51,7 @@ class ApiConstants {
   static const String getOtherProfile = 'get_other_profile/{{id}}'; //get
 
   static const String submitUserReview = 'submit_user_review'; //post
+  static const String toggleReviewReaction = 'toggle_review_reaction'; //post
   static const String submitUserMark = 'submit_user_mark'; //post
   static const String updateProfile = 'update_profile'; //post
 
