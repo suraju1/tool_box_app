@@ -449,10 +449,8 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
               ),
               Row(
                 children: [
-                  const Icon(Icons.star, color: Colors.amber, size: 24),
-                  const SizedBox(width: 8),
                   Text(
-                    '${profile.userDetails.averageRating} (${profile.userDetails.totalReviews} Reviews)',
+                    '${profile.userDetails.totalReviews} Reviews',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ],
@@ -536,46 +534,24 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textColor),
                 ),
                 const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Row(
-                      children: List.generate(
-                        5,
-                        (index) {
-                          final ratingValue = review.rating is int
-                              ? review.rating
-                              : int.tryParse(review.rating.toString()) ?? 0;
-                          return Icon(
-                            index < ratingValue ? Icons.star : Icons.star_border,
-                            color: index < ratingValue ? Colors.amber : Colors.grey.shade400,
-                            size: 16,
-                          );
-                        },
-                      ),
+                if (review.feedbackLabel != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: context.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    if (review.feedbackLabel != null) ...[
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: context.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          review.feedbackLabel!,
-                          style: TextStyle(fontSize: 12, color: context.primaryColor, fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                if (review.comment != null && review.comment!.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    review.comment!,
-                    style: TextStyle(fontSize: 15, color: Colors.grey.shade700, height: 1.5),
+                    child: Text(
+                      review.feedbackLabel!,
+                      style: TextStyle(fontSize: 12, color: context.primaryColor, fontWeight: FontWeight.w700),
+                    ),
                   ),
+                  const SizedBox(height: 12),
                 ],
+                Text(
+                  review.comment?.isNotEmpty == true ? review.comment! : 'No message provided',
+                  style: TextStyle(fontSize: 15, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700, height: 1.5),
+                ),
               ],
             ),
           ),

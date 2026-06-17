@@ -81,6 +81,35 @@ class ProfileService {
   }
 
 
+  Future<ApiResponse<dynamic>> toggleReviewReaction(
+      int reviewId, String reactionType) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.toggleReviewReaction,
+        data: {
+          'review_id': reviewId,
+          'reaction_type': reactionType,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Review reaction updated successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
   Future<ApiResponse<dynamic>> submitUserReview(
       UserReviewRequestModel request) async {
     try {

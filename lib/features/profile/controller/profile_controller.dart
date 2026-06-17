@@ -208,6 +208,71 @@ class ProfileController extends ChangeNotifier {
   }
 
 
+  Future<ApiResponse<dynamic>> toggleReviewReaction(int reviewId, String reactionType) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final response = await _profileService.toggleReviewReaction(reviewId, reactionType);
+
+    if (response.success && response.data != null) {
+      final updatedData = response.data;
+      final int rId = updatedData['review_id'] ?? reviewId;
+      final int newLikesCount = updatedData['likes_count'] ?? 0;
+      final int newDislikesCount = updatedData['dislikes_count'] ?? 0;
+      final String? newUserReaction = updatedData['user_reaction'];
+
+      List<Review> updateReviewsList(List<Review> list) {
+        return list.map((r) {
+          if (r.id == rId) {
+            return Review(
+              id: r.id,
+              userId: r.userId,
+              reviewerId: r.reviewerId,
+              reviewerName: r.reviewerName,
+              reviewerImage: r.reviewerImage,
+              rating: r.rating,
+              feedbackLabel: r.feedbackLabel,
+              comment: r.comment,
+              createdAt: r.createdAt,
+              likesCount: newLikesCount,
+              dislikesCount: newDislikesCount,
+              userReaction: newUserReaction,
+            );
+          }
+          return r;
+        }).toList();
+      }
+
+      if (_ownProfile != null) {
+        _ownProfile = UserProfileModel(
+          userDetails: _ownProfile!.userDetails,
+          tradeStats: _ownProfile!.tradeStats,
+          reviews: updateReviewsList(_ownProfile!.reviews),
+          isSaved: _ownProfile!.isSaved,
+          isRated: _ownProfile!.isRated,
+          showTradeHistory: _ownProfile!.showTradeHistory,
+        );
+      }
+      
+      if (_viewedProfile != null) {
+        _viewedProfile = UserProfileModel(
+          userDetails: _viewedProfile!.userDetails,
+          tradeStats: _viewedProfile!.tradeStats,
+          reviews: updateReviewsList(_viewedProfile!.reviews),
+          isSaved: _viewedProfile!.isSaved,
+          isRated: _viewedProfile!.isRated,
+          showTradeHistory: _viewedProfile!.showTradeHistory,
+        );
+      }
+    } else {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return response;
+  }
+
   Future<ApiResponse<dynamic>> submitReview({
     required int userId,
     required String label,

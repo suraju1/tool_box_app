@@ -504,64 +504,70 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
 
   Widget _buildNewSellerCard(PostModel post) {
     final String postTypeStr = (post.postType.toLowerCase() == 'take' || post.postType.toLowerCase() == 'taking') ? 'Taking' : 'Giving';
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.dividerColor.withOpacity(0.5)),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: Colors.grey.shade200,
-            backgroundImage: post.userImage != null
-                ? NetworkImage(AppCachedImage.getFormattedUrl(post.userImage!)) as ImageProvider
-                : null,
-            child: (post.userImage == null || post.userImage!.isEmpty)
-                ? Text(
-                    post.userName.isNotEmpty ? post.userName.substring(0, 1).toUpperCase() : '?',
-                    style: TextStyle(fontSize: 22, color: Colors.grey.shade700),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  post.userName.isNotEmpty ? post.userName : 'User id-${post.userId}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.textColor),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  post.createdAt.isNotEmpty ? DateUtil.formatTimeAgo(post.createdAt) : 'Recently',
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                ),
-              ],
+    return InkWell(
+      onTap: () {
+        ProfileController.navigateToUserProfile(context, post.userId);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: Colors.grey.shade200,
+              backgroundImage: post.userImage != null
+                  ? NetworkImage(AppCachedImage.getFormattedUrl(post.userImage!)) as ImageProvider
+                  : null,
+              child: (post.userImage == null || post.userImage!.isEmpty)
+                  ? Text(
+                      post.userName.isNotEmpty ? post.userName.substring(0, 1).toUpperCase() : '?',
+                      style: TextStyle(fontSize: 22, color: Colors.grey.shade700),
+                    )
+                  : null,
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            decoration: BoxDecoration(
-              border: Border.all(color: postTypeStr == 'Giving' ? Colors.green.shade400 : context.primaryColor),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              postTypeStr,
-              style: TextStyle(
-                color: postTypeStr == 'Giving' ? Colors.green.shade600 : context.primaryColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    post.userName.isNotEmpty ? post.userName : 'User id-${post.userId}',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.textColor),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    post.createdAt.isNotEmpty ? DateUtil.formatTimeAgo(post.createdAt) : 'Recently',
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: postTypeStr == 'Giving' ? Colors.green.shade400 : context.primaryColor),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                postTypeStr,
+                style: TextStyle(
+                  color: postTypeStr == 'Giving' ? Colors.green.shade600 : context.primaryColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
