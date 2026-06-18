@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/filter_bottom_sheet.dart';
+import 'package:tool_bocs/core/widgets/sort_bottom_sheet.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/core/widgets/skeleton_widgets.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -390,18 +391,30 @@ class _GiveScreenState extends State<GiveScreen> {
             ],
           ),
           SizedBox(height: 8.h),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: InkWell(
-              onTap: () => showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) =>
-                    const FilterBottomSheet(initialPostType: 'take'),
+          Row(
+            children: [
+              InkWell(
+                onTap: () => showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) =>
+                      const FilterBottomSheet(initialPostType: 'take'),
+                ),
+                child: _buildFilterButton(context),
               ),
-              child: _buildFilterButton(context),
-            ),
+              SizedBox(width: 8.w),
+              InkWell(
+                onTap: () => showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) =>
+                      const SortBottomSheet(initialPostType: 'take'),
+                ),
+                child: _buildSortButton(context),
+              ),
+            ],
           ),
         ],
       ),
@@ -459,6 +472,49 @@ class _GiveScreenState extends State<GiveScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSortButton(BuildContext context) {
+    return Consumer<TradeController>(
+      builder: (context, controller, _) {
+        final hasCustomSort = controller.selectedSort != 'Nearest First';
+        return Container(
+          height: 42.h,
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+          decoration: BoxDecoration(
+            color: hasCustomSort ? context.primaryColor : context.surfaceColor,
+            border: Border.all(
+                color: hasCustomSort
+                    ? context.primaryColor
+                    : context.isDarkMode
+                        ? Colors.white24
+                        : Colors.grey.shade300,
+                width: 1),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.sort,
+                color: hasCustomSort ? context.onPrimaryColor : context.textColor,
+                size: 18.sp,
+              ),
+              SizedBox(width: 6.w),
+              Text(
+                'Sort By',
+                style: TextStyle(
+                  color: hasCustomSort ? context.onPrimaryColor : context.textColor,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: FontFamily.openSans,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

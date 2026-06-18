@@ -75,8 +75,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     _buildDistanceSection(),
                     SizedBox(height: 12.h),
                     _buildReturnTypeSection(),
-                    SizedBox(height: 12.h),
-                    _buildSortBySection(),
                     SizedBox(height: 25.h),
                   ],
                 ),
@@ -137,7 +135,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(AppLocalizations.of(context)!.category, style: _sectionTitleStyle()),
-        SizedBox(height: 10.h),
+        SizedBox(height: 12.h),
         Consumer<TradeController>(
           builder: (context, tradeController, child) {
             if (tradeController.isLoading &&
@@ -152,19 +150,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               );
             }
 
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisExtent: 40.h,
-                crossAxisSpacing: 12.w,
-                mainAxisSpacing: 0.5.h,
-              ),
-              itemCount: tradeController.categories.length,
-              itemBuilder: (context, index) {
-                final category = tradeController.categories[index];
-                bool isSelected = selectedCategories.contains(category.name);
+            return Wrap(
+              spacing: 10.w,
+              runSpacing: 10.h,
+              children: tradeController.categories.map((category) {
+                final isSelected = selectedCategories.contains(category.name);
                 return GestureDetector(
                   onTap: () {
                     setState(() {
@@ -175,47 +165,38 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       }
                     });
                   },
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 20.w,
-                        height: 20.w,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? context.primaryColor
-                              : context.surfaceColor,
-                          borderRadius: BorderRadius.circular(4.r),
-                          border: Border.all(
-                            color: isSelected
-                                ? context.primaryColor
-                                : context.dividerColor,
-                          ),
-                        ),
-                        child: isSelected
-                            ? Icon(
-                                Icons.check,
-                                size: 14.sp,
-                                color: context.onPrimaryColor,
-                              )
-                            : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 22.w, vertical: 10.h),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? context.primaryColor
+                          : context.surfaceColor,
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(
+                        color: isSelected
+                            ? context.primaryColor
+                            : context.isDarkMode
+                                ? Colors.white24
+                                : Colors.grey.shade300,
+                        width: 1.5,
                       ),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: Text(
-                          category.name,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            color: context.subTextColor,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                    ),
+                    child: Text(
+                      category.name,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? context.onPrimaryColor
+                            : context.textColor,
+                        fontFamily: FontFamily.openSans,
                       ),
-                    ],
+                    ),
                   ),
                 );
-              },
+              }).toList(),
             );
           },
         ),
@@ -331,47 +312,53 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   Widget _buildReturnTypeSection() {
+    final returnTypes = ['Price', 'Item'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('What do they want in return?', style: _sectionTitleStyle()),
-        SizedBox(height: 10.h),
-        Row(
-          children: [
-            _buildTypeButton('Price'),
-            SizedBox(width: 15.w),
-            _buildTypeButton('Item'),
-          ],
+        SizedBox(height: 12.h),
+        Wrap(
+          spacing: 10.w,
+          runSpacing: 10.h,
+          children: returnTypes.map((type) {
+            final isSelected = returnType == type;
+            return GestureDetector(
+              onTap: () => setState(() => returnType = type),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 28.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? context.primaryColor
+                      : context.surfaceColor,
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(
+                    color: isSelected
+                        ? context.primaryColor
+                        : context.isDarkMode
+                            ? Colors.white24
+                            : Colors.grey.shade300,
+                    width: 1.5,
+                  ),
+                ),
+                child: Text(
+                  type,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? context.onPrimaryColor
+                        : context.textColor,
+                    fontFamily: FontFamily.openSans,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ],
-    );
-  }
-
-  Widget _buildTypeButton(String type) {
-    bool isSelected = returnType == type;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => returnType = type),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8.h),
-          decoration: BoxDecoration(
-            color: isSelected ? context.primaryColor : context.surfaceColor,
-            borderRadius: BorderRadius.circular(22.r),
-            border: Border.all(
-              color: isSelected ? context.primaryColor : context.dividerColor,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            type,
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: isSelected ? context.onPrimaryColor : context.subTextColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -499,51 +486,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                           : context.subTextColor,
                       fontWeight: FontWeight.w600,
                     ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSortBySection() {
-    final sortOptions = [
-      {'label': 'Nearest', 'value': 'Nearest First'},
-      {'label': 'Farthest', 'value': 'Farthest First'},
-      {'label': AppLocalizations.of(context)!.newest, 'value': 'Newest First'},
-      {'label': AppLocalizations.of(context)!.oldest, 'value': 'Oldest First'},
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(AppLocalizations.of(context)!.sortBy, style: _sectionTitleStyle()),
-        SizedBox(height: 10.h),
-        Wrap(
-          spacing: 12.w,
-          runSpacing: 12.h,
-          children: sortOptions.map((option) {
-            bool isSelected = selectedSort == option['value'];
-            return GestureDetector(
-              onTap: () => setState(() => selectedSort = option['value']!),
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
-                decoration: BoxDecoration(
-                  color: isSelected ? context.primaryColor : context.surfaceColor,
-                  borderRadius: BorderRadius.circular(22.r),
-                  border: Border.all(
-                    color: isSelected ? context.primaryColor : context.dividerColor,
-                  ),
-                ),
-                child: Text(
-                  option['label']!,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: isSelected ? context.onPrimaryColor : context.subTextColor,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

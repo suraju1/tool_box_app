@@ -214,7 +214,8 @@ class ChatService {
       }
 
       if (FirebaseAuth.instance.currentUser == null) {
-        debugPrint("getChatRooms: No Firebase user signed in. Attempting anonymous sign-in...");
+        debugPrint(
+            "getChatRooms: No Firebase user signed in. Attempting anonymous sign-in...");
         try {
           await FirebaseAuth.instance.signInAnonymously();
         } catch (error) {
@@ -225,7 +226,8 @@ class ChatService {
       }
 
       final String userId = currentUser.id.toString();
-      debugPrint("getChatRooms: Auth ready. Fetching rooms where 'users' contains $userId");
+      debugPrint(
+          "getChatRooms: Auth ready. Fetching rooms where 'users' contains $userId");
 
       yield* _firestore
           .collection('chat_rooms')
@@ -233,7 +235,8 @@ class ChatService {
           .orderBy('updatedAt', descending: true)
           .snapshots()
           .map((snapshot) {
-        debugPrint("getChatRooms FULL LOG: ${snapshot.docs.map((e) => e.data()).toList()}");
+        debugPrint(
+            "getChatRooms FULL LOG: ${snapshot.docs.map((e) => e.data()).toList()}");
         return snapshot;
       });
     } catch (e) {

@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/features/splash/controller/splash_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
+import 'package:tool_bocs/util/font_family.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -29,23 +31,23 @@ class _SplashScreenState extends State<SplashScreen>
     // Animation controller
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 1),
     );
     // Scale animation
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Curves.easeOutBack,
+        curve: Curves.easeInOut,
       ),
     );
     // Fade animation
-    _opacityAnimation = Tween<double>(begin: 0, end: 1).animate(
+    _opacityAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Curves.easeIn,
+        curve: Curves.easeInOut,
       ),
     );
-    _animationController.forward();
+    _animationController.repeat(reverse: true);
 
     // Navigate after getting AuthController from context
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -71,41 +73,38 @@ class _SplashScreenState extends State<SplashScreen>
     }
     
     return Scaffold(
-      backgroundColor: context.scaffoldBg,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+      backgroundColor: Colors.black,
+      body: Stack(
         children: [
           Center(
             child: FadeTransition(
               opacity: _opacityAnimation,
               child: ScaleTransition(
                 scale: _scaleAnimation,
-                child: Container(
-                  height: 160.h,
-                  width: 160.w,
-                  decoration: BoxDecoration(
-                    color: context.scaffoldBg,
-                    shape: BoxShape.circle,
-                  ),
-                  child: ClipOval(
-                    child: Image.asset(
-                      'assets/logo_transperant.png',
-                      color: context.isDarkMode ? Colors.white : Colors.black,
-                    ),
+                child: SizedBox(
+                  width: 250.w,
+                  child: Image.asset(
+                    'assets/logo_transperant.png',
+                    color: Colors.white,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
             ),
           ),
-          SizedBox(height: 100.h),
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: context.scaffoldBg,
-            ),
-            child: Image.asset(
-              'assets/undraw_walk.png',
-              fit: BoxFit.cover,
+          Positioned(
+            bottom: 60.h,
+            left: 20.w,
+            right: 20.w,
+            child: Text(
+              'Buy • Sell • Exchange • Lend',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.white70,
+                letterSpacing: 1.0,
+              ),
             ),
           ),
         ],

@@ -11,6 +11,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/web_ui/view/web_filter_dialog.dart';
+import 'package:tool_bocs/features/web_ui/view/web_sort_dialog.dart';
 
 class WebGiveScreen extends StatefulWidget {
   const WebGiveScreen({super.key});
@@ -46,138 +47,181 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<TradeController>();
 
-    return Scrollbar(
-      controller: _scrollController,
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // HEADER / SEARCH SECTION
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ]),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "What do you want to give today?",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 700;
+
+        return Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding: EdgeInsets.all(isNarrow ? 16 : 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // HEADER / SEARCH SECTION
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isNarrow ? 16 : 24,
+                    vertical: isNarrow ? 20 : 32,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Search and fulfill requests from people around you.",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
+                  decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ]),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
+                      Text(
+                        "What do you want to give today?",
+                        style: TextStyle(
+                          fontSize: isNarrow ? 20 : 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Search and fulfill requests from people around you.",
+                        style: TextStyle(
+                          fontSize: isNarrow ? 14 : 16,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Search bar — always full width
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) {
+                            controller.setSearchQuery(value, type: 'take');
+                          },
+                          decoration: const InputDecoration(
+                            icon: Icon(Icons.search, color: Colors.grey),
+                            hintText:
+                                "Search requests (e.g. Hammer, Drill)...",
+                            border: InputBorder.none,
                           ),
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: (value) {
-                              controller.setSearchQuery(value, type: 'take');
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Buttons row — wraps on narrow screens
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              WebFilterDialog.show(context, initialPostType: 'take');
                             },
-                            decoration: const InputDecoration(
-                              icon: Icon(Icons.search, color: Colors.grey),
-                              hintText:
-                                  "Search requests (e.g. Hammer, Drill)...",
-                              border: InputBorder.none,
+                            icon: const Icon(Icons.filter_alt_outlined),
+                            label: const Text("Filter"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).cardColor,
+                              foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.grey.shade300),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          WebFilterDialog.show(context, initialPostType: 'take');
-                        },
-                        icon: const Icon(Icons.filter_alt_outlined),
-                        label: const Text("Filter"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).cardColor,
-                          foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: Colors.grey.shade300),
+                          Consumer<TradeController>(
+                            builder: (context, tc, _) {
+                              final hasSort = tc.selectedDistanceSort.isNotEmpty &&
+                                  tc.selectedDistanceSort != 'Nearest First' ||
+                                  tc.selectedDateSort.isNotEmpty;
+                              return ElevatedButton.icon(
+                                onPressed: () {
+                                  WebSortDialog.show(context, initialPostType: 'take');
+                                },
+                                icon: const Icon(Icons.sort),
+                                label: const Text("Sort By"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: hasSort
+                                      ? Colors.black
+                                      : Theme.of(context).cardColor,
+                                  foregroundColor: hasSort
+                                      ? Colors.white
+                                      : Theme.of(context).textTheme.bodyLarge?.color,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: BorderSide(
+                                      color: hasSort
+                                          ? Colors.black
+                                          : Colors.grey.shade300,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        ),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.createGivePost,
+                                arguments: "Create Give Post",
+                              );
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text("Create Post"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.createGivePost,
-                            arguments: "Create Give Post",
-                          );
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text("Create Post"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                      )
                     ],
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // RESULTS COUNT
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Nearby Requests",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
-                Text(
-                  "Showing ${controller.takePosts.length} Results",
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
+
+                SizedBox(height: isNarrow ? 24 : 40),
+
+                // RESULTS COUNT
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 16,
+                  runSpacing: 8,
+                  children: [
+                    Text(
+                      "Nearby Requests",
+                      style: TextStyle(
+                        fontSize: isNarrow ? 18 : 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "Showing ${controller.takePosts.length} Results",
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
             // PRODUCTS GRID
             if (controller.isTakeLoading && controller.takePosts.isEmpty)
@@ -219,8 +263,11 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
         ),
       ),
     );
+      },
+    );
   }
 }
+
 
 class _WebGiveCard extends StatelessWidget {
   final PostModel post;

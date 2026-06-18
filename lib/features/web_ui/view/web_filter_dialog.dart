@@ -32,7 +32,6 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
         selectedCategories = List.from(controller.selectedCategories);
         selectedRating = controller.selectedRating;
         returnType = controller.selectedReturnType;
-        selectedSort = controller.selectedSort;
 
         if (widget.initialPostType != null) {
           selectedPostType = widget.initialPostType!;
@@ -48,7 +47,6 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
   String selectedRating = 'All';
   String returnType = 'All';
   String selectedPostType = 'all';
-  String selectedSort = 'Newest First';
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +75,6 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
                     _buildDistanceSection(),
                     const SizedBox(height: 20),
                     _buildReturnTypeSection(),
-                    const SizedBox(height: 20),
-                    _buildSortBySection(),
                     const SizedBox(height: 30),
                   ],
                 ),
@@ -89,7 +85,8 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
               decoration: BoxDecoration(
                 color: context.surfaceColor,
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(20)),
                 boxShadow: [
                   BoxShadow(
                     color: context.isDarkMode
@@ -112,7 +109,7 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const SizedBox(width: 48), // Balance for close button
+        const SizedBox(width: 48),
         Expanded(
           child: Center(
             child: Text(
@@ -140,11 +137,13 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.category, style: _sectionTitleStyle()),
+        Text(AppLocalizations.of(context)!.category,
+            style: _sectionTitleStyle()),
         const SizedBox(height: 12),
         Consumer<TradeController>(
           builder: (context, tradeController, child) {
-            if (tradeController.isLoading && tradeController.categories.isEmpty) {
+            if (tradeController.isLoading &&
+                tradeController.categories.isEmpty) {
               return const Center(child: CircularProgressIndicator());
             }
 
@@ -155,19 +154,11 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
               );
             }
 
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisExtent: 45,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: tradeController.categories.length,
-              itemBuilder: (context, index) {
-                final category = tradeController.categories[index];
-                bool isSelected = selectedCategories.contains(category.name);
+            return Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: tradeController.categories.map((category) {
+                final isSelected = selectedCategories.contains(category.name);
                 return GestureDetector(
                   onTap: () {
                     setState(() {
@@ -178,39 +169,38 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
                       }
                     });
                   },
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: isSelected ? context.primaryColor : context.surfaceColor,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: isSelected ? context.primaryColor : context.dividerColor,
-                          ),
-                        ),
-                        child: isSelected
-                            ? Icon(Icons.check, size: 16, color: context.onPrimaryColor)
-                            : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? context.primaryColor
+                          : context.surfaceColor,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected
+                            ? context.primaryColor
+                            : context.isDarkMode
+                                ? Colors.white24
+                                : Colors.grey.shade300,
+                        width: 1.5,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          category.name,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: context.subTextColor,
-                            fontFamily: FontFamily.openSans,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                    ),
+                    child: Text(
+                      category.name,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? context.onPrimaryColor
+                            : context.textColor,
+                        fontFamily: FontFamily.openSans,
                       ),
-                    ],
+                    ),
                   ),
                 );
-              },
+              }).toList(),
             );
           },
         ),
@@ -222,7 +212,8 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.distance, style: _sectionTitleStyle()),
+        Text(AppLocalizations.of(context)!.distance,
+            style: _sectionTitleStyle()),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -234,7 +225,8 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
                 min: 0,
                 max: 50,
                 activeColor: context.primaryColor,
-                inactiveColor: context.isDarkMode ? Colors.white12 : Colors.grey.shade200,
+                inactiveColor:
+                    context.isDarkMode ? Colors.white12 : Colors.grey.shade200,
                 thumbColor: context.primaryColor,
                 onChanged: (val) {
                   setState(() => distance = val);
@@ -269,85 +261,46 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
   }
 
   Widget _buildReturnTypeSection() {
+    final returnTypes = ['Price', 'Item'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('What do they want in return?', style: _sectionTitleStyle()),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            _buildTypeButton('Price'),
-            const SizedBox(width: 16),
-            _buildTypeButton('Item'),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTypeButton(String type) {
-    bool isSelected = returnType == type;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => returnType = type),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? context.primaryColor : context.surfaceColor,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: isSelected ? context.primaryColor : context.dividerColor,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            type,
-            style: TextStyle(
-              fontSize: 16,
-              color: isSelected ? context.onPrimaryColor : context.subTextColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSortBySection() {
-    final sortOptions = [
-      {'label': 'Nearest', 'value': 'Nearest First'},
-      {'label': 'Farthest', 'value': 'Farthest First'},
-      {'label': AppLocalizations.of(context)!.newest, 'value': 'Newest First'},
-      {'label': AppLocalizations.of(context)!.oldest, 'value': 'Oldest First'},
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(AppLocalizations.of(context)!.sortBy, style: _sectionTitleStyle()),
-        const SizedBox(height: 12),
         Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: sortOptions.map((option) {
-            bool isSelected = selectedSort == option['value'];
+          spacing: 10,
+          runSpacing: 10,
+          children: returnTypes.map((type) {
+            final isSelected = returnType == type;
             return GestureDetector(
-              onTap: () => setState(() => selectedSort = option['value']!),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              onTap: () => setState(() => returnType = type),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? context.primaryColor : context.surfaceColor,
-                  borderRadius: BorderRadius.circular(24),
+                  color: isSelected
+                      ? context.primaryColor
+                      : context.surfaceColor,
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: isSelected ? context.primaryColor : context.dividerColor,
+                    color: isSelected
+                        ? context.primaryColor
+                        : context.isDarkMode
+                            ? Colors.white24
+                            : Colors.grey.shade300,
+                    width: 1.5,
                   ),
                 ),
                 child: Text(
-                  option['label']!,
+                  type,
                   style: TextStyle(
-                    fontSize: 16,
-                    color: isSelected ? context.onPrimaryColor : context.subTextColor,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? context.onPrimaryColor
+                        : context.textColor,
+                    fontFamily: FontFamily.openSans,
                   ),
                 ),
               ),
@@ -372,7 +325,6 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
                 rating: selectedRating,
                 returnType: returnType,
                 postType: selectedPostType,
-                sort: selectedSort,
               );
 
               if (widget.initialPostType == 'give') {
@@ -412,11 +364,11 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
                 distance = 10.0;
                 selectedRating = 'All';
                 returnType = 'All';
-                selectedSort = 'Nearest First';
               });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.isDarkMode ? Colors.white10 : const Color(0xFFF0F2F5),
+              backgroundColor:
+                  context.isDarkMode ? Colors.white10 : const Color(0xFFF0F2F5),
               foregroundColor: context.textColor,
               elevation: 0,
               shape: RoundedRectangleBorder(

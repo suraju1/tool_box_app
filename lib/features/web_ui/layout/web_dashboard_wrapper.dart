@@ -11,30 +11,37 @@ class WebDashboardWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      endDrawer: const WebProfileDrawer(),
-      body: Row(
-        children: [
-          // 1. LEFT SIDEBAR
-          const WebSidebar(),
-          
-          // 2. MAIN CONTENT AREA (Header + Content)
-          Expanded(
-            child: Column(
-              children: [
-                // Top Header AppBar
-                const WebHeader(),
-                
-                // Content Area
-                Expanded(
-                  child: child,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 800;
+
+        return Scaffold(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          endDrawer: const WebProfileDrawer(),
+          drawer: isNarrow ? const WebSidebar() : null,
+          body: Row(
+            children: [
+              // 1. LEFT SIDEBAR (Only visible on wide screens)
+              if (!isNarrow) const WebSidebar(),
+              
+              // 2. MAIN CONTENT AREA (Header + Content)
+              Expanded(
+                child: Column(
+                  children: [
+                    // Top Header AppBar
+                    const WebHeader(),
+                    
+                    // Content Area
+                    Expanded(
+                      child: child,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

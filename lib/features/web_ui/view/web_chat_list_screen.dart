@@ -136,276 +136,294 @@ class _WebChatListScreenState extends State<WebChatListScreen> {
                         );
                       }
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return _buildShimmer(context);
-                }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return _buildShimmer(context);
+                      }
 
-                final docs = snapshot.data?.docs ?? [];
+                      final docs = snapshot.data?.docs ?? [];
 
-                if (docs.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No chats yet',
-                      style: TextStyle(
-                        color: context.textColor,
-                        fontSize: 16.0,
-                      ),
-                    ),
-                  );
-                }
+                      if (docs.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No chats yet',
+                            style: TextStyle(
+                              color: context.textColor,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                        );
+                      }
 
-                return ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: docs.length,
-                  itemBuilder: (context, index) {
-                    final data = docs[index].data() as Map<String, dynamic>;
-                    final lastMessage =
-                        data['lastMessage'] as Map<String, dynamic>?;
+                      return ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: docs.length,
+                        itemBuilder: (context, index) {
+                          final data =
+                              docs[index].data() as Map<String, dynamic>;
+                          final lastMessage =
+                              data['lastMessage'] as Map<String, dynamic>?;
 
-                    if (lastMessage == null) {
-                      return const SizedBox.shrink();
-                    }
-
-                    final timestamp = lastMessage['timestamp'] as Timestamp?;
-                    final timeString = timestamp != null
-                        ? _formatMessageTime(timestamp.toDate())
-                        : '';
-
-                    String text = lastMessage['text'] as String? ?? '';
-                    if (lastMessage['senderId'] == _currentUserId) {
-                      text = "You: $text";
-                    }
-
-                    final isRead = lastMessage['isRead'] as bool? ??
-                        true; // Default to true if not present for logic sake
-                    // Get unread count
-                    final unreadCounts =
-                        data['unreadCounts'] as Map<String, dynamic>?;
-                    int unreadCountInt = 0;
-                    if (unreadCounts != null && _currentUserId != null) {
-                      debugPrint("UnreadCounts Map: $unreadCounts");
-                      debugPrint("Current User ID: $_currentUserId");
-                      debugPrint(
-                          "Value for Key: ${unreadCounts[_currentUserId]}");
-                      unreadCountInt = unreadCounts[_currentUserId] ?? 0;
-                    } else {
-                      debugPrint(
-                          "UnreadCounts is null or Current User ID is null");
-                      debugPrint("Data: $data");
-                    }
-
-                    String unreadCountStr = '';
-                    if (unreadCountInt > 0) {
-                      unreadCountStr = unreadCountInt.toString();
-                    } else if (unreadCounts == null &&
-                        !isRead &&
-                        lastMessage['senderId'] != _currentUserId) {
-                      // Fallback for old messages ONLY if unreadCounts doesn't exist
-                      unreadCountStr = '1';
-                    }
-
-                    // Determine other user ID (simple implementation assumes 2 users)
-                    final users = List<String>.from(data['users'] ?? []);
-                    final otherUserId = users.firstWhere(
-                        (id) => id != _currentUserId,
-                        orElse: () => 'Unknown');
-
-                    // Determine if chat is disabled (72 hours from first message)
-                    final firstMsgAt = data['firstMessageAt'] as Timestamp?;
-                    final lastUpdatedAt = data['updatedAt'] as Timestamp?;
-                    bool isDisabled = false;
-
-                    if (firstMsgAt != null) {
-                      isDisabled = DateTime.now()
-                              .difference(firstMsgAt.toDate())
-                              .inHours >=
-                          72;
-                    } else if (lastUpdatedAt != null) {
-                      // Fallback for existing chats without firstMessageAt:
-                      // If even the LAST update is > 72 hours ago, the chat is definitely disabled.
-                      isDisabled = DateTime.now()
-                              .difference(lastUpdatedAt.toDate())
-                              .inHours >=
-                          72;
-                    }
-
-                    // Fetch real user name from Firestore
-                    return StreamBuilder<DocumentSnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(otherUserId)
-                          .snapshots(),
-                      builder: (context, userSnapshot) {
-                        String displayName = "User $otherUserId";
-                        String? otherUserImage;
-                        if (userSnapshot.hasData && userSnapshot.data!.exists) {
-                          final userData = userSnapshot.data!.data()
-                              as Map<String, dynamic>?;
-                          if (userData != null &&
-                              userData.containsKey('fullName')) {
-                            displayName = userData['fullName'];
+                          if (lastMessage == null) {
+                            return const SizedBox.shrink();
                           }
-                          if (userData != null &&
-                              userData.containsKey('profileImage')) {
-                            otherUserImage =
-                                userData['profileImage'] as String?;
+
+                          final timestamp =
+                              lastMessage['timestamp'] as Timestamp?;
+                          final timeString = timestamp != null
+                              ? _formatMessageTime(timestamp.toDate())
+                              : '';
+
+                          String text = lastMessage['text'] as String? ?? '';
+                          if (lastMessage['senderId'] == _currentUserId) {
+                            text = "You: $text";
                           }
-                        }
 
-                        // Apply search filter here
-                        if (_searchQuery.isNotEmpty &&
-                            !displayName.toLowerCase().contains(_searchQuery)) {
-                          return const SizedBox.shrink();
-                        }
-
-                        final tradeDetails =
-                            data['tradeDetails'] as Map<String, dynamic>?;
-                        TradeResponseModel? tradeResponse;
-                        if (tradeDetails != null && data['tradeId'] != null) {
-                          tradeResponse = TradeResponseModel(
-                            id: data['tradeId'],
-                            postId: tradeDetails['postId'] ?? 0,
-                            responderId: tradeDetails['responderId'] ?? 0,
-                            posterUserId: tradeDetails['posterUserId'] ?? 0,
-                            responderName: tradeDetails['responderName'] ?? '',
-                            responseType:
-                                tradeDetails['responseType'] ?? 'item',
-                            priceRangeStart:
-                                tradeDetails['priceRangeStart']?.toDouble(),
-                            priceRangeEnd:
-                                tradeDetails['priceRangeEnd']?.toDouble(),
-                            itemName: tradeDetails['itemName'],
-                            postItemName: tradeDetails['postItemName'],
-                            posterName: tradeDetails['posterName'],
-                            createdAt:
-                                '', // Not stored in details but required by model
-                            status:
-                                'accepted', // Assume accepted if they are chatting
-                            posterMobile: tradeDetails['posterMobile'],
-                            responderMobile: tradeDetails['responderMobile'],
-                            postType: tradeDetails['postType'],
-                          );
-                        }
-
-                        Widget? subtitleWidget;
-                        if (tradeResponse != null) {
-                          final isOwner =
-                              context.read<AuthController>().currentUser?.id ==
-                                  tradeResponse.posterUserId;
-                          final isGivePost =
-                              tradeResponse.postType?.toLowerCase() == 'give' ||
-                                  tradeResponse.postType?.toLowerCase() ==
-                                      'giving';
-
-                          String givingItem = '';
-                          String takingItem = '';
-
-                          if (isOwner) {
-                            if (isGivePost) {
-                              givingItem = tradeResponse.postItemName ?? 'Item';
-                              takingItem = tradeResponse.responseType
-                                          .toLowerCase() ==
-                                      'price'
-                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
-                                  : (tradeResponse.itemName ?? 'Item');
-                            } else {
-                              givingItem = tradeResponse.responseType
-                                          .toLowerCase() ==
-                                      'price'
-                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
-                                  : (tradeResponse.itemName ?? 'Item');
-                              takingItem = tradeResponse.postItemName ?? 'Item';
-                            }
+                          final isRead = lastMessage['isRead'] as bool? ??
+                              true; // Default to true if not present for logic sake
+                          // Get unread count
+                          final unreadCounts =
+                              data['unreadCounts'] as Map<String, dynamic>?;
+                          int unreadCountInt = 0;
+                          if (unreadCounts != null && _currentUserId != null) {
+                            debugPrint("UnreadCounts Map: $unreadCounts");
+                            debugPrint("Current User ID: $_currentUserId");
+                            debugPrint(
+                                "Value for Key: ${unreadCounts[_currentUserId]}");
+                            unreadCountInt = unreadCounts[_currentUserId] ?? 0;
                           } else {
-                            if (isGivePost) {
-                              givingItem = tradeResponse.responseType
-                                          .toLowerCase() ==
-                                      'price'
-                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
-                                  : (tradeResponse.itemName ?? 'Item');
-                              takingItem = tradeResponse.postItemName ?? 'Item';
-                            } else {
-                              givingItem = tradeResponse.postItemName ?? 'Item';
-                              takingItem = tradeResponse.responseType
-                                          .toLowerCase() ==
-                                      'price'
-                                  ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
-                                  : (tradeResponse.itemName ?? 'Item');
-                            }
+                            debugPrint(
+                                "UnreadCounts is null or Current User ID is null");
+                            debugPrint("Data: $data");
                           }
 
-                          subtitleWidget = Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text.rich(
-                                TextSpan(
+                          String unreadCountStr = '';
+                          if (unreadCountInt > 0) {
+                            unreadCountStr = unreadCountInt.toString();
+                          } else if (unreadCounts == null &&
+                              !isRead &&
+                              lastMessage['senderId'] != _currentUserId) {
+                            // Fallback for old messages ONLY if unreadCounts doesn't exist
+                            unreadCountStr = '1';
+                          }
+
+                          // Determine other user ID (simple implementation assumes 2 users)
+                          final users = List<String>.from(data['users'] ?? []);
+                          final otherUserId = users.firstWhere(
+                              (id) => id != _currentUserId,
+                              orElse: () => 'Unknown');
+
+                          // Determine if chat is disabled (72 hours from first message)
+                          final firstMsgAt =
+                              data['firstMessageAt'] as Timestamp?;
+                          final lastUpdatedAt = data['updatedAt'] as Timestamp?;
+                          bool isDisabled = false;
+
+                          if (firstMsgAt != null) {
+                            isDisabled = DateTime.now()
+                                    .difference(firstMsgAt.toDate())
+                                    .inHours >=
+                                72;
+                          } else if (lastUpdatedAt != null) {
+                            // Fallback for existing chats without firstMessageAt:
+                            // If even the LAST update is > 72 hours ago, the chat is definitely disabled.
+                            isDisabled = DateTime.now()
+                                    .difference(lastUpdatedAt.toDate())
+                                    .inHours >=
+                                72;
+                          }
+
+                          // Fetch real user name from Firestore
+                          return StreamBuilder<DocumentSnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(otherUserId)
+                                .snapshots(),
+                            builder: (context, userSnapshot) {
+                              String displayName = "User $otherUserId";
+                              String? otherUserImage;
+                              if (userSnapshot.hasData &&
+                                  userSnapshot.data!.exists) {
+                                final userData = userSnapshot.data!.data()
+                                    as Map<String, dynamic>?;
+                                if (userData != null &&
+                                    userData.containsKey('fullName')) {
+                                  displayName = userData['fullName'];
+                                }
+                                if (userData != null &&
+                                    userData.containsKey('profileImage')) {
+                                  otherUserImage =
+                                      userData['profileImage'] as String?;
+                                }
+                              }
+
+                              // Apply search filter here
+                              if (_searchQuery.isNotEmpty &&
+                                  !displayName
+                                      .toLowerCase()
+                                      .contains(_searchQuery)) {
+                                return const SizedBox.shrink();
+                              }
+
+                              final tradeDetails =
+                                  data['tradeDetails'] as Map<String, dynamic>?;
+                              TradeResponseModel? tradeResponse;
+                              if (tradeDetails != null &&
+                                  data['tradeId'] != null) {
+                                tradeResponse = TradeResponseModel(
+                                  id: data['tradeId'],
+                                  postId: tradeDetails['postId'] ?? 0,
+                                  responderId: tradeDetails['responderId'] ?? 0,
+                                  posterUserId:
+                                      tradeDetails['posterUserId'] ?? 0,
+                                  responderName:
+                                      tradeDetails['responderName'] ?? '',
+                                  responseType:
+                                      tradeDetails['responseType'] ?? 'item',
+                                  priceRangeStart:
+                                      tradeDetails['priceRangeStart']
+                                          ?.toDouble(),
+                                  priceRangeEnd:
+                                      tradeDetails['priceRangeEnd']?.toDouble(),
+                                  itemName: tradeDetails['itemName'],
+                                  postItemName: tradeDetails['postItemName'],
+                                  posterName: tradeDetails['posterName'],
+                                  createdAt:
+                                      '', // Not stored in details but required by model
+                                  status:
+                                      'accepted', // Assume accepted if they are chatting
+                                  posterMobile: tradeDetails['posterMobile'],
+                                  responderMobile:
+                                      tradeDetails['responderMobile'],
+                                  postType: tradeDetails['postType'],
+                                );
+                              }
+
+                              Widget? subtitleWidget;
+                              if (tradeResponse != null) {
+                                final isOwner = context
+                                        .read<AuthController>()
+                                        .currentUser
+                                        ?.id ==
+                                    tradeResponse.posterUserId;
+                                final isGivePost =
+                                    tradeResponse.postType?.toLowerCase() ==
+                                            'give' ||
+                                        tradeResponse.postType?.toLowerCase() ==
+                                            'giving';
+
+                                String givingItem = '';
+                                String takingItem = '';
+
+                                if (isOwner) {
+                                  if (isGivePost) {
+                                    givingItem =
+                                        tradeResponse.postItemName ?? 'Item';
+                                    takingItem = tradeResponse.responseType
+                                                .toLowerCase() ==
+                                            'price'
+                                        ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                        : (tradeResponse.itemName ?? 'Item');
+                                  } else {
+                                    givingItem = tradeResponse.responseType
+                                                .toLowerCase() ==
+                                            'price'
+                                        ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                        : (tradeResponse.itemName ?? 'Item');
+                                    takingItem =
+                                        tradeResponse.postItemName ?? 'Item';
+                                  }
+                                } else {
+                                  if (isGivePost) {
+                                    givingItem = tradeResponse.responseType
+                                                .toLowerCase() ==
+                                            'price'
+                                        ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                        : (tradeResponse.itemName ?? 'Item');
+                                    takingItem =
+                                        tradeResponse.postItemName ?? 'Item';
+                                  } else {
+                                    givingItem =
+                                        tradeResponse.postItemName ?? 'Item';
+                                    takingItem = tradeResponse.responseType
+                                                .toLowerCase() ==
+                                            'price'
+                                        ? '₹${tradeResponse.priceRangeStart} - ₹${tradeResponse.priceRangeEnd}'
+                                        : (tradeResponse.itemName ?? 'Item');
+                                  }
+                                }
+
+                                subtitleWidget = Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const TextSpan(text: "Trade: "),
-                                    TextSpan(
-                                      text: givingItem,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                    Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          const TextSpan(text: "Trade: "),
+                                          TextSpan(
+                                            text: givingItem,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          const TextSpan(text: " for "),
+                                          TextSpan(
+                                            text: takingItem,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: context.subTextColor,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    const TextSpan(text: " for "),
-                                    TextSpan(
-                                      text: takingItem,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                    Text(
+                                      text,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: context.subTextColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ],
-                                ),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: context.subTextColor,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                text,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: context.subTextColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          );
-                        } else {
-                          subtitleWidget = Text(
-                            text,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: context.subTextColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          );
-                        }
+                                );
+                              } else {
+                                subtitleWidget = Text(
+                                  text,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: context.subTextColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                );
+                              }
 
-                        return _buildChatItem(
-                          context,
-                          docs[index].id, // Pass chatRoomId
-                          displayName,
-                          subtitleWidget,
-                          timeString,
-                          unreadCountStr,
-                          false, // Online status not implemented
-                          otherUserImage ??
-                              '', // Actual profile image from Firestore
-                          otherUserId: otherUserId,
-                          tradeResponse: tradeResponse,
-                          isDisabled: isDisabled,
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+                              return _buildChatItem(
+                                context,
+                                docs[index].id, // Pass chatRoomId
+                                displayName,
+                                subtitleWidget,
+                                timeString,
+                                unreadCountStr,
+                                false, // Online status not implemented
+                                otherUserImage ??
+                                    '', // Actual profile image from Firestore
+                                otherUserId: otherUserId,
+                                tradeResponse: tradeResponse,
+                                isDisabled: isDisabled,
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -484,8 +502,7 @@ class _WebChatListScreenState extends State<WebChatListScreen> {
                   });
                   FocusScope.of(context).unfocus();
                 },
-                child:
-                    Icon(Icons.clear, color: context.subTextColor, size: 20),
+                child: Icon(Icons.clear, color: context.subTextColor, size: 20),
               ),
           ],
         ),
@@ -638,8 +655,7 @@ class _WebChatListScreenState extends State<WebChatListScreen> {
                       !isDisabled)
                     Container(
                       alignment: Alignment.center,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                       margin: EdgeInsets.symmetric(horizontal: 8),
                       decoration: BoxDecoration(
                         color: context.primaryColor,
@@ -664,4 +680,3 @@ class _WebChatListScreenState extends State<WebChatListScreen> {
     );
   }
 }
-

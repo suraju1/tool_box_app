@@ -86,13 +86,20 @@ class TradeController extends ChangeNotifier {
   List<String> _selectedCategories = [];
   String _selectedRating = 'All';
   String _selectedReturnType = 'All';
-  String _selectedSort = 'Nearest First';
+  // Dual sort: distance sort and date sort independently
+  String _selectedDistanceSort = 'Nearest First'; // 'Nearest First' | 'Farthest First' | ''
+  String _selectedDateSort = '';                  // 'Newest First' | 'Oldest First' | ''
   String _selectedPostType = 'all';
 
   List<String> get selectedCategories => _selectedCategories;
   String get selectedRating => _selectedRating;
   String get selectedReturnType => _selectedReturnType;
-  String get selectedSort => _selectedSort;
+  String get selectedDistanceSort => _selectedDistanceSort;
+  String get selectedDateSort => _selectedDateSort;
+  // Kept for backward compat (SortButton active indicator)
+  String get selectedSort => _selectedDistanceSort.isNotEmpty
+      ? _selectedDistanceSort
+      : _selectedDateSort;
   String get selectedPostType => _selectedPostType;
 
   List<CategoryModel> get categories => _categories;
@@ -302,13 +309,20 @@ class TradeController extends ChangeNotifier {
     List<String>? categories,
     String? rating,
     String? returnType,
-    String? sort,
+    String? sort,          // legacy — sets distanceSort
+    String? distanceSort,
+    String? dateSort,
     String? postType,
   }) {
     if (categories != null) _selectedCategories = categories;
     if (rating != null) _selectedRating = rating;
     if (returnType != null) _selectedReturnType = returnType;
-    if (sort != null) _selectedSort = sort;
+    if (distanceSort != null) _selectedDistanceSort = distanceSort;
+    if (dateSort != null) _selectedDateSort = dateSort;
+    // legacy fallback
+    if (sort != null && distanceSort == null && dateSort == null) {
+      _selectedDistanceSort = sort;
+    }
     if (postType != null) _selectedPostType = postType;
     notifyListeners();
   }
@@ -341,9 +355,10 @@ class TradeController extends ChangeNotifier {
     _selectedCategories = [];
     _selectedRating = 'All';
     _selectedReturnType = 'All';
-    _selectedSort = 'Nearest First';
+    _selectedDistanceSort = 'Nearest First';
+    _selectedDateSort = '';
     _selectedPostType = 'all';
-    _distanceKm = 10.0; // Reset to default
+    _distanceKm = 10.0;
     _giveSearchQuery = '';
     _takeSearchQuery = '';
     _homeSearchQuery = '';
@@ -402,21 +417,27 @@ class TradeController extends ChangeNotifier {
           .toList();
     }
 
-    // 5. Sorting
-    if (_selectedSort == 'Nearest First') {
-      filtered.sort(
-          (a, b) => (a.distanceKm ?? 9999.0).compareTo(b.distanceKm ?? 9999.0));
-    } else if (_selectedSort == 'Farthest First') {
-      filtered.sort(
-          (a, b) => (b.distanceKm ?? -1.0).compareTo(a.distanceKm ?? -1.0));
-    } else if (_selectedSort == 'Newest First') {
-      filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    } else if (_selectedSort == 'Oldest First') {
-      filtered.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-    } else if (_selectedSort == 'Highest Rated') {
-      filtered
-          .sort((a, b) => (b.userRating ?? 0.0).compareTo(a.userRating ?? 0.0));
-    }
+    // 5. Sorting — distance (primary) + date (secondary) combined
+    filtered.sort((a, b) {
+      int distanceCmp = 0;
+      int dateCmp = 0;
+
+      if (_selectedDistanceSort == 'Nearest First') {
+        distanceCmp = (a.distanceKm ?? 9999.0).compareTo(b.distanceKm ?? 9999.0);
+      } else if (_selectedDistanceSort == 'Farthest First') {
+        distanceCmp = (b.distanceKm ?? -1.0).compareTo(a.distanceKm ?? -1.0);
+      }
+
+      if (_selectedDateSort == 'Newest First') {
+        dateCmp = b.createdAt.compareTo(a.createdAt);
+      } else if (_selectedDateSort == 'Oldest First') {
+        dateCmp = a.createdAt.compareTo(b.createdAt);
+      }
+
+      // Distance is primary sort; date breaks ties
+      if (distanceCmp != 0) return distanceCmp;
+      return dateCmp;
+    });
 
     return filtered;
   }

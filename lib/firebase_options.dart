@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDLtL9qbSt8F-ySSSswzOc3iBdBgSSlHhk',
+    apiKey: 'AIzaSyDLtL9qbSt8F-ySSSswzOc31BdBgSSlHHk',
     appId: '1:70648687498:web:6f01ad31ceb9fa679cb673',
     messagingSenderId: '70648687498',
     projectId: 'toolucs-7cbc3',
@@ -84,5 +84,4 @@ class DefaultFirebaseOptions {
     authDomain: 'tool-bocs-prod-v3.firebaseapp.com',
     storageBucket: 'tool-bocs-prod-v3.firebasestorage.app',
   );
-
 }

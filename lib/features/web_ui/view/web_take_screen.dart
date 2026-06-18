@@ -11,6 +11,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/web_ui/view/web_filter_dialog.dart';
+import 'package:tool_bocs/features/web_ui/view/web_sort_dialog.dart';
 
 class WebTakeScreen extends StatefulWidget {
   const WebTakeScreen({super.key});
@@ -46,178 +47,223 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<TradeController>();
 
-    return Scrollbar(
-      controller: _scrollController,
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // HEADER / SEARCH SECTION
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ]),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "What do you want to take today?",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 700;
+
+        return Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding: EdgeInsets.all(isNarrow ? 16 : 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // HEADER / SEARCH SECTION
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isNarrow ? 16 : 24,
+                    vertical: isNarrow ? 20 : 32,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Discover amazing tools and items being given away near you.",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
+                  decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ]),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
+                      Text(
+                        "What do you want to take today?",
+                        style: TextStyle(
+                          fontSize: isNarrow ? 20 : 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Discover amazing tools and items being given away near you.",
+                        style: TextStyle(
+                          fontSize: isNarrow ? 14 : 16,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Search bar — always full width
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) {
+                            controller.setSearchQuery(value, type: 'give');
+                          },
+                          decoration: const InputDecoration(
+                            icon: Icon(Icons.search, color: Colors.grey),
+                            hintText:
+                                "Search items (e.g. Lawn Mower, Tent)...",
+                            border: InputBorder.none,
                           ),
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: (value) {
-                              controller.setSearchQuery(value, type: 'give');
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Buttons — wraps on narrow screens
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              WebFilterDialog.show(context, initialPostType: 'give');
                             },
-                            decoration: const InputDecoration(
-                              icon: Icon(Icons.search, color: Colors.grey),
-                              hintText:
-                                  "Search items (e.g. Lawn Mower, Tent)...",
-                              border: InputBorder.none,
+                            icon: const Icon(Icons.filter_alt_outlined),
+                            label: const Text("Filter"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).cardColor,
+                              foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.grey.shade300),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          WebFilterDialog.show(context, initialPostType: 'give');
-                        },
-                        icon: const Icon(Icons.filter_alt_outlined),
-                        label: const Text("Filter"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).cardColor,
-                          foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: Colors.grey.shade300),
+                          Consumer<TradeController>(
+                            builder: (context, tc, _) {
+                              final hasSort = tc.selectedDistanceSort.isNotEmpty &&
+                                  tc.selectedDistanceSort != 'Nearest First' ||
+                                  tc.selectedDateSort.isNotEmpty;
+                              return ElevatedButton.icon(
+                                onPressed: () {
+                                  WebSortDialog.show(context, initialPostType: 'give');
+                                },
+                                icon: const Icon(Icons.sort),
+                                label: const Text("Sort By"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: hasSort
+                                      ? Colors.black
+                                      : Theme.of(context).cardColor,
+                                  foregroundColor: hasSort
+                                      ? Colors.white
+                                      : Theme.of(context).textTheme.bodyLarge?.color,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: BorderSide(
+                                      color: hasSort
+                                          ? Colors.black
+                                          : Colors.grey.shade300,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        ),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.createGivePost,
+                                arguments: "Create Take Post",
+                              );
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text("Request an Item"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.createGivePost,
-                            arguments: "Create Take Post",
-                          );
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text("Request an Item"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                      )
                     ],
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // RESULTS COUNT
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Available Items Nearby",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
-                Text(
-                  "Showing ${controller.givePosts.length} Results",
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
+
+                SizedBox(height: isNarrow ? 24 : 40),
+
+                // RESULTS COUNT
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 16,
+                  runSpacing: 8,
+                  children: [
+                    Text(
+                      "Available Items Nearby",
+                      style: TextStyle(
+                        fontSize: isNarrow ? 18 : 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "Showing ${controller.givePosts.length} Results",
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 20),
+
+                // PRODUCTS GRID
+                if (controller.isGiveLoading && controller.givePosts.isEmpty)
+                  const Center(child: CircularProgressIndicator())
+                else if (controller.givePosts.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40.0),
+                      child: Column(
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey.shade400),
+                          const SizedBox(height: 16),
+                          Text(
+                            "No items found matching your search.",
+                            style: TextStyle(
+                                color: Colors.grey.shade600, fontSize: 16),
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: isNarrow ? 280 : 320,
+                      mainAxisExtent: 420,
+                      crossAxisSpacing: isNarrow ? 12 : 20,
+                      mainAxisSpacing: isNarrow ? 12 : 20,
+                    ),
+                    itemCount: controller.givePosts.length,
+                    itemBuilder: (context, index) {
+                      return _WebTakeCard(post: controller.givePosts[index]);
+                    },
+                  ),
               ],
             ),
-            const SizedBox(height: 20),
-
-            // PRODUCTS GRID
-            if (controller.isGiveLoading && controller.givePosts.isEmpty)
-              const Center(child: CircularProgressIndicator())
-            else if (controller.givePosts.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(40.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.search_off,
-                          size: 64, color: Colors.grey.shade400),
-                      const SizedBox(height: 16),
-                      Text(
-                        "No items found matching your search.",
-                        style: TextStyle(
-                            color: Colors.grey.shade600, fontSize: 16),
-                      )
-                    ],
-                  ),
-                ),
-              )
-            else
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 320,
-                  mainAxisExtent: 420,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                ),
-                itemCount: controller.givePosts.length,
-                itemBuilder: (context, index) {
-                  return _WebTakeCard(post: controller.givePosts[index]);
-                },
-              ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
