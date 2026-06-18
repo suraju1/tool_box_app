@@ -442,33 +442,60 @@ class _HomeScreenState extends State<HomeScreen> {
     final actionLabel = isOwner ? 'Offers' : (isTake ? 'Give' : 'Take');
 
     // Format exchange details dynamically
-    String getExchangeText() {
+    Widget getExchangeInfo() {
       final type = post.returnType.toLowerCase().trim();
       final min = post.priceMin;
       final max = post.priceMax;
       final name = post.returnItemName ?? '';
       final category = post.returnItemCategory ?? '';
 
-      if (type == 'price' || type == 'money' || min != null) {
-        if (min != null) {
-          if (max != null && max != min) {
-            return 'In exchange for: ₹${min.toStringAsFixed(0)} - ₹${max.toStringAsFixed(0)} (Money)';
-          }
-          return 'In exchange for: ₹${min.toStringAsFixed(0)} (Money)';
-        }
-        return 'In exchange for: Money';
-      } else if (type == 'free') {
-        return 'In exchange for: Free';
-      } else {
+      if (type == 'exchange' || type == 'item') {
+        String text = 'In exchange for: ';
         if (name.isNotEmpty) {
-          return category.isNotEmpty
-              ? 'In exchange for: $name ($category)'
-              : 'In exchange for: $name';
+          text += name;
+          if (category.isNotEmpty) text += ' ($category)';
+        } else if (category.isNotEmpty) {
+          text += category;
+        } else {
+          text += 'Item';
         }
-        if (category.isNotEmpty) {
-          return 'In exchange for: ($category)';
+        return Text(
+          text,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+            fontFamily: FontFamily.openSans,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        );
+      } else if (type == 'free') {
+        return Text(
+          'Free',
+          style: TextStyle(
+            color: context.primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 14.sp,
+            fontFamily: FontFamily.openSans,
+          ),
+        );
+      } else {
+        String text = 'In exchange for: ₹${min?.toStringAsFixed(0) ?? 0} (Money)';
+        if (min != null && max != null && max != min) {
+          text = 'In exchange for: ₹${min.toStringAsFixed(0)} - ₹${max.toStringAsFixed(0)} (Money)';
         }
-        return 'In exchange for: -';
+        return Text(
+          text,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+            fontFamily: FontFamily.openSans,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        );
       }
     }
 
@@ -632,17 +659,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(
-                      getExchangeText(),
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: FontFamily.openSans,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    child: getExchangeInfo(),
                   ),
                   SizedBox(width: 8.w),
                   InkWell(

@@ -11,6 +11,8 @@ class ThemeSelectionBottomSheet extends StatefulWidget {
   const ThemeSelectionBottomSheet({super.key});
 
   static Future<void> show(BuildContext context) async {
+    await StorageService.saveFirstuser('visited');
+    if (!context.mounted) return;
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
