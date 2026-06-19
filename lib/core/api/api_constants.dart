@@ -54,6 +54,9 @@ class ApiConstants {
   static const String toggleReviewReaction = 'toggle_review_reaction'; //post
   static const String submitUserMark = 'submit_user_mark'; //post
   static const String updateProfile = 'update_profile'; //post
+  static const String getAchievements = 'user/achievements'; //get
+  static const String getReportReasons = 'report-reasons'; //get
+  static const String reportPost = 'report-post'; //post
 
   // 5. Address Management
   static const String saveAddress = 'save_address'; //post

@@ -409,7 +409,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                               context: context,
                               builder: (context) => AlertDialog(
                                 title: const Text('Deactivate Post'),
-                                content: const Text('Are you sure you want to deactivate this post? Deactivating it will permanently delete your post.'),
+                                content: const Text(
+                                    'Are you sure you want to deactivate this post? Deactivating it will permanently delete your post.'),
                                 actions: [
                                   TextButton(
                                     onPressed: () =>
@@ -495,54 +496,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                             ],
                           ),
                         ),
-                      ),
-                      SizedBox(width: 8.w),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Delete Post'),
-                              content: const Text(
-                                  'Are you sure you want to delete this post?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  child: const Text('Delete',
-                                      style: TextStyle(color: Colors.red)),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirm == true && context.mounted) {
-                            final success = await context
-                                .read<TradeController>()
-                                .deletePost(post.id);
-                            if (success && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Post deleted successfully')));
-                              context
-                                  .read<ProfileController>()
-                                  .getMyPosts(); // Refresh list
-                            } else if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(context
-                                              .read<TradeController>()
-                                              .errorMessage ??
-                                          'Error deleting post')));
-                            }
-                          }
-                        },
-                      ),
+                      )
                     ],
                   ),
                 ],

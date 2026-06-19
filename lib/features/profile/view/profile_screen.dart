@@ -369,7 +369,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               IconButton(
                 tooltip: 'Settings',
-                onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
+                onPressed: () =>
+                    Navigator.pushNamed(context, AppRoutes.settings),
                 icon: Icon(
                   Icons.settings_outlined,
                   size: 22.sp,
@@ -473,10 +474,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              Navigator.pushNamed(context, AppRoutes.editProfile);
+                              Navigator.pushNamed(
+                                  context, AppRoutes.editProfile);
                             },
                             icon: Icon(Icons.edit, size: 14.sp),
-                            label: Text("Edit Profile", style: TextStyle(fontSize: 12.sp)),
+                            label: Text("Edit Profile",
+                                style: TextStyle(fontSize: 12.sp)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
                               foregroundColor: Colors.white,
@@ -494,14 +497,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             alignment: Alignment.center,
                             padding: EdgeInsets.symmetric(vertical: 8.h),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black, width: 1.5),
+                              border:
+                                  Border.all(color: Colors.black, width: 1.5),
                               borderRadius: BorderRadius.circular(30.r),
                               color: Colors.transparent,
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.credit_card, size: 14.sp, color: Colors.black),
+                                Icon(Icons.credit_card,
+                                    size: 14.sp, color: Colors.black),
                                 SizedBox(width: 4.w),
                                 Flexible(
                                   child: Text(
@@ -603,11 +608,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildMarksOfSurajSection(UserProfileModel profile) {
+    final reviews = profile.reviews;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.grey.shade900 : const Color(0xFFF3F4F6),
+        color:
+            context.isDarkMode ? Colors.grey.shade900 : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(15.r),
         border: Border.all(color: context.dividerColor.withOpacity(0.5)),
       ),
@@ -617,107 +624,198 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Marks of ${profile.userDetails.fullName.split(' ').first}',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                  color: context.textColor,
+              Expanded(
+                child: Text(
+                  'Marks of ${profile.userDetails.fullName.split(' ').first}',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: context.textColor,
+                  ),
                 ),
               ),
               Row(
                 children: [
-                  Icon(Icons.thumb_up_alt_outlined, size: 18.sp, color: context.textColor),
+                  Icon(Icons.thumb_up_alt_outlined,
+                      size: 18.sp, color: context.textColor),
                   SizedBox(width: 4.w),
-                  Text("23", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: context.textColor)),
+                  Text("${profile.userDetails.totalLikes ?? 0}",
+                      style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: context.textColor)),
                   SizedBox(width: 12.w),
-                  Icon(Icons.thumb_down_alt_outlined, size: 18.sp, color: context.textColor),
+                  Icon(Icons.thumb_down_alt_outlined,
+                      size: 18.sp, color: context.textColor),
                   SizedBox(width: 4.w),
-                  Text("23", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: context.textColor)),
+                  Text("${profile.userDetails.totalDislikes ?? 0}",
+                      style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: context.textColor)),
                 ],
               )
             ],
           ),
           SizedBox(height: 16.h),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 4,
-            separatorBuilder: (_, __) => SizedBox(height: 12.h),
-            itemBuilder: (context, index) {
-              return Container(
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: context.surfaceColor,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: greyColor.withOpacity(0.2)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(8.w),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF65B741),
-                        shape: BoxShape.circle,
+          if (reviews.isEmpty)
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Text(
+                "No reviews found.",
+                style: TextStyle(
+                    color: context.isDarkMode
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade600,
+                    fontSize: 14.sp),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: reviews.length,
+              separatorBuilder: (_, __) => SizedBox(height: 12.h),
+              itemBuilder: (context, index) {
+                final review = reviews[index];
+                final bool isPositive =
+                    (review.userReaction ?? '').toLowerCase() != 'dislike' &&
+                        (review.rating is int
+                                ? review.rating as int
+                                : int.tryParse(review.rating.toString()) ??
+                                    0) >=
+                            3;
+
+                return Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: context.surfaceColor,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: greyColor.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color:
+                              isPositive ? const Color(0xFF65B741) : Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(isPositive ? Icons.check : Icons.close,
+                            color: Colors.white, size: 20.sp),
                       ),
-                      child: Icon(Icons.check, color: Colors.white, size: 20.sp),
-                    ),
-                    SizedBox(width: 16.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Professional",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: context.textColor),
-                          ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            "- Best cook ever!!",
-                            style: TextStyle(color: Colors.grey.shade500, fontSize: 11.sp),
-                          ),
-                          SizedBox(height: 8.h),
-                          Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(12.r),
+                      SizedBox(width: 16.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              review.feedbackLabel ?? "Review",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14.sp,
+                                  color: context.textColor),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              review.comment?.isNotEmpty == true
+                                  ? "- ${review.comment}"
+                                  : "- No comments",
+                              style: TextStyle(
+                                  color: Colors.grey.shade500, fontSize: 11.sp),
+                            ),
+                            SizedBox(height: 8.h),
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    context
+                                        .read<ProfileController>()
+                                        .toggleReviewReaction(
+                                            review.id, 'like');
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8.w, vertical: 2.h),
+                                    decoration: BoxDecoration(
+                                      color: review.userReaction == 'like'
+                                          ? const Color(0xFF65B741)
+                                          : (context.isDarkMode
+                                              ? Colors.grey.shade800
+                                              : Colors.black),
+                                      borderRadius: BorderRadius.circular(12.r),
+                                    ),
+                                    child: Text("True:${review.likesCount}",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 9.sp,
+                                            fontWeight: FontWeight.bold)),
+                                  ),
                                 ),
-                                child: Text("True:2", style: TextStyle(color: Colors.white, fontSize: 9.sp, fontWeight: FontWeight.bold)),
-                              ),
-                              SizedBox(width: 6.w),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(12.r),
+                                SizedBox(width: 6.w),
+                                InkWell(
+                                  onTap: () {
+                                    context
+                                        .read<ProfileController>()
+                                        .toggleReviewReaction(
+                                            review.id, 'dislike');
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8.w, vertical: 2.h),
+                                    decoration: BoxDecoration(
+                                      color: review.userReaction == 'dislike'
+                                          ? Colors.red
+                                          : (context.isDarkMode
+                                              ? Colors.grey.shade900
+                                              : Colors.white),
+                                      border: Border.all(
+                                          color:
+                                              review.userReaction == 'dislike'
+                                                  ? Colors.red
+                                                  : (context.isDarkMode
+                                                      ? Colors.grey.shade700
+                                                      : Colors.black)),
+                                      borderRadius: BorderRadius.circular(12.r),
+                                    ),
+                                    child: Text(
+                                        "False: ${review.dislikesCount}",
+                                        style: TextStyle(
+                                            color:
+                                                review.userReaction == 'dislike'
+                                                    ? Colors.white
+                                                    : (context.isDarkMode
+                                                        ? Colors.white
+                                                        : Colors.black),
+                                            fontSize: 9.sp,
+                                            fontWeight: FontWeight.bold)),
+                                  ),
                                 ),
-                                child: Text("False: 6", style: TextStyle(color: Colors.black, fontSize: 9.sp, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
-          )
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              },
+            )
         ],
       ),
     );
   }
 
-  Widget _buildNewTradeHistoryStats(BuildContext context, UserProfileModel profile) {
+  Widget _buildNewTradeHistoryStats(
+      BuildContext context, UserProfileModel profile) {
+    final tradeStats = profile.tradeStats;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.grey.shade900 : const Color(0xFFF3F4F6),
+        color:
+            context.isDarkMode ? Colors.grey.shade900 : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: context.dividerColor.withOpacity(0.5)),
       ),
@@ -735,11 +833,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(height: 16.h),
           Row(
             children: [
-              Expanded(child: _buildNewTradeHistoryCard(Icons.sync, Colors.greenAccent.shade700, "100", "Total Trades")),
+              Expanded(
+                  child: _buildNewTradeHistoryCard(
+                Icons.sync,
+                Colors.greenAccent.shade700,
+                "${tradeStats?.totalTrades ?? 0}",
+                "Total Trades",
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.tradeHistory),
+              )),
               SizedBox(width: 8.w),
-              Expanded(child: _buildNewTradeHistoryCard(Icons.thumb_up_alt_outlined, Colors.orange, "100", "Total Like")),
+              Expanded(
+                  child: _buildNewTradeHistoryCard(
+                      Icons.outbox_outlined,
+                      Colors.orange,
+                      "${tradeStats?.sentOffers ?? 0}",
+                      "Sent Offers")),
               SizedBox(width: 8.w),
-              Expanded(child: _buildNewTradeHistoryCard(Icons.thumb_down_alt_outlined, Colors.red, "100", "Total Dislike")),
+              Expanded(
+                  child: _buildNewTradeHistoryCard(
+                      Icons.move_to_inbox_outlined,
+                      Colors.red,
+                      "${tradeStats?.receivedOffers ?? 0}",
+                      "Received Offers")),
             ],
           ),
           SizedBox(height: 24.h),
@@ -749,15 +865,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ElevatedButton.icon(
                 onPressed: () {},
                 icon: Icon(Icons.bookmark_border, size: 20.sp),
-                label: Text("Save Profile"),
+                label: const Text("Save Profile"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
+                  backgroundColor:
+                      context.isDarkMode ? Colors.white : Colors.black,
+                  foregroundColor:
+                      context.isDarkMode ? Colors.black : Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
                   ),
-                  textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  textStyle:
+                      TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -769,7 +888,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade800,
+                color: context.isDarkMode
+                    ? Colors.grey.shade400
+                    : Colors.grey.shade800,
               ),
             ),
           )
@@ -778,30 +899,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildNewTradeHistoryCard(IconData icon, Color iconColor, String value, String title) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 4.w),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: greyColor.withOpacity(0.2)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: iconColor, size: 28.sp),
-          SizedBox(height: 12.h),
-          Text(
-            value,
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: context.textColor),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
-          ),
-        ],
+  Widget _buildNewTradeHistoryCard(
+      IconData icon, Color iconColor, String value, String title,
+      {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 4.w),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: greyColor.withOpacity(0.2)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: iconColor, size: 28.sp),
+            SizedBox(height: 12.h),
+            Text(
+              value,
+              style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w900,
+                  color: context.textColor),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade700),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -975,7 +1108,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
           SizedBox(height: 8.h),
-
           Row(
             children: [
               Text(
@@ -1016,7 +1148,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const ProfileScreen(isTab: false, isDrawer: false),
+                builder: (context) =>
+                    const ProfileScreen(isTab: false, isDrawer: false),
               ),
             );
           },
@@ -1037,7 +1170,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           context,
           icon: Icons.sync_alt,
           label: AppLocalizations.of(context)!.transactionHistory,
-          onTap: () => Navigator.pushNamed(context, AppRoutes.transactionHistory),
+          onTap: () =>
+              Navigator.pushNamed(context, AppRoutes.transactionHistory),
         ),
         _buildDrawerMenuItem(
           context,
@@ -1065,12 +1199,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         _buildDrawerMenuItem(
           context,
+          icon: Icons.brightness_4_outlined,
+          label: 'Theme',
+          onTap: () => _showThemeBottomSheet(context),
+        ),
+        _buildDrawerMenuItem(
+          context,
           icon: Icons.login_outlined,
           label: AppLocalizations.of(context)!.logout,
           onTap: () => showDialog(
             context: context,
             builder: (context) => const LogoutDialog(),
           ),
+          itemColor: Colors.red,
         ),
         SizedBox(height: 20.h),
       ],
@@ -1082,17 +1223,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    Color? itemColor,
   }) {
+    final color = itemColor ?? context.textColor;
     return ListTile(
       onTap: onTap,
       contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0),
-      leading: Icon(icon, color: context.textColor, size: 28.sp),
+      leading: Icon(icon, color: color, size: 28.sp),
       title: Text(
         label,
         style: TextStyle(
           fontSize: 18.sp,
           fontWeight: FontWeight.bold,
-          color: context.textColor,
+          color: color,
           fontFamily: FontFamily.openSans,
         ),
       ),

@@ -18,6 +18,8 @@ import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/home/view/product_details_screen.dart';
+import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 
@@ -88,6 +90,7 @@ class _GiveScreenState extends State<GiveScreen> {
               locationController.latitude,
               locationController.longitude,
             );
+            controller.fetchTakePosts(refresh: true);
           });
         }
 
@@ -876,6 +879,9 @@ class _GiveScreenState extends State<GiveScreen> {
                   .fetchTakePosts(); // Refresh list to remove hidden post
             }
             break;
+          case 'report':
+            ReportPostSheet.show(context, postId);
+            break;
           case 'block':
             final success = await profileController.blockUser(userId);
             if (success.success && mounted) {
@@ -913,6 +919,11 @@ class _GiveScreenState extends State<GiveScreen> {
             const PopupMenuItem<String>(
               value: 'block',
               child: Text('Block User'),
+            ),
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'report',
+              child: Text('Report Post', style: TextStyle(color: Colors.red)),
             ),
         ];
       },

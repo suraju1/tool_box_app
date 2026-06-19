@@ -12,6 +12,7 @@ import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/web_ui/view/web_filter_dialog.dart';
 import 'package:tool_bocs/features/web_ui/view/web_sort_dialog.dart';
+import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 
 class WebTakeScreen extends StatefulWidget {
   const WebTakeScreen({super.key});
@@ -319,6 +320,9 @@ class _WebTakeCard extends StatelessWidget {
                 .read<TradeController>()
                 .fetchGivePosts(); // Refresh list to remove hidden post
             break;
+          case 'report':
+            ReportPostSheet.show(context, post.id);
+            break;
           case 'block':
             final success = await profileController.blockUser(post.userId);
             if (!context.mounted) return;
@@ -357,6 +361,11 @@ class _WebTakeCard extends StatelessWidget {
             const PopupMenuItem<String>(
               value: 'block',
               child: Text('Block User'),
+            ),
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'report',
+              child: Text('Report Post', style: TextStyle(color: Colors.red)),
             ),
         ];
       },

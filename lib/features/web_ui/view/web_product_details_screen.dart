@@ -14,6 +14,7 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/features/web_ui/widgets/web_product_card.dart';
 import 'package:tool_bocs/features/web_ui/widgets/sticky_sidebar_wrapper.dart';
+import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 
 class WebProductDetailsScreen extends StatefulWidget {
   final int postId;
@@ -214,6 +215,26 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                         )
                       : const Icon(Icons.share_outlined, color: Colors.grey),
                   tooltip: 'Share',
+                ),
+                Consumer<AuthController>(
+                  builder: (context, authController, _) {
+                    final isOwner = authController.currentUser?.id == post.userId;
+                    if (isOwner) return const SizedBox.shrink();
+                    return PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert, color: context.textColor, size: 20),
+                      onSelected: (value) {
+                        if (value == 'report') {
+                          ReportPostSheet.show(context, post.id);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem<String>(
+                          value: 'report',
+                          child: Text('Report Post', style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(width: 16),
               ],

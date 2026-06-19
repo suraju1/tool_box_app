@@ -312,7 +312,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   Widget _buildReturnTypeSection() {
-    final returnTypes = ['Price', 'Item'];
+    final returnTypes = ['Money', 'Services', 'Goods'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

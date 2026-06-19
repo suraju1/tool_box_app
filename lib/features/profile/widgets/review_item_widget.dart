@@ -54,23 +54,7 @@ class ReviewItemWidget extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      Row(
-                        children: List.generate(
-                          5,
-                          (index) {
-                            final ratingValue = review.rating is int
-                                ? review.rating
-                                : int.tryParse(review.rating.toString()) ?? 0;
-                            return Icon(
-                              index < ratingValue ? Icons.star : Icons.star_border,
-                              color: index < ratingValue ? Colors.amber : greyColor,
-                              size: 14.sp,
-                            );
-                          },
-                        ),
-                      ),
                       if (review.feedbackLabel != null) ...[
-                        SizedBox(width: 8.w),
                         Container(
                           padding: EdgeInsets.symmetric(
                               horizontal: 6.w, vertical: 2.h),

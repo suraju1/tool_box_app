@@ -364,6 +364,20 @@ class ProfileController extends ChangeNotifier {
     double? longitude,
     bool? termsAccepted,
     dynamic profileImage,
+    int? age,
+    String? occupation,
+    String? educationalQualification,
+    String? country,
+    String? state,
+    String? city,
+    String? pinCode,
+    String? address,
+    String? churchName,
+    String? fatherOrPastorName,
+    String? churchCity,
+    String? churchPinCode,
+    String? churchAddress,
+    String? churchPhoneNumber,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -382,6 +396,20 @@ class ProfileController extends ChangeNotifier {
       'profile_visibility': profileVisibility ?? _ownProfile?.userDetails.profileVisibility,
       'show_trade_history': showTradeHistory ?? _ownProfile?.userDetails.showTradeHistory,
       'terms_accepted': termsAccepted ?? _ownProfile?.userDetails.termsAccepted,
+      'age': age ?? _ownProfile?.userDetails.age,
+      'occupation': occupation ?? _ownProfile?.userDetails.occupation,
+      'educational_qualification': educationalQualification ?? _ownProfile?.userDetails.educationalQualification,
+      'country': country ?? _ownProfile?.userDetails.country,
+      'state': state ?? _ownProfile?.userDetails.state,
+      'city': city ?? _ownProfile?.userDetails.city,
+      'pin_code': pinCode ?? _ownProfile?.userDetails.pinCode,
+      'address': address ?? _ownProfile?.userDetails.address,
+      'church_name': churchName ?? _ownProfile?.userDetails.churchName,
+      'father_or_pastor_name': fatherOrPastorName ?? _ownProfile?.userDetails.fatherOrPastorName,
+      'church_city': churchCity ?? _ownProfile?.userDetails.churchCity,
+      'church_pin_code': churchPinCode ?? _ownProfile?.userDetails.churchPinCode,
+      'church_address': churchAddress ?? _ownProfile?.userDetails.churchAddress,
+      'church_phone_number': churchPhoneNumber ?? _ownProfile?.userDetails.churchPhoneNumber,
     };
 
     // 1. Update Profile Image if provided

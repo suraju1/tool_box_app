@@ -49,32 +49,19 @@ class AllReviewsScreen extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  averageRating,
+                  'Total Reviews',
                   style: TextStyle(
-                    fontSize: 48.sp,
+                    fontSize: 24.sp,
                     fontWeight: FontWeight.w800,
                     color: context.textColor,
                     fontFamily: FontFamily.openSans,
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    5,
-                    (index) => Icon(
-                      index < (double.tryParse(averageRating) ?? 0).floor()
-                          ? Icons.star
-                          : Icons.star_border,
-                      color: Colors.amber,
-                      size: 24.sp,
-                    ),
-                  ),
-                ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Based on $totalReviews reviews',
+                  '$totalReviews reviews',
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 16.sp,
                     color: context.subTextColor,
                     fontWeight: FontWeight.w400,
                     fontFamily: FontFamily.openSans,

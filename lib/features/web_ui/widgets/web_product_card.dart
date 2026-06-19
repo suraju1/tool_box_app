@@ -10,6 +10,7 @@ import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 
 class WebProductCard extends StatelessWidget {
   final PostModel post;
@@ -114,6 +115,9 @@ class WebProductCard extends StatelessWidget {
                 .read<TradeController>()
                 .fetchHomePosts(); // Refresh list to remove hidden post
             break;
+          case 'report':
+            ReportPostSheet.show(context, post.id);
+            break;
           case 'block':
             final success = await profileController.blockUser(post.userId);
             if (!context.mounted) return;
@@ -152,6 +156,11 @@ class WebProductCard extends StatelessWidget {
             const PopupMenuItem<String>(
               value: 'block',
               child: Text('Block User'),
+            ),
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'report',
+              child: Text('Report Post', style: TextStyle(color: Colors.red)),
             ),
         ];
       },

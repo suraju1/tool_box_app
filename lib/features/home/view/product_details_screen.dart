@@ -14,6 +14,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/util/date_util.dart';
+import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final int postId;
@@ -94,10 +95,34 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             builder: (context, controller, child) {
               final post = controller.selectedPost;
               if (post == null) return const SizedBox.shrink();
-              return ShareButton(
-                post: post,
-                includeImage: true,
-                style: ShareButtonStyle.icon,
+              return Row(
+                children: [
+                  ShareButton(
+                    post: post,
+                    includeImage: true,
+                    style: ShareButtonStyle.icon,
+                  ),
+                  Consumer<AuthController>(
+                    builder: (context, authController, _) {
+                      final isOwner = authController.currentUser?.id == post.userId;
+                      if (isOwner) return const SizedBox.shrink();
+                      return PopupMenuButton<String>(
+                        icon: Icon(Icons.more_vert, color: context.textColor, size: 20.sp),
+                        onSelected: (value) {
+                          if (value == 'report') {
+                            ReportPostSheet.show(context, post.id);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem<String>(
+                            value: 'report',
+                            child: Text('Report Post', style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
               );
             },
           ),

@@ -57,6 +57,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           locationController.latitude,
           locationController.longitude,
         );
+        context.read<TradeController>().fetchHomePosts(refresh: true);
       });
     }
 

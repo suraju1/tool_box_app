@@ -9,6 +9,7 @@ import 'package:tool_bocs/features/trades/model/my_trade_model.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/features/trades/model/trade_completion_model.dart';
 import 'package:tool_bocs/features/trades/service/trade_service.dart';
+import 'package:tool_bocs/features/trades/model/report_reason_model.dart';
 import 'package:tool_bocs/util/debouncer.dart';
 
 class TradeController extends ChangeNotifier {
@@ -411,10 +412,22 @@ class TradeController extends ChangeNotifier {
 
     // 4. Filter by Return Type
     if (_selectedReturnType != 'All') {
-      filtered = filtered
-          .where((p) =>
-              p.returnType.toLowerCase() == _selectedReturnType.toLowerCase())
-          .toList();
+      filtered = filtered.where((p) {
+        final rt = p.returnType.toLowerCase();
+        final rCat = (p.returnItemCategory ?? '').toLowerCase();
+        final selected = _selectedReturnType.toLowerCase();
+
+        if (selected == 'money') {
+          return rt == 'price' || rt == 'money';
+        } else if (selected == 'services') {
+          return (rt == 'item' || rt == 'exchange') && rCat.contains('services');
+        } else if (selected == 'goods') {
+          return (rt == 'item' || rt == 'exchange') && rCat.contains('goods');
+        }
+        
+        // Fallback for any exact matches
+        return rt == selected;
+      }).toList();
     }
 
     // 5. Sorting — distance (primary) + date (secondary) combined
@@ -1071,6 +1084,69 @@ class TradeController extends ChangeNotifier {
     } finally {
       _isMarkingUser = false;
       notifyListeners();
+    }
+  }
+
+  List<ReportReasonModel> _reportReasons = [];
+  bool _isReportReasonsLoading = false;
+
+  List<ReportReasonModel> get reportReasons => _reportReasons;
+  bool get isReportReasonsLoading => _isReportReasonsLoading;
+
+  Future<void> fetchReportReasons() async {
+    if (_reportReasons.isNotEmpty) return; // Cache locally
+
+    _isReportReasonsLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.fetchReportReasons();
+
+      if (response.success) {
+        _reportReasons = response.data ?? [];
+      } else {
+        _errorMessage = response.message;
+      }
+    } catch (e) {
+      _errorMessage = 'An error occurred: $e';
+    } finally {
+      _isReportReasonsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> reportPost({
+    required int postId,
+    required int reasonId,
+    required String description,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _tradeService.reportPost(
+        postId: postId,
+        reasonId: reasonId,
+        description: description,
+      );
+
+      if (response.success) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 }

@@ -9,6 +9,7 @@ import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_request_model.dart';
 import 'package:tool_bocs/core/api/api_response.dart';
 import 'package:tool_bocs/features/trades/model/trade_completion_model.dart';
+import 'package:tool_bocs/features/trades/model/report_reason_model.dart';
 
 class TradeService {
   final ApiClient _apiClient = ApiClient();
@@ -568,6 +569,74 @@ class TradeService {
         return ApiResponse(
           success: data['success'] ?? false,
           message: data['message'] ?? 'User marked successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<List<ReportReasonModel>>> fetchReportReasons() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.getReportReasons);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['success'] == true && data['data'] != null) {
+          final List<dynamic> reasonsJson = data['data'];
+          final reasons = reasonsJson
+              .map((e) => ReportReasonModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+          return ApiResponse(
+              success: true, message: 'Reasons fetched', data: reasons);
+        } else if (data is List) {
+          final reasons = data
+              .map((e) => ReportReasonModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+          return ApiResponse(
+              success: true, message: 'Reasons fetched', data: reasons);
+        } else {
+          return ApiResponse(
+              success: false,
+              message: data is Map
+                  ? (data['message'] ?? 'Failed to fetch report reasons')
+                  : 'Unexpected response format');
+        }
+      } else {
+        return ApiResponse(
+            success: false, message: 'Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> reportPost({
+    required int postId,
+    required int reasonId,
+    required String description,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.reportPost,
+        data: {
+          'post_id': postId,
+          'reason_id': reasonId,
+          'description': description,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Post reported successfully',
           data: data['data'],
         );
       } else {

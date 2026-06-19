@@ -1312,10 +1312,6 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       ),
       child: Consumer<TradeController>(
         builder: (context, controller, child) {
-          final post = controller.selectedPost;
-          if (post != null && post.hasResponded) {
-            return const SizedBox.shrink();
-          }
           return ElevatedButton(
             onPressed: controller.isLoading ? null : _handleOfferSubmission,
             style: ElevatedButton.styleFrom(

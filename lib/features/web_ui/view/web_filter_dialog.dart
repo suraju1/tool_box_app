@@ -261,7 +261,7 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
   }
 
   Widget _buildReturnTypeSection() {
-    final returnTypes = ['Price', 'Item'];
+    final returnTypes = ['Money', 'Services', 'Goods'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

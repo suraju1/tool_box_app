@@ -19,9 +19,12 @@ import 'package:tool_bocs/core/widgets/theme_selection_bottom_sheet.dart';
 import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/features/profile/view/profile_screen.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
+import 'package:tool_bocs/features/home/view/product_details_screen.dart';
+import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/core/controller/theme_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -102,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       locationController.latitude,
                       locationController.longitude,
                     );
+                    controller.fetchHomePosts(refresh: true);
                   });
                 }
 
@@ -249,39 +253,27 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     child: Stack(
+                      clipBehavior: Clip.none,
                       children: [
-                        Icon(
-                          Icons.notifications_none_outlined,
-                          color: context.textColor,
-                          size: 28.sp,
-                        ),
+                        Icon(Icons.notifications_none,
+                            color: context.textColor, size: 28.sp),
                         if (notificationController.unreadCount > 0)
                           Positioned(
-                            right: 0.w,
-                            top: 2.h,
+                            right: -2,
+                            top: -2,
                             child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 4.w, vertical: 2.h),
-                              constraints: BoxConstraints(
-                                minWidth: 16.w,
-                                minHeight: 16.h,
-                              ),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
+                              padding: EdgeInsets.all(4.r),
+                              decoration: const BoxDecoration(
                                 color: Colors.red,
-                                borderRadius: BorderRadius.circular(10.r),
+                                shape: BoxShape.circle,
                               ),
                               child: Text(
-                                notificationController.unreadCount > 99
-                                    ? '99+'
-                                    : notificationController.unreadCount
-                                        .toString(),
+                                '${notificationController.unreadCount}',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 8.sp,
-                                  fontWeight: FontWeight.w900,
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
@@ -359,6 +351,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildDistanceSection(BuildContext context) {
     return Consumer<TradeController>(
       builder: (context, controller, child) {
+        String displayDistance;
+        if (controller.distanceKm < 1) {
+          displayDistance = '${(controller.distanceKm * 1000).round()} m';
+        } else {
+          displayDistance = '${controller.distanceKm.toStringAsFixed(1)} km';
+        }
+
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
           decoration: BoxDecoration(
@@ -373,9 +372,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: Slider(
                       padding: EdgeInsets.zero,
-                      value: controller.distanceKm,
-                      min: 0,
-                      max: 50,
+                      value: controller.distanceKm.clamp(0.01, 10.0),
+                      min: 0.01,
+                      max: 10.0,
                       activeColor: context.primaryColor,
                       inactiveColor: Colors.grey.shade200,
                       thumbColor: context.primaryColor,
@@ -390,7 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(width: 10.w),
                   Text(
-                    '${controller.distanceKm.round()} km',
+                    displayDistance,
                     style: TextStyle(
                       color: context.textColor,
                       fontSize: 14.sp,
@@ -810,6 +809,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   .fetchHomePosts(); // Refresh list to remove hidden post
             }
             break;
+          case 'report':
+            ReportPostSheet.show(context, post.id);
+            break;
           case 'block':
             final success = await profileController.blockUser(post.userId);
             if (success.success && mounted) {
@@ -860,6 +862,11 @@ class _HomeScreenState extends State<HomeScreen> {
             const PopupMenuItem<String>(
               value: 'block',
               child: Text('Block User'),
+            ),
+          if (!isOwner)
+            const PopupMenuItem<String>(
+              value: 'report',
+              child: Text('Report Post', style: TextStyle(color: Colors.red)),
             ),
           if (isOwner)
             const PopupMenuItem<String>(

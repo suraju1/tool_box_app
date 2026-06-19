@@ -72,6 +72,20 @@ class UserDetails {
   final bool termsAccepted;
   final String? giverType;
   final String? takerType;
+  final int? age;
+  final String? occupation;
+  final String? educationalQualification;
+  final String? country;
+  final String? state;
+  final String? city;
+  final String? pinCode;
+  final String? address;
+  final String? churchName;
+  final String? fatherOrPastorName;
+  final String? churchCity;
+  final String? churchPinCode;
+  final String? churchAddress;
+  final String? churchPhoneNumber;
 
   UserDetails({
     required this.id,
@@ -95,6 +109,20 @@ class UserDetails {
     this.termsAccepted = true,
     this.giverType,
     this.takerType,
+    this.age,
+    this.occupation,
+    this.educationalQualification,
+    this.country,
+    this.state,
+    this.city,
+    this.pinCode,
+    this.address,
+    this.churchName,
+    this.fatherOrPastorName,
+    this.churchCity,
+    this.churchPinCode,
+    this.churchAddress,
+    this.churchPhoneNumber,
   });
 
   factory UserDetails.fromJson(Map<String, dynamic> json) {
@@ -130,6 +158,20 @@ class UserDetails {
           json['terms_accepted'] == 1 || json['terms_accepted'] == true,
       giverType: userTypeJson?['giver']?.toString(),
       takerType: userTypeJson?['taker']?.toString(),
+      age: _parseInt(json['age']),
+      occupation: json['occupation'],
+      educationalQualification: json['educational_qualification'],
+      country: json['country'],
+      state: json['state'],
+      city: json['city'],
+      pinCode: json['pin_code'],
+      address: json['address'],
+      churchName: json['church_name'],
+      fatherOrPastorName: json['father_or_pastor_name'],
+      churchCity: json['church_city'],
+      churchPinCode: json['church_pin_code'],
+      churchAddress: json['church_address'],
+      churchPhoneNumber: json['church_phone_number'],
     );
   }
 
@@ -158,6 +200,20 @@ class UserDetails {
         'giver': giverType,
         'taker': takerType,
       },
+      'age': age,
+      'occupation': occupation,
+      'educational_qualification': educationalQualification,
+      'country': country,
+      'state': state,
+      'city': city,
+      'pin_code': pinCode,
+      'address': address,
+      'church_name': churchName,
+      'father_or_pastor_name': fatherOrPastorName,
+      'church_city': churchCity,
+      'church_pin_code': churchPinCode,
+      'church_address': churchAddress,
+      'church_phone_number': churchPhoneNumber,
     };
   }
 }

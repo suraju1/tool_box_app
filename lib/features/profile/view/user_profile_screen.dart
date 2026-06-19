@@ -601,10 +601,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
               Row(
                 children: [
-                  Icon(Icons.star, color: Colors.amber, size: 16.sp),
-                  SizedBox(width: 4.w),
                   Text(
-                    '$averageRating ($totalReviews Reviews)',
+                    '$totalReviews Reviews',
                     style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
