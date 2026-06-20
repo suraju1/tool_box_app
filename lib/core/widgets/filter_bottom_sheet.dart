@@ -22,7 +22,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       final controller = context.read<TradeController>();
       controller.fetchCategories();
       setState(() {
-        distance = controller.distanceKm;
+        distance = controller.distanceKm.clamp(0.01, 10.0);
         selectedCategories = List.from(controller.selectedCategories);
         selectedRating = controller.selectedRating;
         returnType = controller.selectedReturnType;
@@ -217,8 +217,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               child: Slider(
                 padding: EdgeInsets.zero,
                 value: distance,
-                min: 0,
-                max: 50,
+                min: 0.01,
+                max: 10.0,
                 activeColor: context.primaryColor,
                 inactiveColor:
                     context.isDarkMode ? Colors.white12 : Colors.grey.shade200,
@@ -234,12 +234,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ),
             ),
             SizedBox(width: 15.w),
-            Text(
-              '${distance.round()} km',
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: context.textColor,
+            SizedBox(
+              width: 60.w,
+              child: Text(
+                distance < 1.0 
+                    ? '${(distance * 1000).round()} m' 
+                    : '${distance == distance.toInt() ? distance.toInt() : distance.toStringAsFixed(1)} km',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: context.textColor,
+                ),
               ),
             ),
           ],

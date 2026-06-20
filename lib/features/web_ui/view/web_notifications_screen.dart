@@ -260,55 +260,26 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
       return _buildShimmer(context);
     }
 
-    final incomingActive = incomingResponses.where((r) {
-      return r.status == 'pending' || r.status == 'meeting_set';
-    }).toList();
+    final List<Map<String, dynamic>> allMatches = [];
+    
+    for (var r in incomingResponses) {
+      allMatches.add({'response': r, 'isIncoming': true});
+    }
+    for (var r in outgoingResponses) {
+      allMatches.add({'response': r, 'isIncoming': false});
+    }
 
-    final incomingHistory = incomingResponses.where((r) {
-      return r.status == 'completed' ||
-          r.status == 'accepted' ||
-          r.status == 'rejected' ||
-          r.status == 'paid';
-    }).toList();
-
-    final outgoingActive = outgoingResponses.where((r) {
-      return r.status == 'pending' || r.status == 'meeting_set';
-    }).toList();
-
-    final outgoingHistory = outgoingResponses.where((r) {
-      return r.status == 'completed' ||
-          r.status == 'accepted' ||
-          r.status == 'rejected' ||
-          r.status == 'paid';
-    }).toList();
-
-    incomingHistory.sort((a, b) {
+    allMatches.sort((a, b) {
       try {
-        DateTime dateA = DateTime.parse(a.createdAt);
-        DateTime dateB = DateTime.parse(b.createdAt);
+        DateTime dateA = DateTime.parse((a['response'] as TradeResponseModel).createdAt);
+        DateTime dateB = DateTime.parse((b['response'] as TradeResponseModel).createdAt);
         return dateB.compareTo(dateA);
       } catch (e) {
         return 0;
       }
     });
 
-    outgoingHistory.sort((a, b) {
-      try {
-        DateTime dateA = DateTime.parse(a.createdAt);
-        DateTime dateB = DateTime.parse(b.createdAt);
-        return dateB.compareTo(dateA);
-      } catch (e) {
-        return 0;
-      }
-    });
-
-    final totalActiveIncoming = incomingActive.length;
-    final totalActiveOutgoing = outgoingActive.length;
-
-    if (totalActiveIncoming == 0 &&
-        totalActiveOutgoing == 0 &&
-        incomingHistory.isEmpty &&
-        outgoingHistory.isEmpty) {
+    if (allMatches.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(40),
@@ -332,86 +303,15 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
       );
     }
 
-    return SingleChildScrollView(
+    return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (incomingActive.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildMatchSectionHeader(
-                  context,
-                  '📥 INCOMING',
-                  '${incomingActive.length} Offers on your posts',
-                ),
-                ...incomingActive.map(
-                    (response) => _buildResponseCard(context, response, true)),
-              ],
-            ),
-          if (outgoingActive.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: incomingActive.isNotEmpty ? 20 : 0),
-                _buildMatchSectionHeader(
-                  context,
-                  '📤 OUTGOING',
-                  '${outgoingActive.length} Offers you sent',
-                ),
-                ...outgoingActive.map(
-                    (response) => _buildResponseCard(context, response, false)),
-              ],
-            ),
-          if (incomingHistory.isNotEmpty || outgoingHistory.isNotEmpty) ...[
-            SizedBox(
-                height: (incomingActive.isNotEmpty || outgoingActive.isNotEmpty)
-                    ? 20
-                    : 0),
-            _buildMatchSectionHeader(
-              context,
-              '⏱️ HISTORY',
-              'Past matches',
-            ),
-            if (incomingHistory.isNotEmpty)
-              ...incomingHistory.map(
-                  (response) => _buildResponseCard(context, response, true)),
-            if (outgoingHistory.isNotEmpty)
-              ...outgoingHistory.map(
-                  (response) => _buildResponseCard(context, response, false)),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMatchSectionHeader(
-      BuildContext context, String title, String subtitle) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(15, 0, 15, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: context.subTextColor,
-            ),
-          ),
-        ],
-      ),
+      itemCount: allMatches.length,
+      itemBuilder: (context, index) {
+        final matchData = allMatches[index];
+        final response = matchData['response'] as TradeResponseModel;
+        final isIncoming = matchData['isIncoming'] as bool;
+        return _buildResponseCard(context, response, isIncoming);
+      },
     );
   }
 
@@ -423,96 +323,59 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
     Color actionColor = context.primaryColor;
 
     final timeAgo = DateUtil.formatTimeAgo(response.createdAt);
-    final actionWord = isIncoming ? 'Taking' : 'Giving';
 
-    if (response.responseType == 'price' || response.responseType == 'Price') {
+    if (isIncoming) {
+      final postItem = response.postItemName ?? 'item';
       messageSpans = [
         TextSpan(
             text: response.responderName,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' is $actionWord '),
-        const TextSpan(
-            text: 'Price', style: TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' ~ $timeAgo'),
-      ];
-      final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
-      final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-      subText = startPrice == endPrice
-          ? '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice in return'
-          : '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice - ₹$endPrice in return';
-    } else {
-      messageSpans = [
+        const TextSpan(text: ' is Taking your '),
         TextSpan(
-            text: response.responderName,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' is $actionWord '),
-        TextSpan(
-            text: response.itemName ?? 'an item',
+            text: postItem,
             style: const TextStyle(fontWeight: FontWeight.bold)),
         TextSpan(text: ' ~ $timeAgo'),
       ];
+
       if (response.returnItemName != null &&
           response.returnItemName!.isNotEmpty) {
-        subText =
-            '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ${response.returnItemName} in return';
+        subText = '⬇️ Giving you ${response.returnItemName} in return';
+      } else if (response.itemName != null && response.itemName!.isNotEmpty && (response.responseType == 'item' || response.responseType == 'Item')) {
+        subText = '⬇️ Giving you ${response.itemName} in return';
       } else if ((response.priceRangeStart ?? 0) > 0 ||
           (response.priceRangeEnd ?? 0) > 0) {
         final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
         final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
         subText = startPrice == endPrice
-            ? '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice in return'
-            : '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice - ₹$endPrice in return';
+            ? '⬇️ Giving you ₹$startPrice in return'
+            : '⬇️ Giving you ₹$startPrice - ₹$endPrice in return';
       } else {
-        subText =
-            '⬇️ (Category: ${response.itemCategory} | Condition: ${response.itemCondition})';
+        subText = '⬇️ (Category: ${response.itemCategory ?? 'Unknown'} | Condition: ${response.itemCondition ?? 'Unknown'})';
       }
-    }
+    } else {
+      final postItem = response.postItemName ?? 'item';
+      messageSpans = [
+        TextSpan(
+            text: response.posterName ?? 'User',
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        const TextSpan(text: ' is Giving you '),
+        TextSpan(
+            text: postItem,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' ~ $timeAgo'),
+      ];
 
-    if (widget.postId == null && response.postItemName != null) {
-      if (isIncoming) {
-        messageSpans = [
-          TextSpan(
-              text: response.responderName,
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          const TextSpan(text: ' is Taking your '),
-          TextSpan(
-              text: response.postItemName!,
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: ' ~ $timeAgo'),
-        ];
-        if (response.returnItemName != null &&
-            response.returnItemName!.isNotEmpty) {
-          subText = '⬇️ Giving you ${response.returnItemName} in return';
-        } else if ((response.priceRangeStart ?? 0) > 0 ||
-            (response.priceRangeEnd ?? 0) > 0) {
-          final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
-          final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-          subText = startPrice == endPrice
-              ? '⬇️ Giving you ₹$startPrice in return'
-              : '⬇️ Giving you ₹$startPrice - ₹$endPrice in return';
-        }
+      if (response.itemName != null && response.itemName!.isNotEmpty) {
+        subText = '⬇️ Taking ${response.itemName} in return';
+      } else if ((response.priceRangeStart ?? 0) > 0 ||
+          (response.priceRangeEnd ?? 0) > 0) {
+        final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
+        final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
+        subText = startPrice == endPrice
+            ? '⬇️ Taking ₹$startPrice in return'
+            : '⬇️ Taking ₹$startPrice - ₹$endPrice in return';
       } else {
-        messageSpans = [
-          const TextSpan(text: 'Your offer to '),
-          TextSpan(
-              text: response.posterName!,
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          const TextSpan(text: ' on '),
-          TextSpan(
-              text: response.postItemName ?? 'item',
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: ' ~ $timeAgo'),
-        ];
-        if (response.itemName != null && response.itemName!.isNotEmpty) {
-          subText = '⬇️ Offering: ${response.itemName}';
-        } else if ((response.priceRangeStart ?? 0) > 0 ||
-            (response.priceRangeEnd ?? 0) > 0) {
-          final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
-          final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-          subText = startPrice == endPrice
-              ? '⬇️ Offering: ₹$startPrice'
-              : '⬇️ Offering: ₹$startPrice - ₹$endPrice';
-        }
+         subText = '⬇️ Taking an offer in return';
       }
     }
 
@@ -528,23 +391,6 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
     } else {
       actionLabel = 'Details';
       actionColor = Colors.blue;
-    }
-
-    if (!isIncoming && response.posterName != null) {
-      messageSpans = [
-        const TextSpan(text: 'Your offer to '),
-        TextSpan(
-            text: response.posterName!,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        const TextSpan(text: ' on '),
-        TextSpan(
-            text: response.postItemName ?? 'item',
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' ~ $timeAgo'),
-      ];
-      if (response.itemName != null && response.itemName!.isNotEmpty) {
-        subText = 'Offering: ${response.itemName}';
-      }
     }
 
     final responseImagePath =

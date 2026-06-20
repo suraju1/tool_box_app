@@ -262,58 +262,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       return _buildShimmer(context);
     }
 
-    // Filter incoming into Active and History
-    final incomingActive = incomingResponses.where((r) {
-      return r.status == 'pending' || r.status == 'meeting_set';
-    }).toList();
+    final List<Map<String, dynamic>> allMatches = [];
+    
+    for (var r in incomingResponses) {
+      allMatches.add({'response': r, 'isIncoming': true});
+    }
+    for (var r in outgoingResponses) {
+      allMatches.add({'response': r, 'isIncoming': false});
+    }
 
-    final incomingHistory = incomingResponses.where((r) {
-      return r.status == 'completed' ||
-          r.status == 'accepted' ||
-          r.status == 'rejected' ||
-          r.status == 'paid';
-    }).toList();
-
-    // Filter outgoing into Active and History
-    final outgoingActive = outgoingResponses.where((r) {
-      return r.status == 'pending' || r.status == 'meeting_set';
-    }).toList();
-
-    final outgoingHistory = outgoingResponses.where((r) {
-      return r.status == 'completed' ||
-          r.status == 'accepted' ||
-          r.status == 'rejected' ||
-          r.status == 'paid';
-    }).toList();
-
-    // Sort all histories by date (newest first)
-    incomingHistory.sort((a, b) {
+    // Sort all matches by date (newest first)
+    allMatches.sort((a, b) {
       try {
-        DateTime dateA = DateTime.parse(a.createdAt);
-        DateTime dateB = DateTime.parse(b.createdAt);
+        DateTime dateA = DateTime.parse((a['response'] as TradeResponseModel).createdAt);
+        DateTime dateB = DateTime.parse((b['response'] as TradeResponseModel).createdAt);
         return dateB.compareTo(dateA);
       } catch (e) {
         return 0;
       }
     });
 
-    outgoingHistory.sort((a, b) {
-      try {
-        DateTime dateA = DateTime.parse(a.createdAt);
-        DateTime dateB = DateTime.parse(b.createdAt);
-        return dateB.compareTo(dateA);
-      } catch (e) {
-        return 0;
-      }
-    });
-
-    final totalActiveIncoming = incomingActive.length;
-    final totalActiveOutgoing = outgoingActive.length;
-
-    if (totalActiveIncoming == 0 &&
-        totalActiveOutgoing == 0 &&
-        incomingHistory.isEmpty &&
-        outgoingHistory.isEmpty) {
+    if (allMatches.isEmpty) {
       return Center(
         child: Padding(
           padding: EdgeInsets.all(40.w),
@@ -337,93 +306,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
     }
 
-    return SingleChildScrollView(
+    return ListView.builder(
       padding: EdgeInsets.symmetric(vertical: 20.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // INCOMING SECTION
-          if (incomingActive.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildMatchSectionHeader(
-                  context,
-                  '📥 INCOMING',
-                  '${incomingActive.length} Offers on your posts',
-                ),
-                ...incomingActive.map(
-                    (response) => _buildResponseCard(context, response, true)),
-              ],
-            ),
-
-          // OUTGOING SECTION
-          if (outgoingActive.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: incomingActive.isNotEmpty ? 20.h : 0),
-                _buildMatchSectionHeader(
-                  context,
-                  '📤 OUTGOING',
-                  '${outgoingActive.length} Offers you sent',
-                ),
-                ...outgoingActive.map(
-                    (response) => _buildResponseCard(context, response, false)),
-              ],
-            ),
-
-          // HISTORY SECTION
-          if (incomingHistory.isNotEmpty || outgoingHistory.isNotEmpty) ...[
-            SizedBox(
-                height: (incomingActive.isNotEmpty || outgoingActive.isNotEmpty)
-                    ? 20.h
-                    : 0),
-            _buildMatchSectionHeader(
-              context,
-              '⏱️ HISTORY',
-              'Past matches',
-            ),
-            if (incomingHistory.isNotEmpty)
-              ...incomingHistory.map(
-                  (response) => _buildResponseCard(context, response, true)),
-            if (outgoingHistory.isNotEmpty)
-              ...outgoingHistory.map(
-                  (response) => _buildResponseCard(context, response, false)),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMatchSectionHeader(
-      BuildContext context, String title, String subtitle) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(15.w, 0, 15.w, 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              fontFamily: FontFamily.openSans,
-              color: context.textColor,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w500,
-              fontFamily: FontFamily.openSans,
-              color: context.subTextColor,
-            ),
-          ),
-        ],
-      ),
+      itemCount: allMatches.length,
+      itemBuilder: (context, index) {
+        final matchData = allMatches[index];
+        final response = matchData['response'] as TradeResponseModel;
+        final isIncoming = matchData['isIncoming'] as bool;
+        return _buildResponseCard(context, response, isIncoming);
+      },
     );
   }
 
@@ -437,100 +328,58 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     // Format time ago
     final timeAgo = DateUtil.formatTimeAgo(response.createdAt);
 
-    // Determine action word: "Taking" for incoming, "Giving" for outgoing
-    final actionWord = isIncoming ? 'Taking' : 'Giving';
+    if (isIncoming) {
+      final postItem = response.postItemName ?? 'item';
+      messageSpans = [
+        TextSpan(
+            text: response.responderName,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        const TextSpan(text: ' is Taking your '),
+        TextSpan(
+            text: postItem,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' ~ $timeAgo'),
+      ];
 
-    if (response.responseType == 'price' || response.responseType == 'Price') {
-      messageSpans = [
-        TextSpan(
-            text: response.responderName,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' is $actionWord '),
-        const TextSpan(
-            text: 'Price', style: TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' ~ $timeAgo'),
-      ];
-      final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
-      final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-      subText = startPrice == endPrice
-          ? '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice in return'
-          : '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice - ₹$endPrice in return';
-    } else {
-      messageSpans = [
-        TextSpan(
-            text: response.responderName,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' is $actionWord '),
-        TextSpan(
-            text: response.itemName ?? 'an item',
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' ~ $timeAgo'),
-      ];
-      // Show return item or price they want in return
       if (response.returnItemName != null &&
           response.returnItemName!.isNotEmpty) {
-        subText =
-            '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ${response.returnItemName} in return';
+        subText = '⬇️ Giving you ${response.returnItemName} in return';
+      } else if (response.itemName != null && response.itemName!.isNotEmpty && (response.responseType == 'item' || response.responseType == 'Item')) {
+        subText = '⬇️ Giving you ${response.itemName} in return';
       } else if ((response.priceRangeStart ?? 0) > 0 ||
           (response.priceRangeEnd ?? 0) > 0) {
         final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
         final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
         subText = startPrice == endPrice
-            ? '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice in return'
-            : '⬇️ ${isIncoming ? 'Giving you' : 'Taking'} ₹$startPrice - ₹$endPrice in return';
+            ? '⬇️ Giving you ₹$startPrice in return'
+            : '⬇️ Giving you ₹$startPrice - ₹$endPrice in return';
       } else {
-        subText =
-            '⬇️ (Category: ${response.itemCategory} | Condition: ${response.itemCondition})';
+        subText = '⬇️ (Category: ${response.itemCategory ?? 'Unknown'} | Condition: ${response.itemCondition ?? 'Unknown'})';
       }
-    }
+    } else {
+      final postItem = response.postItemName ?? 'item';
+      messageSpans = [
+        TextSpan(
+            text: response.posterName ?? 'User',
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        const TextSpan(text: ' is Giving you '),
+        TextSpan(
+            text: postItem,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: ' ~ $timeAgo'),
+      ];
 
-    // If it's a global response, show which post it's for
-    if (widget.postId == null && response.postItemName != null) {
-      if (isIncoming) {
-        messageSpans = [
-          TextSpan(
-              text: response.responderName,
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          const TextSpan(text: ' is Taking your '),
-          TextSpan(
-              text: response.postItemName!,
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: ' ~ $timeAgo'),
-        ];
-        // Show what they're offering or want in return
-        if (response.returnItemName != null &&
-            response.returnItemName!.isNotEmpty) {
-          subText = '⬇️ Giving you ${response.returnItemName} in return';
-        } else if ((response.priceRangeStart ?? 0) > 0 ||
-            (response.priceRangeEnd ?? 0) > 0) {
-          final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
-          final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-          subText = startPrice == endPrice
-              ? '⬇️ Giving you ₹$startPrice in return'
-              : '⬇️ Giving you ₹$startPrice - ₹$endPrice in return';
-        }
+      if (response.itemName != null && response.itemName!.isNotEmpty) {
+        subText = '⬇️ Taking ${response.itemName} in return';
+      } else if ((response.priceRangeStart ?? 0) > 0 ||
+          (response.priceRangeEnd ?? 0) > 0) {
+        final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
+        final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
+        subText = startPrice == endPrice
+            ? '⬇️ Taking ₹$startPrice in return'
+            : '⬇️ Taking ₹$startPrice - ₹$endPrice in return';
       } else {
-        messageSpans = [
-          const TextSpan(text: 'Your offer to '),
-          TextSpan(
-              text: response.posterName!,
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          const TextSpan(text: ' on '),
-          TextSpan(
-              text: response.postItemName ?? 'item',
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: ' ~ $timeAgo'),
-        ];
-        if (response.itemName != null && response.itemName!.isNotEmpty) {
-          subText = '⬇️ Offering: ${response.itemName}';
-        } else if ((response.priceRangeStart ?? 0) > 0 ||
-            (response.priceRangeEnd ?? 0) > 0) {
-          final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
-          final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
-          subText = startPrice == endPrice
-              ? '⬇️ Offering: ₹$startPrice'
-              : '⬇️ Offering: ₹$startPrice - ₹$endPrice';
-        }
+         subText = '⬇️ Taking an offer in return';
       }
     }
 
@@ -546,23 +395,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     } else {
       actionLabel = 'Details';
       actionColor = Colors.blue;
-    }
-
-    if (!isIncoming && response.posterName != null) {
-      messageSpans = [
-        const TextSpan(text: 'Your offer to '),
-        TextSpan(
-            text: response.posterName!,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        const TextSpan(text: ' on '),
-        TextSpan(
-            text: response.postItemName ?? 'item',
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' ~ $timeAgo'),
-      ];
-      if (response.itemName != null && response.itemName!.isNotEmpty) {
-        subText = 'Offering: ${response.itemName}';
-      }
     }
 
     // Use response item image if available, else post image

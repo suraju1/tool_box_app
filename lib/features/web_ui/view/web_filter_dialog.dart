@@ -28,7 +28,7 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
       final controller = context.read<TradeController>();
       controller.fetchCategories();
       setState(() {
-        distance = controller.distanceKm;
+        distance = controller.distanceKm.clamp(0.01, 10.0);
         selectedCategories = List.from(controller.selectedCategories);
         selectedRating = controller.selectedRating;
         returnType = controller.selectedReturnType;
@@ -222,8 +222,8 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
               child: Slider(
                 padding: EdgeInsets.zero,
                 value: distance,
-                min: 0,
-                max: 50,
+                min: 0.01,
+                max: 10.0,
                 activeColor: context.primaryColor,
                 inactiveColor:
                     context.isDarkMode ? Colors.white12 : Colors.grey.shade200,
@@ -242,7 +242,9 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
             SizedBox(
               width: 70,
               child: Text(
-                '${distance.round()} km',
+                distance < 1.0 
+                    ? '${(distance * 1000).round()} m' 
+                    : '${distance == distance.toInt() ? distance.toInt() : distance.toStringAsFixed(1)} km',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
