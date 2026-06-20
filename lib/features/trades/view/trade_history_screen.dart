@@ -185,8 +185,8 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildFilterChip(' All '),
-          _buildFilterChip(' Gives '),
-          _buildFilterChip(' Takes '),
+          _buildFilterChip(' Sent '),
+          _buildFilterChip(' Received '),
         ],
       ),
     );
@@ -198,8 +198,8 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
       onTap: () {
         setState(() => selectedFilter = label);
         String postType = 'all';
-        if (label.trim() == 'Gives') postType = 'give';
-        if (label.trim() == 'Takes') postType = 'take';
+        if (label.trim() == 'Sent' || label.trim() == 'Gives') postType = 'give';
+        if (label.trim() == 'Received' || label.trim() == 'Takes') postType = 'take';
         context.read<TradeController>().fetchMyTrades(postType: postType);
       },
       child: Container(
@@ -223,63 +223,137 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
     );
   }
 
-  Widget _buildHistoryList() {
-    final trades = context.watch<TradeController>().myTrades;
-
-    if (trades.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.only(top: 100.h),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.history_outlined, size: 50.sp, color: Colors.grey),
-              SizedBox(height: 10.h),
-              Text(
-                'No trade history found',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: context.subTextColor,
-                  fontWeight: FontWeight.w600,
-                ),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.only(top: 100.h),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.history_outlined, size: 50.sp, color: Colors.grey),
+            SizedBox(height: 10.h),
+            Text(
+              'No trade history found',
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: context.subTextColor,
+                fontWeight: FontWeight.w600,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHistoryList() {
+    final tradeController = context.watch<TradeController>();
+
+    if (selectedFilter.trim() == 'Sent') {
+      final responses = tradeController.sentResponses;
+      if (responses.isEmpty) return _buildEmptyState();
+
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.all(10.w),
+        itemCount: responses.length,
+        itemBuilder: (context, index) {
+          final response = responses[index];
+          String title = response.postItemName ?? response.itemName ?? 'Item';
+          String otherUser = response.posterName ?? 'Unknown User';
+          String roleLabel = 'Poster';
+          String dateStr = response.createdAt;
+          try {
+            final date = DateTime.parse(response.createdAt);
+            dateStr = "${date.day} ${_getMonth(date.month)} ${date.year}";
+          } catch (_) {}
+          String imagePath = response.postItemImages.isNotEmpty 
+              ? response.postItemImages[0] 
+              : (response.itemImages.isNotEmpty ? response.itemImages[0] : '');
+
+          return _buildHistoryItem(
+            response.id,
+            title,
+            'With $otherUser ($roleLabel)',
+            dateStr,
+            response.status[0].toUpperCase() + response.status.substring(1),
+            false,
+            imagePath,
+          );
+        },
+      );
+    } else if (selectedFilter.trim() == 'Received') {
+      final responses = tradeController.postResponses;
+      if (responses.isEmpty) return _buildEmptyState();
+
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.all(10.w),
+        itemCount: responses.length,
+        itemBuilder: (context, index) {
+          final response = responses[index];
+          String title = response.itemName ?? response.postItemName ?? 'Item';
+          String otherUser = response.responderName;
+          String roleLabel = 'Responder';
+          String dateStr = response.createdAt;
+          try {
+            final date = DateTime.parse(response.createdAt);
+            dateStr = "${date.day} ${_getMonth(date.month)} ${date.year}";
+          } catch (_) {}
+          String imagePath = response.itemImages.isNotEmpty 
+              ? response.itemImages[0] 
+              : (response.postItemImages.isNotEmpty ? response.postItemImages[0] : '');
+
+          return _buildHistoryItem(
+            response.id,
+            title,
+            'With $otherUser ($roleLabel)',
+            dateStr,
+            response.status[0].toUpperCase() + response.status.substring(1),
+            true,
+            imagePath,
+          );
+        },
+      );
+    } else {
+      final trades = tradeController.myTrades;
+
+      if (trades.isEmpty) return _buildEmptyState();
+
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.all(10.w),
+        itemCount: trades.length,
+        itemBuilder: (context, index) {
+          final trade = trades[index];
+          bool isGive = trade.postType == 'give';
+
+          String otherUser = isGive
+              ? (trade.responderName ?? 'No responder yet')
+              : (trade.posterName ?? 'Unknown Giver');
+          String roleLabel = isGive ? 'Taker' : 'Giver';
+
+          String dateStr = trade.createdAt;
+          try {
+            final date = DateTime.parse(trade.createdAt);
+            dateStr = "${date.day} ${_getMonth(date.month)} ${date.year}";
+          } catch (_) {}
+
+          return _buildHistoryItem(
+            trade.id,
+            trade.itemName,
+            'With $otherUser ($roleLabel)',
+            dateStr,
+            trade.status[0].toUpperCase() + trade.status.substring(1),
+            isGive,
+            trade.itemImages.isNotEmpty ? trade.itemImages[0] : '',
+          );
+        },
       );
     }
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.all(10.w),
-      itemCount: trades.length,
-      itemBuilder: (context, index) {
-        final trade = trades[index];
-        bool isGive = trade.postType == 'give';
-
-        String otherUser = isGive
-            ? (trade.responderName ?? 'No responder yet')
-            : (trade.posterName ?? 'Unknown Giver');
-        String roleLabel = isGive ? 'Taker' : 'Giver';
-
-        String dateStr = trade.createdAt;
-        try {
-          final date = DateTime.parse(trade.createdAt);
-          dateStr = "${date.day} ${_getMonth(date.month)} ${date.year}";
-        } catch (_) {}
-
-        return _buildHistoryItem(
-          trade.id,
-          trade.itemName,
-          'With $otherUser ($roleLabel)',
-          dateStr,
-          trade.status[0].toUpperCase() + trade.status.substring(1),
-          isGive,
-          trade.itemImages.isNotEmpty ? trade.itemImages[0] : '',
-        );
-      },
-    );
   }
 
   String _getMonth(int month) {

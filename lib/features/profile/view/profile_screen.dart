@@ -368,11 +368,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
 
               IconButton(
-                tooltip: 'Settings',
+                tooltip: 'Edit Profile',
                 onPressed: () =>
-                    Navigator.pushNamed(context, AppRoutes.settings),
+                    Navigator.pushNamed(context, AppRoutes.editProfile),
                 icon: Icon(
-                  Icons.settings_outlined,
+                  Icons.edit_outlined,
                   size: 22.sp,
                   color: context.textColor,
                 ),
@@ -469,61 +469,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                     SizedBox(height: 16.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                  context, AppRoutes.editProfile);
-                            },
-                            icon: Icon(Icons.edit, size: 14.sp),
-                            label: Text("Edit Profile",
-                                style: TextStyle(fontSize: 12.sp)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(vertical: 8.h),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30.r),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                      decoration: BoxDecoration(
+                        color: context.isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: context.isDarkMode ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.credit_card,
+                            size: 20.sp,
+                            color: Colors.orange,
+                          ),
+                          SizedBox(width: 12.w),
+                          Flexible(
+                            child: Text(
+                              "Credit Balance : ${user.remainingBalance ?? '50.00'}",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: context.isDarkMode ? Colors.white : Colors.black,
+                                fontSize: 14.sp,
                               ),
-                              elevation: 0,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Expanded(
-                          child: Container(
-                            alignment: Alignment.center,
-                            padding: EdgeInsets.symmetric(vertical: 8.h),
-                            decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: Colors.black, width: 1.5),
-                              borderRadius: BorderRadius.circular(30.r),
-                              color: Colors.transparent,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.credit_card,
-                                    size: 14.sp, color: Colors.black),
-                                SizedBox(width: 4.w),
-                                Flexible(
-                                  child: Text(
-                                    "Bal: ${user.remainingBalance ?? '50.00'}",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                      fontSize: 12.sp,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -672,6 +649,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             )
           else
             ListView.separated(
+              padding: EdgeInsets.zero,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: reviews.length,
@@ -822,13 +800,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Trade History',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: context.textColor,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Trade History',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: context.textColor,
+                ),
+              ),
+              InkWell(
+                onTap: () => Navigator.pushNamed(context, AppRoutes.tradeHistory),
+                borderRadius: BorderRadius.circular(20.r),
+                child: Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    color: context.isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16.sp,
+                    color: context.textColor,
+                  ),
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 16.h),
           Row(

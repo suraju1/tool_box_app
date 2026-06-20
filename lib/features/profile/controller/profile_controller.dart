@@ -209,16 +209,13 @@ class ProfileController extends ChangeNotifier {
 
 
   Future<ApiResponse<dynamic>> toggleReviewReaction(int reviewId, String reactionType) async {
-    _isLoading = true;
-    notifyListeners();
-
     final response = await _profileService.toggleReviewReaction(reviewId, reactionType);
 
     if (response.success && response.data != null) {
       final updatedData = response.data;
       final int rId = updatedData['review_id'] ?? reviewId;
-      final int newLikesCount = updatedData['likes_count'] ?? 0;
-      final int newDislikesCount = updatedData['dislikes_count'] ?? 0;
+      final int newLikesCount = int.tryParse(updatedData['likes_count']?.toString() ?? '') ?? 0;
+      final int newDislikesCount = int.tryParse(updatedData['dislikes_count']?.toString() ?? '') ?? 0;
       final String? newUserReaction = updatedData['user_reaction'];
 
       List<Review> updateReviewsList(List<Review> list) {
@@ -264,12 +261,12 @@ class ProfileController extends ChangeNotifier {
           showTradeHistory: _viewedProfile!.showTradeHistory,
         );
       }
+      notifyListeners();
     } else {
       _errorMessage = response.message;
+      notifyListeners();
     }
 
-    _isLoading = false;
-    notifyListeners();
     return response;
   }
 

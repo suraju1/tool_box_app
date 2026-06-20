@@ -96,20 +96,25 @@ class LocationService {
         // Format address with more precision
         List<String> addressParts = [];
 
+        bool isValid(String? s) {
+          if (s == null || s.isEmpty) return false;
+          if (s.contains('+') && s.length <= 15 && !s.contains(' ')) return false;
+          if (s.toLowerCase().contains('unnamed road')) return false;
+          return true;
+        }
+
         // Building/Society Name
-        if (place.name != null &&
-            place.name!.isNotEmpty &&
-            place.name != place.locality) {
+        if (isValid(place.name) && place.name != place.locality) {
           addressParts.add(place.name!);
         }
 
         // Sub-locality (Landmarks/Area)
-        if (place.subLocality != null && place.subLocality!.isNotEmpty) {
+        if (isValid(place.subLocality)) {
           addressParts.add(place.subLocality!);
         }
 
         // Street/Thoroughfare
-        if (place.thoroughfare != null && place.thoroughfare!.isNotEmpty) {
+        if (isValid(place.thoroughfare) && place.thoroughfare != place.name) {
           addressParts.add(place.thoroughfare!);
         }
 

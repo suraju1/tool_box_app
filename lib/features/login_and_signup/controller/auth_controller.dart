@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:tool_bocs/core/api/api_client.dart';
 import 'package:tool_bocs/core/api/api_exception.dart';
+import 'package:tool_bocs/core/api/api_response.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
 import 'package:tool_bocs/features/login_and_signup/model/auth_request_models.dart';
 import 'package:tool_bocs/features/login_and_signup/model/auth_response_models.dart';
@@ -76,7 +77,24 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _authService.completeProfile(request);
+      ApiResponse<AuthResponse> response = await _authService.completeProfile(request);
+
+      // WORKAROUND for backend bug where completeProfile crashes on createNotification
+      // The database is successfully updated, but the backend throws this error
+      // because it tries to send a notification and fails. We can safely ignore it.
+      if (!response.success && response.message?.contains("createNotification") == true) {
+        if (_currentUser != null && _authToken != null) {
+          response = ApiResponse<AuthResponse>(
+            success: true,
+            message: "Profile completed successfully",
+            data: AuthResponse(
+              user: _currentUser!,
+              token: _authToken!,
+              isProfileComplete: true,
+            ),
+          );
+        }
+      }
 
       if (response.success && response.data != null) {
         // Save success message
@@ -239,7 +257,7 @@ class AuthController extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint("[Auth] Error in signInWithOtp: $e");
-      _errorMessage = "An unexpected error occurred during sign in.";
+      _errorMessage = "Error: $e";
       _isVerifyingOtp = false;
       _isLoading = false;
       notifyListeners();
@@ -375,9 +393,13 @@ class AuthController extends ChangeNotifier {
     // Reset Bottom Navigation Bar index to 0
     final context = navigatorKey.currentContext;
     if (context != null) {
-      Provider.of<BottomNavBarController>(context, listen: false).reset();
-      Provider.of<ProfileController>(context, listen: false).reset();
-      Provider.of<TradeController>(context, listen: false).reset();
+      try {
+        Provider.of<BottomNavBarController>(context, listen: false).reset();
+        Provider.of<ProfileController>(context, listen: false).reset();
+        Provider.of<TradeController>(context, listen: false).reset();
+      } catch (e) {
+        debugPrint("Error resetting providers during logout: $e");
+      }
     }
 
     notifyListeners();

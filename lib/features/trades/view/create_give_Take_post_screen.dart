@@ -243,12 +243,28 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                         ],
                 ),
                 child: _buildItemDetailsSection(),
-                // SizedBox(height: 20.h),
-                // _buildReturnSection(),
-                // SizedBox(height: 20.h),
-                // _buildWalletAndNotificationSection(),
-                // SizedBox(height: 30.h),
-                // _buildPostButton(),
+              ),
+              SizedBox(height: 8.h),
+              SizedBox(height: 8.h),
+              //note section
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 8.h),
+                padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
+                decoration: BoxDecoration(
+                  color: context.surfaceColor,
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(color: context.dividerColor),
+                  boxShadow: context.isDarkMode
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: greyColorWithOpacity0_4,
+                            blurRadius: 5,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                ),
+                child: _buildNoteSection(),
               ),
               SizedBox(height: 8.h),
               //return section
@@ -581,83 +597,108 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           _selectedCategory,
           (val) => setState(() => _selectedCategory = val),
         ),
-        SizedBox(height: 16.h),
-        Text('Condition', style: _labelStyle()),
-        SizedBox(height: 12.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildConditionChip('New'),
-            _buildConditionChip('Like New'),
-            _buildConditionChip('Used'),
-          ],
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topCenter,
+          child: _selectedCategory?.name == 'Goods'
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(height: 20.h),
+                    _buildConditionSection(),
+                    SizedBox(height: 16.h),
+                    _buildItemSourcesSection(),
+                  ],
+                )
+              : const SizedBox.shrink(),
         ),
-        SizedBox(height: 16.h),
-        Text('Write a Note', style: _labelStyle()),
         SizedBox(height: 8.h),
-        _buildTextField('Describe your product here...',
-            maxLines: 4,
-            controller: _itemNoteController,
-            validator: (val) => _validateRequired(val, 'Note')),
-        SizedBox(height: 12.h),
-        Row(
-          children: [
-            Row(
-              children: [
-                SizedBox(
-                  height: 24.w,
-                  width: 24.w,
-                  child: Checkbox(
-                    value: _isHomemade,
-                    activeColor: Colors.green,
-                    onChanged: (val) {
-                      setState(() {
-                        _isHomemade = val ?? false;
-                        if (_isHomemade) _isStoreBought = false;
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  'Homemade',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontFamily: FontFamily.openSans,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+      ],
+    );
+  }
+
+  Widget _buildConditionSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Condition', style: _labelStyle()),
+        SizedBox(height: 8.h),
+        DropdownButtonFormField<String>(
+          value: _selectedCondition,
+          icon: Icon(Icons.keyboard_arrow_down, color: context.subTextColor),
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(color: context.dividerColor),
             ),
-            SizedBox(width: 20.w),
-            Row(
-              children: [
-                SizedBox(
-                  height: 24.w,
-                  width: 24.w,
-                  child: Checkbox(
-                    value: _isStoreBought,
-                    activeColor: Colors.green,
-                    onChanged: (val) {
-                      setState(() {
-                        _isStoreBought = val ?? false;
-                        if (_isStoreBought) _isHomemade = false;
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  'Store bought',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontFamily: FontFamily.openSans,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(color: context.dividerColor),
             ),
-          ],
+            filled: true,
+            fillColor: context.surfaceColor,
+          ),
+          items: ['New', 'Like New', 'Used'].map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value, style: TextStyle(fontSize: 13.sp, color: context.textColor, fontWeight: FontWeight.w500)),
+            );
+          }).toList(),
+          onChanged: (newValue) {
+            if (newValue != null) {
+              setState(() {
+                _selectedCondition = newValue;
+              });
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildItemSourcesSection() {
+    String? currentSource;
+    if (_isHomemade) currentSource = 'Homemade';
+    if (_isStoreBought) currentSource = 'Store bought';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Item Sources', style: _labelStyle()),
+        SizedBox(height: 8.h),
+        DropdownButtonFormField<String>(
+          value: currentSource,
+          hint: Text('-- Select Source --', style: TextStyle(fontSize: 13.sp, color: context.subTextColor)),
+          icon: Icon(Icons.keyboard_arrow_down, color: context.subTextColor),
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(color: context.dividerColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(color: context.dividerColor),
+            ),
+            filled: true,
+            fillColor: context.surfaceColor,
+          ),
+          items: ['Homemade', 'Store bought'].map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value, style: TextStyle(fontSize: 13.sp, color: context.textColor, fontWeight: FontWeight.w500)),
+            );
+          }).toList(),
+          onChanged: (newValue) {
+            if (newValue != null) {
+              setState(() {
+                _isHomemade = newValue == 'Homemade';
+                _isStoreBought = newValue == 'Store bought';
+              });
+            }
+          },
         ),
         if (_showSourceError)
           Padding(
@@ -667,6 +708,20 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
               style: TextStyle(color: Colors.red, fontSize: 12.sp),
             ),
           ),
+      ],
+    );
+  }
+
+  Widget _buildNoteSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Write a Note', style: _labelStyle()),
+        SizedBox(height: 8.h),
+        _buildTextField('Describe your product here...',
+            maxLines: 4,
+            controller: _itemNoteController,
+            validator: (val) => _validateRequired(val, 'Note')),
       ],
     );
   }

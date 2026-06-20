@@ -33,6 +33,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   final TextEditingController _floorController = TextEditingController();
   final TextEditingController _areaController = TextEditingController();
   final TextEditingController _mapSearchController = TextEditingController();
+  final TextEditingController _customLabelController = TextEditingController();
   String _selectedLabel = 'Home';
   String _orderFor = 'Myself';
   double _radius = 5.0; // km
@@ -48,7 +49,10 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
 
   // State management for multistep flow
   bool _showFullForm = false;
+  bool _isMinimized = false;
   bool _isDefault = false;
+  bool _isPanning = false;
+  bool _isFetchingLocation = false;
 
   @override
   void initState() {
@@ -57,9 +61,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     _isDefault = widget.editAddress?.isDefault == 1;
     if (widget.editAddress != null) {
       _initEditAddress();
-    } else {
-      _initLocation();
     }
+    _getCurrentLocation();
   }
 
   void _initEditAddress() {
@@ -67,7 +70,23 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     _lastMapPosition = LatLng(addr.latitude, addr.longitude);
     _currentAddress = addr.address;
     _areaController.text = addr.address;
-    _selectedLabel = addr.label;
+
+    final validLabels = ['Home', 'Work', 'Office', 'Hotel', 'Other'];
+
+    // Find matching label case-insensitively
+    String? matchedLabel;
+    for (var l in validLabels) {
+      if (l.toLowerCase() == addr.label.toLowerCase()) {
+        matchedLabel = l;
+        break;
+      }
+    }
+
+    if (matchedLabel != null && matchedLabel != 'Other') {
+      _selectedLabel = matchedLabel;
+    } else {
+      _selectedLabel = 'Other';
+    }
 
     // Try to parse house/floor if they were saved in the address string
     // This is simple logic, might not be perfect depending on how it was saved
@@ -103,11 +122,13 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    setState(() => _isFetchingLocation = true);
     final success = await context.read<LocationController>().fetchLocation();
     if (success && mounted) {
       final loc = context.read<LocationController>();
       _updateLocalLocation(LatLng(loc.latitude!, loc.longitude!), loc.address!);
     }
+    if (mounted) setState(() => _isFetchingLocation = false);
   }
 
   void _updateLocalLocation(LatLng position, String address) {
@@ -124,13 +145,12 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   }
 
   Future<void> _onCameraMove(CameraPosition position) async {
-    setState(() {
-      _lastMapPosition = position.target;
-      _currentZoom = position.zoom;
-    });
+    _lastMapPosition = position.target;
+    _currentZoom = position.zoom;
   }
 
   Future<void> _onCameraIdle() async {
+    setState(() => _isPanning = false);
     if (_isReverseGeocoding) return;
 
     setState(() => _isReverseGeocoding = true);
@@ -156,8 +176,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 45.h,
         title: Text('Add address',
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -166,62 +187,32 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       body: Stack(
         children: [
           _buildMap(),
-          _buildRadiusText(),
-          // _buildMarkerOverlay(),
+          _buildMarkerOverlay(),
           _buildSearchOverlay(),
-          _buildUseCurrentLocationFloating(),
-          _buildRadiusSliderOverlay(),
-          _buildBottomForm(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRadiusText() {
-    // Calculate pixels per meter
-    final double metersPerPixel = 156543.03392 *
-        math.cos(_lastMapPosition.latitude * math.pi / 180) /
-        math.pow(2, _currentZoom);
-
-    final double radiusInPixels =
-        ((_radius * 1000) / metersPerPixel).clamp(0.0, 5000.0);
-
-    return IgnorePointer(
-      child: Padding(
-        padding: EdgeInsets.only(top: 70.h, bottom: 350.h),
-        child: Center(
-          child: Transform.translate(
-            offset: Offset(radiusInPixels / 2, 18.h),
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 6.w,
-                vertical: 2.h,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(4.r),
-              ),
-              child: Text(
-                formattedRadius,
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w800,
-                ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _buildUseCurrentLocationFloating(),
+                  _buildRadiusSliderOverlay(),
+                  _buildBottomForm(),
+                ],
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildRadiusSliderOverlay() {
     if (_showFullForm) return const SizedBox.shrink();
-    return Positioned(
-      bottom: 260.h,
-      left: 16.w,
-      right: 16.w,
+
+    return Padding(
+      padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 15.h),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
@@ -316,6 +307,12 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     // Calculate initial zoom based on radius
     double initialZoom = _getZoomForRadius(_radius);
 
+    // Calculate center tick length in latitude degrees to maintain ~16px height
+    final double metersPerPixel = 156543.03392 *
+        math.cos(_lastMapPosition.latitude * math.pi / 180) /
+        math.pow(2, _currentZoom);
+    final double tickLatDelta = (16.0 * metersPerPixel) / 111132.0;
+
     return GoogleMap(
       initialCameraPosition:
           CameraPosition(target: _lastMapPosition, zoom: initialZoom),
@@ -326,41 +323,21 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       onMapCreated: (GoogleMapController controller) {
         _controller.complete(controller);
       },
+      onCameraMoveStarted: () {
+        setState(() => _isPanning = true);
+      },
       onCameraMove: _onCameraMove,
       onCameraIdle: _onCameraIdle,
-      myLocationEnabled: true,
+      onTap: (LatLng location) async {
+        final GoogleMapController controller = await _controller.future;
+        await controller.animateCamera(
+          CameraUpdate.newLatLng(location),
+        );
+      },
+      myLocationEnabled: false,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
       mapToolbarEnabled: false,
-      circles: {
-        Circle(
-          circleId: const CircleId('radius_circle'),
-          center: _lastMapPosition,
-          radius: _radius * 1000, // Convert to meters
-          fillColor: Colors.black.withOpacity(0.3),
-          strokeColor: Colors.black,
-          strokeWidth: 2,
-        ),
-      },
-      polylines: {
-        Polyline(
-          polylineId: const PolylineId('radius_line'),
-          points: [
-            _lastMapPosition,
-            LatLng(
-              _lastMapPosition.latitude,
-              _lastMapPosition.longitude +
-                  (_radius /
-                      (111.32 *
-                          math.cos(
-                            _lastMapPosition.latitude * math.pi / 180,
-                          ))),
-            ),
-          ],
-          color: Colors.black,
-          width: 3,
-        ),
-      },
     );
   }
 
@@ -379,107 +356,107 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       child: Padding(
         padding: EdgeInsets.only(top: 70.h, bottom: 350.h),
         child: Center(
-          child: Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              // Tooltip
-              Positioned(
-                top: -55.h,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 6.h,
-                  ),
+          child: OverflowBox(
+            maxWidth: double.infinity,
+            maxHeight: double.infinity,
+            child: Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                // Radius Circle
+                Container(
+                  width: radiusInPixels * 2,
+                  height: radiusInPixels * 2,
                   decoration: BoxDecoration(
-                    color: context.textColor.withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Text(
-                    'Move the map to adjust your location',
-                    style: TextStyle(
-                      color: context.reverseTextColor,
-                      fontSize: 10.sp,
+                    color: Colors.black.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 2,
                     ),
                   ),
                 ),
-              ),
 
-              // Radius Line
-              Transform.translate(
-                offset: Offset(radiusInPixels / 2, 0),
-                child: SizedBox(
-                  width: radiusInPixels,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
-                    children: [
-                      // Horizontal line
-                      Container(
-                        height: 2.5.h,
-                        width: radiusInPixels,
-                        color: Colors.black87,
-                      ),
-
-                      // Start Tick
-                      Positioned(
-                        left: 0,
-                        child: Container(
-                          width: 2.w,
-                          height: 14.h,
-                          color: Colors.black87,
+                // Radius Line
+                Transform.translate(
+                  offset: Offset(radiusInPixels / 2, 0),
+                  child: SizedBox(
+                    width: radiusInPixels,
+                    height: 16.h,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          height: 3,
+                          width: double.infinity,
+                          color: Colors.black,
                         ),
-                      ),
-
-                      // End Tick
-                      Positioned(
-                        right: 0,
-                        child: Container(
-                          width: 2.w,
-                          height: 14.h,
-                          color: Colors.black87,
-                        ),
-                      ),
-
-                      // Radius Text
-                      Positioned(
-                        top: 12.h,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 4.w,
-                            vertical: 2.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(4.r),
-                          ),
-                          child: Text(
-                            _radius < 1
-                                ? '${(_radius * 1000).toInt()} meters'
-                                : '${_radius.toStringAsFixed(_radius.truncateToDouble() == _radius ? 0 : 1)} km',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Center Dot
-              Container(
-                width: 8.w,
-                height: 8.w,
-                decoration: const BoxDecoration(
+                // Location Name Label (floating above the center)
+                if (!_isPanning && _currentAddress.isNotEmpty)
+                  Transform.translate(
+                    offset: Offset(0, -35.h),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(24.r),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: Offset(0, 3))
+                        ],
+                      ),
+                      child: Text(
+                        _currentAddress.split(',').first,
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+
+                // Center Tick
+                Container(
+                  width: 4,
+                  height: 16.h,
                   color: Colors.black,
-                  shape: BoxShape.circle,
                 ),
-              ),
-            ],
+
+                // Radius Text
+                if (!_isPanning)
+                  Transform.translate(
+                    offset: Offset(radiusInPixels / 2, 18.h),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        formattedRadius,
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -567,9 +544,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
 
   Widget _buildUseCurrentLocationFloating() {
     if (_showFullForm) return const SizedBox.shrink();
-    return Positioned(
-      bottom: 335.h, // Positioned above the radius slider
-      right: 16.w,
+
+    return Padding(
+      padding: EdgeInsets.only(right: 16.w, bottom: 15.h),
       child: InkWell(
         onTap: _getCurrentLocation,
         child: Container(
@@ -587,16 +564,17 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.my_location, color: context.primaryColor, size: 20.sp),
-              // SizedBox(width: 8.w),
-              // Text(
-              //   'Use current location',
-              //   style: TextStyle(
-              //     color: context.primaryColor,
-              //     fontWeight: FontWeight.bold,
-              //     fontSize: 14.sp,
-              //  ),
-              // ),
+              _isFetchingLocation
+                  ? SizedBox(
+                      width: 20.sp,
+                      height: 20.sp,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: context.primaryColor,
+                      ),
+                    )
+                  : Icon(Icons.my_location,
+                      color: context.primaryColor, size: 20.sp),
             ],
           ),
         ),
@@ -605,26 +583,50 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   }
 
   Widget _buildBottomForm() {
-    return Align(
-      alignment: Alignment.bottomCenter,
+    return GestureDetector(
+      onVerticalDragUpdate: (details) {
+        if (details.primaryDelta! > 5) {
+          if (!_isMinimized && !_showFullForm)
+            setState(() => _isMinimized = true);
+        } else if (details.primaryDelta! < -5) {
+          if (_isMinimized && !_showFullForm)
+            setState(() => _isMinimized = false);
+        }
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 16.h),
         decoration: BoxDecoration(
           color: context.onPrimaryColor,
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20.r), topRight: Radius.circular(20.r)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
           boxShadow: [
             BoxShadow(
-                color: context.isDarkMode ? Colors.black45 : Colors.black12,
-                blurRadius: 10,
-                spreadRadius: 5)
+              color: context.isDarkMode ? Colors.black45 : Colors.black12,
+              blurRadius: 15,
+              spreadRadius: 2,
+            )
           ],
         ),
-        child: SingleChildScrollView(
-          child: _showFullForm
-              ? _buildDetailedAddressForm()
-              : _buildConfirmationView(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Grab Handle
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 5.h,
+                margin: EdgeInsets.only(bottom: 15.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+              ),
+            ),
+            _showFullForm
+                ? _buildDetailedAddressForm()
+                : _buildConfirmationView(),
+          ],
         ),
       ),
     );
@@ -635,9 +637,9 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Fiding Products for',
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-        SizedBox(height: 15.h),
+        Text('Finding Products in',
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+        SizedBox(height: 10.h),
         Container(
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
@@ -671,59 +673,56 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: () {}, // Handled by map movement mostly
-                child: Text('Change',
-                    style: TextStyle(
-                        color: context.primaryColor,
-                        fontWeight: FontWeight.bold)),
-              ),
             ],
           ),
         ),
-        SizedBox(height: 20.h),
-        SizedBox(
-          width: double.infinity,
-          height: 50.h,
-          child: ElevatedButton(
-            onPressed: widget.isPickOnly ? _onConfirmLocation : _onDirectSave,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.primaryColor,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(widget.isPickOnly ? 'Confirm Location' : 'Save Location',
-                    style: TextStyle(
-                        color: context.onPrimaryColor,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-        ),
-        if (!widget.isPickOnly) ...[
-          SizedBox(height: 15.h),
-          Center(
-            child: InkWell(
-              onTap: () {
-                // Handle unknown location
-              },
-              child: Text(
-                'I don\'t know the exact location on map',
-                style: TextStyle(
-                  color: context.primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.sp,
-                  decoration: TextDecoration.underline,
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          alignment: Alignment.topCenter,
+          child: _isMinimized
+              ? const SizedBox.shrink()
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 12.h),
+                    Text('Save address as',
+                        style: TextStyle(
+                            fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8.h),
+                    _buildLabelSelector(),
+                    SizedBox(height: 12.h),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 46.h,
+                      child: ElevatedButton(
+                        onPressed: widget.isPickOnly
+                            ? _onConfirmLocation
+                            : _onDirectSave,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.primaryColor,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                                widget.isPickOnly
+                                    ? 'Confirm Location'
+                                    : 'Save Location',
+                                style: TextStyle(
+                                    color: context.onPrimaryColor,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                  ],
                 ),
-              ),
-            ),
-          ),
-        ],
-        SizedBox(height: 10.h),
+        ),
       ],
     );
   }
@@ -740,11 +739,12 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
 
   void _onDirectSave() {
     final addressController = context.read<AddressController>();
+    String finalLabel = _selectedLabel.toLowerCase();
 
     if (widget.editAddress != null) {
       final updatedAddress = AddressModel(
         id: widget.editAddress!.id,
-        label: 'Other',
+        label: finalLabel,
         address: _currentAddress,
         latitude: _lastMapPosition.latitude,
         longitude: _lastMapPosition.longitude,
@@ -770,7 +770,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       });
     } else {
       final newAddress = AddressModel(
-        label: 'Other',
+        label: finalLabel,
         address: _currentAddress,
         latitude: _lastMapPosition.latitude,
         longitude: _lastMapPosition.longitude,
@@ -882,48 +882,59 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
   }
 
   Widget _buildLabelSelector() {
-    final labels = ['Home', 'Work', 'Hotel', 'Other'];
+    final labels = ['Home', 'Work', 'Office', 'Hotel', 'Other'];
     final icons = [
       Icons.home_outlined,
       Icons.work_outline,
+      Icons.business_outlined,
       Icons.hotel_outlined,
       Icons.location_on_outlined
     ];
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(labels.length, (index) {
-        final isSelected = _selectedLabel == labels[index];
-        return InkWell(
-          onTap: () => setState(() => _selectedLabel = labels[index]),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? context.primaryColor.withOpacity(0.1)
-                  : context.surfaceColor,
-              border: Border.all(
-                  color:
-                      isSelected ? context.primaryColor : context.dividerColor),
-              borderRadius: BorderRadius.circular(8.r),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(labels.length, (index) {
+          final isSelected = _selectedLabel == labels[index];
+          return Padding(
+            padding: EdgeInsets.only(right: 10.w),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedLabel = labels[index];
+                });
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? context.primaryColor.withOpacity(0.1)
+                      : context.surfaceColor,
+                  border: Border.all(
+                      color: isSelected
+                          ? context.primaryColor
+                          : context.dividerColor),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Row(
+                  children: [
+                    Icon(icons[index],
+                        color: isSelected ? context.primaryColor : Colors.grey,
+                        size: 16.sp),
+                    SizedBox(width: 4.w),
+                    Text(labels[index],
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            color: isSelected
+                                ? context.primaryColor
+                                : context.textColor)),
+                  ],
+                ),
+              ),
             ),
-            child: Row(
-              children: [
-                Icon(icons[index],
-                    color: isSelected ? context.primaryColor : Colors.grey,
-                    size: 16.sp),
-                SizedBox(width: 4.w),
-                Text(labels[index],
-                    style: TextStyle(
-                        fontSize: 12.sp,
-                        color: isSelected
-                            ? context.primaryColor
-                            : context.textColor)),
-              ],
-            ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 
@@ -1007,9 +1018,18 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       ToastService.showErrorToast(context, 'Please enter house/building name');
       return;
     }
+    if (_selectedLabel == 'Other' &&
+        _customLabelController.text.trim().isEmpty) {
+      ToastService.showErrorToast(context, 'Please enter a custom label');
+      return;
+    }
 
     final fullAddress =
         "${_houseController.text}, ${_floorController.text.isNotEmpty ? "${_floorController.text}, " : ""}$_currentAddress";
+
+    String finalLabel = _selectedLabel == 'Other'
+        ? _customLabelController.text.trim()
+        : _selectedLabel;
 
     // Create/Update address model
     final addressController = context.read<AddressController>();
@@ -1018,7 +1038,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       // Update existing address
       final updatedAddress = AddressModel(
         id: widget.editAddress!.id,
-        label: _selectedLabel,
+        label: finalLabel,
         address: fullAddress,
         latitude: _lastMapPosition.latitude,
         longitude: _lastMapPosition.longitude,
@@ -1046,7 +1066,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     } else {
       // Save new address
       final newAddress = AddressModel(
-        label: _selectedLabel,
+        label: finalLabel,
         address: fullAddress,
         latitude: _lastMapPosition.latitude,
         longitude: _lastMapPosition.longitude,

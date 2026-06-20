@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
@@ -81,9 +82,71 @@ class ReviewItemWidget extends StatelessWidget {
                       style: TextStyle(
                           fontSize: 12.sp, color: context.subTextColor),
                     ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    children: [
+                      _buildReactionButton(
+                        context: context,
+                        icon: review.userReaction == 'like' ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
+                        label: 'True',
+                        count: review.likesCount,
+                        reactionType: 'like',
+                        isActive: review.userReaction == 'like',
+                        activeColor: Colors.blue,
+                      ),
+                      SizedBox(width: 16.w),
+                      _buildReactionButton(
+                        context: context,
+                        icon: review.userReaction == 'dislike' ? Icons.thumb_down : Icons.thumb_down_alt_outlined,
+                        label: 'False',
+                        count: review.dislikesCount,
+                        reactionType: 'dislike',
+                        isActive: review.userReaction == 'dislike',
+                        activeColor: Colors.red,
+                      ),
+                    ],
+                  ),
                   SizedBox(height: 4.h),
-
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReactionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required int count,
+    required String reactionType,
+    required bool isActive,
+    required Color activeColor,
+  }) {
+    return InkWell(
+      onTap: () {
+        context.read<ProfileController>().toggleReviewReaction(review.id, reactionType);
+      },
+      borderRadius: BorderRadius.circular(20.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16.sp,
+              color: isActive ? activeColor : context.subTextColor,
+            ),
+            SizedBox(width: 6.w),
+            Text(
+              count > 0 ? '$label ($count)' : label,
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: isActive ? activeColor : context.subTextColor,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ],

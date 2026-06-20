@@ -38,7 +38,7 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Saved Users',
+          'Saved Profiles',
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -57,157 +57,173 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
         ),
       ),
       body: isLoading
-          ? _buildShimmerGrid()
-          : savedUsers.isEmpty
-              ? _buildEmptyState()
-              : RefreshIndicator(
-                  onRefresh: () =>
-                      context.read<ProfileController>().getSavedUsers(),
-                  child: GridView.builder(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 15.w, vertical: 20.h),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 15.w,
-                      mainAxisSpacing: 15.h,
-                    ),
-                    itemCount: savedUsers.length,
-                    itemBuilder: (context, index) {
-                      return _buildUserCard(context, savedUsers[index]);
-                    },
-                  ),
+          ? Center(child: CircularProgressIndicator(color: context.primaryColor))
+          : RefreshIndicator(
+              onRefresh: () =>
+                  context.read<ProfileController>().getSavedUsers(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.all(20.w),
+                child: Column(
+                  children: [
+                    _buildAllSavedCard(context, savedUsers),
+                    SizedBox(height: 20.h),
+                    _buildCreateFolderCard(context),
+                  ],
                 ),
+              ),
+            ),
     );
   }
 
-  Widget _buildUserCard(BuildContext context, SavedUserModel user) {
+  Widget _buildAllSavedCard(BuildContext context, List<SavedUserModel> savedUsers) {
+    final dividerColor = context.dividerColor.withOpacity(0.3);
+    return Container(
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: dividerColor),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 16.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'All Saved',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: context.textColor,
+                    fontFamily: FontFamily.openSans,
+                  ),
+                ),
+                Text(
+                  '${savedUsers.length}',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: context.textColor.withOpacity(0.8),
+                    fontFamily: FontFamily.openSans,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: dividerColor),
+          savedUsers.isEmpty 
+              ? _buildEmptyState()
+              : ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.all(20.w),
+                  itemCount: savedUsers.length,
+                  separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                  itemBuilder: (context, index) {
+                    final user = savedUsers[index];
+                    return _buildProfileListItem(context, user);
+                  },
+                ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileListItem(BuildContext context, SavedUserModel user) {
+    final dividerColor = context.dividerColor.withOpacity(0.3);
     return InkWell(
       onTap: () {
         ProfileController.navigateToUserProfile(context, user.id);
       },
+      borderRadius: BorderRadius.circular(12.r),
       child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         decoration: BoxDecoration(
           color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(15.r),
-          boxShadow: context.isDarkMode
-              ? []
-              : [
-                  BoxShadow(
-                    color: greyColorWithOpacity0_4,
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-          border: Border.all(color: context.dividerColor),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: dividerColor),
         ),
-        child: Column(
+        child: Row(
           children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(15.r)),
-                    child: AppCachedImage(
-                      imageUrl: user.profileImage ?? '',
-                      userName: user.fullName,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 8.h,
-                    right: 8.w,
-                    child: GestureDetector(
-                      onTap: () async {
-                        final response = await context
-                            .read<ProfileController>()
-                            .toggleSaveUser(user.id);
-                        if (response.success && mounted) {
-                          ToastService.showSuccessToast(
-                              context, response.message);
-                        }
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(6.r),
-                        decoration: BoxDecoration(
-                          color: context.surfaceColor.withOpacity(0.8),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.bookmark,
-                          color: context.primaryColor,
-                          size: 18.sp,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24.r),
+              child: AppCachedImage(
+                imageUrl: user.profileImage ?? '',
+                userName: user.fullName,
+                width: 48.w,
+                height: 48.w,
+                fit: BoxFit.cover,
+                radius: 24.r,
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(10.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user.fullName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: context.textColor,
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Text(
+                user.fullName,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: FontFamily.openSans,
+                  color: context.textColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreateFolderCard(BuildContext context) {
+    final dividerColor = context.dividerColor.withOpacity(0.3);
+    return Container(
+      height: 350.h,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: context.isDarkMode ? Colors.white10 : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: dividerColor),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
+              onTap: () {
+                ToastService.showSuccessToast(context, "Create folder feature coming soon!");
+              },
+              borderRadius: BorderRadius.circular(50.r),
+              child: Container(
+                width: 90.w,
+                height: 90.w,
+                decoration: BoxDecoration(
+                  color: context.surfaceColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, color: greyColor, size: 12.sp),
-                      SizedBox(width: 4.w),
-                      Expanded(
-                        child: Text(
-                          user.location ?? 'Unknown',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            color: context.subTextColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.amber, size: 12.sp),
-                          SizedBox(width: 2.w),
-                          Text(
-                            user.avgStars,
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                              color: context.textColor,
-                            ),
-                          ),
-                          Text(
-                            ' (${user.totalRatings})',
-                            style: TextStyle(
-                              fontSize: 8.sp,
-                              color: context.subTextColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
+                child: Icon(
+                  Icons.add,
+                  size: 32.sp,
+                  color: context.textColor,
+                ),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              'Create New Folder',
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: context.textColor,
+                fontFamily: FontFamily.openSans,
               ),
             ),
           ],
@@ -217,73 +233,25 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.bookmark_border, size: 60.sp, color: greyColor),
-          SizedBox(height: 15.h),
-          Text(
-            'No saved users yet',
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: context.textColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 5.h),
-          Text(
-            'Profiles you save will appear here',
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: context.subTextColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildShimmerGrid() {
-    return GridView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 20.h),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 15.w,
-        mainAxisSpacing: 15.h,
-      ),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: BorderRadius.circular(15.r),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: ShimmerBox(
-                  height: double.infinity,
-                  width: double.infinity,
-                  radius: 15.r,
-                ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 40.h),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.bookmark_border, size: 60.sp, color: greyColor),
+            SizedBox(height: 15.h),
+            Text(
+              'No saved users yet',
+              style: TextStyle(
+                fontSize: 18.sp,
+                color: context.textColor,
+                fontWeight: FontWeight.bold,
               ),
-              Padding(
-                padding: EdgeInsets.all(10.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ShimmerBox(height: 14.h, width: 100.w),
-                    SizedBox(height: 5.h),
-                    ShimmerBox(height: 10.h, width: 80.w),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
