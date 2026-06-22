@@ -68,6 +68,7 @@ class UserDetails {
   final int totalReviews;
   final int totalLikes;
   final int totalDislikes;
+  final int savedCount;
   final String? remainingBalance;
   final bool termsAccepted;
   final String? giverType;
@@ -105,6 +106,7 @@ class UserDetails {
     required this.totalReviews,
     this.totalLikes = 0,
     this.totalDislikes = 0,
+    this.savedCount = 0,
     this.remainingBalance,
     this.termsAccepted = true,
     this.giverType,
@@ -153,6 +155,7 @@ class UserDetails {
       totalLikes: _parseInt(json['total_likes'] ?? reviewStats['likes']),
       totalDislikes:
           _parseInt(json['total_dislikes'] ?? reviewStats['dislikes']),
+      savedCount: _parseInt(json['saved_count'] ?? json['saved_users_count'] ?? 0),
       remainingBalance: json['remaining_balance']?.toString(),
       termsAccepted:
           json['terms_accepted'] == 1 || json['terms_accepted'] == true,
@@ -194,6 +197,7 @@ class UserDetails {
       'total_reviews': totalReviews,
       'total_likes': totalLikes,
       'total_dislikes': totalDislikes,
+      'saved_count': savedCount,
       'remaining_balance': remainingBalance,
       'terms_accepted': termsAccepted ? 1 : 0,
       'user_type': {

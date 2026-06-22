@@ -112,6 +112,8 @@ class ProfileController extends ChangeNotifier {
           tradeStats: _viewedProfile!.tradeStats,
           reviews: _viewedProfile!.reviews,
           isSaved: !currentlySaved,
+          isRated: _viewedProfile!.isRated,
+          showTradeHistory: _viewedProfile!.showTradeHistory,
         );
       }
       // Refresh saved list if we are on the saved users screen or need it up to date

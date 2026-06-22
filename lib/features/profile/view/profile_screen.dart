@@ -857,33 +857,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       "Received Offers")),
             ],
           ),
-          SizedBox(height: 24.h),
-          Center(
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: Icon(Icons.bookmark_border, size: 20.sp),
-                label: const Text("Save Profile"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      context.isDarkMode ? Colors.white : Colors.black,
-                  foregroundColor:
-                      context.isDarkMode ? Colors.black : Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  textStyle:
-                      TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
           SizedBox(height: 16.h),
           Center(
             child: Text(
-              "Your profile is saved by 22 users",
+              "Your profile is saved by ${profile.userDetails.savedCount} users",
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
