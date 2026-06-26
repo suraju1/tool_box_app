@@ -71,9 +71,14 @@ class ApiConstants {
   static const String listBlockedUser = 'list_blocked_user'; //get
 
   // Saved Users
-  static const String userSave = 'user_save/{{id}}'; //post
+  // static const String userSave = 'user_save/{{id}}'; //post
   static const String unsaveUser = 'unsave_user/{{id}}'; //delete
   static const String listSaveUser = 'list_save_user'; //get
+  static const String collections = 'collections'; //get, post
+  static const String fetchCollectionItems = 'collections/{{id}}'; //get
+  static const String collectionItems = 'collections/{{id}}/items'; //post
+  static const String removeCollectionItem = 'collections/{{id}}/items/{{itemId}}'; //delete
+  static const String deleteCollection = 'collections/{{id}}'; //delete
 
   // static const String reactivatePost = 'reactivate_post/{{postid}}'; //put
   static const String subscribe = 'subscribe'; //post

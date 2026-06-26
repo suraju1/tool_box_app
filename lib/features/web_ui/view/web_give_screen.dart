@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
@@ -11,6 +12,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/web_ui/view/web_filter_dialog.dart';
+import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
 import 'package:tool_bocs/features/web_ui/view/web_sort_dialog.dart';
 import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 
@@ -128,7 +130,7 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                               WebFilterDialog.show(context, initialPostType: 'take');
                             },
                             icon: const Icon(Icons.filter_alt_outlined),
-                            label: const Text("Filter"),
+                            label: Text(AppLocalizations.of(context)!.filter),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).cardColor,
                               foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
@@ -150,7 +152,7 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                                   WebSortDialog.show(context, initialPostType: 'take');
                                 },
                                 icon: const Icon(Icons.sort),
-                                label: const Text("Sort By"),
+                                label: Text(AppLocalizations.of(context)!.sortBy),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: hasSort
                                       ? Colors.black
@@ -181,7 +183,7 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                               );
                             },
                             icon: const Icon(Icons.add),
-                            label: const Text("Create Post"),
+                            label: Text(AppLocalizations.of(context)!.createPost),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
                               foregroundColor: Colors.white,
@@ -300,14 +302,7 @@ class _WebGiveCard extends StatelessWidget {
             );
             break;
           case 'save':
-            final success = await profileController.toggleSaveUser(post.userId);
-            if (!context.mounted) return;
-            if (success.success) {
-              ToastService.showSuccessToast(context, 'User saved successfully');
-            } else {
-              ToastService.showErrorToast(
-                  context, success.message ?? 'Error saving user');
-            }
+            SaveToCollectionBottomSheet.show(context, post.userId);
             break;
           case 'share':
             Share.share(
@@ -341,32 +336,32 @@ class _WebGiveCard extends StatelessWidget {
       itemBuilder: (BuildContext context) {
         return [
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'profile',
-              child: Text('View Seller Profile'),
+              child: Text(AppLocalizations.of(context)!.viewSellerProfile),
             ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'save',
-              child: Text('Save Seller'),
+              child: Text(AppLocalizations.of(context)!.saveSeller),
             ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'share',
-            child: Text('Share Post'),
+            child: Text(AppLocalizations.of(context)!.sharePost),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'hide',
-            child: Text('Hide Post'),
+            child: Text(AppLocalizations.of(context)!.hidePost),
           ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'block',
-              child: Text('Block User'),
+              child: Text(AppLocalizations.of(context)!.blockUser),
             ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'report',
-              child: Text('Report Post', style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.reportPost, style: TextStyle(color: Colors.red)),
             ),
         ];
       },

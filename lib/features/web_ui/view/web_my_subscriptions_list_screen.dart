@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -103,7 +104,7 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
               backgroundColor: context.primaryColor,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             ),
-            child: const Text('Refresh', style: TextStyle(color: Colors.white, fontSize: 16)),
+            child: Text(AppLocalizations.of(context)!.refresh, style: TextStyle(color: Colors.white, fontSize: 16)),
           ),
         ],
       ),

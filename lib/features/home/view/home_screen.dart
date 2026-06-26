@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
@@ -19,6 +20,7 @@ import 'package:tool_bocs/core/widgets/theme_selection_bottom_sheet.dart';
 import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/features/profile/view/profile_screen.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
+import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
 import 'package:tool_bocs/features/home/view/product_details_screen.dart';
 import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
@@ -130,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(controller.errorMessage!),
                               ElevatedButton(
                                 onPressed: () => controller.fetchHomePosts(),
-                                child: const Text('Retry'),
+                                child: Text(AppLocalizations.of(context)!.retry),
                               ),
                             ],
                           ),
@@ -788,13 +790,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
             break;
           case 'save':
-            final success = await profileController.toggleSaveUser(post.userId);
-            if (success.success && mounted) {
-              ToastService.showSuccessToast(context, 'User saved successfully');
-            } else if (mounted) {
-              ToastService.showErrorToast(
-                  context, success.message ?? 'Error saving user');
-            }
+            SaveToCollectionBottomSheet.show(context, post.userId);
             break;
           case 'share':
             Share.share(
@@ -841,37 +837,37 @@ class _HomeScreenState extends State<HomeScreen> {
       itemBuilder: (BuildContext context) {
         return [
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'profile',
-              child: Text('View Seller Profile'),
+              child: Text(AppLocalizations.of(context)!.viewSellerProfile),
             ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'save',
-              child: Text('Save Seller'),
+              child: Text(AppLocalizations.of(context)!.saveSeller),
             ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'share',
-            child: Text('Share Post'),
+            child: Text(AppLocalizations.of(context)!.sharePost),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'hide',
-            child: Text('Hide Post'),
+            child: Text(AppLocalizations.of(context)!.hidePost),
           ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'block',
-              child: Text('Block User'),
+              child: Text(AppLocalizations.of(context)!.blockUser),
             ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'report',
-              child: Text('Report Post', style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.reportPost, style: TextStyle(color: Colors.red)),
             ),
           if (isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'delete',
-              child: Text('Delete Post', style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.deletePost, style: TextStyle(color: Colors.red)),
             ),
         ];
       },

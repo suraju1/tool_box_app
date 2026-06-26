@@ -85,68 +85,69 @@ class ReviewItemWidget extends StatelessWidget {
                   SizedBox(height: 8.h),
                   Row(
                     children: [
-                      _buildReactionButton(
-                        context: context,
-                        icon: review.userReaction == 'like' ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
-                        label: 'True',
-                        count: review.likesCount,
-                        reactionType: 'like',
-                        isActive: review.userReaction == 'like',
-                        activeColor: Colors.blue,
+                      InkWell(
+                        onTap: () {
+                          context
+                              .read<ProfileController>()
+                              .toggleReviewReaction(review.id, 'like');
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: review.userReaction == 'like'
+                                ? const Color(0xFF65B741)
+                                : (context.isDarkMode
+                                    ? Colors.grey.shade800
+                                    : Colors.black),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Text("True:${review.likesCount}",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.bold)),
+                        ),
                       ),
-                      SizedBox(width: 16.w),
-                      _buildReactionButton(
-                        context: context,
-                        icon: review.userReaction == 'dislike' ? Icons.thumb_down : Icons.thumb_down_alt_outlined,
-                        label: 'False',
-                        count: review.dislikesCount,
-                        reactionType: 'dislike',
-                        isActive: review.userReaction == 'dislike',
-                        activeColor: Colors.red,
+                      SizedBox(width: 6.w),
+                      InkWell(
+                        onTap: () {
+                          context
+                              .read<ProfileController>()
+                              .toggleReviewReaction(review.id, 'dislike');
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: review.userReaction == 'dislike'
+                                ? Colors.red
+                                : (context.isDarkMode
+                                    ? Colors.grey.shade900
+                                    : Colors.white),
+                            border: Border.all(
+                                color: review.userReaction == 'dislike'
+                                    ? Colors.red
+                                    : (context.isDarkMode
+                                        ? Colors.grey.shade700
+                                        : Colors.black)),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Text("False: ${review.dislikesCount}",
+                              style: TextStyle(
+                                  color: review.userReaction == 'dislike'
+                                      ? Colors.white
+                                      : (context.isDarkMode
+                                          ? Colors.white
+                                          : Colors.black),
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.bold)),
+                        ),
                       ),
                     ],
                   ),
                   SizedBox(height: 4.h),
                 ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReactionButton({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required int count,
-    required String reactionType,
-    required bool isActive,
-    required Color activeColor,
-  }) {
-    return InkWell(
-      onTap: () {
-        context.read<ProfileController>().toggleReviewReaction(review.id, reactionType);
-      },
-      borderRadius: BorderRadius.circular(20.r),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16.sp,
-              color: isActive ? activeColor : context.subTextColor,
-            ),
-            SizedBox(width: 6.w),
-            Text(
-              count > 0 ? '$label ($count)' : label,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: isActive ? activeColor : context.subTextColor,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ],

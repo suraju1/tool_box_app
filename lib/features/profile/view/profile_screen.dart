@@ -85,7 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 .getUserProfile(currentUserId);
                           }
                         },
-                        child: Text('Retry'),
+                        child: Text(AppLocalizations.of(context)!.retry),
                       ),
                     ],
                   ),
@@ -490,7 +490,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           SizedBox(width: 12.w),
                           Flexible(
                             child: Text(
-                              "Credit Balance : ${user.remainingBalance ?? '50.00'}",
+                              "${AppLocalizations.of(context)!.creditBalance}${user.remainingBalance ?? '50.00'}",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: context.isDarkMode ? Colors.white : Colors.black,
@@ -804,7 +804,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Trade History',
+                AppLocalizations.of(context)!.tradeHistory,
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
@@ -837,7 +837,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Icons.sync,
                 Colors.greenAccent.shade700,
                 "${tradeStats?.totalTrades ?? 0}",
-                "Total Trades",
+                AppLocalizations.of(context)!.totalTrades,
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.tradeHistory),
               )),
@@ -847,20 +847,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Icons.outbox_outlined,
                       Colors.orange,
                       "${tradeStats?.sentOffers ?? 0}",
-                      "Sent Offers")),
+                      AppLocalizations.of(context)!.sentOffers)),
               SizedBox(width: 8.w),
               Expanded(
                   child: _buildNewTradeHistoryCard(
                       Icons.move_to_inbox_outlined,
                       Colors.red,
                       "${tradeStats?.receivedOffers ?? 0}",
-                      "Received Offers")),
+                      AppLocalizations.of(context)!.receivedOffers)),
             ],
           ),
           SizedBox(height: 16.h),
           Center(
             child: Text(
-              "Your profile is saved by ${profile.userDetails.savedCount} users",
+              AppLocalizations.of(context)!.profileSavedBy(profile.userDetails.savedCount.toString()),
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
@@ -1087,7 +1087,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             children: [
               Text(
-                'Credit Balance : ',
+                AppLocalizations.of(context)!.creditBalance,
                 style: TextStyle(
                   color: context.subTextColor,
                   fontSize: 14.sp,
@@ -1118,7 +1118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildDrawerMenuItem(
           context,
           icon: Icons.person_outline,
-          label: 'Profile',
+          label: AppLocalizations.of(context)!.profile,
           onTap: () {
             Navigator.pop(context);
             Navigator.push(
@@ -1176,7 +1176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildDrawerMenuItem(
           context,
           icon: Icons.brightness_4_outlined,
-          label: 'Theme',
+          label: AppLocalizations.of(context)!.theme,
           onTap: () => _showThemeBottomSheet(context),
         ),
         _buildDrawerMenuItem(

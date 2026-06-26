@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/features/chat/view/chat_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -58,7 +59,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('No trade selected'),
+              Text(AppLocalizations.of(context)!.noTradeSelected),
               if (tradeController.errorMessage != null)
                 Padding(
                   padding: EdgeInsets.all(16.w),
@@ -259,12 +260,12 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel Trade'),
-        content: const Text('Are you sure you want to cancel this trade?'),
+        title: Text(AppLocalizations.of(context)!.cancelTrade),
+        content: Text(AppLocalizations.of(context)!.areYouSureYouWant7),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('No'),
+            child: Text(AppLocalizations.of(context)!.no),
           ),
           TextButton(
             onPressed: () async {
@@ -283,7 +284,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
               }
             },
             child:
-                const Text('Yes, Cancel', style: TextStyle(color: Colors.red)),
+                Text(AppLocalizations.of(context)!.yesCancel, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -476,7 +477,12 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
                   ),
                 ),
                 Text(
-                  isPoster ? 'Responder' : 'Poster',
+                  (() {
+                    final isGive = response.postType == 'give' || response.postType == 'giving';
+                    final partnerIsGiving = (isPoster && !isGive) || (!isPoster && isGive);
+                    final itemName = response.postItemName ?? response.givingItemName ?? 'Item';
+                    return partnerIsGiving ? 'Giving you $itemName' : 'Taking your $itemName';
+                  })(),
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w400,
@@ -651,27 +657,40 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
   }
 
   Widget _buildExchangeCard(TradeResponseModel response) {
+    final authController = context.read<AuthController>();
+    final currentUserId = authController.currentUser?.id;
+    final isPoster = currentUserId == response.posterUserId;
+    final isGive = response.postType == 'give' || response.postType == 'giving';
+    final partnerIsGiving = (isPoster && !isGive) || (!isPoster && isGive);
+
     final isTicketTrade =
         response.responseType == 'price' || response.postReturnType == 'Price';
 
-    String exchangeLabel = 'Exchange Item';
+    String exchangeLabel = partnerIsGiving ? 'You Give' : 'You Receive';
     String exchangeValue =
         response.itemName ?? response.givingItemName ?? 'Item';
     IconData exchangeIcon = Icons.inventory_2_outlined;
 
     if (isTicketTrade) {
-      exchangeLabel = 'Exchange Tickets';
+      exchangeLabel = partnerIsGiving ? 'You Pay' : 'You Receive';
       if (response.offerPrice != null && response.offerPrice! > 0) {
-        exchangeValue = '${response.offerPrice} Tickets';
+        exchangeValue = '₹${response.offerPrice!.toStringAsFixed(0)}';
       } else if (response.priceRangeStart != null) {
-        exchangeValue =
-            '${response.priceRangeStart} - ${response.priceRangeEnd} Tickets';
+        final startPrice = response.priceRangeStart!.toStringAsFixed(0);
+        final endPrice = (response.priceRangeEnd ?? response.priceRangeStart!).toStringAsFixed(0);
+        
+        if (startPrice == endPrice) {
+          exchangeValue = '₹$startPrice';
+        } else {
+          exchangeValue = '₹$startPrice - ₹$endPrice';
+        }
       } else if (response.paymentAmount != null) {
-        exchangeValue = '${response.paymentAmount} Tickets';
+        final parsedAmt = double.tryParse(response.paymentAmount!)?.toStringAsFixed(0) ?? response.paymentAmount;
+        exchangeValue = '₹$parsedAmt';
       } else {
-        exchangeValue = 'Tickets';
+        exchangeValue = 'Price';
       }
-      exchangeIcon = Icons.confirmation_number_outlined;
+      exchangeIcon = Icons.currency_rupee;
     }
 
     final images = response.itemImages.isNotEmpty

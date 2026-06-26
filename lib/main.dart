@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -33,6 +34,15 @@ import 'package:hive_flutter/hive_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Make system navigation bar transparent for edge-to-edge UI
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ),
+  );
+  
   // Clear image cache on startup to remove any corrupted 0-byte files
   await DefaultCacheManager().emptyCache();
 
@@ -55,11 +65,13 @@ void main() async {
         "Please ensure you have added google-services.json (Android) or GoogleService-Info.plist (iOS)");
   }
 
-  await NotificationService().init();
-  await FirebaseNotificationService().init();
-
+  // Do not await these services here because they might request permissions
+  // which block the UI indefinitely if awaited before runApp
+  NotificationService().init().catchError((e) => debugPrint("Notification init error: $e"));
+  FirebaseNotificationService().init().catchError((e) => debugPrint("Firebase Notification init error: $e"));
+  
   // Initialize deep link handler for shared URL handling
-  await DeepLinkHandler().init();
+  DeepLinkHandler().init().catchError((e) => debugPrint("DeepLink init error: $e"));
 
   runApp(
     WebResponsiveWrapper(

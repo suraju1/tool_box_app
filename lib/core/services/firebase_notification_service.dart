@@ -113,8 +113,10 @@ class FirebaseNotificationService {
             .handleNotificationPayload(jsonEncode(initialMessage.data));
       }
 
-      // 5. Get and Save Token
-      await saveTokenToFirestore();
+      // 5. Get and Save Token (Fire and forget, do not block initialization)
+      saveTokenToFirestore().catchError((e) {
+        debugPrint("Error in background saveTokenToFirestore: $e");
+      });
 
       // 6. Listen for Token Refresh
       _firebaseMessaging.onTokenRefresh.listen((token) async {

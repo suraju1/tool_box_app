@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -19,7 +20,7 @@ class WebProfileScreen extends StatelessWidget {
     final profileUser = profileController.ownProfile?.userDetails;
 
     if (user == null) {
-      return const Center(child: Text("Please log in to view your profile."));
+      return Center(child: Text(AppLocalizations.of(context)!.pleaseLogInToView));
     }
 
     final String fullName = profileUser?.fullName ?? user.fullName;
@@ -203,7 +204,7 @@ class WebProfileScreen extends StatelessWidget {
                   Navigator.pushNamed(context, AppRoutes.editProfile);
                 },
                 icon: const Icon(Icons.edit, size: 16),
-                label: const Text("Edit Profile"),
+                label: Text(AppLocalizations.of(context)!.editProfile),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isDark ? Colors.white : Colors.black,
                   foregroundColor: isDark ? Colors.black : Colors.white,
@@ -320,7 +321,7 @@ class WebProfileScreen extends StatelessWidget {
           if (reviews.isEmpty)
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text("No reviews found.", style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 16)),
+              child: Text(AppLocalizations.of(context)!.noReviewsFound, style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 16)),
             )
           else
             ListView.separated(
@@ -458,7 +459,7 @@ class WebProfileScreen extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.bookmark_border, size: 24),
-              label: const Text("Save Profile"),
+              label: Text(AppLocalizations.of(context)!.saveProfile),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isDark ? Colors.white : Colors.black,
                 foregroundColor: isDark ? Colors.black : Colors.white,

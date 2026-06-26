@@ -14,6 +14,8 @@ import 'package:tool_bocs/features/profile/view/profile_screen.dart';
 import 'package:tool_bocs/core/services/firebase_notification_service.dart';
 import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
 import 'package:tool_bocs/features/profile/model/faq_model.dart';
+import 'package:tool_bocs/features/profile/model/collection_model.dart';
+import 'package:tool_bocs/features/profile/model/collection_item_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/core/models/pagination_model.dart';
 import 'package:tool_bocs/core/services/storage_service.dart';
@@ -26,12 +28,14 @@ class ProfileController extends ChangeNotifier {
   UserProfileModel? _viewedProfile;
   List<BlockedUserModel> _blockedUsers = [];
   List<SavedUserModel> _savedUsers = [];
+  List<CollectionModel> _collections = [];
   List<FaqModel> _faqs = [];
   List<PostModel> _myPosts = [];
+
   int _totalMyPostsCount = 0;
   int _totalMyGivesCount = 0;
   int _totalMyTakesCount = 0;
-  String _selectedMyPostsFilter = ' All ';
+  String _selectedMyPostsFilter = 'All';
   bool _isLoading = false;
   bool _isPaginationLoading = false;
   String? _errorMessage;
@@ -42,6 +46,7 @@ class ProfileController extends ChangeNotifier {
   UserProfileModel? get viewedProfile => _viewedProfile;
   List<BlockedUserModel> get blockedUsers => _blockedUsers;
   List<SavedUserModel> get savedUsers => _savedUsers;
+  List<CollectionModel> get collections => _collections;
   List<FaqModel> get faqs => _faqs;
   List<PostModel> get myPosts => _myPosts;
   int get totalMyPostsCount => _totalMyPostsCount;
@@ -88,42 +93,97 @@ class ProfileController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<ApiResponse<dynamic>> toggleSaveUser(int userId) async {
+  Future<void> getCollections() async {
     _isLoading = true;
     notifyListeners();
 
-    // Determine current status
-    bool currentlySaved = false;
-    if (_viewedProfile?.userDetails.id == userId) {
-      currentlySaved = _viewedProfile?.isSaved ?? false;
-    } else {
-      currentlySaved = _savedUsers.any((u) => u.id == userId);
-    }
-
-    final response = currentlySaved
-        ? await _profileService.unsaveUser(userId)
-        : await _profileService.saveUser(userId);
+    final response = await _profileService.fetchCollections();
 
     if (response.success) {
-      // Update local state for viewed profile
-      if (_viewedProfile?.userDetails.id == userId) {
-        _viewedProfile = UserProfileModel(
-          userDetails: _viewedProfile!.userDetails,
-          tradeStats: _viewedProfile!.tradeStats,
-          reviews: _viewedProfile!.reviews,
-          isSaved: !currentlySaved,
-          isRated: _viewedProfile!.isRated,
-          showTradeHistory: _viewedProfile!.showTradeHistory,
-        );
-      }
-      // Refresh saved list if we are on the saved users screen or need it up to date
-      await getSavedUsers();
+      _collections = response.data ?? [];
     } else {
       _errorMessage = response.message;
     }
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<ApiResponse<dynamic>> createCollection(String name) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final response = await _profileService.createCollection(name);
+
+    if (response.success) {
+      await getCollections();
+    } else {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return response;
+  }
+
+  Future<ApiResponse<dynamic>> deleteCollection(int collectionId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final response = await _profileService.deleteCollection(collectionId);
+
+    if (response.success) {
+      await getCollections();
+    } else {
+      _errorMessage = response.message;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return response;
+  }
+
+  Future<ApiResponse<List<CollectionItemModel>>> fetchCollectionItems(int collectionId) async {
+    final response = await _profileService.fetchCollectionItems(collectionId);
+    if (!response.success) {
+      _errorMessage = response.message;
+    }
+    return response;
+  }
+
+  Future<ApiResponse<dynamic>> addCollectionItem(int collectionId, String itemType, int itemId) async {
+    final response = await _profileService.addCollectionItem(collectionId, itemType, itemId);
+    if (response.success) {
+      await getCollections(); // Update the count in the collections list
+      await getSavedUsers(); // Update the "All Saved" list
+    } else {
+      _errorMessage = response.message;
+    }
+    return response;
+  }
+
+  Future<ApiResponse<dynamic>> removeCollectionItem(int collectionId, int itemId) async {
+    final response = await _profileService.removeCollectionItem(collectionId, itemId);
+    if (response.success) {
+      // User requested that removing from a collection should also remove from All Saved
+      await unsaveUser(itemId);
+      
+      await getCollections(); // Update the count in the collections list
+      await getSavedUsers(); // Update the "All Saved" list
+    } else {
+      _errorMessage = response.message;
+    }
+    return response;
+  }
+
+  Future<ApiResponse<dynamic>> unsaveUser(int userId) async {
+    final response = await _profileService.unsaveUser(userId);
+
+    if (response.success) {
+      await getSavedUsers();
+    } else {
+      _errorMessage = response.message;
+    }
     return response;
   }
 
@@ -342,7 +402,7 @@ class ProfileController extends ChangeNotifier {
     _totalMyPostsCount = 0;
     _totalMyGivesCount = 0;
     _totalMyTakesCount = 0;
-    _selectedMyPostsFilter = ' All ';
+    _selectedMyPostsFilter = 'All';
     _myPostsPagination = null;
     _currentMyPostsPage = 1;
     _errorMessage = null;
@@ -532,7 +592,7 @@ class ProfileController extends ChangeNotifier {
 
   Future<void> getMyPosts(
       {String postType = 'all',
-      String label = ' All ',
+      String label = 'All',
       bool isRefresh = true}) async {
     if (isRefresh) {
       _myPosts = [];

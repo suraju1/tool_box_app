@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -358,7 +359,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Personal Information", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.personalInformation, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
         const SizedBox(height: 16),
         Divider(color: context.dividerColor, thickness: 1.5),
         const SizedBox(height: 32),
@@ -428,7 +429,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Preferences", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.preferences, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
         const SizedBox(height: 16),
         Divider(color: context.dividerColor, thickness: 1.5),
         const SizedBox(height: 32),
@@ -455,7 +456,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
           },
         ),
         const SizedBox(height: 48),
-        Text("Contact Information", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.contactInformation, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
         const SizedBox(height: 16),
         Divider(color: context.dividerColor, thickness: 1.5),
         const SizedBox(height: 32),
@@ -666,7 +667,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     ),
-                    child: Text('Cancel', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: context.textColor)),
+                    child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: context.textColor)),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
@@ -674,7 +675,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                       final fullName = _nameController.text.trim();
                       if (fullName.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Full name is required')),
+                          SnackBar(content: Text(AppLocalizations.of(context)!.fullNameIsRequired)),
                         );
                         return;
                       }

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -204,7 +205,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       borderRadius: BorderRadius.circular(10.r)),
                 ),
                 child:
-                    Text('OK', style: TextStyle(color: context.onPrimaryColor)),
+                    Text(AppLocalizations.of(context)!.ok, style: TextStyle(color: context.onPrimaryColor)),
               ),
             ),
           ],
@@ -909,7 +910,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       borderRadius: BorderRadius.circular(10.r)),
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                 ),
-                child: Text('Close',
+                child: Text(AppLocalizations.of(context)!.close,
                     style: TextStyle(
                         color: context.onPrimaryColor,
                         fontWeight: FontWeight.bold)),
@@ -961,17 +962,17 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 16.h),
-        Text('Item Name', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.itemName, style: _labelStyle()),
         SizedBox(height: 8.h),
         _buildTextField('Enter item name', controller: _itemNameController),
         SizedBox(height: 12.h),
         _buildAddPhotosSection(),
         SizedBox(height: 20.h),
-        Text('Category', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.category, style: _labelStyle()),
         SizedBox(height: 8.h),
         _buildDropdown('Select Category'),
         SizedBox(height: 16.h),
-        Text('Condition', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.condition, style: _labelStyle()),
         SizedBox(height: 12.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -982,7 +983,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
           ],
         ),
         SizedBox(height: 16.h),
-        Text('Description', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.description, style: _labelStyle()),
         SizedBox(height: 8.h),
         _buildTextField('Describe your product here...',
             maxLines: 4, controller: _descriptionController),
@@ -1012,7 +1013,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Add Photos', style: _labelStyle(size: 14)),
+        Text(AppLocalizations.of(context)!.addPhotos, style: _labelStyle(size: 14)),
         SizedBox(height: 15.h),
         GestureDetector(
           onTap: _pickImage,

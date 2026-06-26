@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -263,7 +264,7 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
         builder: (context, controller, child) {
           final post = controller.selectedPost;
           if (post == null) {
-            return const Center(child: Text('Post not found'));
+            return Center(child: Text(AppLocalizations.of(context)!.postNotFound));
           }
 
           final isGivePost = post.postType.toLowerCase() == 'give';
@@ -707,7 +708,7 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: Text('Close', style: TextStyle(color: context.onPrimaryColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                child: Text(AppLocalizations.of(context)!.close, style: TextStyle(color: context.onPrimaryColor, fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom),
@@ -759,11 +760,11 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
         const SizedBox(height: 20),
         _buildAddPhotosSection(),
         const SizedBox(height: 20),
-        Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.category, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
         const SizedBox(height: 8),
         _buildDropdown('Select Category'),
         const SizedBox(height: 20),
-        Text('Condition', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.condition, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -841,7 +842,7 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Add Photos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.addPhotos, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
         const SizedBox(height: 12),
         GestureDetector(
           onTap: _pickImage,
@@ -858,7 +859,7 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
               children: [
                 Icon(Icons.camera_alt_outlined, color: context.primaryColor, size: 40),
                 const SizedBox(height: 12),
-                Text('Add up to 5 photos', style: TextStyle(color: context.subTextColor, fontSize: 14)),
+                Text(AppLocalizations.of(context)!.addUpTo5Photos, style: TextStyle(color: context.subTextColor, fontSize: 14)),
               ],
             ),
           ),
@@ -944,7 +945,7 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
           children: [
             Switch(value: _isNegotiable, activeColor: context.primaryColor, onChanged: (val) => setState(() => _isNegotiable = val)),
             const SizedBox(width: 8),
-            Text('Negotiable', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.subTextColor)),
+            Text(AppLocalizations.of(context)!.negotiable, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.subTextColor)),
           ],
         ),
       ],

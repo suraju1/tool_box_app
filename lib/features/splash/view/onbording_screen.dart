@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
@@ -233,7 +234,7 @@ class _BoardingScreenState extends State<BoardingPage> {
                           _redirectTimer?.cancel();
                           controller.fetchOnboardingData();
                         },
-                        child: const Text("Retry"),
+                        child: Text(AppLocalizations.of(context)!.retry),
                       ),
                       SizedBox(width: 12.w),
                       TextButton(
@@ -242,7 +243,7 @@ class _BoardingScreenState extends State<BoardingPage> {
                           Navigator.pushReplacementNamed(
                               context, AppRoutes.login);
                         },
-                        child: const Text("Go to Login"),
+                        child: Text(AppLocalizations.of(context)!.goToLogin),
                       ),
                     ],
                   ),

@@ -1,5 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
@@ -124,8 +125,8 @@ class _WebChatScreenState extends State<WebChatScreen> {
             child: _chatRoomId.isEmpty || _currentUserId == null
                 ? Column(
                     children: [
-                      const Expanded(
-                        child: Center(child: Text('Start a conversation', style: TextStyle(fontSize: 16))),
+                      Expanded(
+                        child: Center(child: Text(AppLocalizations.of(context)!.startAConversation, style: TextStyle(fontSize: 16))),
                       ),
                       _buildInput(false),
                     ],

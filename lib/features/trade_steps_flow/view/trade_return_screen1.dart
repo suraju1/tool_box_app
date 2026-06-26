@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
@@ -166,7 +167,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('What do you want in return ?',
+        Text(AppLocalizations.of(context)!.whatDoYouWantIn,
             style: _labelStyle(context, size: 16)),
         SizedBox(height: 16.h),
         Container(
@@ -214,7 +215,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
                       ),
                     ),
                     SizedBox(width: 8.w),
-                    Text('Negotiable',
+                    Text(AppLocalizations.of(context)!.negotiable,
                         style: TextStyle(color: Colors.grey, fontSize: 13.sp)),
                   ],
                 ),
@@ -233,17 +234,17 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 20.h),
-        Text('Item Name', style: _labelStyle(context)),
+        Text(AppLocalizations.of(context)!.itemName, style: _labelStyle(context)),
         SizedBox(height: 8.h),
         _buildTextField('Enter item name'),
         SizedBox(height: 20.h),
         _buildAddPhotosSection(),
         SizedBox(height: 20.h),
-        Text('Category', style: _labelStyle(context)),
+        Text(AppLocalizations.of(context)!.category, style: _labelStyle(context)),
         SizedBox(height: 8.h),
         _buildDropdown('Select Category'),
         SizedBox(height: 16.h),
-        Text('Condition', style: _labelStyle(context)),
+        Text(AppLocalizations.of(context)!.condition, style: _labelStyle(context)),
         SizedBox(height: 12.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -254,7 +255,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
           ],
         ),
         SizedBox(height: 16.h),
-        Text('Description', style: _labelStyle(context)),
+        Text(AppLocalizations.of(context)!.description, style: _labelStyle(context)),
         SizedBox(height: 8.h),
         _buildTextField('Describe your product here...', maxLines: 4),
         SizedBox(height: 12.h),
@@ -387,7 +388,7 @@ class _TradeReturnSearchScreenState extends State<TradeReturnSearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Add Photos', style: _labelStyle(context, size: 14)),
+        Text(AppLocalizations.of(context)!.addPhotos, style: _labelStyle(context, size: 14)),
         SizedBox(height: 15.h),
         GestureDetector(
           onTap: _returnItemImages.length >= 5 ? null : _pickImage,

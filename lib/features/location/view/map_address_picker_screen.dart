@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -177,7 +178,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 45.h,
-        title: Text('Add address',
+        title: Text(AppLocalizations.of(context)!.addAddress,
             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -637,7 +638,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Finding Products in',
+        Text(AppLocalizations.of(context)!.findingProductsIn,
             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
         SizedBox(height: 10.h),
         Container(
@@ -686,7 +687,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 12.h),
-                    Text('Save address as',
+                    Text(AppLocalizations.of(context)!.saveAddressAs,
                         style: TextStyle(
                             fontSize: 14.sp, fontWeight: FontWeight.bold)),
                     SizedBox(height: 8.h),
@@ -802,7 +803,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Enter complete address',
+            Text(AppLocalizations.of(context)!.enterCompleteAddress,
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
             IconButton(
               onPressed: () => setState(() => _showFullForm = false),
@@ -813,7 +814,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         SizedBox(height: 15.h),
         _buildSwitchOption(),
         SizedBox(height: 10.h),
-        Text('Save address as *',
+        Text(AppLocalizations.of(context)!.saveAddressAs1,
             style: TextStyle(fontSize: 14.sp, color: context.subTextColor)),
         SizedBox(height: 10.h),
         _buildLabelSelector(),
@@ -831,7 +832,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
 
   Widget _buildDefaultToggle() {
     return SwitchListTile(
-      title: Text('Set as default address', style: TextStyle(fontSize: 14.sp)),
+      title: Text(AppLocalizations.of(context)!.setAsDefaultAddress, style: TextStyle(fontSize: 14.sp)),
       value: _isDefault,
       activeColor: context.primaryColor,
       onChanged: (val) => setState(() => _isDefault = val),
@@ -848,7 +849,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Who you are searching for?',
+          Text(AppLocalizations.of(context)!.whoYouAreSearchingFor,
               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
           const Spacer(),
           Row(
@@ -970,7 +971,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Area / Sector / Locality *',
+                Text(AppLocalizations.of(context)!.areaSectorLocality,
                     style: TextStyle(
                         fontSize: 10.sp, color: context.subTextColor)),
                 Text(
@@ -986,7 +987,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           TextButton(
             onPressed: () {}, // Trigger search
             child:
-                Text('Change', style: TextStyle(color: context.primaryColor)),
+                Text(AppLocalizations.of(context)!.change, style: TextStyle(color: context.primaryColor)),
           ),
         ],
       ),
@@ -1004,7 +1005,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
         ),
-        child: Text('Save address',
+        child: Text(AppLocalizations.of(context)!.saveAddress,
             style: TextStyle(
                 color: context.onPrimaryColor,
                 fontSize: 16.sp,

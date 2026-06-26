@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -238,9 +239,9 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Negotiable', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                    Text(AppLocalizations.of(context)!.negotiable, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                     const SizedBox(height: 4),
-                    Text('Allow buyers to make counter offers', style: TextStyle(color: context.subTextColor, fontSize: 13)),
+                    Text(AppLocalizations.of(context)!.allowBuyersToMakeCounter, style: TextStyle(color: context.subTextColor, fontSize: 13)),
                   ],
                 ),
               ],
@@ -313,7 +314,7 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                           });
                         },
                       ),
-                      const Text('Homemade', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                      Text(AppLocalizations.of(context)!.homemade, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -329,7 +330,7 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                           });
                         },
                       ),
-                      const Text('Store bought', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                      Text(AppLocalizations.of(context)!.storeBought, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
                     ],
                   ),
                 ],

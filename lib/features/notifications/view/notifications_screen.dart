@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
@@ -480,7 +481,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
       centerTitle: true,
       title: Text(
-        'Match Offers',
+        AppLocalizations.of(context)!.matchOffers,
         style: TextStyle(
           color: context.textColor,
           fontSize: 18.sp,
@@ -531,7 +532,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'See what people want around you',
+                      AppLocalizations.of(context)!.seeWhatPeopleWantAround,
                       style: TextStyle(
                         color: const Color(0xFF111311),
                         fontSize: 14.sp,
@@ -541,7 +542,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
                     SizedBox(height: 10.h),
                     Text(
-                      '• See existing posts by givers around you',
+                      AppLocalizations.of(context)!.seeExistingPostsByGivers,
                       style: TextStyle(
                         color: Colors.grey.shade700,
                         fontSize: 12.sp,
@@ -551,7 +552,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
                     SizedBox(height: 6.h),
                     Text(
-                      '• Respond to posts, mention what you can offer in return',
+                      AppLocalizations.of(context)!.respondToPostsMentionWhat2,
                       style: TextStyle(
                         color: Colors.grey.shade700,
                         fontSize: 12.sp,
@@ -583,7 +584,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   SizedBox(width: 8.w),
                   Text(
-                    'Help & Support',
+                    AppLocalizations.of(context)!.helpSupport,
                     style: TextStyle(
                       color: context.primaryColor,
                       fontSize: 13.sp,
@@ -614,7 +615,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text('General'),
+                            Text(AppLocalizations.of(context)!.general),
                             SizedBox(width: 4.w),
                             Container(
                               padding: EdgeInsets.symmetric(
@@ -638,8 +639,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           ],
                         ),
                       )
-                    : const Tab(text: 'General'),
-                const Tab(text: 'Matches'),
+                    : Tab(text: AppLocalizations.of(context)!.general),
+                Tab(text: AppLocalizations.of(context)!.matches),
               ],
             )
           : PreferredSize(
@@ -823,7 +824,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     icon: Icon(Icons.done_all,
                         size: 18.sp, color: context.primaryColor),
                     label: Text(
-                      'Mark all as read',
+                      AppLocalizations.of(context)!.markAllAsRead,
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: context.primaryColor,
@@ -1217,7 +1218,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),

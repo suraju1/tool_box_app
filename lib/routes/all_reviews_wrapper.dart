@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/responsive_layout.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
@@ -53,8 +54,8 @@ class _AllReviewsWrapperState extends State<AllReviewsWrapper> {
         }
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Reviews')),
-          body: const Center(child: Text('Error: Profile not found')),
+          appBar: AppBar(title: Text(AppLocalizations.of(context)!.reviews)),
+          body: Center(child: Text(AppLocalizations.of(context)!.errorProfileNotFound)),
         );
       },
     );

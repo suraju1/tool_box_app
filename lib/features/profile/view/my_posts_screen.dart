@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
@@ -305,7 +306,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: () => context.read<ProfileController>().getMyPosts(),
-            child: const Text('Retry'),
+            child: Text(AppLocalizations.of(context)!.retry),
           ),
         ],
       ),
@@ -408,19 +409,19 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                             final confirm = await showDialog<bool>(
                               context: context,
                               builder: (context) => AlertDialog(
-                                title: const Text('Deactivate Post'),
+                                title: Text(AppLocalizations.of(context)!.deactivatePost),
                                 content: const Text(
                                     'Are you sure you want to deactivate this post? Deactivating it will permanently delete your post.'),
                                 actions: [
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.pop(context, false),
-                                    child: const Text('Cancel'),
+                                    child: Text(AppLocalizations.of(context)!.cancel),
                                   ),
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.pop(context, true),
-                                    child: const Text('Deactivate',
+                                    child: Text(AppLocalizations.of(context)!.deactivate,
                                         style: TextStyle(color: Colors.red)),
                                   ),
                                 ],

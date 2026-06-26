@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
@@ -40,7 +41,7 @@ class _WebMySubscriptionStatusScreenState
               onPressed: () =>
                   Navigator.pushNamed(context, AppRoutes.subscriptionHistory),
               icon: Icon(Icons.history, color: context.primaryColor),
-              label: Text('Payment History',
+              label: Text(AppLocalizations.of(context)!.paymentHistory,
                   style: TextStyle(
                       color: context.primaryColor,
                       fontWeight: FontWeight.bold)),
@@ -194,7 +195,7 @@ class _WebMySubscriptionStatusScreenState
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('View Plans',
+                child: Text(AppLocalizations.of(context)!.viewPlans,
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -204,7 +205,7 @@ class _WebMySubscriptionStatusScreenState
             const SizedBox(height: 24),
             TextButton(
               onPressed: () => controller.fetchMySubscription(),
-              child: Text('Refresh',
+              child: Text(AppLocalizations.of(context)!.refresh,
                   style: TextStyle(color: context.subTextColor, fontSize: 16)),
             ),
           ],

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
+import 'package:tool_bocs/features/profile/model/collection_model.dart';
+import 'package:tool_bocs/features/profile/view/collection_items_screen.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
@@ -22,6 +25,7 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileController>().getSavedUsers();
+      context.read<ProfileController>().getCollections();
     });
   }
 
@@ -38,7 +42,7 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Saved Profiles',
+          AppLocalizations.of(context)!.savedProfiles,
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -59,8 +63,10 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
       body: isLoading
           ? Center(child: CircularProgressIndicator(color: context.primaryColor))
           : RefreshIndicator(
-              onRefresh: () =>
-                  context.read<ProfileController>().getSavedUsers(),
+              onRefresh: () async {
+                context.read<ProfileController>().getSavedUsers();
+                context.read<ProfileController>().getCollections();
+              },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.all(20.w),
@@ -68,6 +74,10 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
                   children: [
                     _buildAllSavedCard(context, savedUsers),
                     SizedBox(height: 20.h),
+                    ...profileController.collections.map((c) => Padding(
+                          padding: EdgeInsets.only(bottom: 20.h),
+                          child: _buildCollectionCard(context, c),
+                        )),
                     _buildCreateFolderCard(context),
                   ],
                 ),
@@ -92,7 +102,7 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'All Saved',
+                  AppLocalizations.of(context)!.allSaved,
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
@@ -129,6 +139,36 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _removeSavedUser(BuildContext context, int userId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: context.surfaceColor,
+        title: Text(AppLocalizations.of(context)!.removeSavedProfile, style: TextStyle(color: context.textColor)),
+        content: Text(AppLocalizations.of(context)!.areYouSureYouWant6, style: TextStyle(color: context.textColor)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: context.subTextColor)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(AppLocalizations.of(context)!.remove, style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      final response = await context.read<ProfileController>().unsaveUser(userId);
+      if (response.success && mounted) {
+        ToastService.showSuccessToast(context, AppLocalizations.of(context)!.profileRemovedFromSaved);
+      } else if (mounted) {
+        ToastService.showErrorToast(context, response.message ?? AppLocalizations.of(context)!.failedToRemoveProfile);
+      }
+    }
   }
 
   Widget _buildProfileListItem(BuildContext context, SavedUserModel user) {
@@ -170,6 +210,10 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
                 ),
               ),
             ),
+            IconButton(
+              icon: Icon(Icons.remove_circle_outline, color: Colors.red),
+              onPressed: () => _removeSavedUser(context, user.id),
+            ),
           ],
         ),
       ),
@@ -192,7 +236,7 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
           children: [
             InkWell(
               onTap: () {
-                ToastService.showSuccessToast(context, "Create folder feature coming soon!");
+                _showCreateFolderDialog(context);
               },
               borderRadius: BorderRadius.circular(50.r),
               child: Container(
@@ -218,7 +262,7 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
             ),
             SizedBox(height: 16.h),
             Text(
-              'Create New Folder',
+              AppLocalizations.of(context)!.createNewFolder,
               style: TextStyle(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w600,
@@ -242,11 +286,117 @@ class _SavedUsersScreenState extends State<SavedUsersScreen> {
             Icon(Icons.bookmark_border, size: 60.sp, color: greyColor),
             SizedBox(height: 15.h),
             Text(
-              'No saved users yet',
+              AppLocalizations.of(context)!.noSavedUsersYet,
               style: TextStyle(
                 fontSize: 18.sp,
                 color: context.textColor,
                 fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCreateFolderDialog(BuildContext context) {
+    final TextEditingController nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: context.surfaceColor,
+          title: Text(
+            AppLocalizations.of(context)!.createNewFolder,
+            style: TextStyle(color: context.textColor, fontFamily: FontFamily.openSans),
+          ),
+          content: TextField(
+            controller: nameController,
+            style: TextStyle(color: context.textColor),
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.folderName,
+              hintStyle: TextStyle(color: context.textColor.withOpacity(0.5)),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: context.dividerColor),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: context.primaryColor),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: context.textColor)),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (nameController.text.trim().isNotEmpty) {
+                  Navigator.pop(context);
+                  final res = await context.read<ProfileController>().createCollection(nameController.text.trim());
+                  if (res.success) {
+                    if (context.mounted) ToastService.showSuccessToast(context, AppLocalizations.of(context)!.collectionCreatedSuccessfully);
+                  } else {
+                    if (context.mounted) ToastService.showErrorToast(context, res.message ?? AppLocalizations.of(context)!.failedToCreateCollection);
+                  }
+                }
+              },
+              child: Text(AppLocalizations.of(context)!.create, style: TextStyle(color: context.primaryColor)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCollectionCard(BuildContext context, CollectionModel collection) {
+    final dividerColor = context.dividerColor.withOpacity(0.3);
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CollectionItemsScreen(collection: collection),
+          ),
+        ).then((_) {
+          // Refresh collections when returning from items screen
+          context.read<ProfileController>().getCollections();
+        });
+      },
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: dividerColor),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.folder_outlined, size: 28.sp, color: context.textColor),
+                SizedBox(width: 16.w),
+                Text(
+                  collection.name,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: context.textColor,
+                    fontFamily: FontFamily.openSans,
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              '${collection.itemCount}',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: context.textColor.withOpacity(0.8),
+                fontFamily: FontFamily.openSans,
               ),
             ),
           ],

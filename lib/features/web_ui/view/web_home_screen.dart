@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
@@ -99,7 +100,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           if (controller.isHomeLoading && controller.homePosts.isEmpty)
             const Center(child: CircularProgressIndicator())
           else if (controller.homePosts.isEmpty)
-            const Center(child: Text("No posts found near you."))
+            Center(child: Text(AppLocalizations.of(context)!.noPostsFoundNearYou))
           else
             GridView.builder(
               shrinkWrap: true,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -154,7 +155,7 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
             SizedBox(height: 24.h),
             ElevatedButton(
               onPressed: () => controller.fetchAvailablePlans(),
-              child: const Text('Try Again'),
+              child: Text(AppLocalizations.of(context)!.tryAgain),
             ),
           ],
         ),

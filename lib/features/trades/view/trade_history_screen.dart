@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
@@ -18,7 +19,7 @@ class TradeHistoryScreen extends StatefulWidget {
 }
 
 class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
-  String selectedFilter = ' All ';
+  String selectedFilter = 'all';
 
   @override
   void initState() {
@@ -100,7 +101,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Trade Summary',
+            AppLocalizations.of(context)!.tradeSummary,
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
@@ -112,11 +113,11 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSummaryCard('${stats?.totalTrades ?? 0}', 'Total Trades',
+              _buildSummaryCard('${stats?.totalTrades ?? 0}', AppLocalizations.of(context)!.totalTrades,
                   Icons.handshake, Colors.blue),
-              _buildSummaryCard('$sentOffers', 'Sent Offers',
+              _buildSummaryCard('$sentOffers', AppLocalizations.of(context)!.sentOffers,
                   Icons.outbox_outlined, Colors.red),
-              _buildSummaryCard('$receivedOffers', 'Received Offers',
+              _buildSummaryCard('$receivedOffers', AppLocalizations.of(context)!.receivedOffers,
                   Icons.move_to_inbox_outlined, Colors.orange),
             ],
           ),
@@ -184,22 +185,22 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildFilterChip(' All '),
-          _buildFilterChip(' Sent '),
-          _buildFilterChip(' Received '),
+          _buildFilterChip('all', ' ${AppLocalizations.of(context)!.all} '),
+          _buildFilterChip('sent', ' ${AppLocalizations.of(context)!.sentTab} '),
+          _buildFilterChip('received', ' ${AppLocalizations.of(context)!.receivedTab} '),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChip(String label) {
-    bool isSelected = selectedFilter == label;
+  Widget _buildFilterChip(String filterKey, String label) {
+    bool isSelected = selectedFilter == filterKey;
     return GestureDetector(
       onTap: () {
-        setState(() => selectedFilter = label);
+        setState(() => selectedFilter = filterKey);
         String postType = 'all';
-        if (label.trim() == 'Sent' || label.trim() == 'Gives') postType = 'give';
-        if (label.trim() == 'Received' || label.trim() == 'Takes') postType = 'take';
+        if (filterKey == 'sent') postType = 'give';
+        if (filterKey == 'received') postType = 'take';
         context.read<TradeController>().fetchMyTrades(postType: postType);
       },
       child: Container(
@@ -233,7 +234,7 @@ class _TradeHistoryScreenState extends State<TradeHistoryScreen> {
             Icon(Icons.history_outlined, size: 50.sp, color: Colors.grey),
             SizedBox(height: 10.h),
             Text(
-              'No trade history found',
+              AppLocalizations.of(context)!.noTradeHistoryFound,
               style: TextStyle(
                 fontSize: 16.sp,
                 color: context.subTextColor,

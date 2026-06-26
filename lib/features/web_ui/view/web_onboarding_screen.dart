@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/splash/controller/on_bording_controller.dart';
@@ -150,7 +151,7 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
                           _redirectTimer?.cancel();
                           controller.fetchOnboardingData();
                         },
-                        child: const Text("Retry"),
+                        child: Text(AppLocalizations.of(context)!.retry),
                       ),
                       const SizedBox(width: 12),
                       TextButton(
@@ -159,7 +160,7 @@ class _WebOnboardingScreenState extends State<WebOnboardingScreen> {
                           Navigator.pushReplacementNamed(
                               context, AppRoutes.login);
                         },
-                        child: const Text("Go to Login"),
+                        child: Text(AppLocalizations.of(context)!.goToLogin),
                       ),
                     ],
                   ),

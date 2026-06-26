@@ -267,7 +267,7 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('What do they want in return?', style: _sectionTitleStyle()),
+        Text(AppLocalizations.of(context)!.whatDoTheyWantIn, style: _sectionTitleStyle()),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,

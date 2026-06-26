@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
@@ -41,7 +42,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Blocked Users',
+          AppLocalizations.of(context)!.blockedUsers,
           style: TextStyle(
             color: context.textColor,
             fontSize: 18.sp,
@@ -64,7 +65,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                   child: blockedUsers.isEmpty
                       ? Center(
                           child: Text(
-                            'No blocked users',
+                            AppLocalizations.of(context)!.noBlockedUsers,
                             style: TextStyle(
                               color: context.subTextColor,
                               fontSize: 16.sp,
@@ -107,7 +108,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
-              'Blocked users will not be able to see your posts or contact you.',
+              AppLocalizations.of(context)!.blockedUsersWillNotBe,
               style: TextStyle(
                 color: context.isDarkMode
                     ? Colors.white70
@@ -225,7 +226,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                     if (user.blockedAt.isNotEmpty) ...[
                       SizedBox(height: 2.h),
                       Text(
-                        'Blocked on: ${DateFormat('dd MMM yyyy').format(DateTime.parse(user.blockedAt))}',
+                        AppLocalizations.of(context)!.blockedOnDate(DateFormat('dd MMM yyyy').format(DateTime.parse(user.blockedAt))),
                         style: TextStyle(
                           fontSize: 10.sp,
                           color: context.subTextColor.withOpacity(0.7),
@@ -263,7 +264,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                   ),
                   child: Text(
-                    'Unblock',
+                    AppLocalizations.of(context)!.unblock,
                     style: TextStyle(
                       color: context.primaryColor,
                       fontSize: 12.sp,
@@ -306,7 +307,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
               ),
               SizedBox(height: 24.h),
               Text(
-                'Are you sure you want to',
+                AppLocalizations.of(context)!.areYouSureYouWant2,
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
@@ -315,7 +316,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                 ),
               ),
               Text(
-                'unblock ${user.fullName}?',
+                AppLocalizations.of(context)!.unblockUserPrompt(user.fullName),
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
@@ -354,7 +355,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Unblock',
+                        AppLocalizations.of(context)!.unblock,
                         style: TextStyle(
                           color: context.onPrimaryColor,
                           fontSize: 15.sp,
@@ -379,7 +380,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Cancel',
+                        AppLocalizations.of(context)!.cancel,
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,

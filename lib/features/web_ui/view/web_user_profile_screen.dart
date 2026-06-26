@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
@@ -11,6 +12,7 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
 
 class WebUserProfileScreen extends StatefulWidget {
   final String? userId;
@@ -245,7 +247,7 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () => _handleBlockUser(profile),
                   icon: const Icon(Icons.block),
-                  label: const Text('Block'),
+                  label: Text(AppLocalizations.of(context)!.block),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     side: const BorderSide(color: Colors.redAccent, width: 1.5),
@@ -262,25 +264,18 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
   }
 
   void _handleSaveUser(UserProfileModel profile) async {
-    final response = await context.read<ProfileController>().toggleSaveUser(profile.userDetails.id);
-    if (!mounted) return;
-    if (response.success) {
-      setState(() => _isUserSaved = !_isUserSaved);
-      ToastService.showSuccessToast(context, _isUserSaved ? 'User saved' : 'User removed from saved');
-    } else {
-      ToastService.showErrorToast(context, response.message);
-    }
+    SaveToCollectionBottomSheet.show(context, profile.userDetails.id);
   }
 
   void _handleBlockUser(UserProfileModel profile) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Block User'),
+        title: Text(AppLocalizations.of(context)!.blockUser),
         content: Text('Are you sure you want to block ${profile.userDetails.fullName}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Block', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(AppLocalizations.of(context)!.cancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(AppLocalizations.of(context)!.block, style: TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -355,7 +350,7 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Community Marks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textColor)),
+          Text(AppLocalizations.of(context)!.communityMarks, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textColor)),
           Row(
             children: [
               Icon(Icons.thumb_up_alt_outlined, color: Colors.green, size: 20),
@@ -387,7 +382,7 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Bio', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textColor)),
+          Text(AppLocalizations.of(context)!.bio, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textColor)),
           const SizedBox(height: 16),
           Text(
             profile.userDetails.bio!,
@@ -420,7 +415,7 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
             children: [
               Row(
                 children: [
-                  Text('Reviews', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textColor)),
+                  Text(AppLocalizations.of(context)!.reviews, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textColor)),
                   if (profile.isRated != true) ...[
                     const SizedBox(width: 16),
                     ElevatedButton.icon(
@@ -434,7 +429,7 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                         );
                       },
                       icon: const Icon(Icons.star_rate_rounded, size: 18),
-                      label: const Text('Rate This Person'),
+                      label: Text(AppLocalizations.of(context)!.rateThisPerson),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: context.primaryColor,
                         foregroundColor: Colors.white,
@@ -462,7 +457,7 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32),
               child: Center(
-                child: Text('No reviews yet', style: TextStyle(fontSize: 16, color: Colors.grey.shade500)),
+                child: Text(AppLocalizations.of(context)!.noReviewsYet, style: TextStyle(fontSize: 16, color: Colors.grey.shade500)),
               ),
             )
           else ...[

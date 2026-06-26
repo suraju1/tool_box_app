@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
@@ -11,6 +12,7 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
+import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
 
 class WebProductCard extends StatelessWidget {
   final PostModel post;
@@ -94,14 +96,7 @@ class WebProductCard extends StatelessWidget {
             );
             break;
           case 'save':
-            final success = await profileController.toggleSaveUser(post.userId);
-            if (!context.mounted) return;
-            if (success.success) {
-              ToastService.showSuccessToast(context, 'User saved successfully');
-            } else {
-              ToastService.showErrorToast(
-                  context, success.message);
-            }
+            SaveToCollectionBottomSheet.show(context, post.userId);
             break;
           case 'share':
             Share.share(
@@ -135,32 +130,32 @@ class WebProductCard extends StatelessWidget {
       itemBuilder: (BuildContext context) {
         return [
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'profile',
-              child: Text('View Seller Profile'),
+              child: Text(AppLocalizations.of(context)!.viewSellerProfile),
             ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'save',
-              child: Text('Save Seller'),
+              child: Text(AppLocalizations.of(context)!.saveSeller),
             ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'share',
-            child: Text('Share Post'),
+            child: Text(AppLocalizations.of(context)!.sharePost),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'hide',
-            child: Text('Hide Post'),
+            child: Text(AppLocalizations.of(context)!.hidePost),
           ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'block',
-              child: Text('Block User'),
+              child: Text(AppLocalizations.of(context)!.blockUser),
             ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'report',
-              child: Text('Report Post', style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.reportPost, style: TextStyle(color: Colors.red)),
             ),
         ];
       },

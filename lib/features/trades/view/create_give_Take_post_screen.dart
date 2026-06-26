@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
@@ -376,7 +377,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           ),
         ),
         SizedBox(height: 12.h),
-        Text('Select Area', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.selectArea, style: _labelStyle()),
         SizedBox(height: 8.h),
         InkWell(
           onTap: () {
@@ -422,7 +423,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Select Area Diameter', style: _labelStyle()),
+            Text(AppLocalizations.of(context)!.selectAreaDiameter, style: _labelStyle()),
             Text('${_diameter.toInt()} km', style: _labelStyle()),
           ],
         ),
@@ -452,9 +453,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Trade Details', style: _labelStyle(size: 14)),
+        Text(AppLocalizations.of(context)!.tradeDetails, style: _labelStyle(size: 14)),
         SizedBox(height: 8.h),
-        Text('Trade Type',
+        Text(AppLocalizations.of(context)!.tradeType,
             style: TextStyle(color: context.subTextColor, fontSize: 12.sp)),
         SizedBox(height: 12.h),
         Container(
@@ -484,7 +485,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Add Photos', style: _labelStyle(size: 14)),
+        Text(AppLocalizations.of(context)!.addPhotos, style: _labelStyle(size: 14)),
         SizedBox(height: 15.h),
         GestureDetector(
           onTap: _itemImages.length >= 5 ? null : () => _pickImage(false),
@@ -581,9 +582,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Item Details', style: _labelStyle(size: 16)),
+        Text(AppLocalizations.of(context)!.itemDetails, style: _labelStyle(size: 16)),
         SizedBox(height: 12.h),
-        Text('Item Name', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.itemName, style: _labelStyle()),
         SizedBox(height: 8.h),
         _buildTextField('Enter item name',
             controller: _itemNameController,
@@ -591,7 +592,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         SizedBox(height: 12.h),
         _buildAddPhotosSection(),
         SizedBox(height: 20.h),
-        Text('Category', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.category, style: _labelStyle()),
         SizedBox(height: 8.h),
         _buildCategoryToggleSelection(
           _selectedCategory,
@@ -622,7 +623,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Condition', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.condition, style: _labelStyle()),
         SizedBox(height: 8.h),
         DropdownButtonFormField<String>(
           value: _selectedCondition,
@@ -666,11 +667,11 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Item Sources', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.itemSources, style: _labelStyle()),
         SizedBox(height: 8.h),
         DropdownButtonFormField<String>(
           value: currentSource,
-          hint: Text('-- Select Source --', style: TextStyle(fontSize: 13.sp, color: context.subTextColor)),
+          hint: Text(AppLocalizations.of(context)!.selectSource, style: TextStyle(fontSize: 13.sp, color: context.subTextColor)),
           icon: Icon(Icons.keyboard_arrow_down, color: context.subTextColor),
           decoration: InputDecoration(
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -716,7 +717,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Write a Note', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.writeANote, style: _labelStyle()),
         SizedBox(height: 8.h),
         _buildTextField('Describe your product here...',
             maxLines: 4,
@@ -730,7 +731,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('What do you want in return ?', style: _labelStyle(size: 16)),
+        Text(AppLocalizations.of(context)!.whatDoYouWantIn, style: _labelStyle(size: 16)),
         SizedBox(height: 16.h),
         Container(
           height: 45.h,
@@ -777,7 +778,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                       ),
                     ),
                     SizedBox(width: 8.w),
-                    Text('Negotiable',
+                    Text(AppLocalizations.of(context)!.negotiable,
                         style: TextStyle(
                             color: context.subTextColor, fontSize: 13.sp)),
                   ],
@@ -797,7 +798,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 20.h),
-        Text('Item Name', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.itemName, style: _labelStyle()),
         SizedBox(height: 8.h),
         _buildTextField('Enter item name',
             controller: _returnItemNameController,
@@ -807,7 +808,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Add Photos', style: _labelStyle(size: 14)),
+            Text(AppLocalizations.of(context)!.addPhotos, style: _labelStyle(size: 14)),
             SizedBox(height: 15.h),
             GestureDetector(
               onTap:
@@ -901,14 +902,14 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           ],
         ),
         SizedBox(height: 20.h),
-        Text('Category', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.category, style: _labelStyle()),
         SizedBox(height: 8.h),
         _buildCategoryToggleSelection(
           _selectedReturnCategory,
           (val) => setState(() => _selectedReturnCategory = val),
         ),
         SizedBox(height: 16.h),
-        Text('Condition', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.condition, style: _labelStyle()),
         SizedBox(height: 12.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -919,7 +920,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           ],
         ),
         SizedBox(height: 16.h),
-        Text('Description', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.description, style: _labelStyle()),
         SizedBox(height: 8.h),
         _buildTextField('Describe your product here...',
             maxLines: 4,
@@ -1042,7 +1043,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Wallet', style: _labelStyle(size: 14)),
+              Text(AppLocalizations.of(context)!.wallet, style: _labelStyle(size: 14)),
               SizedBox(height: 8.h),
               Consumer<SubscriptionController>(
                 builder: (context, subscriptionController, child) {
@@ -1077,7 +1078,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
               SizedBox(height: 6.h),
               Divider(color: context.dividerColor),
               SizedBox(height: 6.h),
-              Text('Notification Settings', style: _labelStyle(size: 14)),
+              Text(AppLocalizations.of(context)!.notificationSettings, style: _labelStyle(size: 14)),
               SizedBox(height: 12.h),
               Row(
                 children: [
@@ -1085,7 +1086,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Notify Saved Users Only',
+                        Text(AppLocalizations.of(context)!.notifySavedUsersOnly,
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 13.sp)),
                         SizedBox(height: 4.h),
@@ -1216,7 +1217,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       return;
     }
 
-    final String title = ModalRoute.of(context)!.settings.arguments as String;
+    final Object? args = ModalRoute.of(context)?.settings.arguments;
+    final String title = args is String ? args : 'Create Give Post';
     final String postType =
         title.toLowerCase().contains('take') ? 'take' : 'give';
 
@@ -1532,7 +1534,8 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
 
   Widget _buildAppBar() {
     // take teh argument data
-    final String title = ModalRoute.of(context)!.settings.arguments as String;
+    final Object? args = ModalRoute.of(context)?.settings.arguments;
+    final String title = args is String ? args : 'Create Give Post';
     return Container(
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.only(top: 20.h),

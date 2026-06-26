@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
@@ -133,7 +134,7 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
                 backgroundColor: context.primaryColor,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
-              child: const Text('Try Again', style: TextStyle(color: Colors.white, fontSize: 16)),
+              child: Text(AppLocalizations.of(context)!.tryAgain, style: TextStyle(color: Colors.white, fontSize: 16)),
             ),
           ],
         ),

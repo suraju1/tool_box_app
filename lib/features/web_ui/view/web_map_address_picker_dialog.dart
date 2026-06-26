@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -118,12 +119,12 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Location Disabled', style: TextStyle(fontWeight: FontWeight.bold)),
-            content: const Text('Your system location services are turned off. Please enable location in your device settings to fetch your current location.'),
+            title: Text(AppLocalizations.of(context)!.locationDisabled, style: TextStyle(fontWeight: FontWeight.bold)),
+            content: Text(AppLocalizations.of(context)!.yourSystemLocationServicesAre),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('OK', style: TextStyle(fontSize: 16)),
+                child: Text(AppLocalizations.of(context)!.ok, style: TextStyle(fontSize: 16)),
               ),
             ],
           ),
@@ -536,7 +537,7 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Finding Products for', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(AppLocalizations.of(context)!.findingProductsFor, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 15),
         Container(
           padding: const EdgeInsets.all(12),
@@ -571,7 +572,7 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
               ),
               TextButton(
                 onPressed: () => setState(() => _showFullForm = true),
-                child: Text('Change', style: TextStyle(color: context.primaryColor, fontWeight: FontWeight.bold)),
+                child: Text(AppLocalizations.of(context)!.change, style: TextStyle(color: context.primaryColor, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -617,7 +618,7 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Enter complete address', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(AppLocalizations.of(context)!.enterCompleteAddress, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             IconButton(
               onPressed: () => setState(() => _showFullForm = false),
               icon: const Icon(Icons.close),
@@ -625,7 +626,7 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           ],
         ),
         const SizedBox(height: 15),
-        Text('Save address as *', style: TextStyle(fontSize: 14, color: context.subTextColor)),
+        Text(AppLocalizations.of(context)!.saveAddressAs1, style: TextStyle(fontSize: 14, color: context.subTextColor)),
         const SizedBox(height: 10),
         _buildLabelSelector(),
         const SizedBox(height: 20),
@@ -699,7 +700,7 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Area / Sector / Locality *', style: TextStyle(fontSize: 12, color: context.subTextColor)),
+                Text(AppLocalizations.of(context)!.areaSectorLocality, style: TextStyle(fontSize: 12, color: context.subTextColor)),
                 const SizedBox(height: 4),
                 Text(
                   _currentAddress,
@@ -712,7 +713,7 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           ),
           TextButton(
             onPressed: () => setState(() => _showFullForm = false), // Go back to map view
-            child: Text('Change', style: TextStyle(color: context.primaryColor)),
+            child: Text(AppLocalizations.of(context)!.change, style: TextStyle(color: context.primaryColor)),
           ),
         ],
       ),
@@ -721,7 +722,7 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
 
   Widget _buildDefaultToggle() {
     return SwitchListTile(
-      title: const Text('Set as default address', style: TextStyle(fontSize: 16)),
+      title: Text(AppLocalizations.of(context)!.setAsDefaultAddress, style: TextStyle(fontSize: 16)),
       value: _isDefault,
       activeColor: context.primaryColor,
       onChanged: (val) => setState(() => _isDefault = val),
@@ -739,7 +740,7 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           backgroundColor: context.primaryColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: Text('Save address', style: TextStyle(color: context.onPrimaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
+        child: Text(AppLocalizations.of(context)!.saveAddress, style: TextStyle(color: context.onPrimaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
       ),
     );
   }

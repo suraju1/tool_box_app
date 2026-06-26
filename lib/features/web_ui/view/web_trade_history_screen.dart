@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/core/controller/shimmer_controller.dart';
 import 'package:tool_bocs/core/widgets/shimmer_box.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
@@ -89,9 +90,9 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Trade Summary',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context)!.tradeSummary,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -99,13 +100,13 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
         const SizedBox(height: 16),
         Row(
           children: [
-            _buildSummaryCard('${stats?.totalTrades ?? 0}', 'Total Trades',
+            _buildSummaryCard('${stats?.totalTrades ?? 0}', AppLocalizations.of(context)!.totalTrades,
                 Icons.handshake, Colors.blue),
             const SizedBox(width: 24),
-            _buildSummaryCard('$sentOffers', 'Sent Offers',
+            _buildSummaryCard('$sentOffers', AppLocalizations.of(context)!.sentOffers,
                 Icons.outbox_outlined, Colors.red),
             const SizedBox(width: 24),
-            _buildSummaryCard('$receivedOffers', 'Received Offers',
+            _buildSummaryCard('$receivedOffers', AppLocalizations.of(context)!.receivedOffers,
                 Icons.move_to_inbox_outlined, Colors.orange),
           ],
         ),
@@ -165,23 +166,23 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
   Widget _buildFilters() {
     return Row(
       children: [
-        _buildFilterChip(' All '),
+        _buildFilterChip('all', ' ${AppLocalizations.of(context)!.all} '),
         const SizedBox(width: 12),
-        _buildFilterChip(' Gives '),
+        _buildFilterChip('sent', ' ${AppLocalizations.of(context)!.sentTab} '),
         const SizedBox(width: 12),
-        _buildFilterChip(' Takes '),
+        _buildFilterChip('received', ' ${AppLocalizations.of(context)!.receivedTab} '),
       ],
     );
   }
 
-  Widget _buildFilterChip(String label) {
-    bool isSelected = selectedFilter == label;
+  Widget _buildFilterChip(String filterKey, String label) {
+    bool isSelected = selectedFilter == filterKey;
     return GestureDetector(
       onTap: () {
-        setState(() => selectedFilter = label);
+        setState(() => selectedFilter = filterKey);
         String postType = 'all';
-        if (label.trim() == 'Gives') postType = 'give';
-        if (label.trim() == 'Takes') postType = 'take';
+        if (filterKey == 'sent') postType = 'give';
+        if (filterKey == 'received') postType = 'take';
         context.read<TradeController>().fetchMyTrades(postType: postType);
       },
       child: Container(

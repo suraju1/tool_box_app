@@ -23,6 +23,7 @@ import 'package:tool_bocs/features/home/view/product_details_screen.dart';
 import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
+import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
 
 class TakeScreen extends StatefulWidget {
   const TakeScreen({super.key});
@@ -112,7 +113,7 @@ class _TakeScreenState extends State<TakeScreen> {
                         Text(controller.errorMessage!),
                         ElevatedButton(
                           onPressed: () => controller.fetchGivePosts(),
-                          child: const Text('Retry'),
+                          child: Text(AppLocalizations.of(context)!.retry),
                         ),
                       ],
                     ),
@@ -860,13 +861,7 @@ class _TakeScreenState extends State<TakeScreen> {
             );
             break;
           case 'save':
-            final success = await profileController.toggleSaveUser(userId);
-            if (success.success && mounted) {
-              ToastService.showSuccessToast(context, 'User saved successfully');
-            } else if (mounted) {
-              ToastService.showErrorToast(
-                  context, success.message ?? 'Error saving user');
-            }
+            SaveToCollectionBottomSheet.show(context, userId);
             break;
           case 'share':
             Share.share(
@@ -913,37 +908,37 @@ class _TakeScreenState extends State<TakeScreen> {
       itemBuilder: (BuildContext context) {
         return [
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'profile',
-              child: Text('View Seller Profile'),
+              child: Text(AppLocalizations.of(context)!.viewSellerProfile),
             ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'save',
-              child: Text('Save Seller'),
+              child: Text(AppLocalizations.of(context)!.saveSeller),
             ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'share',
-            child: Text('Share Post'),
+            child: Text(AppLocalizations.of(context)!.sharePost),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'hide',
-            child: Text('Hide Post'),
+            child: Text(AppLocalizations.of(context)!.hidePost),
           ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'block',
-              child: Text('Block User'),
+              child: Text(AppLocalizations.of(context)!.blockUser),
             ),
           if (!isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'report',
-              child: Text('Report Post', style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.reportPost, style: TextStyle(color: Colors.red)),
             ),
           if (isOwner)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'delete',
-              child: Text('Delete Post', style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.deletePost, style: TextStyle(color: Colors.red)),
             ),
         ];
       },

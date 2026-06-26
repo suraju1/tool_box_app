@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
@@ -36,7 +37,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
       return Scaffold(
         backgroundColor: context.scaffoldBg,
         appBar: _buildAppBar(context),
-        body: const Center(child: Text('No response selected')),
+        body: Center(child: Text(AppLocalizations.of(context)!.noResponseSelected)),
       );
     }
 
@@ -752,7 +753,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
               child: const Icon(Icons.check_circle, color: Colors.green, size: 64),
             ),
             const SizedBox(height: 32),
-            const Text('Trade Accepted!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(AppLocalizations.of(context)!.tradeAccepted, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             const Text(
               'The partner will now be notified to pay and start the chat.',
@@ -772,7 +773,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                   backgroundColor: context.primaryColor,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text('Done', style: TextStyle(color: context.onPrimaryColor, fontSize: 16)),
+                child: Text(AppLocalizations.of(context)!.done, style: TextStyle(color: context.onPrimaryColor, fontSize: 16)),
               ),
             ),
           ],
@@ -797,7 +798,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Confirm Acceptance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text(AppLocalizations.of(context)!.confirmAcceptance, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: Icon(Icons.close, color: context.textColor),
@@ -820,7 +821,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                       side: BorderSide(color: context.dividerColor),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text('Cancel', style: TextStyle(color: context.textColor, fontSize: 15)),
+                    child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: context.textColor, fontSize: 15)),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
@@ -830,7 +831,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                    child: Text(AppLocalizations.of(context)!.confirm, style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),

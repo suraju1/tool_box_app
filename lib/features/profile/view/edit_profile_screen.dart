@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +83,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (kIsWeb) {
         // TODO (Phase 4): Handle web image uploading using bytes
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Web image upload coming in next phase')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.webImageUploadComingIn)),
         );
         return;
       }
@@ -515,7 +516,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 final fullName = _nameController.text.trim();
                 if (fullName.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Full name is required')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.fullNameIsRequired)),
                   );
                   return;
                 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/features/web_ui/view/web_chat_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
@@ -55,7 +56,7 @@ class _WebTradeDetailsScreenState extends State<WebTradeDetailsScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('No trade selected', style: TextStyle(fontSize: 18)),
+              Text(AppLocalizations.of(context)!.noTradeSelected, style: TextStyle(fontSize: 18)),
               if (tradeController.errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -301,12 +302,12 @@ class _WebTradeDetailsScreenState extends State<WebTradeDetailsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Cancel Trade', style: TextStyle(fontWeight: FontWeight.w800)),
-        content: const Text('Are you sure you want to cancel this trade?', style: TextStyle(fontSize: 16)),
+        title: Text(AppLocalizations.of(context)!.cancelTrade, style: TextStyle(fontWeight: FontWeight.w800)),
+        content: Text(AppLocalizations.of(context)!.areYouSureYouWant7, style: TextStyle(fontSize: 16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('No', style: TextStyle(fontSize: 16)),
+            child: Text(AppLocalizations.of(context)!.no, style: TextStyle(fontSize: 16)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -320,7 +321,7 @@ class _WebTradeDetailsScreenState extends State<WebTradeDetailsScreen> {
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Yes, Cancel', style: TextStyle(color: Colors.white, fontSize: 16)),
+            child: Text(AppLocalizations.of(context)!.yesCancel, style: TextStyle(color: Colors.white, fontSize: 16)),
           ),
         ],
       ),
@@ -452,7 +453,12 @@ class _WebTradeDetailsScreenState extends State<WebTradeDetailsScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            isPoster ? 'Responder' : 'Poster',
+            (() {
+              final isGive = response.postType == 'give' || response.postType == 'giving';
+              final partnerIsGiving = (isPoster && !isGive) || (!isPoster && isGive);
+              final itemName = response.postItemName ?? response.givingItemName ?? 'Item';
+              return partnerIsGiving ? 'Giving you $itemName' : 'Taking your $itemName';
+            })(),
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.subTextColor),
           ),
           const SizedBox(height: 24),
@@ -508,7 +514,7 @@ class _WebTradeDetailsScreenState extends State<WebTradeDetailsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Rate this user', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              Text(AppLocalizations.of(context)!.rateThisUser, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -610,23 +616,37 @@ class _WebTradeDetailsScreenState extends State<WebTradeDetailsScreen> {
   }
 
   Widget _buildExchangeCard(TradeResponseModel response) {
+    final authController = context.read<AuthController>();
+    final currentUserId = authController.currentUser?.id;
+    final isPoster = currentUserId == response.posterUserId;
+    final isGive = response.postType == 'give' || response.postType == 'giving';
+    final partnerIsGiving = (isPoster && !isGive) || (!isPoster && isGive);
+
     final isTicketTrade = response.responseType == 'price' || response.postReturnType == 'Price';
-    String exchangeLabel = 'Exchange Item';
+    String exchangeLabel = partnerIsGiving ? 'You Give' : 'You Receive';
     String exchangeValue = response.itemName ?? response.givingItemName ?? 'Item';
     IconData exchangeIcon = Icons.inventory_2_outlined;
 
     if (isTicketTrade) {
-      exchangeLabel = 'Exchange Tickets';
+      exchangeLabel = partnerIsGiving ? 'You Pay' : 'You Receive';
       if (response.offerPrice != null && response.offerPrice! > 0) {
-        exchangeValue = '${response.offerPrice} Tickets';
+        exchangeValue = '₹${response.offerPrice!.toStringAsFixed(0)}';
       } else if (response.priceRangeStart != null) {
-        exchangeValue = '${response.priceRangeStart} - ${response.priceRangeEnd} Tickets';
+        final startPrice = response.priceRangeStart!.toStringAsFixed(0);
+        final endPrice = (response.priceRangeEnd ?? response.priceRangeStart!).toStringAsFixed(0);
+        
+        if (startPrice == endPrice) {
+          exchangeValue = '₹$startPrice';
+        } else {
+          exchangeValue = '₹$startPrice - ₹$endPrice';
+        }
       } else if (response.paymentAmount != null) {
-        exchangeValue = '${response.paymentAmount} Tickets';
+        final parsedAmt = double.tryParse(response.paymentAmount!)?.toStringAsFixed(0) ?? response.paymentAmount;
+        exchangeValue = '₹$parsedAmt';
       } else {
-        exchangeValue = 'Tickets';
+        exchangeValue = 'Price';
       }
-      exchangeIcon = Icons.confirmation_number_outlined;
+      exchangeIcon = Icons.currency_rupee;
     }
 
     final images = response.itemImages.isNotEmpty ? response.itemImages : (response.givingItemImages ?? []);

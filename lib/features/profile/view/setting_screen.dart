@@ -27,7 +27,7 @@ class _SettingScreenState extends State<SettingScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Settings',
+          AppLocalizations.of(context)!.settings,
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -69,7 +69,7 @@ class _SettingScreenState extends State<SettingScreen> {
               _buildSettingItem(
                 context,
                 icon: Icons.person_outline,
-                label: 'Edit Profile',
+                label: AppLocalizations.of(context)!.editProfile,
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.editProfile),
               ),
@@ -77,7 +77,7 @@ class _SettingScreenState extends State<SettingScreen> {
               _buildSettingItem(
                 context,
                 icon: Icons.help_outline,
-                label: 'Help & Support',
+                label: AppLocalizations.of(context)!.helpSupport,
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.helpSupport),
               ),
@@ -99,7 +99,7 @@ class _SettingScreenState extends State<SettingScreen> {
               _buildSettingItem(
                 context,
                 icon: Icons.description_outlined,
-                label: 'Terms & Conditions',
+                label: AppLocalizations.of(context)!.termsConditions,
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.termsConditions),
               ),
@@ -107,7 +107,7 @@ class _SettingScreenState extends State<SettingScreen> {
               _buildSettingItem(
                 context,
                 icon: Icons.shield_outlined,
-                label: 'Privacy Policy',
+                label: AppLocalizations.of(context)!.privacyPolicy,
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.privacyPolicy),
               ),
@@ -122,11 +122,11 @@ class _SettingScreenState extends State<SettingScreen> {
               _buildSettingItem(
                 context,
                 icon: Icons.visibility_outlined,
-                label: 'Unhide All Posts',
+                label: AppLocalizations.of(context)!.unhideAllPosts,
                 onTap: () async {
                   await context.read<TradeController>().clearHiddenPosts();
                   if (context.mounted) {
-                    ToastService.showSuccessToast(context, 'All hidden posts are now visible');
+                    ToastService.showSuccessToast(context, AppLocalizations.of(context)!.allHiddenPostsVisible);
                     context.read<TradeController>().fetchHomePosts(); // Refresh feed
                   }
                 },
@@ -200,7 +200,7 @@ class _SettingScreenState extends State<SettingScreen> {
               SizedBox(height: 20.h),
               _buildLanguageOption(
                 context,
-                title: 'English',
+                title: AppLocalizations.of(context)!.english,
                 isSelected: currentLocale == 'en',
                 onTap: () {
                   languageController.setLanguage('en');
@@ -209,7 +209,7 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
               _buildLanguageOption(
                 context,
-                title: 'हिन्दी (Hindi)',
+                title: AppLocalizations.of(context)!.hindi,
                 isSelected: currentLocale == 'hi',
                 onTap: () {
                   languageController.setLanguage('hi');
@@ -218,7 +218,7 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
               _buildLanguageOption(
                 context,
-                title: 'मराठी (Marathi)',
+                title: AppLocalizations.of(context)!.marathi,
                 isSelected: currentLocale == 'mr',
                 onTap: () {
                   languageController.setLanguage('mr');
@@ -312,7 +312,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   Divider(color: context.dividerColor, thickness: 1),
                   _buildThemeOption(
                     context,
-                    title: 'Light theme',
+                    title: AppLocalizations.of(context)!.lightTheme,
                     mode: ThemeMode.light,
                     currentMode: selectedMode,
                     onChanged: (mode) =>
@@ -321,7 +321,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   _buildDivider(),
                   _buildThemeOption(
                     context,
-                    title: 'Dark theme',
+                    title: AppLocalizations.of(context)!.darkTheme,
                     mode: ThemeMode.dark,
                     currentMode: selectedMode,
                     onChanged: (mode) =>
@@ -330,7 +330,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   _buildDivider(),
                   _buildThemeOption(
                     context,
-                    title: 'Use device theme',
+                    title: AppLocalizations.of(context)!.useDeviceTheme,
                     mode: ThemeMode.system,
                     currentMode: selectedMode,
                     onChanged: (mode) =>
@@ -353,7 +353,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Save preference',
+                        AppLocalizations.of(context)!.savePreference,
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/connectivity_service.dart';
 import 'package:tool_bocs/util/font_family.dart';
@@ -125,7 +126,7 @@ class _WebNoInternetScreenState extends State<WebNoInternetScreen> with SingleTi
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
-                      child: const Text('Retry Connection', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      child: Text(AppLocalizations.of(context)!.retryConnection, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 24),

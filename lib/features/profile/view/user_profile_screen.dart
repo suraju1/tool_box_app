@@ -9,6 +9,9 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/core/widgets/popup_menu_arrow_shape.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
+import 'package:tool_bocs/features/profile/view/blocked_users_screen.dart';
+import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
+import 'package:tool_bocs/features/profile/view/saved_users_screen.dart';
 import 'package:tool_bocs/features/profile/widgets/review_item_widget.dart';
 import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -811,24 +814,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     return GestureDetector(
       onTap: isSaving
           ? null
-          : () async {
+          : () {
               if (_userProfile != null) {
-                final response = await context
-                    .read<ProfileController>()
-                    .toggleSaveUser(_userProfile!.userDetails.id);
-
-                if (response.success) {
-                  if (mounted) {
-                    setState(() {
-                      _isUserSaved = !_isUserSaved;
-                    });
-                    ToastService.showSuccessToast(context, response.message);
-                  }
-                } else {
-                  if (mounted) {
-                    ToastService.showErrorToast(context, response.message);
-                  }
-                }
+                SaveToCollectionBottomSheet.show(context, _userProfile!.userDetails.id);
               }
             },
       child: Container(

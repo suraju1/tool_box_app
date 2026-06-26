@@ -41,16 +41,10 @@ class ToolUcsApp extends StatelessWidget {
         routes: AppPages.routes,
         locale: languageController.locale,
         builder: (context, child) {
-          // Globally apply bottom safe area to prevent system navigation bar overlap on all screens
-          return Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: SafeArea(
-              top: false,
-              left: false,
-              right: false,
-              bottom: true,
-              child: child ?? const SizedBox.shrink(),
-            ),
+          return SafeArea(
+            top: false, // Keep app bars under the status bar correctly if they handle it
+            bottom: true, // Prevent content from going behind system navigation buttons
+            child: child ?? const SizedBox.shrink(),
           );
         },
         localizationsDelegates: const [

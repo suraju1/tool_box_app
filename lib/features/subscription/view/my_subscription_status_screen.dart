@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -48,7 +49,7 @@ class _MySubscriptionStatusScreenState
         ],
         centerTitle: true,
         title: Text(
-          'My Subscription',
+          AppLocalizations.of(context)!.mySubscription,
           style: TextStyle(
             color: context.textColor,
             fontSize: 18.sp,
@@ -84,7 +85,7 @@ class _MySubscriptionStatusScreenState
                 _buildCreditStatusCard(context, subscription),
                 SizedBox(height: 20.h),
                 Text(
-                  'INCLUDED BENEFITS',
+                  AppLocalizations.of(context)!.includedBenefits,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -94,17 +95,17 @@ class _MySubscriptionStatusScreenState
                 ),
                 SizedBox(height: 15.h),
                 _buildBenefitItem(
-                    context, 'Post Visibility: ${subscription.status}'),
+                    context, AppLocalizations.of(context)!.postVisibilityStatus(subscription.status)),
                 _buildBenefitItem(
-                    context, 'Remaining Days: ${subscription.remainingDays}'),
+                    context, AppLocalizations.of(context)!.remainingDaysCount(subscription.remainingDays.toString())),
                 _buildBenefitItem(
-                    context, 'Post Price: ₹${subscription.postPrice}'),
+                    context, AppLocalizations.of(context)!.postPriceAmount(subscription.postPrice.toString())),
                 _buildBenefitItem(context,
-                    'Total Allocation: ${subscription.creditBalance} Credits'),
+                    AppLocalizations.of(context)!.totalAllocationCredits(subscription.creditBalance.toString())),
                 SizedBox(height: 20.h),
                 _buildActionButton(
                   context,
-                  label: 'Change Plan',
+                  label: AppLocalizations.of(context)!.changePlan,
                   onPressed: () =>
                       Navigator.pushNamed(context, AppRoutes.choosePlan),
                   isPrimary: true,
@@ -151,7 +152,7 @@ class _MySubscriptionStatusScreenState
                 size: 64.sp, color: context.subTextColor),
             SizedBox(height: 16.h),
             Text(
-              'No Active Subscription',
+              AppLocalizations.of(context)!.noActiveSubscription,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -161,7 +162,7 @@ class _MySubscriptionStatusScreenState
             SizedBox(height: 8.h),
             Text(
               controller.errorMessage ??
-                  'You don\'t have any active subscription plan.',
+                  AppLocalizations.of(context)!.youDontHaveAnyActiveSubscriptionPlan,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
@@ -171,7 +172,7 @@ class _MySubscriptionStatusScreenState
             SizedBox(height: 24.h),
             _buildActionButton(
               context,
-              label: 'View Plans',
+              label: AppLocalizations.of(context)!.viewPlans,
               onPressed: () =>
                   Navigator.pushNamed(context, AppRoutes.choosePlan),
               isPrimary: true,
@@ -180,7 +181,7 @@ class _MySubscriptionStatusScreenState
             TextButton(
               onPressed: () => controller.fetchMySubscription(),
               child:
-                  Text('Retry', style: TextStyle(color: context.primaryColor)),
+                  Text(AppLocalizations.of(context)!.retry, style: TextStyle(color: context.primaryColor)),
             ),
           ],
         ),
@@ -250,7 +251,7 @@ class _MySubscriptionStatusScreenState
                       ),
                     ),
                     TextSpan(
-                      text: '${subscription.days} Days Plan',
+                      text: AppLocalizations.of(context)!.daysPlan(subscription.days.toString()),
                       style: TextStyle(
                         color: context.subTextColor,
                         fontSize: 12.sp,
@@ -265,7 +266,7 @@ class _MySubscriptionStatusScreenState
           ),
           SizedBox(height: 5.h),
           Text(
-            '${subscription.name} Plan',
+            AppLocalizations.of(context)!.planText(subscription.name),
             style: TextStyle(
               fontSize: 24.sp,
               fontWeight: FontWeight.w800,
@@ -290,7 +291,7 @@ class _MySubscriptionStatusScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Expiry Date',
+                    AppLocalizations.of(context)!.expiryDate,
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: context.subTextColor,
@@ -347,7 +348,7 @@ class _MySubscriptionStatusScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Remaining Credits',
+                    AppLocalizations.of(context)!.remainingCredits,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -356,7 +357,7 @@ class _MySubscriptionStatusScreenState
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'Usage: ${subscription.usedPosts} posts used',
+                    AppLocalizations.of(context)!.usagePostsUsed(subscription.usedPosts.toString()),
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: context.subTextColor,

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -53,7 +54,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     SizedBox(height: 16.h),
                     ElevatedButton(
                       onPressed: () => controller.fetchWalletHistory(),
-                      child: const Text('Retry'),
+                      child: Text(AppLocalizations.of(context)!.retry),
                     ),
                   ],
                 ),
@@ -64,7 +65,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           if (controller.walletHistory.isEmpty) {
             return Center(
               child: Text(
-                'No transactions found',
+                AppLocalizations.of(context)!.noTransactionsFound,
                 style: TextStyle(
                   color: context.textColor.withOpacity(0.5),
                   fontSize: 16.sp,
@@ -99,7 +100,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       ),
       centerTitle: true,
       title: Text(
-        'Transaction History',
+        AppLocalizations.of(context)!.transactionHistory,
         style: TextStyle(
           color: context.textColor,
           fontSize: 18.sp,

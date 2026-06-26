@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -36,7 +37,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
     if (response == null) {
       return Scaffold(
         appBar: _buildAppBar(context),
-        body: const Center(child: Text('No response selected')),
+        body: Center(child: Text(AppLocalizations.of(context)!.noResponseSelected)),
       );
     }
 
@@ -876,7 +877,7 @@ class _TradeStartScreenState extends State<TradeStartScreen> {
           children: [
             const Icon(Icons.check_circle, color: Colors.green, size: 60),
             const SizedBox(height: 20),
-            const Text('Trade Accepted!',
+            Text(AppLocalizations.of(context)!.tradeAccepted,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             const Text(

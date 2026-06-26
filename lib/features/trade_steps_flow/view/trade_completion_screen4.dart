@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/util/colors.dart';
@@ -35,7 +36,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
     if (response == null) {
       return Scaffold(
         appBar: _buildAppBar(context),
-        body: const Center(child: Text('No trade selected')),
+        body: Center(child: Text(AppLocalizations.of(context)!.noTradeSelected)),
       );
     }
 
@@ -66,7 +67,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
                     ),
                   );
                 },
-                child: const Text('Go to Chat'),
+                child: Text(AppLocalizations.of(context)!.goToChat),
               ),
             ],
           ),
@@ -113,7 +114,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
                 SizedBox(height: 32.h),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Go Back'),
+                  child: Text(AppLocalizations.of(context)!.goBack),
                 ),
               ],
             ),
@@ -408,7 +409,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
                   borderRadius: BorderRadius.circular(8.r)),
               minimumSize: Size(100.w, 40.h),
             ),
-            child: Text('OK',
+            child: Text(AppLocalizations.of(context)!.ok,
                 style: TextStyle(
                     color: context.onPrimaryColor,
                     fontWeight: FontWeight.w700)),
@@ -510,7 +511,7 @@ class _TradeCompletionScreenState extends State<TradeCompletionScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r)),
             ),
-            child: Text('Yes, Proceed',
+            child: Text(AppLocalizations.of(context)!.yesProceed,
                 style: TextStyle(
                     color: context.onPrimaryColor,
                     fontWeight: FontWeight.w700)),

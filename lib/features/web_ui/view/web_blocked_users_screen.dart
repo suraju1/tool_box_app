@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
@@ -252,7 +253,7 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Unblock User'),
+          title: Text(AppLocalizations.of(context)!.unblockUser),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -285,7 +286,7 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               ),
-              child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(fontSize: 16)),
             ),
             ElevatedButton(
               onPressed: () async {

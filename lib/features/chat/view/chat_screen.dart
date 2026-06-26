@@ -1,5 +1,6 @@
 
 import 'dart:io';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -124,7 +125,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (kIsWeb) {
         // TODO (Phase 4): Handle web image uploading using bytes
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Web image upload coming in next phase')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.webImageUploadComingIn)),
         );
         return;
       }
@@ -176,8 +177,8 @@ class _ChatScreenState extends State<ChatScreen> {
             child: _chatRoomId.isEmpty || _currentUserId == null
                 ? Column(
                     children: [
-                      const Expanded(
-                        child: Center(child: Text('Start a conversation')),
+                      Expanded(
+                        child: Center(child: Text(AppLocalizations.of(context)!.startAConversation)),
                       ),
                       _buildInput(false),
                     ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/services/share_service.dart';
@@ -13,6 +14,7 @@ import 'package:tool_bocs/features/trades/model/post_model.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/util/date_util.dart';
 import 'package:tool_bocs/features/web_ui/widgets/web_product_card.dart';
+import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
 import 'package:tool_bocs/features/web_ui/widgets/sticky_sidebar_wrapper.dart';
 import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 
@@ -59,8 +61,8 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
           }
 
           if (widget.postId == 0) {
-            return const Center(
-              child: Text('Error: No Post ID provided (or page was refreshed)'),
+            return Center(
+              child: Text(AppLocalizations.of(context)!.errorNoPostIdProvided),
             );
           }
 
@@ -71,7 +73,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
 
           final post = controller.selectedPost;
           if (post == null) {
-            return const Center(child: Text('Post not found or access denied'));
+            return Center(child: Text(AppLocalizations.of(context)!.postNotFoundOrAccess));
           }
 
           // Generate similar posts from already loaded frontend list
@@ -228,9 +230,9 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                         }
                       },
                       itemBuilder: (context) => [
-                        const PopupMenuItem<String>(
+                        PopupMenuItem<String>(
                           value: 'report',
-                          child: Text('Report Post', style: TextStyle(color: Colors.red)),
+                          child: Text(AppLocalizations.of(context)!.reportPost, style: TextStyle(color: Colors.red)),
                         ),
                       ],
                     );
@@ -635,7 +637,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.w500, fontFamily: FontFamily.openSans, color: context.textColor),
                   ),
                   const SizedBox(height: 8),
-                  Text('Price in return', style: TextStyle(fontSize: 15, color: context.subTextColor)),
+                  Text(AppLocalizations.of(context)!.priceInReturn, style: TextStyle(fontSize: 15, color: context.subTextColor)),
                 ] else ...[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -653,7 +655,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(child: Text('Item Name', style: TextStyle(color: Colors.grey.shade500, fontSize: 13))),
+                                Expanded(child: Text(AppLocalizations.of(context)!.itemName, style: TextStyle(color: Colors.grey.shade500, fontSize: 13))),
                                 Expanded(flex: 2, child: Text(post.returnItemName ?? '-', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.textColor))),
                               ],
                             ),
@@ -661,7 +663,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(child: Text('Condition', style: TextStyle(color: Colors.grey.shade500, fontSize: 13))),
+                                Expanded(child: Text(AppLocalizations.of(context)!.condition, style: TextStyle(color: Colors.grey.shade500, fontSize: 13))),
                                 Expanded(flex: 2, child: Text(post.returnItemCondition ?? '-', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.textColor))),
                               ],
                             ),
@@ -669,7 +671,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(child: Text('Item Source', style: TextStyle(color: Colors.grey.shade500, fontSize: 13))),
+                                Expanded(child: Text(AppLocalizations.of(context)!.itemSource, style: TextStyle(color: Colors.grey.shade500, fontSize: 13))),
                                 Expanded(flex: 2, child: Text(post.returnItemSource ?? '-', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.textColor))),
                               ],
                             ),
@@ -680,7 +682,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                   ),
                   if (post.returnItemDescription != null && post.returnItemDescription!.isNotEmpty) ...[
                     const SizedBox(height: 24),
-                    Text('Description', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+                    Text(AppLocalizations.of(context)!.description, style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
                     const SizedBox(height: 12),
                     ...post.returnItemDescription!.split('\n').where((l) => l.trim().isNotEmpty).map((l) => Padding(
                       padding: const EdgeInsets.only(bottom: 6),
@@ -746,7 +748,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                       arguments: post.id,
                     ),
                     icon: const Icon(Icons.inbox_rounded),
-                    label: const Text('View Offers'),
+                    label: Text(AppLocalizations.of(context)!.viewOffers),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.isDarkMode ? Colors.white : Colors.black,
                       foregroundColor: context.isDarkMode ? Colors.black : Colors.white,
@@ -772,14 +774,8 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
                     builder: (context, profileController, child) {
                       final isSaved = profileController.savedUsers.any((user) => user.id == post.userId);
                       return OutlinedButton.icon(
-                        onPressed: () async {
-                          final success = await profileController.toggleSaveUser(post.userId);
-                          if (!context.mounted) return;
-                          if (success.success) {
-                            ToastService.showSuccessToast(context, isSaved ? 'Seller removed from saved list' : 'Seller saved successfully');
-                          } else {
-                            ToastService.showErrorToast(context, success.message);
-                          }
+                        onPressed: () {
+                          SaveToCollectionBottomSheet.show(context, post.userId);
                         },
                         icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border, size: 20),
                         label: Text(isSaved ? 'Seller Saved' : 'Save Seller'),
@@ -815,7 +811,7 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
           arguments: post.id,
         ),
         icon: const Icon(Icons.inbox_rounded),
-        label: const Text('View Offers'),
+        label: Text(AppLocalizations.of(context)!.viewOffers),
         style: ElevatedButton.styleFrom(
           backgroundColor: context.primaryColor,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -861,22 +857,8 @@ class _WebProductDetailsScreenState extends State<WebProductDetailsScreen> {
               (user) => user.id == post.userId,
             );
             return OutlinedButton.icon(
-              onPressed: () async {
-                final success = await profileController.toggleSaveUser(
-                  post.userId,
-                );
-                if (!context.mounted) return;
-
-                if (success.success) {
-                  ToastService.showSuccessToast(
-                    context,
-                    isSaved
-                        ? 'Seller removed from saved list'
-                        : 'Seller saved successfully',
-                  );
-                } else {
-                  ToastService.showErrorToast(context, success.message);
-                }
+              onPressed: () {
+                SaveToCollectionBottomSheet.show(context, post.userId);
               },
               icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
               label: Text(isSaved ? 'Seller Saved' : 'Save Seller'),

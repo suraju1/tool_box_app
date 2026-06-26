@@ -262,7 +262,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Person Rating', style: _sectionTitleStyle()),
+        Text(AppLocalizations.of(context)!.personRating, style: _sectionTitleStyle()),
         SizedBox(height: 10.h),
         Wrap(
           spacing: 12.w,
@@ -321,7 +321,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('What do they want in return?', style: _sectionTitleStyle()),
+        Text(AppLocalizations.of(context)!.whatDoTheyWantIn, style: _sectionTitleStyle()),
         SizedBox(height: 12.h),
         Wrap(
           spacing: 10.w,

@@ -11,6 +11,8 @@ import '../model/blocked_user_model.dart';
 
 import 'package:tool_bocs/features/profile/model/saved_user_model.dart';
 import 'package:tool_bocs/features/profile/model/faq_model.dart';
+import 'package:tool_bocs/features/profile/model/collection_model.dart';
+import 'package:tool_bocs/features/profile/model/collection_item_model.dart';
 import 'package:tool_bocs/features/trades/model/post_model.dart';
 
 class ProfileService {
@@ -291,6 +293,114 @@ class ProfileService {
     }
   }
 
+  Future<ApiResponse<dynamic>> addCollectionItem(int collectionId, String itemType, int itemId) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.collectionItems.replaceFirst('{{id}}', collectionId.toString()),
+        data: {'item_type': itemType, 'item_id': itemId},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Item added to collection successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<List<CollectionItemModel>>> fetchCollectionItems(int collectionId) async {
+    try {
+      final response = await _apiClient.get(
+        ApiConstants.fetchCollectionItems.replaceFirst('{{id}}', collectionId.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null && data['data']['items'] != null) {
+          final List<dynamic> itemsData = data['data']['items'];
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'Collection items fetched successfully',
+            data: itemsData.map((e) => CollectionItemModel.fromJson(e)).toList(),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch collection items',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> removeCollectionItem(int collectionId, int itemId) async {
+    try {
+      final response = await _apiClient.delete(
+        ApiConstants.removeCollectionItem
+            .replaceFirst('{{id}}', collectionId.toString())
+            .replaceFirst('{{itemId}}', itemId.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Item removed from collection successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> deleteCollection(int collectionId) async {
+    try {
+      final response = await _apiClient.delete(
+        ApiConstants.deleteCollection.replaceFirst('{{id}}', collectionId.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Collection deleted successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  /*
   Future<ApiResponse<dynamic>> saveUser(int userId) async {
     try {
       final response = await _apiClient.post(
@@ -314,6 +424,7 @@ class ProfileService {
       return ApiResponse(success: false, message: e.toString());
     }
   }
+  */
 
   Future<ApiResponse<dynamic>> unsaveUser(int userId) async {
     try {
@@ -368,6 +479,62 @@ class ProfileService {
       return ApiResponse(success: false, message: e.toString());
     }
   }
+
+  Future<ApiResponse<List<CollectionModel>>> fetchCollections() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.collections);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final List<dynamic> collectionsData = data['data'];
+          return ApiResponse(
+            success: true,
+            message: data['message'] ?? 'Collections fetched successfully',
+            data: collectionsData.map((e) => CollectionModel.fromJson(e)).toList(),
+          );
+        } else {
+          return ApiResponse(
+            success: false,
+            message: data['message'] ?? 'Failed to fetch collections',
+          );
+        }
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> createCollection(String name) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.collections,
+        data: {'name': name},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        return ApiResponse(
+          success: data['success'] ?? false,
+          message: data['message'] ?? 'Collection created successfully',
+          data: data['data'],
+        );
+      } else {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
   Future<ApiResponse<List<FaqModel>>> fetchFaqs() async {
     try {
       final response = await _apiClient.get(ApiConstants.faqs);

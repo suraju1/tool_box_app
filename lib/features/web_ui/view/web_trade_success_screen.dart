@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/trades/controller/trade_controller.dart';
 import 'package:tool_bocs/features/subscription/controller/subscription_controller.dart';
@@ -151,7 +152,7 @@ class _WebTradeSuccessScreenState extends State<WebTradeSuccessScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    child: const Text('View Trade Details', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    child: Text(AppLocalizations.of(context)!.viewTradeDetails, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -166,7 +167,7 @@ class _WebTradeSuccessScreenState extends State<WebTradeSuccessScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    child: Text('Go to Home', style: TextStyle(color: context.primaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                    child: Text(AppLocalizations.of(context)!.goToHome, style: TextStyle(color: context.primaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

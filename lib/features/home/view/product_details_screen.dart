@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -104,19 +105,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ),
                   Consumer<AuthController>(
                     builder: (context, authController, _) {
-                      final isOwner = authController.currentUser?.id == post.userId;
+                      final isOwner =
+                          authController.currentUser?.id == post.userId;
                       if (isOwner) return const SizedBox.shrink();
                       return PopupMenuButton<String>(
-                        icon: Icon(Icons.more_vert, color: context.textColor, size: 20.sp),
+                        icon: Icon(Icons.more_vert,
+                            color: context.textColor, size: 20.sp),
                         onSelected: (value) {
                           if (value == 'report') {
                             ReportPostSheet.show(context, post.id);
                           }
                         },
                         itemBuilder: (context) => [
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'report',
-                            child: Text('Report Post', style: TextStyle(color: Colors.red)),
+                            child: Text(AppLocalizations.of(context)!.reportPost,
+                                style: TextStyle(color: Colors.red)),
                           ),
                         ],
                       );
@@ -139,18 +143,19 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           }
 
           if (widget.postId == 0) {
-            return const Center(
-              child: Text('Error: No Post ID provided (or page was refreshed)'),
+            return Center(
+              child: Text(AppLocalizations.of(context)!.errorNoPostIdProvided),
             );
           }
 
-          if (controller.isLoading || controller.selectedPost?.id != widget.postId) {
+          if (controller.isLoading ||
+              controller.selectedPost?.id != widget.postId) {
             return const Center(child: CircularProgressIndicator());
           }
 
           final post = controller.selectedPost;
           if (post == null) {
-            return const Center(child: Text('Post not found'));
+            return Center(child: Text(AppLocalizations.of(context)!.postNotFound));
           }
 
           // Start autoplay if not started and multiple images
@@ -275,7 +280,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           ],
                         ),
                       ),
-                      if (_isPriceReturn(post) || _hasReturnItemDetails(post)) ...[
+                      if (_isPriceReturn(post) ||
+                          _hasReturnItemDetails(post)) ...[
                         SizedBox(height: 15.h),
                         Container(
                           width: double.infinity,
@@ -321,7 +327,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                       separatorBuilder: (_, __) =>
                                           SizedBox(width: 12.w),
                                       itemBuilder: (context, index) {
-                                        final imageUrl = post.returnItemImages[index];
+                                        final imageUrl =
+                                            post.returnItemImages[index];
                                         return GestureDetector(
                                           onTap: () => _openReturnImagePreview(
                                             post.returnItemImages,
@@ -354,7 +361,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                                       ? Colors.white10
                                                       : Colors.grey[100],
                                                   borderRadius:
-                                                      BorderRadius.circular(12.r),
+                                                      BorderRadius.circular(
+                                                          12.r),
                                                 ),
                                                 child: Icon(
                                                   Icons
@@ -394,7 +402,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     post.returnItemDescription!.isNotEmpty) ...[
                                   SizedBox(height: 8.h),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Description',
@@ -491,7 +500,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               onPressed: () {
                 // not required for now directly offer screen(becaue we consider first step as create post)
                 // Navigator.pushNamed(context, AppRoutes.tradeStep1);
-                Navigator.pushNamed(context, AppRoutes.tradeOffer);
+                Navigator.pushNamed(context, AppRoutes.tradeOffer);//tradeStep1
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.primaryColor,

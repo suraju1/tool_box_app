@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
@@ -34,7 +35,7 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
     if (response == null) {
       return Scaffold(
         appBar: _buildAppBar(context),
-        body: const Center(child: Text('No trade selected')),
+        body: Center(child: Text(AppLocalizations.of(context)!.noTradeSelected)),
       );
     }
 
@@ -70,7 +71,7 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
                   backgroundColor: context.primaryColor,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
-                child: const Text('Go to Chat', style: TextStyle(color: Colors.white, fontSize: 16)),
+                child: Text(AppLocalizations.of(context)!.goToChat, style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
             ],
           ),
@@ -120,7 +121,7 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   ),
-                  child: const Text('Go Back', style: TextStyle(fontSize: 16)),
+                  child: Text(AppLocalizations.of(context)!.goBack, style: TextStyle(fontSize: 16)),
                 ),
               ],
             ),
@@ -458,7 +459,7 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Yes, Proceed', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(AppLocalizations.of(context)!.yesProceed, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

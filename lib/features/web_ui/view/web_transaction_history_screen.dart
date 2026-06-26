@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -56,7 +57,7 @@ class _WebTransactionHistoryScreenState extends State<WebTransactionHistoryScree
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () => controller.fetchWalletHistory(),
-                          child: const Text('Retry'),
+                          child: Text(AppLocalizations.of(context)!.retry),
                         ),
                       ],
                     ),

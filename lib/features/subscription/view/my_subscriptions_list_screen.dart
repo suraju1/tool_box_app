@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -123,7 +124,7 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
           SizedBox(height: 12.h),
           TextButton(
             onPressed: () => controller.fetchSubscriptionHistory(),
-            child: Text('Retry', style: TextStyle(color: context.primaryColor)),
+            child: Text(AppLocalizations.of(context)!.retry, style: TextStyle(color: context.primaryColor)),
           ),
         ],
       ),

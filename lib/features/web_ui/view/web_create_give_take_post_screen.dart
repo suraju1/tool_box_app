@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -251,7 +252,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: FontFamily.openSans),
         ),
         const SizedBox(height: 20),
-        Text('Select Area', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.selectArea, style: _labelStyle()),
         const SizedBox(height: 8),
         InkWell(
           onTap: () {
@@ -291,7 +292,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Select Area Diameter', style: _labelStyle()),
+            Text(AppLocalizations.of(context)!.selectAreaDiameter, style: _labelStyle()),
             Text(_diameter < 1 ? '${(_diameter * 1000).round()} m' : '${_diameter.toStringAsFixed(1)} km', style: _labelStyle()),
           ],
         ),
@@ -320,9 +321,9 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Trade Details', style: _labelStyle(size: 18)),
+        Text(AppLocalizations.of(context)!.tradeDetails, style: _labelStyle(size: 18)),
         const SizedBox(height: 12),
-        const Text('Trade Type', style: TextStyle(color: Colors.grey, fontSize: 14)),
+        Text(AppLocalizations.of(context)!.tradeType, style: TextStyle(color: Colors.grey, fontSize: 14)),
         const SizedBox(height: 12),
         Container(
           height: 45,
@@ -349,7 +350,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Add Photos', style: _labelStyle(size: 16)),
+        Text(AppLocalizations.of(context)!.addPhotos, style: _labelStyle(size: 16)),
         const SizedBox(height: 16),
         GestureDetector(
           onTap: _itemImages.length >= 5 ? null : () => _pickImage(false),
@@ -424,22 +425,22 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Item Details', style: _labelStyle(size: 20)),
+        Text(AppLocalizations.of(context)!.itemDetails, style: _labelStyle(size: 20)),
         const SizedBox(height: 24),
-        Text('Item Name', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.itemName, style: _labelStyle()),
         const SizedBox(height: 12),
         _buildTextField('Enter item name', controller: _itemNameController, validator: (val) => _validateRequired(val, 'Item Name')),
         const SizedBox(height: 24),
         _buildAddPhotosSection(),
         const SizedBox(height: 32),
-        Text('Category', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.category, style: _labelStyle()),
         const SizedBox(height: 12),
         _buildCategoryToggleSelection(
           _selectedCategory,
           (val) => setState(() => _selectedCategory = val),
         ),
         const SizedBox(height: 24),
-        Text('Condition', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.condition, style: _labelStyle()),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -451,7 +452,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           ],
         ),
         const SizedBox(height: 24),
-        Text('Write a Note', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.writeANote, style: _labelStyle()),
         const SizedBox(height: 12),
         _buildTextField('Describe your product here...', maxLines: 4, controller: _itemNoteController, validator: (val) => _validateRequired(val, 'Note')),
         const SizedBox(height: 24),
@@ -470,7 +471,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                   },
                 ),
                 const SizedBox(width: 8),
-                const Text('Homemade', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(AppLocalizations.of(context)!.homemade, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ],
             ),
             const SizedBox(width: 32),
@@ -487,15 +488,15 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                   },
                 ),
                 const SizedBox(width: 8),
-                const Text('Store bought', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(AppLocalizations.of(context)!.storeBought, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ],
             ),
           ],
         ),
         if (_showSourceError)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 8),
-            child: Text('Please select at least one option', style: TextStyle(color: Colors.red, fontSize: 14)),
+            child: Text(AppLocalizations.of(context)!.pleaseSelectAtLeastOne, style: TextStyle(color: Colors.red, fontSize: 14)),
           ),
       ],
     );
@@ -505,7 +506,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('What do you want in return ?', style: _labelStyle(size: 20)),
+        Text(AppLocalizations.of(context)!.whatDoYouWantIn, style: _labelStyle(size: 20)),
         const SizedBox(height: 24),
         Container(
           height: 45,
@@ -549,7 +550,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                       onChanged: (val) => setState(() => _isNegotiable = val),
                     ),
                     const SizedBox(width: 12),
-                    const Text('Negotiable', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                    Text(AppLocalizations.of(context)!.negotiable, style: TextStyle(color: Colors.grey, fontSize: 16)),
                   ],
                 ),
               ],
@@ -567,14 +568,14 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
-        Text('Item Name', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.itemName, style: _labelStyle()),
         const SizedBox(height: 12),
         _buildTextField('Enter item name', controller: _returnItemNameController, validator: (val) => _validateRequired(val, 'Return Item Name')),
         const SizedBox(height: 32),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Add Photos', style: _labelStyle(size: 16)),
+            Text(AppLocalizations.of(context)!.addPhotos, style: _labelStyle(size: 16)),
             const SizedBox(height: 16),
             GestureDetector(
               onTap: _returnItemImages.length >= 5 ? null : () => _pickImage(true),
@@ -644,14 +645,14 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           ],
         ),
         const SizedBox(height: 32),
-        Text('Category', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.category, style: _labelStyle()),
         const SizedBox(height: 12),
         _buildCategoryToggleSelection(
           _selectedReturnCategory,
           (val) => setState(() => _selectedReturnCategory = val),
         ),
         const SizedBox(height: 24),
-        Text('Condition', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.condition, style: _labelStyle()),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -663,7 +664,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           ],
         ),
         const SizedBox(height: 24),
-        Text('Description', style: _labelStyle()),
+        Text(AppLocalizations.of(context)!.description, style: _labelStyle()),
         const SizedBox(height: 12),
         _buildTextField('Describe your product here...', maxLines: 4, controller: _returnItemDescriptionController, validator: (val) => _validateRequired(val, 'Return Item Description')),
         const SizedBox(height: 24),
@@ -682,7 +683,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                   },
                 ),
                 const SizedBox(width: 8),
-                const Text('Homemade', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(AppLocalizations.of(context)!.homemade, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ],
             ),
             const SizedBox(width: 32),
@@ -699,7 +700,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                   },
                 ),
                 const SizedBox(width: 8),
-                const Text('Store bought', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(AppLocalizations.of(context)!.storeBought, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ],
             ),
           ],
@@ -745,7 +746,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Wallet', style: _labelStyle(size: 18)),
+              Text(AppLocalizations.of(context)!.wallet, style: _labelStyle(size: 18)),
               const SizedBox(height: 16),
               Consumer<SubscriptionController>(
                 builder: (context, subscriptionController, child) {
@@ -771,7 +772,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
               const SizedBox(height: 16),
               Divider(color: Theme.of(context).dividerColor),
               const SizedBox(height: 16),
-              Text('Notification Settings', style: _labelStyle(size: 18)),
+              Text(AppLocalizations.of(context)!.notificationSettings, style: _labelStyle(size: 18)),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -779,7 +780,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Notify Saved Users Only', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(AppLocalizations.of(context)!.notifySavedUsersOnly, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         const SizedBox(height: 8),
                         const Text(
                           'Only Partners you\'ve traded with before will receive notifications.',
@@ -821,7 +822,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                     width: 24,
                     child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                   )
-                : const Text('Post Item', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                : Text(AppLocalizations.of(context)!.postItem, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
           ),
         );
       },
@@ -961,7 +962,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600, fontSize: 16)),
+            child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600, fontSize: 16)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -977,7 +978,7 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            child: const Text('Buy Subscription', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            child: Text(AppLocalizations.of(context)!.buySubscription, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ],
       ),
