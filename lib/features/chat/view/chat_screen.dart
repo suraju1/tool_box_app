@@ -274,71 +274,115 @@ class _ChatScreenState extends State<ChatScreen> {
               icon: const Icon(Icons.info_outline),
               color: context.textColor,
               onPressed: () {
-                showDialog(
+                showModalBottomSheet(
                   context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
                   builder: (context) {
-                    return AlertDialog(
-                      insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
-                      // title: Text(
-                      //   '',
-                      //   style: TextStyle(
-                      //     color: context.textColor,
-                      //     fontWeight: FontWeight.bold,
-                      //     fontSize: 16.sp,
-                      //     fontFamily: FontFamily.openSans,
-                      //   ),
-                      // ),
-                      content: Column(
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 25.h),
+                      decoration: BoxDecoration(
+                        color: context.surfaceColor,
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(35.r)),
+                      ),
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Center(
+                            child: Container(
+                              width: 50.w,
+                              height: 5.h,
+                              decoration: BoxDecoration(
+                                color: context.dividerColor,
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20.h),
                           Text(
-                            '• This Chat stays on for next 72 hours.',
+                            AppLocalizations.of(context)!.chatInfoTitle,
                             style: TextStyle(
                               color: context.textColor,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.sp,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.sp,
                               fontFamily: FontFamily.openSans,
                             ),
                           ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            '• Do Not cheat, Negative remarks stays on your profile forever.',
-                            style: TextStyle(
-                              color: context.textColor,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.sp,
-                              fontFamily: FontFamily.openSans,
+                          SizedBox(height: 15.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(top: 6.h, right: 10.w),
+                                child: Icon(Icons.circle, size: 6.r, color: context.textColor.withOpacity(0.5)),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  AppLocalizations.of(context)!.chatInfo1,
+                                  style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14.sp, fontFamily: FontFamily.openSans),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(top: 6.h, right: 10.w),
+                                child: Icon(Icons.circle, size: 6.r, color: context.textColor.withOpacity(0.5)),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  AppLocalizations.of(context)!.chatInfo2,
+                                  style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14.sp, fontFamily: FontFamily.openSans),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(top: 6.h, right: 10.w),
+                                child: Icon(Icons.circle, size: 6.r, color: context.textColor.withOpacity(0.5)),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  AppLocalizations.of(context)!.chatInfo3,
+                                  style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14.sp, fontFamily: FontFamily.openSans),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 25.h),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50.h,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: context.primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15.r),
+                                ),
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                AppLocalizations.of(context)!.done,
+                                style: TextStyle(
+                                  color: context.onPrimaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.sp,
+                                  fontFamily: FontFamily.openSans,
+                                ),
+                              ),
                             ),
                           ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            '• Good Luck, Happy Innovation!.',
-                            style: TextStyle(
-                              color: context.textColor,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.sp,
-                              fontFamily: FontFamily.openSans,
-                            ),
-                          ),
+                          SizedBox(height: MediaQuery.of(context).padding.bottom),
                         ],
                       ),
-                      actions: [
-                        InkWell(
-                          onTap: () => Navigator.pop(context),
-                          child: Text(
-                            'OK',
-                            style: TextStyle(
-                              color: context.primaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
-                              fontFamily: FontFamily.openSans,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ),
-                      ],
                     );
                   },
                 );
@@ -364,7 +408,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ],
       centerTitle: true,
       title: Text(
-        'Message',
+        AppLocalizations.of(context)!.message,
         style: TextStyle(
           color: context.textColor,
           fontWeight: FontWeight.bold,
@@ -554,23 +598,23 @@ class _ChatScreenState extends State<ChatScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                   children: [
-                    const TextSpan(text: "You chose "),
+                    TextSpan(text: AppLocalizations.of(context)!.youChose),
                     TextSpan(
-                      text: "Giving $givingItem to $partnerName ",
+                      text: AppLocalizations.of(context)!.givingTo(givingItem, partnerName),
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         color: context.primaryColor,
                       ),
                     ),
-                    const TextSpan(text: "and "),
+                    TextSpan(text: AppLocalizations.of(context)!.andWord),
                     TextSpan(
-                      text: "Taking $takingItem ",
+                      text: AppLocalizations.of(context)!.taking(takingItem),
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         color: context.primaryColor,
                       ),
                     ),
-                    const TextSpan(text: "in return"),
+                    TextSpan(text: AppLocalizations.of(context)!.inReturn),
                   ],
                 ),
               ),
@@ -739,10 +783,10 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               child: TextField(
                 controller: _messageController,
-                decoration: const InputDecoration(
-                  hintText: 'Type a message ...',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.typeAMessage,
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.grey),
+                  hintStyle: const TextStyle(color: Colors.grey),
                 ),
               ),
             ),

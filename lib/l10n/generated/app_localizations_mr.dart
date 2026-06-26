@@ -63,7 +63,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get logout => 'लॉगआउट';
 
   @override
-  String get nearbyItems => 'जवळपासच्या वस्तू';
+  String get nearbyItems => 'जवळील वस्तू';
 
   @override
   String get distance => 'अंतर';
@@ -123,7 +123,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get editProfile => 'प्रोफाइल संपादित करा';
 
   @override
-  String get helpSupport => 'मदत आणि समर्थन';
+  String get helpSupport => 'मदत आणि सपोर्ट';
 
   @override
   String get termsConditions => 'अटी आणि शर्ती';
@@ -162,7 +162,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get noCategoriesAvailable => 'कोणत्याही श्रेणी उपलब्ध नाहीत';
 
   @override
-  String get showItemsNearYou => 'तुमच्या जवळच्या वस्तू दाखवा';
+  String get showItemsNearYou => 'आपल्या जवळील वस्तू दाखवा';
 
   @override
   String get areYouSureYouWant =>
@@ -230,13 +230,13 @@ class AppLocalizationsMr extends AppLocalizations {
   String get savedAddresses => 'सेव्ह केलेले पत्ते';
 
   @override
-  String get profileAddress => 'प्रोफाइल पत्ता';
+  String get profileAddress => 'प्रोफाईलचा पत्ता';
 
   @override
-  String get selectDeliveryLocation => 'वितरण स्थान निवडा';
+  String get selectDeliveryLocation => 'डिलिव्हरीचे ठिकाण निवडा';
 
   @override
-  String get useCurrentLocation => 'वर्तमान स्थान वापरा';
+  String get useCurrentLocation => 'सध्याच्या ठिकाणाचा वापर करा';
 
   @override
   String get defaultText => 'डीफॉल्ट';
@@ -356,12 +356,10 @@ class AppLocalizationsMr extends AppLocalizations {
   String get matchOffers => 'मॅच ऑफर्स';
 
   @override
-  String get seeWhatPeopleWantAround =>
-      'आपल्या सभोवतालच्या लोकांना काय हवे आहे ते पहा';
+  String get seeWhatPeopleWantAround => 'आजुबाजुला लोकांना काय हवे आहे ते पहा';
 
   @override
-  String get seeExistingPostsByGivers =>
-      '• तुमच्या आजूबाजूला देणाऱ्यांच्या सध्याच्या पोस्ट पहा';
+  String get seeExistingPostsByGivers => 'देणाऱ्यांच्या सध्याच्या पोस्ट पहा';
 
   @override
   String get respondToPostsMentionWhat =>
@@ -622,16 +620,16 @@ class AppLocalizationsMr extends AppLocalizations {
   String get mySubscriptions => 'माझे सदस्यत्व';
 
   @override
-  String get noSubscriptionHistory => 'सदस्यता इतिहास नाही';
+  String get noSubscriptionHistory => 'कोणताही सबस्क्रिप्शन इतिहास नाही';
 
   @override
   String get youHaven => 'तुमच्याकडे नाही\\';
 
   @override
-  String get currentPlan => 'चालू योजना';
+  String get currentPlan => 'सध्याचा प्लॅन';
 
   @override
-  String get creditsRemaining => 'क्रेडिट्स बाकी';
+  String get creditsRemaining => 'क्रेडिट्स शिल्लक';
 
   @override
   String get includedBenefits => 'फायद्यांचा समावेश आहे';
@@ -646,7 +644,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get remainingCredits => 'उर्वरित क्रेडिट्स';
 
   @override
-  String get tradingPoint => 'ट्रेडिंग पॉइंट';
+  String get tradingPoint => 'ट्रेडिंग पॉईंट';
 
   @override
   String get selectArea => 'क्षेत्र निवडा';
@@ -695,10 +693,10 @@ class AppLocalizationsMr extends AppLocalizations {
   String get negotiable => 'निगोशिएबल';
 
   @override
-  String get homemade => 'होममेड';
+  String get homemade => 'घरगुती';
 
   @override
-  String get storeBought => 'दुकान विकत घेतले';
+  String get storeBought => 'दुकानातून खरेदी केलेले';
 
   @override
   String get wallet => 'पाकीट';
@@ -714,25 +712,24 @@ class AppLocalizationsMr extends AppLocalizations {
   String get onlyPartnersYou => 'केवळ भागीदार तुम्ही\\';
 
   @override
-  String get postItem => 'पोस्ट आयटम';
+  String get postItem => 'आयटम पोस्ट करा';
 
   @override
-  String get activeSubscriptionRequired => 'सक्रिय सदस्यता आवश्यक';
+  String get activeSubscriptionRequired => 'सक्रिय सदस्यत्व आवश्यक';
 
   @override
   String get youDoNotHaveAny =>
       'हे पोस्ट तयार करण्यासाठी तुमच्याकडे कोणतीही सक्रिय सदस्यता किंवा क्रेडिट्स नाहीत. कृपया सुरू ठेवण्यासाठी नवीन सदस्यता खरेदी करा किंवा सक्रिय करा.';
 
   @override
-  String get buySubscription => 'सदस्यता खरेदी करा';
+  String get buySubscription => 'सदस्यत्व खरेदी करा';
 
   @override
-  String get seeExistingPostsByTakers =>
-      '• तुमच्या आजूबाजूला घेणाऱ्यांच्या सध्याच्या पोस्ट पहा';
+  String get seeExistingPostsByTakers => 'घेणाऱ्यांच्या सध्याच्या पोस्ट पहा';
 
   @override
   String get respondToPostsMentionWhat1 =>
-      '• पोस्टना प्रतिसाद द्या, त्या बदल्यात तुम्हाला काय हवे आहे ते नमूद करा';
+      'पोस्टला प्रतिसाद द्या, सांगा काय...';
 
   @override
   String get viewSellerProfile => 'विक्रेता प्रोफाइल पहा';
@@ -750,12 +747,11 @@ class AppLocalizationsMr extends AppLocalizations {
   String get reportPost => 'अहवाल पोस्ट';
 
   @override
-  String get seeWhatPeopleAreGiving =>
-      'तुमच्या आजूबाजूला लोक काय देत आहेत ते पहा';
+  String get seeWhatPeopleAreGiving => 'लोक काय देत आहेत ते पहा';
 
   @override
   String get respondToPostsMentionWhat2 =>
-      '• पोस्टना प्रतिसाद द्या, त्या बदल्यात तुम्ही काय देऊ शकता ते नमूद करा';
+      'पोस्टला प्रतिसाद द्या, सांगा काय...';
 
   @override
   String get deletePost => 'पोस्ट हटवा';
@@ -764,7 +760,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get noTradeSelected => 'कोणताही व्यापार निवडलेला नाही';
 
   @override
-  String get completeTrade => 'पूर्ण व्यापार';
+  String get completeTrade => 'व्यापार पूर्ण करा';
 
   @override
   String get cancelTrade => 'व्यापार रद्द करा';
@@ -1100,6 +1096,163 @@ class AppLocalizationsMr extends AppLocalizations {
   String get done => 'झाले';
 
   @override
+  String get searchChats => 'चॅट्स शोधा...';
+
+  @override
+  String get chatInfoTitle => 'माहिती';
+
+  @override
+  String get chatInfo1 => 'ही चॅट पुढील 72 तासांसाठी सुरू राहील.';
+
+  @override
+  String get chatInfo2 =>
+      'फसवणूक करू नका, नकारात्मक टिप्पण्या तुमच्या प्रोफाईलवर कायम राहतील.';
+
+  @override
+  String get chatInfo3 => 'शुभेच्छा, हॅपी इनोव्हेशन!';
+
+  @override
+  String get distanceLabel => 'अंतर';
+
+  @override
+  String get setYourLocationToEnable =>
+      'अंतर फिल्टर करण्यासाठी आपले लोकेशन सेट करा';
+
+  @override
+  String kmAway(String distance) {
+    return '$distance किमी दूर';
+  }
+
+  @override
+  String get unknownDistanceAway => '- किमी दूर';
+
+  @override
+  String userIsTaking(String userName) {
+    return '$userName घेत आहेत';
+  }
+
+  @override
+  String userIsGiving(String userName) {
+    return '$userName देत आहेत';
+  }
+
+  @override
+  String get inExchangeFor => 'बदल्यात: ';
+
+  @override
+  String get moneyLabel => '(पैसे)';
+
+  @override
+  String get freeLabel => 'मोफत';
+
+  @override
+  String get itemLabel => 'आयटम';
+
+  @override
+  String get offersLabel => 'ऑफर';
+
+  @override
+  String get giveLabel => 'द्या';
+
+  @override
+  String get takeLabel => 'घ्या';
+
+  @override
+  String get enableGpsForAccurateLocation => 'अचूक ठिकाणासाठी GPS सुरू करा';
+
+  @override
+  String get addNewAddress => 'नवीन पत्ता जोडा';
+
+  @override
+  String get defaultLabel => 'डिफॉल्ट';
+
+  @override
+  String get filterLabel => 'फिल्टर';
+
+  @override
+  String get sortByLabel => 'सॉर्ट करा';
+
+  @override
+  String showingResults(int count) {
+    return '($count निकाल दाखवत आहे)';
+  }
+
+  @override
+  String get myPostsTitle => 'माझ्या पोस्ट';
+
+  @override
+  String get seeAllActiveInactivePosts =>
+      '• तुमच्या सर्व सक्रिय आणि निष्क्रिय पोस्ट पहा';
+
+  @override
+  String get viewOffersNotifications =>
+      '• तुमच्या वस्तूंसाठी ऑफर आणि सूचना पहा';
+
+  @override
+  String get allPostsTab => 'सर्व';
+
+  @override
+  String get activePostsTab => 'सक्रिय';
+
+  @override
+  String get inactivePostsTab => 'निष्क्रिय';
+
+  @override
+  String get tryChangingFilterOrCreatePost =>
+      'फिल्टर बदलून पहा किंवा नवीन पोस्ट तयार करा!';
+
+  @override
+  String get createPostLabel => 'पोस्ट तयार करा';
+
+  @override
+  String get noSubscriptionPaymentsYet =>
+      'तुम्ही अद्याप कोणतेही सबस्क्रिप्शन पेमेंट केलेले नाही.';
+
+  @override
+  String expiresOn(String date) {
+    return 'येथे समाप्त $date';
+  }
+
+  @override
+  String idHash(String id) {
+    return 'आयडी #$id';
+  }
+
+  @override
+  String get periodLabel => 'कालावधी';
+
+  @override
+  String get amountLabel => 'रक्कम';
+
+  @override
+  String get activeStatus => 'सक्रिय';
+
+  @override
+  String get expiredStatus => 'कालबाह्य';
+
+  @override
+  String get typeAMessage => 'संदेश टाइप करा ...';
+
+  @override
+  String get youChose => 'तुम्ही निवडले ';
+
+  @override
+  String givingTo(String givingItem, String partnerName) {
+    return '$partnerName ला $givingItem देणे ';
+  }
+
+  @override
+  String get andWord => 'आणि ';
+
+  @override
+  String taking(String takingItem) {
+    return '$takingItem घेणे ';
+  }
+
+  @override
+  String get inReturn => 'बदल्यात';
+
+  @override
   String get postNotFound => 'पोस्ट सापडली नाही';
 
   @override
@@ -1258,4 +1411,387 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get failedToRemoveProfile => 'प्रोफाइल काढण्यात अयशस्वी';
+
+  @override
+  String get giveIt => 'हे द्या';
+
+  @override
+  String get productDetails => 'उत्पादन तपशील';
+
+  @override
+  String get itemCondition => 'उत्पादनाची स्थिती';
+
+  @override
+  String get noDescriptionProvided => 'कोणतेही वर्णन दिलेले नाही.';
+
+  @override
+  String get priceRange => 'किंमत श्रेणी';
+
+  @override
+  String returnInReturn(String returnType) {
+    return 'बदल्यात $returnType';
+  }
+
+  @override
+  String get returnInReturnFallback => 'बदल्यात परतावा';
+
+  @override
+  String kmAwayFrom(String km, String location) {
+    return '$location पासून $km किमी दूर';
+  }
+
+  @override
+  String get giveWhatWillYouOffer => 'द्या ( तुम्ही बदल्यात काय द्याल? )';
+
+  @override
+  String get takeWhatYouWant => 'घ्या ( तुम्हाला बदल्यात काय हवे आहे? )';
+
+  @override
+  String giveWhatIsAskingFor(String name) {
+    return 'द्या जे $name मागत आहेत';
+  }
+
+  @override
+  String takeWhatIsGiving(String name) {
+    return 'घ्या जे $name देत आहेत';
+  }
+
+  @override
+  String get itemYouOfferInReturn => 'जी वस्तू तुम्ही बदल्यात द्याल';
+
+  @override
+  String get itemYouWantInReturn => 'जी वस्तू तुम्हाला बदल्यात हवी आहे';
+
+  @override
+  String get fillDetailsYouOffering => 'तुम्ही देत असलेल्या वस्तूचा तपशील भरा';
+
+  @override
+  String get fillItemDetailsYouWant =>
+      'तुम्हाला बदल्यात हव्या असलेल्या वस्तूचा तपशील भरा';
+
+  @override
+  String get moneyAskForMoney => 'पैसे ( पैशांसाठी विचारा )';
+
+  @override
+  String get askForMoney => 'पैशांसाठी विचारा';
+
+  @override
+  String get offerPriceForItem => 'वस्तूसाठी किंमत ऑफर करा';
+
+  @override
+  String get setCustomPrice => 'वस्तूसाठी तुमची किंमत सेट करा';
+
+  @override
+  String get askForFree => 'मोफत विचारा';
+
+  @override
+  String get giveForFree => 'मोफत द्या';
+
+  @override
+  String get spreadSomeJoy => 'शेजारी काही आनंद वाटा';
+
+  @override
+  String get giverLabel => 'देणारा';
+
+  @override
+  String get takerLabel => 'घेणारा';
+
+  @override
+  String givingAction(String name) {
+    return '$name देत आहेत';
+  }
+
+  @override
+  String takingAction(String name) {
+    return '$name घेत आहेत';
+  }
+
+  @override
+  String offerTypeLabel(String type) {
+    return 'ऑफरचा प्रकार : $type';
+  }
+
+  @override
+  String categoryLabel(String category) {
+    return 'श्रेणी : $category';
+  }
+
+  @override
+  String takeItemFrom(String item, String name) {
+    return '$name कडून $item घ्या';
+  }
+
+  @override
+  String giveItemTo(String item, String name) {
+    return '$name ला $item द्या';
+  }
+
+  @override
+  String get giveSpecifiedReturn => 'ठरलेला रिटर्न द्या';
+
+  @override
+  String get takeOfferedItem => 'ऑफर केलेली वस्तू घ्या';
+
+  @override
+  String get offerCustomItem => 'तुमची वस्तू ऑफर करा';
+
+  @override
+  String get requestCustomItem => 'तुमच्या वस्तूची विनंती करा';
+
+  @override
+  String get sendOffer => 'ऑफर पाठवा';
+
+  @override
+  String get offerSentTitle => 'ऑफर पाठवली!';
+
+  @override
+  String get offerSentMsg =>
+      'तुमची ऑफर यशस्वीरित्या पाठवली गेली आहे. कृपया मालकाने ती स्वीकारण्याची प्रतीक्षा करा.';
+
+  @override
+  String kmAwayLabel(String km) {
+    return '$km किमी दूर';
+  }
+
+  @override
+  String get didNotFindWhatYouWereLookingFor =>
+      'तुम्हाला जे हवे होते ते सापडले नाही ?';
+
+  @override
+  String get wereHereToHelpYouWithAnyQuestions =>
+      'समुदायाशी संबंधित तुमच्या कोणत्याही प्रश्नांमध्ये किंवा समस्यांमध्ये मदत करण्यासाठी आम्ही येथे आहोत';
+
+  @override
+  String get shareYourFeedback => 'तुमचा अभिप्राय शेअर करा';
+
+  @override
+  String get partnersWithinRadius =>
+      'या त्रिज्येतील भागीदारांना तुमची वस्तू दिसेल.';
+
+  @override
+  String get enterItemName => 'वस्तूचे नाव प्रविष्ट करा';
+
+  @override
+  String get pleaseSelectAtLeastOneOption => 'कृपया किमान एक पर्याय निवडा';
+
+  @override
+  String get minimum => 'किमान';
+
+  @override
+  String get maximum => 'कमाल';
+
+  @override
+  String get postNow => 'आत्ता पोस्ट करा';
+
+  @override
+  String get postRequest => 'विनंती पोस्ट करा';
+
+  @override
+  String get uploadAtLeastOneImage => 'किमान एक फोटो अपलोड करा';
+
+  @override
+  String get add => 'जोडा';
+
+  @override
+  String creditsLeft(String credits) {
+    return 'क्रेडिट्स: $credits';
+  }
+
+  @override
+  String creditsPerTrade(String credits) {
+    return 'प्रत्येक ट्रेडसाठी $credits क्रेडिट्स';
+  }
+
+  @override
+  String get noActiveSubscriptionMessage =>
+      'तुमच्याकडे ही पोस्ट तयार करण्यासाठी कोणतेही सक्रिय सदस्यत्व किंवा क्रेडिट्स नाहीत. कृपया सुरू ठेवण्यासाठी नवीन सदस्यत्व खरेदी करा किंवा सक्रिय करा.';
+
+  @override
+  String get addCategory => 'श्रेणी जोडा';
+
+  @override
+  String get categoryAddedSuccessfully => 'श्रेणी यशस्वीरित्या जोडली गेली!';
+
+  @override
+  String get addCustomCategory => 'कस्टम श्रेणी जोडा';
+
+  @override
+  String get photoRequired => 'फोटो आवश्यक';
+
+  @override
+  String get max5PhotosReached => 'कमाल 5 फोटो पूर्ण झाले आहेत';
+
+  @override
+  String get createGivePost => 'गिव पोस्ट तयार करा';
+
+  @override
+  String get createTakePost => 'टेक पोस्ट तयार करा';
+
+  @override
+  String get askSomeoneToTake =>
+      '• पोस्ट तयार करून एखाद्याला काहीतरी घेण्यास सांगा';
+
+  @override
+  String get postVisibleToTakers =>
+      '• ही पोस्ट तुमच्या सभोवतालच्या \"टेकर्स\" ला दिसेल';
+
+  @override
+  String get inYourSelectedArea =>
+      '• तुमच्या निवडलेल्या क्षेत्रात म्हणजेच >10 मीटर / <5किमी';
+
+  @override
+  String get newCondition => 'नवीन';
+
+  @override
+  String get likeNewCondition => 'नवीन सारखे';
+
+  @override
+  String get usedCondition => 'वापरलेले';
+
+  @override
+  String get describeYourProduct => 'तुमच्या उत्पादनाचे वर्णन येथे करा...';
+
+  @override
+  String get priceLabel => 'किंमत';
+
+  @override
+  String get desiredPriceRange => 'इच्छित किंमत श्रेणी';
+
+  @override
+  String get minPrice => 'किमान किंमत';
+
+  @override
+  String get maxPrice => 'कमाल किंमत';
+
+  @override
+  String get tradeWith => 'यांच्याशी व्यापार करा';
+
+  @override
+  String get exchangeDetails => 'विनिमय तपशील';
+
+  @override
+  String get youReceive => 'तुम्हाला मिळते';
+
+  @override
+  String get youGive => 'तुम्ही देता';
+
+  @override
+  String get youPay => 'तुम्ही भरता';
+
+  @override
+  String get tradeInfo => 'व्यापार माहिती';
+
+  @override
+  String dateLabel(String date) {
+    return 'तारीख: $date';
+  }
+
+  @override
+  String statusLabel(String status) {
+    return 'स्थिती: $status';
+  }
+
+  @override
+  String meetingLabel(String meeting) {
+    return 'मीटिंग: $meeting';
+  }
+
+  @override
+  String get tradeNotes => 'व्यापार नोट्स';
+
+  @override
+  String get noAdditionalNotesProvided =>
+      'कोणत्याही अतिरिक्त नोट्स प्रदान केल्या नाहीत.';
+
+  @override
+  String rejectedReasonLabel(String reason) {
+    return 'नाकारण्याचे कारण: $reason';
+  }
+
+  @override
+  String chatWith(String name) {
+    return '$name सोबत चॅट करा';
+  }
+
+  @override
+  String get tradeCancelledSuccessfully => 'व्यापार यशस्वीरित्या रद्द झाला';
+
+  @override
+  String get failedToCancelTrade => 'व्यापार रद्द करण्यात अयशस्वी';
+
+  @override
+  String get like => 'आवडले';
+
+  @override
+  String get dislike => 'नाही आवडले';
+
+  @override
+  String get likedSuccessfully => 'यशस्वीरित्या आवडले';
+
+  @override
+  String get dislikedSuccessfully => 'यशस्वीरित्या नाही आवडले';
+
+  @override
+  String get failedToSubmitMark => 'चिन्ह सबमिट करण्यात अयशस्वी';
+
+  @override
+  String givingYouItem(String itemName) {
+    return 'तुम्हाला $itemName देत आहे';
+  }
+
+  @override
+  String takingYourItem(String itemName) {
+    return 'तुमची $itemName घेत आहे';
+  }
+
+  @override
+  String get fullName => 'पूर्ण नाव';
+
+  @override
+  String get locationLabel => 'स्थान';
+
+  @override
+  String get emailAddress => 'ईमेल पत्ता';
+
+  @override
+  String get usedForNotifications =>
+      'सूचना आणि खाते पुनर्प्राप्तीसाठी वापरले जाते';
+
+  @override
+  String get mobileNumber => 'मोबाईल नंबर';
+
+  @override
+  String get verifiedMobileNumber => 'सत्यापित मोबाईल नंबर';
+
+  @override
+  String get dateOfBirth => 'जन्मतारीख';
+
+  @override
+  String get male => 'पुरुष';
+
+  @override
+  String get female => 'स्त्री';
+
+  @override
+  String get other => 'इतर';
+
+  @override
+  String get profileVisibility => 'प्रोफाइल दृश्यमानता';
+
+  @override
+  String get publicAnyoneCanView =>
+      'सार्वजनिक: कोणीही तुमची प्रोफाइल पाहू शकतो.';
+
+  @override
+  String get showTradeHistory => 'व्यापार इतिहास दाखवा';
+
+  @override
+  String get tradeHistoryHidden =>
+      'तुमचा व्यापार इतिहास इतरांपासून लपलेला आहे.';
+
+  @override
+  String get enterYourBio => 'तुमचा बायो एंटर करा...';
+
+  @override
+  String get updateFailed => 'अपडेट अयशस्वी';
 }

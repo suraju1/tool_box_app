@@ -1252,7 +1252,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Appearance',
+                        AppLocalizations.of(context)!.appearance,
                         style: TextStyle(
                           fontSize: 22.sp,
                           fontWeight: FontWeight.w700,
@@ -1282,7 +1282,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Divider(color: context.dividerColor, thickness: 1),
                   _buildThemeOption(
                     context,
-                    title: 'Light theme',
+                    title: AppLocalizations.of(context)!.lightTheme,
                     mode: ThemeMode.light,
                     currentMode: selectedMode,
                     onChanged: (mode) =>
@@ -1291,7 +1291,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildDivider(),
                   _buildThemeOption(
                     context,
-                    title: 'Dark theme',
+                    title: AppLocalizations.of(context)!.darkTheme,
                     mode: ThemeMode.dark,
                     currentMode: selectedMode,
                     onChanged: (mode) =>
@@ -1300,7 +1300,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildDivider(),
                   _buildThemeOption(
                     context,
-                    title: 'Use device theme',
+                    title: AppLocalizations.of(context)!.useDeviceTheme,
                     mode: ThemeMode.system,
                     currentMode: selectedMode,
                     onChanged: (mode) =>
@@ -1323,7 +1323,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Save preference',
+                        AppLocalizations.of(context)!.savePreference,
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,

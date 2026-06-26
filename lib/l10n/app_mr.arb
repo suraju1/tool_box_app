@@ -345,6 +345,111 @@
   "customizeTheLookAndFeel": "अनुप्रयोगाचे स्वरूप आणि अनुभव सानुकूलित करा.",
   "rateThisUser": "या वापरकर्त्याला रेट करा",
   "done": "झाले",
+  "searchChats": "चॅट्स शोधा...",
+  "chatInfoTitle": "माहिती",
+  "chatInfo1": "ही चॅट पुढील 72 तासांसाठी सुरू राहील.",
+  "chatInfo2": "फसवणूक करू नका, नकारात्मक टिप्पण्या तुमच्या प्रोफाईलवर कायम राहतील.",
+  "chatInfo3": "शुभेच्छा, हॅपी इनोव्हेशन!",
+  "distanceLabel": "अंतर",
+  "showItemsNearYou": "आपल्या जवळील वस्तू दाखवा",
+  "setYourLocationToEnable": "अंतर फिल्टर करण्यासाठी आपले लोकेशन सेट करा",
+  "kmAway": "{distance} किमी दूर",
+  "@kmAway": {
+    "placeholders": {
+      "distance": { "type": "String" }
+    }
+  },
+  "unknownDistanceAway": "- किमी दूर",
+  "userIsTaking": "{userName} घेत आहेत",
+  "@userIsTaking": {
+    "placeholders": {
+      "userName": { "type": "String" }
+    }
+  },
+  "userIsGiving": "{userName} देत आहेत",
+  "@userIsGiving": {
+    "placeholders": {
+      "userName": { "type": "String" }
+    }
+  },
+  "inExchangeFor": "बदल्यात: ",
+  "moneyLabel": "(पैसे)",
+  "freeLabel": "मोफत",
+  "itemLabel": "वस्तू",
+  "offersLabel": "ऑफर",
+  "giveLabel": "द्या",
+  "takeLabel": "घ्या",
+  "selectDeliveryLocation": "डिलिव्हरीचे ठिकाण निवडा",
+  "useCurrentLocation": "सध्याच्या ठिकाणाचा वापर करा",
+  "enableGpsForAccurateLocation": "अचूक ठिकाणासाठी GPS सुरू करा",
+  "addNewAddress": "नवीन पत्ता जोडा",
+  "savedAddresses": "सेव्ह केलेले पत्ते",
+  "profileAddress": "प्रोफाईलचा पत्ता",
+  "defaultLabel": "डिफॉल्ट",
+  "filterLabel": "फिल्टर",
+  "sortByLabel": "सॉर्ट करा",
+  "nearbyItems": "जवळील वस्तू",
+  "showingResults": "({count} निकाल दाखवत आहे)",
+  "@showingResults": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "searchWhatYouWantToGive": "तुम्हाला काय द्यायचे आहे ते शोधा",
+  "seeWhatPeopleWantAround": "आजुबाजुला लोकांना काय हवे आहे ते पहा",
+  "seeExistingPostsByTakers": "घेणाऱ्यांच्या सध्याच्या पोस्ट पहा",
+  "respondToPostsMentionWhat1": "पोस्टला प्रतिसाद द्या, सांगा काय...",
+  "helpSupport": "मदत आणि सपोर्ट",
+  "searchWhatYouWantToTake": "तुम्हाला काय घ्यायचे आहे ते शोधा",
+  "seeWhatPeopleAreGiving": "लोक काय देत आहेत ते पहा",
+  "seeExistingPostsByGivers": "देणाऱ्यांच्या सध्याच्या पोस्ट पहा",
+  "respondToPostsMentionWhat2": "पोस्टला प्रतिसाद द्या, सांगा काय...",
+  "myPostsTitle": "माझ्या पोस्ट",
+  "manageYourPosts": "तुमच्या पोस्ट व्यवस्थापित करा",
+  "seeAllActiveInactivePosts": "• तुमच्या सर्व सक्रिय आणि निष्क्रिय पोस्ट पहा",
+  "viewOffersNotifications": "• तुमच्या वस्तूंसाठी ऑफर आणि सूचना पहा",
+  "allPostsTab": "सर्व",
+  "activePostsTab": "सक्रिय",
+  "inactivePostsTab": "निष्क्रिय",
+  "tryChangingFilterOrCreatePost": "फिल्टर बदलून पहा किंवा नवीन पोस्ट तयार करा!",
+  "createPostLabel": "पोस्ट तयार करा",
+  "noSubscriptionHistory": "कोणताही सबस्क्रिप्शन इतिहास नाही",
+  "noSubscriptionPaymentsYet": "तुम्ही अद्याप कोणतेही सबस्क्रिप्शन पेमेंट केलेले नाही.",
+  "currentPlan": "सध्याचा प्लॅन",
+  "expiresOn": "येथे समाप्त {date}",
+  "@expiresOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "idHash": "आयडी #{id}",
+  "@idHash": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "periodLabel": "कालावधी",
+  "amountLabel": "रक्कम",
+  "creditsRemaining": "क्रेडिट्स शिल्लक",
+  "activeStatus": "सक्रिय",
+  "expiredStatus": "कालबाह्य",
+  "typeAMessage": "संदेश टाइप करा ...",
+  "youChose": "तुम्ही निवडले ",
+  "givingTo": "{partnerName} ला {givingItem} देणे ",
+  "@givingTo": {
+    "placeholders": {
+      "givingItem": { "type": "String" },
+      "partnerName": { "type": "String" }
+    }
+  },
+  "andWord": "आणि ",
+  "taking": "{takingItem} घेणे ",
+  "@taking": {
+    "placeholders": {
+      "takingItem": { "type": "String" }
+    }
+  },
+  "inReturn": "बदल्यात",
   "postNotFound": "पोस्ट सापडली नाही",
   "offerSummary": "ऑफर सारांश",
   "selectYourOffer": "तुमची ऑफर निवडा",
@@ -396,5 +501,160 @@
   "collectionCreatedSuccessfully": "संग्रह यशस्वीरित्या तयार केला",
   "failedToCreateCollection": "संग्रह तयार करण्यात अयशस्वी",
   "profileRemovedFromSaved": "प्रोफाइल सेव्हमधून काढले",
-  "failedToRemoveProfile": "प्रोफाइल काढण्यात अयशस्वी"
+  "failedToRemoveProfile": "प्रोफाइल काढण्यात अयशस्वी",
+  "giveIt": "हे द्या",
+  "productDetails": "उत्पादन तपशील",
+  "itemCondition": "उत्पादनाची स्थिती",
+  "noDescriptionProvided": "कोणतेही वर्णन दिलेले नाही.",
+  "priceRange": "किंमत श्रेणी",
+  "returnInReturn": "बदल्यात {returnType}",
+  "returnInReturnFallback": "बदल्यात परतावा",
+  "kmAwayFrom": "{location} पासून {km} किमी दूर",
+  "giveWhatWillYouOffer": "द्या ( तुम्ही बदल्यात काय द्याल? )",
+  "takeWhatYouWant": "घ्या ( तुम्हाला बदल्यात काय हवे आहे? )",
+  "giveWhatIsAskingFor": "द्या जे {name} मागत आहेत",
+  "takeWhatIsGiving": "घ्या जे {name} देत आहेत",
+  "itemYouOfferInReturn": "जी वस्तू तुम्ही बदल्यात द्याल",
+  "itemYouWantInReturn": "जी वस्तू तुम्हाला बदल्यात हवी आहे",
+  "fillDetailsYouOffering": "तुम्ही देत असलेल्या वस्तूचा तपशील भरा",
+  "fillItemDetailsYouWant": "तुम्हाला बदल्यात हव्या असलेल्या वस्तूचा तपशील भरा",
+  "moneyAskForMoney": "पैसे ( पैशांसाठी विचारा )",
+  "askForMoney": "पैशांसाठी विचारा",
+  "offerPriceForItem": "वस्तूसाठी किंमत ऑफर करा",
+  "setCustomPrice": "वस्तूसाठी तुमची किंमत सेट करा",
+  "askForFree": "मोफत विचारा",
+  "giveForFree": "मोफत द्या",
+  "spreadSomeJoy": "शेजारी काही आनंद वाटा",
+  "giverLabel": "देणारा",
+  "takerLabel": "घेणारा",
+  "givingAction": "{name} देत आहेत",
+  "takingAction": "{name} घेत आहेत",
+  "offerTypeLabel": "ऑफरचा प्रकार : {type}",
+  "categoryLabel": "श्रेणी : {category}",
+  "takeItemFrom": "{name} कडून {item} घ्या",
+  "giveItemTo": "{name} ला {item} द्या",
+  "giveSpecifiedReturn": "ठरलेला रिटर्न द्या",
+  "takeOfferedItem": "ऑफर केलेली वस्तू घ्या",
+  "offerCustomItem": "तुमची वस्तू ऑफर करा",
+  "requestCustomItem": "तुमच्या वस्तूची विनंती करा",
+  "sendOffer": "ऑफर पाठवा",
+  "offerSentTitle": "ऑफर पाठवली!",
+  "offerSentMsg": "तुमची ऑफर यशस्वीरित्या पाठवली गेली आहे. कृपया मालकाने ती स्वीकारण्याची प्रतीक्षा करा.",
+  "kmAwayLabel": "{km} किमी दूर",
+  "didNotFindWhatYouWereLookingFor": "तुम्हाला जे हवे होते ते सापडले नाही ?",
+  "wereHereToHelpYouWithAnyQuestions": "समुदायाशी संबंधित तुमच्या कोणत्याही प्रश्नांमध्ये किंवा समस्यांमध्ये मदत करण्यासाठी आम्ही येथे आहोत",
+  "shareYourFeedback": "तुमचा अभिप्राय शेअर करा",
+  "tradingPoint": "ट्रेडिंग पॉईंट",
+  "change": "बदला",
+  "partnersWithinRadius": "या त्रिज्येतील भागीदारांना तुमची वस्तू दिसेल.",
+  "enterItemName": "वस्तूचे नाव प्रविष्ट करा",
+  "pleaseSelectAtLeastOneOption": "कृपया किमान एक पर्याय निवडा",
+  "minimum": "किमान",
+  "maximum": "कमाल",
+  "postNow": "आत्ता पोस्ट करा",
+  "postRequest": "विनंती पोस्ट करा",
+  "uploadAtLeastOneImage": "किमान एक फोटो अपलोड करा",
+  "add": "जोडा",
+  "creditsLeft": "क्रेडिट्स: {credits}",
+  "creditsPerTrade": "प्रत्येक ट्रेडसाठी {credits} क्रेडिट्स",
+  "activeSubscriptionRequired": "सक्रिय सदस्यत्व आवश्यक",
+  "noActiveSubscriptionMessage": "तुमच्याकडे ही पोस्ट तयार करण्यासाठी कोणतेही सक्रिय सदस्यत्व किंवा क्रेडिट्स नाहीत. कृपया सुरू ठेवण्यासाठी नवीन सदस्यत्व खरेदी करा किंवा सक्रिय करा.",
+  "buySubscription": "सदस्यत्व खरेदी करा",
+  "addCategory": "श्रेणी जोडा",
+  "categoryAddedSuccessfully": "श्रेणी यशस्वीरित्या जोडली गेली!",
+  "addCustomCategory": "कस्टम श्रेणी जोडा",
+  "photoRequired": "फोटो आवश्यक",
+  "max5PhotosReached": "कमाल 5 फोटो पूर्ण झाले आहेत",
+  "createGivePost": "गिव पोस्ट तयार करा",
+  "createTakePost": "टेक पोस्ट तयार करा",
+  "askSomeoneToTake": "• पोस्ट तयार करून एखाद्याला काहीतरी घेण्यास सांगा",
+  "postVisibleToTakers": "• ही पोस्ट तुमच्या सभोवतालच्या \"टेकर्स\" ला दिसेल",
+  "inYourSelectedArea": "• तुमच्या निवडलेल्या क्षेत्रात म्हणजेच >10 मीटर / <5किमी",
+  "newCondition": "नवीन",
+  "likeNewCondition": "नवीन सारखे",
+  "usedCondition": "वापरलेले",
+  "describeYourProduct": "तुमच्या उत्पादनाचे वर्णन येथे करा...",
+  "priceLabel": "किंमत",
+  "itemLabel": "आयटम",
+  "postItem": "आयटम पोस्ट करा",
+  "homemade": "घरगुती",
+  "storeBought": "दुकानातून खरेदी केलेले",
+  "desiredPriceRange": "इच्छित किंमत श्रेणी",
+  "minPrice": "किमान किंमत",
+  "maxPrice": "कमाल किंमत",
+  "tradeWith": "यांच्याशी व्यापार करा",
+  "exchangeDetails": "विनिमय तपशील",
+  "youReceive": "तुम्हाला मिळते",
+  "youGive": "तुम्ही देता",
+  "youPay": "तुम्ही भरता",
+  "tradeInfo": "व्यापार माहिती",
+  "dateLabel": "तारीख: {date}",
+  "@dateLabel": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "statusLabel": "स्थिती: {status}",
+  "@statusLabel": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "meetingLabel": "मीटिंग: {meeting}",
+  "@meetingLabel": {
+    "placeholders": {
+      "meeting": { "type": "String" }
+    }
+  },
+  "tradeNotes": "व्यापार नोट्स",
+  "noAdditionalNotesProvided": "कोणत्याही अतिरिक्त नोट्स प्रदान केल्या नाहीत.",
+  "rejectedReasonLabel": "नाकारण्याचे कारण: {reason}",
+  "@rejectedReasonLabel": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "completeTrade": "व्यापार पूर्ण करा",
+  "chatWith": "{name} सोबत चॅट करा",
+  "@chatWith": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "cancelTrade": "व्यापार रद्द करा",
+  "tradeCancelledSuccessfully": "व्यापार यशस्वीरित्या रद्द झाला",
+  "failedToCancelTrade": "व्यापार रद्द करण्यात अयशस्वी",
+  "like": "आवडले",
+  "dislike": "नाही आवडले",
+  "likedSuccessfully": "यशस्वीरित्या आवडले",
+  "dislikedSuccessfully": "यशस्वीरित्या नाही आवडले",
+  "failedToSubmitMark": "चिन्ह सबमिट करण्यात अयशस्वी",
+  "givingYouItem": "तुम्हाला {itemName} देत आहे",
+  "@givingYouItem": {
+    "placeholders": {
+      "itemName": { "type": "String" }
+    }
+  },
+  "takingYourItem": "तुमची {itemName} घेत आहे",
+  "@takingYourItem": {
+    "placeholders": {
+      "itemName": { "type": "String" }
+    }
+  },
+  "fullName": "पूर्ण नाव",
+  "locationLabel": "स्थान",
+  "emailAddress": "ईमेल पत्ता",
+  "usedForNotifications": "सूचना आणि खाते पुनर्प्राप्तीसाठी वापरले जाते",
+  "mobileNumber": "मोबाईल नंबर",
+  "verifiedMobileNumber": "सत्यापित मोबाईल नंबर",
+  "dateOfBirth": "जन्मतारीख",
+  "male": "पुरुष",
+  "female": "स्त्री",
+  "other": "इतर",
+  "profileVisibility": "प्रोफाइल दृश्यमानता",
+  "publicAnyoneCanView": "सार्वजनिक: कोणीही तुमची प्रोफाइल पाहू शकतो.",
+  "showTradeHistory": "व्यापार इतिहास दाखवा",
+  "tradeHistoryHidden": "तुमचा व्यापार इतिहास इतरांपासून लपलेला आहे.",
+  "enterYourBio": "तुमचा बायो एंटर करा...",
+  "updateFailed": "अपडेट अयशस्वी"
 }

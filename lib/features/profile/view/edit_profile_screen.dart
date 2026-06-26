@@ -153,10 +153,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               children: [
                 _buildProfileImage(),
                 SizedBox(height: 15.h),
-                _buildSectionTitle('Personal Information'),
+                _buildSectionTitle(AppLocalizations.of(context)!.personalInformation),
                 SizedBox(height: 10.h),
-                _buildTextField('Full Name', _nameController),
-                _buildTextField('Location', _locationController,
+                _buildTextField(AppLocalizations.of(context)!.fullName, _nameController),
+                _buildTextField(AppLocalizations.of(context)!.locationLabel, _locationController,
                     icon: Icons.location_on_outlined,
                     readOnly: true, onTap: () {
                   Navigator.push(
@@ -167,15 +167,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ).then((_) => _updateLocationFromController());
                 }),
-                _buildTextField('Email Address', _emailController,
+                _buildTextField(AppLocalizations.of(context)!.emailAddress, _emailController,
                     icon: Icons.email_outlined,
-                    helperText: 'Used for notifications and account recovery'),
-                _buildTextField('Mobile Number', _mobileController,
+                    helperText: AppLocalizations.of(context)!.usedForNotifications),
+                _buildTextField(AppLocalizations.of(context)!.mobileNumber, _mobileController,
                     icon: Icons.phone_android_outlined,
-                    helperText: 'Verified mobile number',
+                    helperText: AppLocalizations.of(context)!.verifiedMobileNumber,
                     readOnly: true),
                 _buildTextField(
-                  'Date of Birth',
+                  AppLocalizations.of(context)!.dateOfBirth,
                   _dobController,
                   icon: Icons.calendar_today_outlined,
                   readOnly: true,
@@ -197,19 +197,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   },
                 ),
                 SizedBox(height: 10.h),
-                _buildSectionTitle('Gender'),
+                _buildSectionTitle(AppLocalizations.of(context)!.gender),
                 Row(
                   children: [
-                    _buildGenderRadio('Male'),
-                    _buildGenderRadio('Female'),
-                    _buildGenderRadio('Other'),
+                    _buildGenderRadio('Male', AppLocalizations.of(context)!.male),
+                    _buildGenderRadio('Female', AppLocalizations.of(context)!.female),
+                    _buildGenderRadio('Other', AppLocalizations.of(context)!.other),
                   ],
                 ),
                 SizedBox(height: 10.h),
-                _buildSectionTitle('Bio'),
+                _buildSectionTitle(AppLocalizations.of(context)!.bio),
                 SizedBox(height: 10.h),
                 Text(
-                  'Tell others about yourself',
+                  AppLocalizations.of(context)!.tellOthersAboutYourself,
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: context.textColor,
@@ -235,10 +235,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ],
                 ),
                 SizedBox(height: 10.h),
-                _buildSectionTitle('Profile Visibility'),
+                _buildSectionTitle(AppLocalizations.of(context)!.profileVisibility),
                 _buildSwitchTile(
-                    'Profile Visibility',
-                    'Public: Anyone can view your profile.',
+                    AppLocalizations.of(context)!.profileVisibility,
+                    AppLocalizations.of(context)!.publicAnyoneCanView,
                     _profileVisibility,
                     (val) => setState(() => _profileVisibility = val)),
                 // _buildSwitchTile(
@@ -247,8 +247,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 //     _showRatings,
                 //     (val) => setState(() => _showRatings = val)),
                 _buildSwitchTile(
-                    'Show Trade History',
-                    'Your trade history is hidden from others.',
+                    AppLocalizations.of(context)!.showTradeHistory,
+                    AppLocalizations.of(context)!.tradeHistoryHidden,
                     _showTradeHistory,
                     (val) => setState(() => _showTradeHistory = val)),
 
@@ -345,7 +345,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           SizedBox(height: 10.h),
           Text(
-            'Tap to change photo',
+            AppLocalizations.of(context)!.tapToChangePhoto,
             style: TextStyle(
               fontSize: 12.sp,
               color: Colors.grey.shade500,
@@ -453,7 +453,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             decoration: InputDecoration(
               contentPadding: EdgeInsets.all(8.w),
               border: InputBorder.none,
-              hintText: 'Enter your bio...',
+              hintText: AppLocalizations.of(context)!.enterYourBio,
               hintStyle: TextStyle(
                   fontSize: 10.sp,
                   color: context.textColor.withOpacity(0.5),
@@ -551,7 +551,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content:
-                            Text(controller.errorMessage ?? 'Update failed')));
+                            Text(controller.errorMessage ?? AppLocalizations.of(context)!.updateFailed)));
                   }
                 }
               },
@@ -564,7 +564,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 shadowColor: context.primaryColor,
               ),
               child: Text(
-                'Save Changes',
+                AppLocalizations.of(context)!.saveChanges,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
@@ -576,12 +576,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildGenderRadio(String label) {
+  Widget _buildGenderRadio(String value, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Radio<String>(
-          value: label,
+          value: value,
           groupValue: _selectedGender,
           activeColor: context.primaryColor,
           onChanged: (v) => setState(() => _selectedGender = v),

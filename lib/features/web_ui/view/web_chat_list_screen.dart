@@ -15,6 +15,7 @@ import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'dart:convert';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/skeleton_widgets.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebChatListScreen extends StatefulWidget {
   final Function(String chatRoomId, String otherUserId, String otherUserName,
@@ -484,7 +485,7 @@ class _WebChatListScreenState extends State<WebChatListScreen> {
                 },
                 style: TextStyle(color: context.textColor, fontSize: 16),
                 decoration: InputDecoration(
-                  hintText: 'Search chats...',
+                  hintText: AppLocalizations.of(context)!.searchChats,
                   hintStyle:
                       TextStyle(color: context.subTextColor, fontSize: 16),
                   border: InputBorder.none,

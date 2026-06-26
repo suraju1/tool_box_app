@@ -66,7 +66,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                 _buildDivider(),
                 _buildOptionItem(
                   icon: Icons.add,
-                  title: 'Add new address',
+                  title: AppLocalizations.of(context)!.addNewAddress,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -87,7 +87,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                 SizedBox(height: 20.h),
                 if (context.watch<AddressController>().addresses.isNotEmpty) ...[
                   Text(
-                    'Saved Addresses',
+                    AppLocalizations.of(context)!.savedAddresses,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
@@ -102,7 +102,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                 ] else if (context.watch<AuthController>().currentUser?.location != null &&
                     context.watch<AuthController>().currentUser!.location.isNotEmpty) ...[
                   Text(
-                    'Profile Address',
+                    AppLocalizations.of(context)!.profileAddress,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
@@ -140,7 +140,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Select delivery location',
+            AppLocalizations.of(context)!.selectDeliveryLocation,
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
@@ -183,7 +183,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Use current location',
+                    AppLocalizations.of(context)!.useCurrentLocation,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
@@ -192,7 +192,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                   ),
                   Text(
                     locationController.address ??
-                        'Enable GPS for accurate location',
+                        AppLocalizations.of(context)!.enableGpsForAccurateLocation,
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: Colors.grey[600],
@@ -297,7 +297,7 @@ class _LocationSelectionSheetState extends State<LocationSelectionSheet> {
                             borderRadius: BorderRadius.circular(4.r),
                           ),
                           child: Text(
-                            'Default',
+                            AppLocalizations.of(context)!.defaultLabel,
                             style: TextStyle(
                                 fontSize: 10.sp,
                                 color: context.primaryColor,

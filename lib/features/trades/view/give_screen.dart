@@ -227,7 +227,7 @@ class _GiveScreenState extends State<GiveScreen> {
           ),
           const Spacer(),
           Text(
-            '(Showing $count Results)',
+            AppLocalizations.of(context)!.showingResults(count),
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -301,7 +301,7 @@ class _GiveScreenState extends State<GiveScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'See what people want around you',
+                            AppLocalizations.of(context)!.seeWhatPeopleWantAround,
                             style: TextStyle(
                               color: const Color(0xFF111311),
                               fontSize: 14.sp,
@@ -311,7 +311,7 @@ class _GiveScreenState extends State<GiveScreen> {
                           ),
                           SizedBox(height: 10.h),
                           Text(
-                            '• See existing posts by takers around you',
+                            AppLocalizations.of(context)!.seeExistingPostsByTakers,
                             style: TextStyle(
                               color: Colors.grey.shade700,
                               fontSize: 12.sp,
@@ -321,7 +321,7 @@ class _GiveScreenState extends State<GiveScreen> {
                           ),
                           SizedBox(height: 6.h),
                           Text(
-                            '• Respond to posts, Mention what you want in return',
+                            AppLocalizations.of(context)!.respondToPostsMentionWhat1,
                             style: TextStyle(
                               color: Colors.grey.shade700,
                               fontSize: 12.sp,
@@ -347,7 +347,7 @@ class _GiveScreenState extends State<GiveScreen> {
                             size: 18.sp, color: context.primaryColor),
                         SizedBox(width: 8.w),
                         Text(
-                          'Help & Support',
+                          AppLocalizations.of(context)!.helpSupport,
                           style: TextStyle(
                             color: context.primaryColor,
                             fontSize: 13.sp,
@@ -466,7 +466,7 @@ class _GiveScreenState extends State<GiveScreen> {
           ),
           SizedBox(width: 6.w),
           Text(
-            "Filter",
+            AppLocalizations.of(context)!.filterLabel,
             style: TextStyle(
               color: context.textColor,
               fontSize: 14.sp,
@@ -507,7 +507,7 @@ class _GiveScreenState extends State<GiveScreen> {
               ),
               SizedBox(width: 6.w),
               Text(
-                'Sort By',
+                AppLocalizations.of(context)!.sortByLabel,
                 style: TextStyle(
                   color: hasCustomSort ? context.onPrimaryColor : context.textColor,
                   fontSize: 14.sp,
@@ -539,7 +539,7 @@ class _GiveScreenState extends State<GiveScreen> {
   }) {
     final authController = context.read<AuthController>();
     final isOwner = authController.currentUser?.id == userId;
-    final finalActionLabel = isOwner ? 'Offers' : actionLabel;
+    final finalActionLabel = isOwner ? AppLocalizations.of(context)!.offersLabel : actionLabel;
 
     return GestureDetector(
       onTap: () {
@@ -633,7 +633,7 @@ class _GiveScreenState extends State<GiveScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          "$owner's ${postType?.toLowerCase() == 'give' ? 'Giving' : 'Taking'}",
+                          postType?.toLowerCase() == 'give' ? AppLocalizations.of(context)!.userIsGiving(owner) : AppLocalizations.of(context)!.userIsTaking(owner),
                           style: TextStyle(
                             fontSize: 9.sp,
                             color: context.subTextColor,

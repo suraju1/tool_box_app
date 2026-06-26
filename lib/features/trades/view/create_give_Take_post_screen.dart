@@ -368,7 +368,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Trading Point',
+          AppLocalizations.of(context)!.tradingPoint,
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
@@ -409,7 +409,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   ),
                 ),
                 Text(
-                  'Change',
+                  AppLocalizations.of(context)!.change,
                   style: TextStyle(
                       color: context.primaryColor,
                       fontWeight: FontWeight.bold,
@@ -442,7 +442,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         ),
         SizedBox(height: 15.h),
         Text(
-          'Partners within this radius will see your item.',
+          AppLocalizations.of(context)!.partnersWithinRadius,
           style: TextStyle(color: context.subTextColor, fontSize: 10.sp),
         ),
       ],
@@ -515,10 +515,10 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                 SizedBox(height: 8.h),
                 Text(
                   _showImageError
-                      ? 'Photo required'
+                      ? AppLocalizations.of(context)!.photoRequired
                       : (_itemImages.length >= 5
-                          ? 'Max 5 photos reached'
-                          : 'Add up to 5 photos'),
+                          ? AppLocalizations.of(context)!.max5PhotosReached
+                          : AppLocalizations.of(context)!.addUpTo5Photos),
                   style: TextStyle(
                       color: _showImageError
                           ? Colors.red
@@ -586,7 +586,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         SizedBox(height: 12.h),
         Text(AppLocalizations.of(context)!.itemName, style: _labelStyle()),
         SizedBox(height: 8.h),
-        _buildTextField('Enter item name',
+        _buildTextField(AppLocalizations.of(context)!.enterItemName,
             controller: _itemNameController,
             validator: (val) => _validateRequired(val, 'Item Name')),
         SizedBox(height: 12.h),
@@ -705,7 +705,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           Padding(
             padding: EdgeInsets.only(top: 8.h, left: 4.w),
             child: Text(
-              'Please select at least one option',
+              AppLocalizations.of(context)!.pleaseSelectAtLeastOneOption,
               style: TextStyle(color: Colors.red, fontSize: 12.sp),
             ),
           ),
@@ -719,7 +719,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
       children: [
         Text(AppLocalizations.of(context)!.writeANote, style: _labelStyle()),
         SizedBox(height: 8.h),
-        _buildTextField('Describe your product here...',
+        _buildTextField(AppLocalizations.of(context)!.describeYourProduct,
             maxLines: 4,
             controller: _itemNoteController,
             validator: (val) => _validateRequired(val, 'Note')),
@@ -742,10 +742,10 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           ),
           child: Row(
             children: [
-              _buildToggleButton('Price', _isPriceSelected, () {
+              _buildToggleButton(AppLocalizations.of(context)!.priceLabel, _isPriceSelected, () {
                 setState(() => _isPriceSelected = true);
               }),
-              _buildToggleButton('Item', !_isPriceSelected, () {
+              _buildToggleButton(AppLocalizations.of(context)!.itemLabel, !_isPriceSelected, () {
                 setState(() => _isPriceSelected = false);
               }),
             ],
@@ -800,7 +800,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         SizedBox(height: 20.h),
         Text(AppLocalizations.of(context)!.itemName, style: _labelStyle()),
         SizedBox(height: 8.h),
-        _buildTextField('Enter item name',
+        _buildTextField(AppLocalizations.of(context)!.enterItemName,
             controller: _returnItemNameController,
             validator: (val) => _validateRequired(val, 'Return Item Name')),
         SizedBox(height: 20.h),
@@ -840,10 +840,10 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     SizedBox(height: 8.h),
                     Text(
                       _showReturnImageError
-                          ? 'Photo required'
+                          ? AppLocalizations.of(context)!.photoRequired
                           : (_returnItemImages.length >= 5
-                              ? 'Max 5 photos reached'
-                              : 'Add up to 5 photos'),
+                              ? AppLocalizations.of(context)!.max5PhotosReached
+                              : AppLocalizations.of(context)!.addUpTo5Photos),
                       style: TextStyle(
                           color: _showReturnImageError
                               ? Colors.red
@@ -922,7 +922,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
         SizedBox(height: 16.h),
         Text(AppLocalizations.of(context)!.description, style: _labelStyle()),
         SizedBox(height: 8.h),
-        _buildTextField('Describe your product here...',
+        _buildTextField(AppLocalizations.of(context)!.describeYourProduct,
             maxLines: 4,
             controller: _returnItemDescriptionController,
             validator: (val) =>
@@ -1059,12 +1059,12 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                           Icon(Icons.account_balance_wallet_outlined,
                               color: context.primaryColor, size: 18.sp),
                           SizedBox(width: 8.w),
-                          Text('$postPrice Credits per trade',
+                          Text(AppLocalizations.of(context)!.creditsPerTrade(postPrice.toString()),
                               style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w600)),
                           const Spacer(),
-                          Text('Credits: $remainingCredit',
+                          Text(AppLocalizations.of(context)!.creditsLeft(remainingCredit.toString()),
                               style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
@@ -1091,7 +1091,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                                 fontWeight: FontWeight.bold, fontSize: 13.sp)),
                         SizedBox(height: 4.h),
                         Text(
-                          'Only Partners you\'ve traded with before will receive notifications.',
+                          AppLocalizations.of(context)!.onlyPartnersYou,
                           style: TextStyle(
                               color: context.subTextColor, fontSize: 12.sp),
                         ),
@@ -1137,7 +1137,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     ),
                   )
                 : Text(
-                    'Post Item',
+                    AppLocalizations.of(context)!.postItem,
                     style: TextStyle(
                       color: context.onPrimaryColor,
                       fontWeight: FontWeight.bold,
@@ -1218,7 +1218,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
     }
 
     final Object? args = ModalRoute.of(context)?.settings.arguments;
-    final String title = args is String ? args : 'Create Give Post';
+    final String title = args == 'Create Take Post' ? AppLocalizations.of(context)!.createTakePost : AppLocalizations.of(context)!.createGivePost;
     final String postType =
         title.toLowerCase().contains('take') ? 'take' : 'give';
 
@@ -1307,7 +1307,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
             SizedBox(width: 8.w),
             Expanded(
               child: Text(
-                'Active Subscription Required',
+                AppLocalizations.of(context)!.activeSubscriptionRequired,
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.bold,
@@ -1319,7 +1319,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           ],
         ),
         content: Text(
-          'You do not have any active subscription or credits to create this post. Please buy or activate a new subscription to continue.',
+          AppLocalizations.of(context)!.noActiveSubscriptionMessage,
           style: TextStyle(
             fontSize: 14.sp,
             color: context.subTextColor,
@@ -1330,7 +1330,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              AppLocalizations.of(context)!.cancel,
               style: TextStyle(
                 color: context.subTextColor,
                 fontWeight: FontWeight.w600,
@@ -1353,7 +1353,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                   borderRadius: BorderRadius.circular(10.r)),
             ),
             child: Text(
-              'Buy Subscription',
+              AppLocalizations.of(context)!.buySubscription,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -1535,7 +1535,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
   Widget _buildAppBar() {
     // take teh argument data
     final Object? args = ModalRoute.of(context)?.settings.arguments;
-    final String title = args is String ? args : 'Create Give Post';
+    final String title = args == 'Create Take Post' ? AppLocalizations.of(context)!.createTakePost : AppLocalizations.of(context)!.createGivePost;
     return Container(
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.only(top: 20.h),
@@ -1550,7 +1550,7 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
           SizedBox(width: 45.w),
           Center(
             child: Text(
-              title, //'Create Give Post',
+              title,
               style: TextStyle(
                 color: context.textColor,
                 fontWeight: FontWeight.bold,
@@ -1575,9 +1575,9 @@ class _CreateGivePostScreenState extends State<CreateGivePostScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      '• Ask someone to take something, by creating a post',
-                      '• This post will be visible to the "takers" around you',
-                      '• In your selected area i.e >10 mtrs / <5kms',
+                      AppLocalizations.of(context)!.askSomeoneToTake,
+                      AppLocalizations.of(context)!.postVisibleToTakers,
+                      AppLocalizations.of(context)!.inYourSelectedArea,
                     ]
                         .map((text) => Padding(
                               padding: EdgeInsets.only(bottom: 8.h),

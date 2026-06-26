@@ -15,6 +15,7 @@ import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'dart:convert';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/core/widgets/skeleton_widgets.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class ChatListScreen extends StatefulWidget {
   final Function(String chatRoomId, String otherUserId, String otherUserName,
@@ -466,7 +467,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 },
                 style: TextStyle(color: context.textColor, fontSize: 16.sp),
                 decoration: InputDecoration(
-                  hintText: 'Search chats...',
+                  hintText: AppLocalizations.of(context)!.searchChats,
                   hintStyle:
                       TextStyle(color: context.subTextColor, fontSize: 16.sp),
                   border: InputBorder.none,

@@ -4,13 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
+
 
 class AppPriceRangeSelector extends StatefulWidget {
   final RangeValues initialValues;
   final double min;
   final double max;
   final ValueChanged<RangeValues> onChanged;
-  final String label;
+  final String? label;
 
   const AppPriceRangeSelector({
     super.key,
@@ -18,7 +20,7 @@ class AppPriceRangeSelector extends StatefulWidget {
     this.min = 0,
     this.max = 200000,
     required this.onChanged,
-    this.label = 'Desired Price Range',
+    this.label,
   });
 
   @override
@@ -92,7 +94,7 @@ class _AppPriceRangeSelectorState extends State<AppPriceRangeSelector> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${widget.label} : ₹${_formatter.format(_currentRange.start.toInt())} - ₹${_formatter.format(_currentRange.end.toInt())}',
+          '${widget.label ?? AppLocalizations.of(context)!.desiredPriceRange} : ₹${_formatter.format(_currentRange.start.toInt())} - ₹${_formatter.format(_currentRange.end.toInt())}',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 13.sp,
@@ -114,12 +116,13 @@ class _AppPriceRangeSelectorState extends State<AppPriceRangeSelector> {
         Row(
           children: [
             Expanded(
-                child: _buildPriceField(
-                    'Min Price', _minController, _updateFromMinText)),
-            SizedBox(width: 15.w),
+              child: _buildPriceField(
+                  AppLocalizations.of(context)!.minPrice, _minController, _updateFromMinText)),
+            SizedBox(width: 16.w),
             Expanded(
-                child: _buildPriceField(
-                    'Max Price', _maxController, _updateFromMaxText)),
+              child: _buildPriceField(
+                  AppLocalizations.of(context)!.maxPrice, _maxController, _updateFromMaxText),
+            ),
           ],
         ),
       ],

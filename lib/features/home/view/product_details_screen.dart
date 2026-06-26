@@ -80,7 +80,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         title: Consumer<TradeController>(
           builder: (context, controller, child) {
             return Text(
-              controller.selectedPost?.itemName ?? 'Product Details',
+              controller.selectedPost?.itemName ?? AppLocalizations.of(context)!.productDetails,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -119,7 +119,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         itemBuilder: (context) => [
                           PopupMenuItem<String>(
                             value: 'report',
-                            child: Text(AppLocalizations.of(context)!.reportPost,
+                            child: Text(
+                                AppLocalizations.of(context)!.reportPost,
                                 style: TextStyle(color: Colors.red)),
                           ),
                         ],
@@ -155,7 +156,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
           final post = controller.selectedPost;
           if (post == null) {
-            return Center(child: Text(AppLocalizations.of(context)!.postNotFound));
+            return Center(
+                child: Text(AppLocalizations.of(context)!.postNotFound));
           }
 
           // Start autoplay if not started and multiple images
@@ -211,7 +213,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                       SizedBox(height: 15.h),
                       Text(
-                        'Description',
+                        AppLocalizations.of(context)!.description,
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
@@ -226,7 +228,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           Text(
                             post.itemNote.isNotEmpty
                                 ? post.itemNote
-                                : 'No description provided.',
+                                : AppLocalizations.of(context)!.noDescriptionProvided,
                             style: TextStyle(
                               fontSize: 13.sp,
                               color: context.subTextColor,
@@ -261,19 +263,19 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildDetailRow(
-                              'Item Condition',
+                              AppLocalizations.of(context)!.itemCondition,
                               post.itemCondition,
                               Icons.info_outline,
                             ),
                             SizedBox(height: 8.h),
                             _buildDetailRow(
-                              'Trade Type',
+                              AppLocalizations.of(context)!.tradeType,
                               post.tradeType,
                               Icons.swap_horiz_rounded,
                             ),
                             SizedBox(height: 8.h),
                             _buildDetailRow(
-                              'Item Source',
+                              AppLocalizations.of(context)!.itemSource,
                               post.itemSource,
                               Icons.source_outlined,
                             ),
@@ -307,7 +309,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 _buildReturnHeader(post),
                                 SizedBox(height: 8.h),
                                 _buildDetailRow(
-                                  'Price Range',
+                                  AppLocalizations.of(context)!.priceRange,
                                   '₹${post.priceMin} - ₹${post.priceMax}',
                                   Icons.monetization_on_outlined,
                                   true,
@@ -381,20 +383,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 ],
                                 if (post.returnItemName != null)
                                   _buildDetailRow(
-                                    'Item Name',
+                                    AppLocalizations.of(context)!.itemName,
                                     post.returnItemName!,
                                   ),
                                 if (post.returnItemCondition != null) ...[
                                   SizedBox(height: 8.h),
                                   _buildDetailRow(
-                                    'Condition',
+                                    AppLocalizations.of(context)!.condition,
                                     post.returnItemCondition!,
                                   ),
                                 ],
                                 if (post.returnItemSource != null) ...[
                                   SizedBox(height: 8.h),
                                   _buildDetailRow(
-                                    'Item Source',
+                                    AppLocalizations.of(context)!.itemSource,
                                     post.returnItemSource!,
                                   ),
                                 ],
@@ -406,7 +408,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Description',
+                                        AppLocalizations.of(context)!.description,
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.w600,
@@ -476,7 +478,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   elevation: 0,
                 ),
                 child: Text(
-                  'View Offers',
+                  AppLocalizations.of(context)!.viewOffers,
                   style: TextStyle(
                     color: context.onPrimaryColor,
                     fontSize: 16.sp,
@@ -500,7 +502,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               onPressed: () {
                 // not required for now directly offer screen(becaue we consider first step as create post)
                 // Navigator.pushNamed(context, AppRoutes.tradeStep1);
-                Navigator.pushNamed(context, AppRoutes.tradeOffer);//tradeStep1
+                Navigator.pushNamed(context, AppRoutes.tradeOffer); //tradeStep1
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.primaryColor,
@@ -525,8 +527,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   Text(
                     (post.postType.toLowerCase() == 'take' ||
                             post.postType.toLowerCase() == 'taking')
-                        ? 'Give It'
-                        : 'Take It',
+                        ? AppLocalizations.of(context)!.giveIt
+                        : AppLocalizations.of(context)!.takeIt,
                     style: TextStyle(
                       color: context.onPrimaryColor,
                       fontSize: 16.sp,
@@ -757,7 +759,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Row(
       children: [
         Text(
-          returnType.isEmpty ? 'Return in return' : '$returnType in return',
+          returnType.isEmpty ? AppLocalizations.of(context)!.returnInReturnFallback : AppLocalizations.of(context)!.returnInReturn(returnType),
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,

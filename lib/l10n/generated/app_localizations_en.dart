@@ -354,11 +354,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchOffers => 'Match Offers';
 
   @override
-  String get seeWhatPeopleWantAround => 'See what people want around you';
+  String get seeWhatPeopleWantAround => 'See what people want around';
 
   @override
-  String get seeExistingPostsByGivers =>
-      '• See existing posts by givers around you';
+  String get seeExistingPostsByGivers => 'See existing posts by givers';
 
   @override
   String get respondToPostsMentionWhat =>
@@ -720,12 +719,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buySubscription => 'Buy Subscription';
 
   @override
-  String get seeExistingPostsByTakers =>
-      '• See existing posts by takers around you';
+  String get seeExistingPostsByTakers => 'See existing posts by takers';
 
   @override
-  String get respondToPostsMentionWhat1 =>
-      '• Respond to posts, Mention what you want in return';
+  String get respondToPostsMentionWhat1 => 'Respond to posts, mention what...';
 
   @override
   String get viewSellerProfile => 'View Seller Profile';
@@ -743,11 +740,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportPost => 'Report Post';
 
   @override
-  String get seeWhatPeopleAreGiving => 'See what people are giving around you';
+  String get seeWhatPeopleAreGiving => 'See what people are giving';
 
   @override
-  String get respondToPostsMentionWhat2 =>
-      '• Respond to posts, Mention what you can offer in return';
+  String get respondToPostsMentionWhat2 => 'Respond to posts, mention what...';
 
   @override
   String get deletePost => 'Delete Post';
@@ -1091,6 +1087,163 @@ class AppLocalizationsEn extends AppLocalizations {
   String get done => 'Done';
 
   @override
+  String get searchChats => 'Search chats...';
+
+  @override
+  String get chatInfoTitle => 'Information';
+
+  @override
+  String get chatInfo1 => 'This Chat stays on for next 72 hours.';
+
+  @override
+  String get chatInfo2 =>
+      'Do Not cheat, Negative remarks stays on your profile forever.';
+
+  @override
+  String get chatInfo3 => 'Good Luck, Happy Innovation!.';
+
+  @override
+  String get distanceLabel => 'Distance';
+
+  @override
+  String get setYourLocationToEnable =>
+      'Set your location to enable distance filtering';
+
+  @override
+  String kmAway(String distance) {
+    return '$distance km away';
+  }
+
+  @override
+  String get unknownDistanceAway => '- km away';
+
+  @override
+  String userIsTaking(String userName) {
+    return '$userName\'s Taking';
+  }
+
+  @override
+  String userIsGiving(String userName) {
+    return '$userName\'s Giving';
+  }
+
+  @override
+  String get inExchangeFor => 'In exchange for: ';
+
+  @override
+  String get moneyLabel => '(Money)';
+
+  @override
+  String get freeLabel => 'Free';
+
+  @override
+  String get itemLabel => 'Item';
+
+  @override
+  String get offersLabel => 'Offers';
+
+  @override
+  String get giveLabel => 'Give';
+
+  @override
+  String get takeLabel => 'Take';
+
+  @override
+  String get enableGpsForAccurateLocation => 'Enable GPS for accurate location';
+
+  @override
+  String get addNewAddress => 'Add new address';
+
+  @override
+  String get defaultLabel => 'Default';
+
+  @override
+  String get filterLabel => 'Filter';
+
+  @override
+  String get sortByLabel => 'Sort By';
+
+  @override
+  String showingResults(int count) {
+    return '(Showing $count Results)';
+  }
+
+  @override
+  String get myPostsTitle => 'My Posts';
+
+  @override
+  String get seeAllActiveInactivePosts =>
+      '• See all your active and inactive posts';
+
+  @override
+  String get viewOffersNotifications =>
+      '• View offers and notifications for your items';
+
+  @override
+  String get allPostsTab => 'All';
+
+  @override
+  String get activePostsTab => 'Active';
+
+  @override
+  String get inactivePostsTab => 'Inactive';
+
+  @override
+  String get tryChangingFilterOrCreatePost =>
+      'Try changing the filter or create a new post!';
+
+  @override
+  String get createPostLabel => 'Create Post';
+
+  @override
+  String get noSubscriptionPaymentsYet =>
+      'You haven\'t made any subscription payments yet.';
+
+  @override
+  String expiresOn(String date) {
+    return 'Expires on $date';
+  }
+
+  @override
+  String idHash(String id) {
+    return 'ID #$id';
+  }
+
+  @override
+  String get periodLabel => 'PERIOD';
+
+  @override
+  String get amountLabel => 'AMOUNT';
+
+  @override
+  String get activeStatus => 'ACTIVE';
+
+  @override
+  String get expiredStatus => 'EXPIRED';
+
+  @override
+  String get typeAMessage => 'Type a message ...';
+
+  @override
+  String get youChose => 'You chose ';
+
+  @override
+  String givingTo(String givingItem, String partnerName) {
+    return 'Giving $givingItem to $partnerName ';
+  }
+
+  @override
+  String get andWord => 'and ';
+
+  @override
+  String taking(String takingItem) {
+    return 'Taking $takingItem ';
+  }
+
+  @override
+  String get inReturn => 'in return';
+
+  @override
   String get postNotFound => 'Post not found';
 
   @override
@@ -1248,4 +1401,385 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToRemoveProfile => 'Failed to remove profile';
+
+  @override
+  String get giveIt => 'Give It';
+
+  @override
+  String get productDetails => 'Product Details';
+
+  @override
+  String get itemCondition => 'Item Condition';
+
+  @override
+  String get noDescriptionProvided => 'No description provided.';
+
+  @override
+  String get priceRange => 'Price Range';
+
+  @override
+  String returnInReturn(String returnType) {
+    return '$returnType in return';
+  }
+
+  @override
+  String get returnInReturnFallback => 'Return in return';
+
+  @override
+  String kmAwayFrom(String km, String location) {
+    return '$km km away from $location';
+  }
+
+  @override
+  String get giveWhatWillYouOffer => 'Give ( What will you offer in Return? )';
+
+  @override
+  String get takeWhatYouWant => 'Take ( What you want in Return? )';
+
+  @override
+  String giveWhatIsAskingFor(String name) {
+    return 'Give what $name\'s asking for';
+  }
+
+  @override
+  String takeWhatIsGiving(String name) {
+    return 'Take what $name\'s giving';
+  }
+
+  @override
+  String get itemYouOfferInReturn => 'Item You Offer in Return';
+
+  @override
+  String get itemYouWantInReturn => 'Item You Want in Return';
+
+  @override
+  String get fillDetailsYouOffering =>
+      'Fill details of the item you\'re offering';
+
+  @override
+  String get fillItemDetailsYouWant => 'Fill item details you want in return';
+
+  @override
+  String get moneyAskForMoney => 'Money ( Ask for Money )';
+
+  @override
+  String get askForMoney => 'Ask for Money';
+
+  @override
+  String get offerPriceForItem => 'Offer a price for the item';
+
+  @override
+  String get setCustomPrice => 'Set a custom price for the item';
+
+  @override
+  String get askForFree => 'Ask for Free';
+
+  @override
+  String get giveForFree => 'Give For Free';
+
+  @override
+  String get spreadSomeJoy => 'Spread some joy in the neighborhood';
+
+  @override
+  String get giverLabel => 'GIVER';
+
+  @override
+  String get takerLabel => 'TAKER';
+
+  @override
+  String givingAction(String name) {
+    return '$name\'s Giving';
+  }
+
+  @override
+  String takingAction(String name) {
+    return '$name\'s Taking';
+  }
+
+  @override
+  String offerTypeLabel(String type) {
+    return 'Offer Type : $type';
+  }
+
+  @override
+  String categoryLabel(String category) {
+    return 'Category : $category';
+  }
+
+  @override
+  String takeItemFrom(String item, String name) {
+    return 'Take $item from $name';
+  }
+
+  @override
+  String giveItemTo(String item, String name) {
+    return 'Give $item to $name';
+  }
+
+  @override
+  String get giveSpecifiedReturn => 'Give Specified Return';
+
+  @override
+  String get takeOfferedItem => 'Take Offered Item';
+
+  @override
+  String get offerCustomItem => 'Offer Custom Item';
+
+  @override
+  String get requestCustomItem => 'Request Custom Item';
+
+  @override
+  String get sendOffer => 'Send Offer';
+
+  @override
+  String get offerSentTitle => 'Offer Sent!';
+
+  @override
+  String get offerSentMsg =>
+      'Your offer has been sent successfully. Please wait for the owner to accept it.';
+
+  @override
+  String kmAwayLabel(String km) {
+    return '$km km away';
+  }
+
+  @override
+  String get didNotFindWhatYouWereLookingFor =>
+      'Didn\'t find what you were looking for ?';
+
+  @override
+  String get wereHereToHelpYouWithAnyQuestions =>
+      'We\'re here to help you with any questions or issues you might have with the community';
+
+  @override
+  String get shareYourFeedback => 'Share Your Feedback';
+
+  @override
+  String get partnersWithinRadius =>
+      'Partners within this radius will see your item.';
+
+  @override
+  String get enterItemName => 'Enter item name';
+
+  @override
+  String get pleaseSelectAtLeastOneOption =>
+      'Please select at least one option';
+
+  @override
+  String get minimum => 'Minimum';
+
+  @override
+  String get maximum => 'Maximum';
+
+  @override
+  String get postNow => 'Post Now';
+
+  @override
+  String get postRequest => 'Post Request';
+
+  @override
+  String get uploadAtLeastOneImage => 'Upload at least one image';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String creditsLeft(String credits) {
+    return 'Credits: $credits';
+  }
+
+  @override
+  String creditsPerTrade(String credits) {
+    return '$credits Credits per trade';
+  }
+
+  @override
+  String get noActiveSubscriptionMessage =>
+      'You do not have any active subscription or credits to create this post. Please buy or activate a new subscription to continue.';
+
+  @override
+  String get addCategory => 'Add Category';
+
+  @override
+  String get categoryAddedSuccessfully => 'Category added successfully!';
+
+  @override
+  String get addCustomCategory => 'Add Custom Category';
+
+  @override
+  String get photoRequired => 'Photo required';
+
+  @override
+  String get max5PhotosReached => 'Max 5 photos reached';
+
+  @override
+  String get createGivePost => 'Create Give Post';
+
+  @override
+  String get createTakePost => 'Create Take Post';
+
+  @override
+  String get askSomeoneToTake =>
+      '• Ask someone to take something, by creating a post';
+
+  @override
+  String get postVisibleToTakers =>
+      '• This post will be visible to the \"takers\" around you';
+
+  @override
+  String get inYourSelectedArea =>
+      '• In your selected area i.e >10 mtrs / <5kms';
+
+  @override
+  String get newCondition => 'New';
+
+  @override
+  String get likeNewCondition => 'Like New';
+
+  @override
+  String get usedCondition => 'Used';
+
+  @override
+  String get describeYourProduct => 'Describe your product here...';
+
+  @override
+  String get priceLabel => 'Price';
+
+  @override
+  String get desiredPriceRange => 'Desired Price Range';
+
+  @override
+  String get minPrice => 'Min Price';
+
+  @override
+  String get maxPrice => 'Max Price';
+
+  @override
+  String get tradeWith => 'Trade With';
+
+  @override
+  String get exchangeDetails => 'Exchange Details';
+
+  @override
+  String get youReceive => 'You Receive';
+
+  @override
+  String get youGive => 'You Give';
+
+  @override
+  String get youPay => 'You Pay';
+
+  @override
+  String get tradeInfo => 'Trade Info';
+
+  @override
+  String dateLabel(String date) {
+    return 'Date: $date';
+  }
+
+  @override
+  String statusLabel(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String meetingLabel(String meeting) {
+    return 'Meeting: $meeting';
+  }
+
+  @override
+  String get tradeNotes => 'Trade Notes';
+
+  @override
+  String get noAdditionalNotesProvided => 'No additional notes provided.';
+
+  @override
+  String rejectedReasonLabel(String reason) {
+    return 'Rejected Reason: $reason';
+  }
+
+  @override
+  String chatWith(String name) {
+    return 'Chat with $name';
+  }
+
+  @override
+  String get tradeCancelledSuccessfully => 'Trade cancelled successfully';
+
+  @override
+  String get failedToCancelTrade => 'Failed to cancel trade';
+
+  @override
+  String get like => 'Like';
+
+  @override
+  String get dislike => 'Dislike';
+
+  @override
+  String get likedSuccessfully => 'Liked successfully';
+
+  @override
+  String get dislikedSuccessfully => 'Disliked successfully';
+
+  @override
+  String get failedToSubmitMark => 'Failed to submit mark';
+
+  @override
+  String givingYouItem(String itemName) {
+    return 'Giving you $itemName';
+  }
+
+  @override
+  String takingYourItem(String itemName) {
+    return 'Taking your $itemName';
+  }
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get locationLabel => 'Location';
+
+  @override
+  String get emailAddress => 'Email Address';
+
+  @override
+  String get usedForNotifications =>
+      'Used for notifications and account recovery';
+
+  @override
+  String get mobileNumber => 'Mobile Number';
+
+  @override
+  String get verifiedMobileNumber => 'Verified mobile number';
+
+  @override
+  String get dateOfBirth => 'Date of Birth';
+
+  @override
+  String get male => 'Male';
+
+  @override
+  String get female => 'Female';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String get profileVisibility => 'Profile Visibility';
+
+  @override
+  String get publicAnyoneCanView => 'Public: Anyone can view your profile.';
+
+  @override
+  String get showTradeHistory => 'Show Trade History';
+
+  @override
+  String get tradeHistoryHidden => 'Your trade history is hidden from others.';
+
+  @override
+  String get enterYourBio => 'Enter your bio...';
+
+  @override
+  String get updateFailed => 'Update failed';
 }

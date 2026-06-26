@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/util/font_family.dart';
 
 class WebHelpSupportScreen extends StatefulWidget {
@@ -44,7 +45,8 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
                 child: Consumer<ProfileController>(
                   builder: (context, controller, child) {
                     return SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 40),
                       child: Column(
                         children: [
                           if (controller.isLoading && controller.faqs.isEmpty)
@@ -69,9 +71,9 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
                                   context,
                                   question: faq.question,
                                   answer: faq.answer,
-                                  initiallyExpanded: controller.faqs.indexOf(faq) == 0,
+                                  initiallyExpanded:
+                                      controller.faqs.indexOf(faq) == 0,
                                 )),
-                          
                           const SizedBox(height: 60),
                           _buildFeedbackSection(context, controller),
                         ],
@@ -141,7 +143,8 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
               color: Theme.of(context).primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.help_outline, color: Theme.of(context).primaryColor, size: 20),
+            child: Icon(Icons.help_outline,
+                color: Theme.of(context).primaryColor, size: 20),
           ),
           title: Text(
             question,
@@ -171,7 +174,8 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
     );
   }
 
-  Widget _buildFeedbackSection(BuildContext context, ProfileController controller) {
+  Widget _buildFeedbackSection(
+      BuildContext context, ProfileController controller) {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -194,11 +198,12 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
               color: Theme.of(context).primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.chat_bubble_outline, color: Theme.of(context).primaryColor, size: 32),
+            child: Icon(Icons.chat_bubble_outline,
+                color: Theme.of(context).primaryColor, size: 32),
           ),
           const SizedBox(height: 24),
-          const Text(
-            "Didn't find what you were looking for?",
+          Text(
+            AppLocalizations.of(context)!.didNotFindWhatYouWereLookingFor,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -206,8 +211,8 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            "We're here to help you with any questions or issues you might have with the community.",
+          Text(
+            AppLocalizations.of(context)!.wereHereToHelpYouWithAnyQuestions,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -232,8 +237,8 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  'Add Feedback',
+                child: Text(
+                  AppLocalizations.of(context)!.addFeedback,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -246,7 +251,7 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
               controller: _feedbackController,
               maxLines: 5,
               decoration: InputDecoration(
-                hintText: 'Share your feedback...',
+                hintText: AppLocalizations.of(context)!.shareYourFeedback,
                 filled: true,
                 fillColor: Theme.of(context).scaffoldBackgroundColor,
                 border: OutlineInputBorder(
@@ -268,19 +273,23 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
                     ? null
                     : () async {
                         if (_feedbackController.text.trim().isNotEmpty) {
-                          final response = await controller.submitFeedback(_feedbackController.text.trim());
+                          final response = await controller
+                              .submitFeedback(_feedbackController.text.trim());
                           if (!context.mounted) return;
                           if (response.success) {
-                            ToastService.showSuccessToast(context, response.message);
+                            ToastService.showSuccessToast(
+                                context, response.message);
                             setState(() {
                               _showFeedbackField = false;
                               _feedbackController.clear();
                             });
                           } else {
-                            ToastService.showErrorToast(context, response.message);
+                            ToastService.showErrorToast(
+                                context, response.message);
                           }
                         } else {
-                          ToastService.showErrorToast(context, 'Please enter some feedback');
+                          ToastService.showErrorToast(
+                              context, 'Please enter some feedback');
                         }
                       },
                 style: ElevatedButton.styleFrom(

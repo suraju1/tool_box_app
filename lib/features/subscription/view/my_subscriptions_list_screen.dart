@@ -44,7 +44,7 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
         ),
         centerTitle: true,
         title: Text(
-          'My Subscriptions',
+          AppLocalizations.of(context)!.mySubscriptions,
           style: TextStyle(
             color: context.textColor,
             fontSize: 18.sp,
@@ -109,7 +109,7 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
           Icon(Icons.history_outlined, size: 64.sp, color: context.subTextColor),
           SizedBox(height: 16.h),
           Text(
-            'No Subscription History',
+            AppLocalizations.of(context)!.noSubscriptionHistory,
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
@@ -118,7 +118,7 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'You haven\'t made any subscription payments yet.',
+            AppLocalizations.of(context)!.noSubscriptionPaymentsYet,
             style: TextStyle(color: context.subTextColor),
           ),
           SizedBox(height: 12.h),
@@ -173,7 +173,7 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Current Plan',
+                      AppLocalizations.of(context)!.currentPlan,
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 14.sp,
@@ -188,7 +188,11 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
-                        subscription.status.toUpperCase(),
+                        subscription.status.toLowerCase() == 'active'
+                            ? AppLocalizations.of(context)!.activeStatus
+                            : (subscription.status.toLowerCase() == 'expired'
+                                ? AppLocalizations.of(context)!.expiredStatus
+                                : subscription.status.toUpperCase()),
                         style: TextStyle(
                           color: context.onPrimaryColor,
                           fontSize: 10.sp,
@@ -209,7 +213,7 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
                 ),
                 SizedBox(height: 12.h),
                 Text(
-                  'Expires on $expiryDate',
+                  AppLocalizations.of(context)!.expiresOn(expiryDate),
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 14.sp,
@@ -334,7 +338,7 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
                           ),
                         ),
                         Text(
-                          'ID #${item.id}',
+                          AppLocalizations.of(context)!.idHash(item.id.toString()),
                           style: TextStyle(
                             fontSize: 12.sp,
                             color: context.subTextColor,
@@ -350,7 +354,11 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
                         borderRadius: BorderRadius.circular(10.r),
                       ),
                       child: Text(
-                        item.status.toUpperCase(),
+                        item.status.toLowerCase() == 'active'
+                            ? AppLocalizations.of(context)!.activeStatus
+                            : (item.status.toLowerCase() == 'expired'
+                                ? AppLocalizations.of(context)!.expiredStatus
+                                : item.status.toUpperCase()),
                         style: TextStyle(
                           color: statusColor,
                           fontSize: 12.sp,
@@ -364,11 +372,11 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildInfoItem(context, 'PERIOD', period),
+                      child: _buildInfoItem(context, AppLocalizations.of(context)!.periodLabel, period),
                     ),
                     Expanded(
                       child: _buildInfoItem(
-                          context, 'AMOUNT', '₹${item.totalAmount}'),
+                          context, AppLocalizations.of(context)!.amountLabel, '₹${item.totalAmount}'),
                     ),
                   ],
                 ),
@@ -395,7 +403,7 @@ class _MySubscriptionsListScreenState extends State<MySubscriptionsListScreen> {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      'Credits Remaining',
+                      AppLocalizations.of(context)!.creditsRemaining,
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: context.primaryColor,

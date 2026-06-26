@@ -175,7 +175,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             ),
             SizedBox(height: 20.h),
             Text(
-              'Offer Sent!',
+              AppLocalizations.of(context)!.offerSentTitle,
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w800,
@@ -184,7 +184,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Your offer has been sent successfully. Please wait for the owner to accept it.',
+              AppLocalizations.of(context)!.offerSentMsg,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: context.subTextColor,
@@ -217,15 +217,15 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
   String _getButtonName(bool isGivePost) {
     switch (_selectedReturnType) {
       case ReturnType.existing:
-        return isGivePost ? 'Give Specified Return' : 'Take Offered Item';
+        return isGivePost ? AppLocalizations.of(context)!.giveSpecifiedReturn : AppLocalizations.of(context)!.takeOfferedItem;
       case ReturnType.customItem:
-        return isGivePost ? 'Offer Custom Item' : 'Request Custom Item';
+        return isGivePost ? AppLocalizations.of(context)!.offerCustomItem : AppLocalizations.of(context)!.requestCustomItem;
       case ReturnType.money:
-        return isGivePost ? 'Money (Ask for Money)' : 'Ask for Money';
+        return isGivePost ? AppLocalizations.of(context)!.moneyAskForMoney : AppLocalizations.of(context)!.askForMoney;
       case ReturnType.free:
-        return isGivePost ? 'Ask for Free' : 'Give for Free';
+        return isGivePost ? AppLocalizations.of(context)!.askForFree : AppLocalizations.of(context)!.giveForFree;
       default:
-        return 'Send Offer';
+        return AppLocalizations.of(context)!.sendOffer;
     }
   }
 
@@ -286,8 +286,8 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       SizedBox(height: 24.h),
                       Text(
                         isGivePost
-                            ? 'Give ( What will you offer in Return? )'
-                            : 'Take ( What you want in Return? )',
+                            ? AppLocalizations.of(context)!.giveWhatWillYouOffer
+                            : AppLocalizations.of(context)!.takeWhatYouWant,
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
@@ -299,37 +299,37 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       _buildReturnOption(
                         type: ReturnType.existing,
                         title: isGivePost
-                            ? "Give what ${post?.userName ?? '-'}’s asking for"
-                            : "Take what ${post?.userName ?? '-'}’s giving",
+                            ? AppLocalizations.of(context)!.giveWhatIsAskingFor(post?.userName ?? '-')
+                            : AppLocalizations.of(context)!.takeWhatIsGiving(post?.userName ?? '-'),
                         child: _buildItemPreviewCard(post),
                       ),
                       SizedBox(height: 12.h),
                       _buildReturnOption(
                         type: ReturnType.customItem,
                         title: isGivePost
-                            ? "Item You Offer in Return"
-                            : "Item You Want in Return",
+                            ? AppLocalizations.of(context)!.itemYouOfferInReturn
+                            : AppLocalizations.of(context)!.itemYouWantInReturn,
                         subtitle: isGivePost
-                            ? "Fill details of the item you're offering"
-                            : "Fill item details you want in return",
+                            ? AppLocalizations.of(context)!.fillDetailsYouOffering
+                            : AppLocalizations.of(context)!.fillItemDetailsYouWant,
                         child: _buildCustomItemForm(),
                       ),
                       SizedBox(height: 12.h),
                       _buildReturnOption(
                         type: ReturnType.money,
                         title: isGivePost
-                            ? "Money ( Ask for Money )"
-                            : "Ask for Money",
+                            ? AppLocalizations.of(context)!.moneyAskForMoney
+                            : AppLocalizations.of(context)!.askForMoney,
                         subtitle: isGivePost
-                            ? "Offer a price for the item"
-                            : "Set a custom price for the item",
+                            ? AppLocalizations.of(context)!.offerPriceForItem
+                            : AppLocalizations.of(context)!.setCustomPrice,
                         child: _buildMoneyForm(isGivePost),
                       ),
                       SizedBox(height: 12.h),
                       _buildReturnOption(
                         type: ReturnType.free,
-                        title: isGivePost ? "Ask for Free" : "Give For Free",
-                        subtitle: "Spread some joy in the neighborhood",
+                        title: isGivePost ? AppLocalizations.of(context)!.askForFree : AppLocalizations.of(context)!.giveForFree,
+                        subtitle: AppLocalizations.of(context)!.spreadSomeJoy,
                         child: const SizedBox.shrink(),
                       ),
                     ],
@@ -359,8 +359,8 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
       centerTitle: true,
       title: Text(
         isGivePost
-            ? 'Take $itemName from $userName'
-            : 'Give $itemName to $userName',
+            ? AppLocalizations.of(context)!.takeItemFrom(itemName, userName)
+            : AppLocalizations.of(context)!.giveItemTo(itemName, userName),
         style: TextStyle(
           color: context.textColor,
           fontSize: 18.sp,
@@ -494,7 +494,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isGivePost ? 'GIVER' : 'TAKER',
+                  isGivePost ? AppLocalizations.of(context)!.giverLabel : AppLocalizations.of(context)!.takerLabel,
                   style: TextStyle(
                     color: context.primaryColor,
                     fontSize: 12.sp,
@@ -513,7 +513,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  "${post?.userName ?? '-'}'s ${isGivePost ? 'Giving' : 'Taking'}",
+                  isGivePost ? AppLocalizations.of(context)!.givingAction(post?.userName ?? '-') : AppLocalizations.of(context)!.takingAction(post?.userName ?? '-'),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
@@ -532,7 +532,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                 ),
                 SizedBox(height: 12.h),
                 Text(
-                  'Offer Type : ${post?.tradeType ?? '-'}',
+                  AppLocalizations.of(context)!.offerTypeLabel(post?.tradeType ?? '-'),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
@@ -541,7 +541,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Category : ${post?.itemCategory ?? '-'}',
+                  AppLocalizations.of(context)!.categoryLabel(post?.itemCategory ?? '-'),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
@@ -569,7 +569,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
                       color: context.subTextColor, size: 14.sp),
                   SizedBox(width: 4.w),
                   Text(
-                    '${post?.distanceKm?.toStringAsFixed(1) ?? '0.4'} km away',
+                    AppLocalizations.of(context)!.kmAwayLabel(post?.distanceKm?.toStringAsFixed(1) ?? '0.4'),
                     style: TextStyle(
                       color: context.subTextColor,
                       fontSize: 12.sp,
@@ -795,7 +795,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'See Details',
+                  AppLocalizations.of(context)!.seeDetails,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
@@ -842,7 +842,7 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             ),
             SizedBox(height: 20.h),
             Text(
-              'Requested Return Details',
+              AppLocalizations.of(context)!.requestedReturnDetails,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
@@ -851,11 +851,11 @@ class _TradeOfferScreenState extends State<TradeOfferScreen> {
             ),
             SizedBox(height: 20.h),
             if (post.returnType?.toLowerCase() == 'price') ...[
-              _buildInfoRow('Price Range',
+              _buildInfoRow(AppLocalizations.of(context)!.priceRange,
                   '₹${post.priceMin?.toStringAsFixed(2) ?? '0'} - ₹${post.priceMax?.toStringAsFixed(2) ?? '0'}'),
               SizedBox(height: 12.h),
               _buildInfoRow(
-                  'Negotiable', post.isNegotiable == true ? 'Yes' : 'No'),
+                  AppLocalizations.of(context)!.negotiable, post.isNegotiable == true ? AppLocalizations.of(context)!.yes : AppLocalizations.of(context)!.no),
             ] else ...[
               if (post.returnItemImages != null &&
                   post.returnItemImages.isNotEmpty)

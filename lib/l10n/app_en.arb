@@ -345,6 +345,111 @@
   "customizeTheLookAndFeel": "Customize the look and feel of the application.",
   "rateThisUser": "Rate this user",
   "done": "Done",
+  "searchChats": "Search chats...",
+  "chatInfoTitle": "Information",
+  "chatInfo1": "This Chat stays on for next 72 hours.",
+  "chatInfo2": "Do Not cheat, Negative remarks stays on your profile forever.",
+  "chatInfo3": "Good Luck, Happy Innovation!.",
+  "distanceLabel": "Distance",
+  "showItemsNearYou": "Show items near you",
+  "setYourLocationToEnable": "Set your location to enable distance filtering",
+  "kmAway": "{distance} km away",
+  "@kmAway": {
+    "placeholders": {
+      "distance": { "type": "String" }
+    }
+  },
+  "unknownDistanceAway": "- km away",
+  "userIsTaking": "{userName}'s Taking",
+  "@userIsTaking": {
+    "placeholders": {
+      "userName": { "type": "String" }
+    }
+  },
+  "userIsGiving": "{userName}'s Giving",
+  "@userIsGiving": {
+    "placeholders": {
+      "userName": { "type": "String" }
+    }
+  },
+  "inExchangeFor": "In exchange for: ",
+  "moneyLabel": "(Money)",
+  "freeLabel": "Free",
+  "itemLabel": "Item",
+  "offersLabel": "Offers",
+  "giveLabel": "Give",
+  "takeLabel": "Take",
+  "selectDeliveryLocation": "Select delivery location",
+  "useCurrentLocation": "Use current location",
+  "enableGpsForAccurateLocation": "Enable GPS for accurate location",
+  "addNewAddress": "Add new address",
+  "savedAddresses": "Saved Addresses",
+  "profileAddress": "Profile Address",
+  "defaultLabel": "Default",
+  "filterLabel": "Filter",
+  "sortByLabel": "Sort By",
+  "nearbyItems": "Nearby Items",
+  "showingResults": "(Showing {count} Results)",
+  "@showingResults": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "searchWhatYouWantToGive": "Search what you want to give",
+  "seeWhatPeopleWantAround": "See what people want around",
+  "seeExistingPostsByTakers": "See existing posts by takers",
+  "respondToPostsMentionWhat1": "Respond to posts, mention what...",
+  "helpSupport": "Help & Support",
+  "searchWhatYouWantToTake": "Search what you want to take",
+  "seeWhatPeopleAreGiving": "See what people are giving",
+  "seeExistingPostsByGivers": "See existing posts by givers",
+  "respondToPostsMentionWhat2": "Respond to posts, mention what...",
+  "myPostsTitle": "My Posts",
+  "manageYourPosts": "Manage your posts",
+  "seeAllActiveInactivePosts": "• See all your active and inactive posts",
+  "viewOffersNotifications": "• View offers and notifications for your items",
+  "allPostsTab": "All",
+  "activePostsTab": "Active",
+  "inactivePostsTab": "Inactive",
+  "tryChangingFilterOrCreatePost": "Try changing the filter or create a new post!",
+  "createPostLabel": "Create Post",
+  "noSubscriptionHistory": "No Subscription History",
+  "noSubscriptionPaymentsYet": "You haven't made any subscription payments yet.",
+  "currentPlan": "Current Plan",
+  "expiresOn": "Expires on {date}",
+  "@expiresOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "idHash": "ID #{id}",
+  "@idHash": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "periodLabel": "PERIOD",
+  "amountLabel": "AMOUNT",
+  "creditsRemaining": "Credits Remaining",
+  "activeStatus": "ACTIVE",
+  "expiredStatus": "EXPIRED",
+  "typeAMessage": "Type a message ...",
+  "youChose": "You chose ",
+  "givingTo": "Giving {givingItem} to {partnerName} ",
+  "@givingTo": {
+    "placeholders": {
+      "givingItem": { "type": "String" },
+      "partnerName": { "type": "String" }
+    }
+  },
+  "andWord": "and ",
+  "taking": "Taking {takingItem} ",
+  "@taking": {
+    "placeholders": {
+      "takingItem": { "type": "String" }
+    }
+  },
+  "inReturn": "in return",
   "postNotFound": "Post not found",
   "offerSummary": "Offer Summary",
   "selectYourOffer": "Select Your Offer",
@@ -459,5 +564,260 @@
   "collectionCreatedSuccessfully": "Collection created successfully",
   "failedToCreateCollection": "Failed to create collection",
   "profileRemovedFromSaved": "Profile removed from saved",
-  "failedToRemoveProfile": "Failed to remove profile"
+  "failedToRemoveProfile": "Failed to remove profile",
+  "giveIt": "Give It",
+  "productDetails": "Product Details",
+  "itemCondition": "Item Condition",
+  "noDescriptionProvided": "No description provided.",
+  "priceRange": "Price Range",
+  "returnInReturn": "{returnType} in return",
+  "@returnInReturn": {
+    "placeholders": {
+      "returnType": {
+        "type": "String"
+      }
+    }
+  },
+  "returnInReturnFallback": "Return in return",
+  "kmAwayFrom": "{km} km away from {location}",
+  "@kmAwayFrom": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      },
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "giveWhatWillYouOffer": "Give ( What will you offer in Return? )",
+  "takeWhatYouWant": "Take ( What you want in Return? )",
+  "giveWhatIsAskingFor": "Give what {name}'s asking for",
+  "@giveWhatIsAskingFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "takeWhatIsGiving": "Take what {name}'s giving",
+  "@takeWhatIsGiving": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "itemYouOfferInReturn": "Item You Offer in Return",
+  "itemYouWantInReturn": "Item You Want in Return",
+  "fillDetailsYouOffering": "Fill details of the item you're offering",
+  "fillItemDetailsYouWant": "Fill item details you want in return",
+  "moneyAskForMoney": "Money ( Ask for Money )",
+  "askForMoney": "Ask for Money",
+  "offerPriceForItem": "Offer a price for the item",
+  "setCustomPrice": "Set a custom price for the item",
+  "askForFree": "Ask for Free",
+  "giveForFree": "Give For Free",
+  "spreadSomeJoy": "Spread some joy in the neighborhood",
+  "giverLabel": "GIVER",
+  "takerLabel": "TAKER",
+  "givingAction": "{name}'s Giving",
+  "@givingAction": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "takingAction": "{name}'s Taking",
+  "@takingAction": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "offerTypeLabel": "Offer Type : {type}",
+  "@offerTypeLabel": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryLabel": "Category : {category}",
+  "@categoryLabel": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "takeItemFrom": "Take {item} from {name}",
+  "@takeItemFrom": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "giveItemTo": "Give {item} to {name}",
+  "@giveItemTo": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "giveSpecifiedReturn": "Give Specified Return",
+  "takeOfferedItem": "Take Offered Item",
+  "offerCustomItem": "Offer Custom Item",
+  "requestCustomItem": "Request Custom Item",
+  "sendOffer": "Send Offer",
+  "offerSentTitle": "Offer Sent!",
+  "offerSentMsg": "Your offer has been sent successfully. Please wait for the owner to accept it.",
+  "kmAwayLabel": "{km} km away",
+  "@kmAwayLabel": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "didNotFindWhatYouWereLookingFor": "Didn't find what you were looking for ?",
+  "wereHereToHelpYouWithAnyQuestions": "We're here to help you with any questions or issues you might have with the community",
+  "shareYourFeedback": "Share Your Feedback",
+  "tradingPoint": "Trading Point",
+  "change": "Change",
+  "partnersWithinRadius": "Partners within this radius will see your item.",
+  "enterItemName": "Enter item name",
+  "pleaseSelectAtLeastOneOption": "Please select at least one option",
+  "minimum": "Minimum",
+  "maximum": "Maximum",
+  "postNow": "Post Now",
+  "postRequest": "Post Request",
+  "uploadAtLeastOneImage": "Upload at least one image",
+  "add": "Add",
+  "creditsLeft": "Credits: {credits}",
+  "@creditsLeft": {
+    "placeholders": {
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "creditsPerTrade": "{credits} Credits per trade",
+  "@creditsPerTrade": {
+    "placeholders": {
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "activeSubscriptionRequired": "Active Subscription Required",
+  "noActiveSubscriptionMessage": "You do not have any active subscription or credits to create this post. Please buy or activate a new subscription to continue.",
+  "buySubscription": "Buy Subscription",
+  "addCategory": "Add Category",
+  "categoryAddedSuccessfully": "Category added successfully!",
+  "addCustomCategory": "Add Custom Category",
+  "photoRequired": "Photo required",
+  "max5PhotosReached": "Max 5 photos reached",
+  "createGivePost": "Create Give Post",
+  "createTakePost": "Create Take Post",
+  "askSomeoneToTake": "• Ask someone to take something, by creating a post",
+  "postVisibleToTakers": "• This post will be visible to the \"takers\" around you",
+  "inYourSelectedArea": "• In your selected area i.e >10 mtrs / <5kms",
+  "newCondition": "New",
+  "likeNewCondition": "Like New",
+  "usedCondition": "Used",
+  "describeYourProduct": "Describe your product here...",
+  "priceLabel": "Price",
+  "itemLabel": "Item",
+  "postItem": "Post Item",
+  "homemade": "Homemade",
+  "storeBought": "Store bought",
+  "desiredPriceRange": "Desired Price Range",
+  "minPrice": "Min Price",
+  "maxPrice": "Max Price",
+  "tradeWith": "Trade With",
+  "exchangeDetails": "Exchange Details",
+  "youReceive": "You Receive",
+  "youGive": "You Give",
+  "youPay": "You Pay",
+  "tradeInfo": "Trade Info",
+  "dateLabel": "Date: {date}",
+  "@dateLabel": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "statusLabel": "Status: {status}",
+  "@statusLabel": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "meetingLabel": "Meeting: {meeting}",
+  "@meetingLabel": {
+    "placeholders": {
+      "meeting": { "type": "String" }
+    }
+  },
+  "tradeNotes": "Trade Notes",
+  "noAdditionalNotesProvided": "No additional notes provided.",
+  "rejectedReasonLabel": "Rejected Reason: {reason}",
+  "@rejectedReasonLabel": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "completeTrade": "Complete Trade",
+  "chatWith": "Chat with {name}",
+  "@chatWith": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "cancelTrade": "Cancel Trade",
+  "tradeCancelledSuccessfully": "Trade cancelled successfully",
+  "failedToCancelTrade": "Failed to cancel trade",
+  "like": "Like",
+  "dislike": "Dislike",
+  "likedSuccessfully": "Liked successfully",
+  "dislikedSuccessfully": "Disliked successfully",
+  "failedToSubmitMark": "Failed to submit mark",
+  "givingYouItem": "Giving you {itemName}",
+  "@givingYouItem": {
+    "placeholders": {
+      "itemName": { "type": "String" }
+    }
+  },
+  "takingYourItem": "Taking your {itemName}",
+  "@takingYourItem": {
+    "placeholders": {
+      "itemName": { "type": "String" }
+    }
+  },
+  "fullName": "Full Name",
+  "locationLabel": "Location",
+  "emailAddress": "Email Address",
+  "usedForNotifications": "Used for notifications and account recovery",
+  "mobileNumber": "Mobile Number",
+  "verifiedMobileNumber": "Verified mobile number",
+  "dateOfBirth": "Date of Birth",
+  "male": "Male",
+  "female": "Female",
+  "other": "Other",
+  "profileVisibility": "Profile Visibility",
+  "publicAnyoneCanView": "Public: Anyone can view your profile.",
+  "showTradeHistory": "Show Trade History",
+  "tradeHistoryHidden": "Your trade history is hidden from others.",
+  "enterYourBio": "Enter your bio...",
+  "updateFailed": "Update failed"
 }

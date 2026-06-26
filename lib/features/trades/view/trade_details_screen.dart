@@ -94,20 +94,20 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
             children: [
               _buildMainItemCard(response),
               SizedBox(height: 14.h),
-              _buildSectionTitle('Trade With'),
+              _buildSectionTitle(AppLocalizations.of(context)!.tradeWith),
               SizedBox(height: 8.h),
               _buildUserCard(response),
               _buildUserMarkActions(response),
               SizedBox(height: 14.h),
-              _buildSectionTitle('Exchange Details'),
+              _buildSectionTitle(AppLocalizations.of(context)!.exchangeDetails),
               SizedBox(height: 8.h),
               _buildExchangeCard(response),
               SizedBox(height: 14.h),
-              _buildSectionTitle('Trade Info'),
+              _buildSectionTitle(AppLocalizations.of(context)!.tradeInfo),
               SizedBox(height: 8.h),
               _buildTradeInfoCard(response),
               SizedBox(height: 14.h),
-              _buildSectionTitle('Trade Notes'),
+              _buildSectionTitle(AppLocalizations.of(context)!.tradeNotes),
               SizedBox(height: 8.h),
               _buildNotesCard(response),
               SizedBox(height: 20.h),
@@ -153,7 +153,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
           elevation: 0,
         ),
         child: Text(
-          'Complete Trade',
+          AppLocalizations.of(context)!.completeTrade,
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
@@ -204,7 +204,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
         },
         icon: Icon(Icons.chat_bubble_outline, color: context.onPrimaryColor),
         label: Text(
-          'Chat with ${isOwner ? response.responderName : (response.posterName ?? 'User')}',
+          AppLocalizations.of(context)!.chatWith(isOwner ? response.responderName : (response.posterName ?? 'User')),
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
@@ -245,7 +245,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
           padding: EdgeInsets.symmetric(vertical: 14.h),
         ),
         child: Text(
-          'Cancel Trade',
+          AppLocalizations.of(context)!.cancelTrade,
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
@@ -275,9 +275,9 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success
-                        ? 'Trade cancelled successfully'
-                        : 'Failed to cancel trade'),
+                        content: Text(success
+                            ? AppLocalizations.of(context)!.tradeCancelledSuccessfully
+                            : AppLocalizations.of(context)!.failedToCancelTrade),
                     backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
@@ -301,7 +301,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
       ),
       centerTitle: true,
       title: Text(
-        'Trade Details',
+        AppLocalizations.of(context)!.tradeDetails,
         style: TextStyle(
           color: context.textColor,
           fontSize: 18.sp,
@@ -481,7 +481,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
                     final isGive = response.postType == 'give' || response.postType == 'giving';
                     final partnerIsGiving = (isPoster && !isGive) || (!isPoster && isGive);
                     final itemName = response.postItemName ?? response.givingItemName ?? 'Item';
-                    return partnerIsGiving ? 'Giving you $itemName' : 'Taking your $itemName';
+                    return partnerIsGiving ? AppLocalizations.of(context)!.givingYouItem(itemName) : AppLocalizations.of(context)!.takingYourItem(itemName);
                   })(),
                   style: TextStyle(
                     fontSize: 13.sp,
@@ -506,7 +506,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             ),
             child: Text(
-              'View Profile',
+              AppLocalizations.of(context)!.viewProfile,
               style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
@@ -551,7 +551,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
             children: [
               Expanded(
                 child: _buildMarkButton(
-                  label: 'Like',
+                  label: AppLocalizations.of(context)!.like,
                   icon: Icons.thumb_up_alt_outlined,
                   color: Colors.green,
                   isSelected: (tradeController.getUserMark(response.id) ?? _submittedMark) == 'like',
@@ -562,7 +562,7 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
               SizedBox(width: 12.w),
               Expanded(
                 child: _buildMarkButton(
-                  label: 'Dislike',
+                  label: AppLocalizations.of(context)!.dislike,
                   icon: Icons.thumb_down_alt_outlined,
                   color: Colors.red,
                   isSelected: (tradeController.getUserMark(response.id) ?? _submittedMark) == 'dislike',
@@ -646,13 +646,13 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
       setState(() => _submittedMark = mark);
       ToastService.showSuccessToast(
         context,
-        mark == 'like' ? 'Liked successfully' : 'Disliked successfully',
+        mark == 'like' ? AppLocalizations.of(context)!.likedSuccessfully : AppLocalizations.of(context)!.dislikedSuccessfully,
       );
       return;
     }
 
     final message =
-        tc.errorMessage ?? 'Failed to submit mark';
+        tc.errorMessage ?? AppLocalizations.of(context)!.failedToSubmitMark;
     ToastService.showErrorToast(context, message);
   }
 
@@ -666,13 +666,13 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
     final isTicketTrade =
         response.responseType == 'price' || response.postReturnType == 'Price';
 
-    String exchangeLabel = partnerIsGiving ? 'You Give' : 'You Receive';
+    String exchangeLabel = partnerIsGiving ? AppLocalizations.of(context)!.youGive : AppLocalizations.of(context)!.youReceive;
     String exchangeValue =
         response.itemName ?? response.givingItemName ?? 'Item';
     IconData exchangeIcon = Icons.inventory_2_outlined;
 
     if (isTicketTrade) {
-      exchangeLabel = partnerIsGiving ? 'You Pay' : 'You Receive';
+      exchangeLabel = partnerIsGiving ? AppLocalizations.of(context)!.youPay : AppLocalizations.of(context)!.youReceive;
       if (response.offerPrice != null && response.offerPrice! > 0) {
         exchangeValue = '₹${response.offerPrice!.toStringAsFixed(0)}';
       } else if (response.priceRangeStart != null) {
@@ -774,14 +774,14 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
       ),
       child: Column(
         children: [
-          _buildInfoRow(Icons.calendar_today_outlined, 'Date: $formattedDate'),
+          _buildInfoRow(Icons.calendar_today_outlined, AppLocalizations.of(context)!.dateLabel(formattedDate)),
           SizedBox(height: 12.h),
           _buildInfoRow(Icons.access_time_outlined,
-              'Status: ${response.status.toUpperCase()}'),
+              AppLocalizations.of(context)!.statusLabel(response.status.toUpperCase())),
           if (response.meetingType != null) ...[
             SizedBox(height: 12.h),
             _buildInfoRow(Icons.handshake_outlined,
-                'Meeting: ${response.meetingType!.replaceAll('_', ' ').toUpperCase()}'),
+                AppLocalizations.of(context)!.meetingLabel(response.meetingType!.replaceAll('_', ' ').toUpperCase())),
           ],
 
           //dont show this
@@ -814,9 +814,9 @@ class _TradeDetailsScreenState extends State<TradeDetailsScreen> {
   }
 
   Widget _buildNotesCard(TradeResponseModel response) {
-    String notes = response.itemDescription ?? 'No additional notes provided.';
+    String notes = response.itemDescription ?? AppLocalizations.of(context)!.noAdditionalNotesProvided;
     if (response.rejectedReason != null) {
-      notes = 'Rejected Reason: ${response.rejectedReason}\n\n$notes';
+      notes = '${AppLocalizations.of(context)!.rejectedReasonLabel(response.rejectedReason!)}\n\n$notes';
     }
 
     return Container(

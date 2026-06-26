@@ -330,41 +330,115 @@ class _WebChatScreenState extends State<WebChatScreen> {
   }
 
   void _showInfoDialog() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          contentPadding: const EdgeInsets.all(24),
-          content: Column(
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+          decoration: BoxDecoration(
+            color: context.surfaceColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
+          ),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '• This Chat stays on for next 72 hours.',
-                style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14),
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: context.dividerColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
               Text(
-                '• Do Not cheat, Negative remarks stays on your profile forever.',
-                style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14),
+                AppLocalizations.of(context)!.chatInfoTitle,
+                style: TextStyle(
+                  color: context.textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  fontFamily: FontFamily.openSans,
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '• Good Luck, Happy Innovation!',
-                style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14),
+              const SizedBox(height: 15),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, right: 10),
+                    child: Icon(Icons.circle, size: 6, color: context.textColor.withOpacity(0.5)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.of(context)!.chatInfo1,
+                      style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14, fontFamily: FontFamily.openSans),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, right: 10),
+                    child: Icon(Icons.circle, size: 6, color: context.textColor.withOpacity(0.5)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.of(context)!.chatInfo2,
+                      style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14, fontFamily: FontFamily.openSans),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, right: 10),
+                    child: Icon(Icons.circle, size: 6, color: context.textColor.withOpacity(0.5)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.of(context)!.chatInfo3,
+                      style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14, fontFamily: FontFamily.openSans),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 25),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    AppLocalizations.of(context)!.done,
+                    style: TextStyle(
+                      color: context.onPrimaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontFamily: FontFamily.openSans,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).padding.bottom),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'OK',
-                style: TextStyle(color: context.primaryColor, fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ),
-          ],
         );
       },
     );
@@ -428,13 +502,13 @@ class _WebChatScreenState extends State<WebChatScreen> {
             child: RichText(
               text: TextSpan(
                 style: TextStyle(fontSize: 15, color: context.textColor, fontFamily: FontFamily.openSans, height: 1.5),
-                children: [
-                  const TextSpan(text: "You chose "),
-                  TextSpan(text: "Giving $givingItem to $otherUserName ", style: TextStyle(fontWeight: FontWeight.w700, color: context.primaryColor)),
-                  const TextSpan(text: "and "),
-                  TextSpan(text: "Taking $takingItem ", style: TextStyle(fontWeight: FontWeight.w700, color: context.primaryColor)),
-                  const TextSpan(text: "in return"),
-                ],
+                  children: [
+                    TextSpan(text: AppLocalizations.of(context)!.youChose),
+                    TextSpan(text: AppLocalizations.of(context)!.givingTo(givingItem, otherUserName), style: TextStyle(fontWeight: FontWeight.w700, color: context.primaryColor)),
+                    TextSpan(text: AppLocalizations.of(context)!.andWord),
+                    TextSpan(text: AppLocalizations.of(context)!.taking(takingItem), style: TextStyle(fontWeight: FontWeight.w700, color: context.primaryColor)),
+                    TextSpan(text: AppLocalizations.of(context)!.inReturn),
+                  ],
               ),
             ),
           ),
@@ -565,11 +639,11 @@ class _WebChatScreenState extends State<WebChatScreen> {
                   child: TextField(
                     controller: _messageController,
                     onSubmitted: (_) => _sendMessage(),
-                    decoration: const InputDecoration(
-                      hintText: 'Type a message...',
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.typeAMessage,
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
                     ),
                   ),
                 ),

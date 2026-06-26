@@ -781,13 +781,13 @@ abstract class AppLocalizations {
   /// No description provided for @seeWhatPeopleWantAround.
   ///
   /// In en, this message translates to:
-  /// **'See what people want around you'**
+  /// **'See what people want around'**
   String get seeWhatPeopleWantAround;
 
   /// No description provided for @seeExistingPostsByGivers.
   ///
   /// In en, this message translates to:
-  /// **'• See existing posts by givers around you'**
+  /// **'See existing posts by givers'**
   String get seeExistingPostsByGivers;
 
   /// No description provided for @respondToPostsMentionWhat.
@@ -1483,13 +1483,13 @@ abstract class AppLocalizations {
   /// No description provided for @seeExistingPostsByTakers.
   ///
   /// In en, this message translates to:
-  /// **'• See existing posts by takers around you'**
+  /// **'See existing posts by takers'**
   String get seeExistingPostsByTakers;
 
   /// No description provided for @respondToPostsMentionWhat1.
   ///
   /// In en, this message translates to:
-  /// **'• Respond to posts, Mention what you want in return'**
+  /// **'Respond to posts, mention what...'**
   String get respondToPostsMentionWhat1;
 
   /// No description provided for @viewSellerProfile.
@@ -1525,13 +1525,13 @@ abstract class AppLocalizations {
   /// No description provided for @seeWhatPeopleAreGiving.
   ///
   /// In en, this message translates to:
-  /// **'See what people are giving around you'**
+  /// **'See what people are giving'**
   String get seeWhatPeopleAreGiving;
 
   /// No description provided for @respondToPostsMentionWhat2.
   ///
   /// In en, this message translates to:
-  /// **'• Respond to posts, Mention what you can offer in return'**
+  /// **'Respond to posts, mention what...'**
   String get respondToPostsMentionWhat2;
 
   /// No description provided for @deletePost.
@@ -2170,6 +2170,276 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get done;
 
+  /// No description provided for @searchChats.
+  ///
+  /// In en, this message translates to:
+  /// **'Search chats...'**
+  String get searchChats;
+
+  /// No description provided for @chatInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get chatInfoTitle;
+
+  /// No description provided for @chatInfo1.
+  ///
+  /// In en, this message translates to:
+  /// **'This Chat stays on for next 72 hours.'**
+  String get chatInfo1;
+
+  /// No description provided for @chatInfo2.
+  ///
+  /// In en, this message translates to:
+  /// **'Do Not cheat, Negative remarks stays on your profile forever.'**
+  String get chatInfo2;
+
+  /// No description provided for @chatInfo3.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Luck, Happy Innovation!.'**
+  String get chatInfo3;
+
+  /// No description provided for @distanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get distanceLabel;
+
+  /// No description provided for @setYourLocationToEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your location to enable distance filtering'**
+  String get setYourLocationToEnable;
+
+  /// No description provided for @kmAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} km away'**
+  String kmAway(String distance);
+
+  /// No description provided for @unknownDistanceAway.
+  ///
+  /// In en, this message translates to:
+  /// **'- km away'**
+  String get unknownDistanceAway;
+
+  /// No description provided for @userIsTaking.
+  ///
+  /// In en, this message translates to:
+  /// **'{userName}\'s Taking'**
+  String userIsTaking(String userName);
+
+  /// No description provided for @userIsGiving.
+  ///
+  /// In en, this message translates to:
+  /// **'{userName}\'s Giving'**
+  String userIsGiving(String userName);
+
+  /// No description provided for @inExchangeFor.
+  ///
+  /// In en, this message translates to:
+  /// **'In exchange for: '**
+  String get inExchangeFor;
+
+  /// No description provided for @moneyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'(Money)'**
+  String get moneyLabel;
+
+  /// No description provided for @freeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get freeLabel;
+
+  /// No description provided for @itemLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get itemLabel;
+
+  /// No description provided for @offersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Offers'**
+  String get offersLabel;
+
+  /// No description provided for @giveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Give'**
+  String get giveLabel;
+
+  /// No description provided for @takeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Take'**
+  String get takeLabel;
+
+  /// No description provided for @enableGpsForAccurateLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable GPS for accurate location'**
+  String get enableGpsForAccurateLocation;
+
+  /// No description provided for @addNewAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new address'**
+  String get addNewAddress;
+
+  /// No description provided for @defaultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultLabel;
+
+  /// No description provided for @filterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filterLabel;
+
+  /// No description provided for @sortByLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort By'**
+  String get sortByLabel;
+
+  /// No description provided for @showingResults.
+  ///
+  /// In en, this message translates to:
+  /// **'(Showing {count} Results)'**
+  String showingResults(int count);
+
+  /// No description provided for @myPostsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Posts'**
+  String get myPostsTitle;
+
+  /// No description provided for @seeAllActiveInactivePosts.
+  ///
+  /// In en, this message translates to:
+  /// **'• See all your active and inactive posts'**
+  String get seeAllActiveInactivePosts;
+
+  /// No description provided for @viewOffersNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'• View offers and notifications for your items'**
+  String get viewOffersNotifications;
+
+  /// No description provided for @allPostsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allPostsTab;
+
+  /// No description provided for @activePostsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activePostsTab;
+
+  /// No description provided for @inactivePostsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactivePostsTab;
+
+  /// No description provided for @tryChangingFilterOrCreatePost.
+  ///
+  /// In en, this message translates to:
+  /// **'Try changing the filter or create a new post!'**
+  String get tryChangingFilterOrCreatePost;
+
+  /// No description provided for @createPostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Post'**
+  String get createPostLabel;
+
+  /// No description provided for @noSubscriptionPaymentsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t made any subscription payments yet.'**
+  String get noSubscriptionPaymentsYet;
+
+  /// No description provided for @expiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires on {date}'**
+  String expiresOn(String date);
+
+  /// No description provided for @idHash.
+  ///
+  /// In en, this message translates to:
+  /// **'ID #{id}'**
+  String idHash(String id);
+
+  /// No description provided for @periodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PERIOD'**
+  String get periodLabel;
+
+  /// No description provided for @amountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOUNT'**
+  String get amountLabel;
+
+  /// No description provided for @activeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIVE'**
+  String get activeStatus;
+
+  /// No description provided for @expiredStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'EXPIRED'**
+  String get expiredStatus;
+
+  /// No description provided for @typeAMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message ...'**
+  String get typeAMessage;
+
+  /// No description provided for @youChose.
+  ///
+  /// In en, this message translates to:
+  /// **'You chose '**
+  String get youChose;
+
+  /// No description provided for @givingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Giving {givingItem} to {partnerName} '**
+  String givingTo(String givingItem, String partnerName);
+
+  /// No description provided for @andWord.
+  ///
+  /// In en, this message translates to:
+  /// **'and '**
+  String get andWord;
+
+  /// No description provided for @taking.
+  ///
+  /// In en, this message translates to:
+  /// **'Taking {takingItem} '**
+  String taking(String takingItem);
+
+  /// No description provided for @inReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'in return'**
+  String get inReturn;
+
   /// No description provided for @postNotFound.
   ///
   /// In en, this message translates to:
@@ -2439,6 +2709,666 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to remove profile'**
   String get failedToRemoveProfile;
+
+  /// No description provided for @giveIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Give It'**
+  String get giveIt;
+
+  /// No description provided for @productDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Details'**
+  String get productDetails;
+
+  /// No description provided for @itemCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Condition'**
+  String get itemCondition;
+
+  /// No description provided for @noDescriptionProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'No description provided.'**
+  String get noDescriptionProvided;
+
+  /// No description provided for @priceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Range'**
+  String get priceRange;
+
+  /// No description provided for @returnInReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'{returnType} in return'**
+  String returnInReturn(String returnType);
+
+  /// No description provided for @returnInReturnFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Return in return'**
+  String get returnInReturnFallback;
+
+  /// No description provided for @kmAwayFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km away from {location}'**
+  String kmAwayFrom(String km, String location);
+
+  /// No description provided for @giveWhatWillYouOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Give ( What will you offer in Return? )'**
+  String get giveWhatWillYouOffer;
+
+  /// No description provided for @takeWhatYouWant.
+  ///
+  /// In en, this message translates to:
+  /// **'Take ( What you want in Return? )'**
+  String get takeWhatYouWant;
+
+  /// No description provided for @giveWhatIsAskingFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Give what {name}\'s asking for'**
+  String giveWhatIsAskingFor(String name);
+
+  /// No description provided for @takeWhatIsGiving.
+  ///
+  /// In en, this message translates to:
+  /// **'Take what {name}\'s giving'**
+  String takeWhatIsGiving(String name);
+
+  /// No description provided for @itemYouOfferInReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Item You Offer in Return'**
+  String get itemYouOfferInReturn;
+
+  /// No description provided for @itemYouWantInReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Item You Want in Return'**
+  String get itemYouWantInReturn;
+
+  /// No description provided for @fillDetailsYouOffering.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill details of the item you\'re offering'**
+  String get fillDetailsYouOffering;
+
+  /// No description provided for @fillItemDetailsYouWant.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill item details you want in return'**
+  String get fillItemDetailsYouWant;
+
+  /// No description provided for @moneyAskForMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Money ( Ask for Money )'**
+  String get moneyAskForMoney;
+
+  /// No description provided for @askForMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for Money'**
+  String get askForMoney;
+
+  /// No description provided for @offerPriceForItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer a price for the item'**
+  String get offerPriceForItem;
+
+  /// No description provided for @setCustomPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a custom price for the item'**
+  String get setCustomPrice;
+
+  /// No description provided for @askForFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for Free'**
+  String get askForFree;
+
+  /// No description provided for @giveForFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Give For Free'**
+  String get giveForFree;
+
+  /// No description provided for @spreadSomeJoy.
+  ///
+  /// In en, this message translates to:
+  /// **'Spread some joy in the neighborhood'**
+  String get spreadSomeJoy;
+
+  /// No description provided for @giverLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'GIVER'**
+  String get giverLabel;
+
+  /// No description provided for @takerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TAKER'**
+  String get takerLabel;
+
+  /// No description provided for @givingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s Giving'**
+  String givingAction(String name);
+
+  /// No description provided for @takingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s Taking'**
+  String takingAction(String name);
+
+  /// No description provided for @offerTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer Type : {type}'**
+  String offerTypeLabel(String type);
+
+  /// No description provided for @categoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category : {category}'**
+  String categoryLabel(String category);
+
+  /// No description provided for @takeItemFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Take {item} from {name}'**
+  String takeItemFrom(String item, String name);
+
+  /// No description provided for @giveItemTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Give {item} to {name}'**
+  String giveItemTo(String item, String name);
+
+  /// No description provided for @giveSpecifiedReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Give Specified Return'**
+  String get giveSpecifiedReturn;
+
+  /// No description provided for @takeOfferedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Offered Item'**
+  String get takeOfferedItem;
+
+  /// No description provided for @offerCustomItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer Custom Item'**
+  String get offerCustomItem;
+
+  /// No description provided for @requestCustomItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Custom Item'**
+  String get requestCustomItem;
+
+  /// No description provided for @sendOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Offer'**
+  String get sendOffer;
+
+  /// No description provided for @offerSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer Sent!'**
+  String get offerSentTitle;
+
+  /// No description provided for @offerSentMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your offer has been sent successfully. Please wait for the owner to accept it.'**
+  String get offerSentMsg;
+
+  /// No description provided for @kmAwayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km away'**
+  String kmAwayLabel(String km);
+
+  /// No description provided for @didNotFindWhatYouWereLookingFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t find what you were looking for ?'**
+  String get didNotFindWhatYouWereLookingFor;
+
+  /// No description provided for @wereHereToHelpYouWithAnyQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re here to help you with any questions or issues you might have with the community'**
+  String get wereHereToHelpYouWithAnyQuestions;
+
+  /// No description provided for @shareYourFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Your Feedback'**
+  String get shareYourFeedback;
+
+  /// No description provided for @partnersWithinRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Partners within this radius will see your item.'**
+  String get partnersWithinRadius;
+
+  /// No description provided for @enterItemName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter item name'**
+  String get enterItemName;
+
+  /// No description provided for @pleaseSelectAtLeastOneOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one option'**
+  String get pleaseSelectAtLeastOneOption;
+
+  /// No description provided for @minimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum'**
+  String get minimum;
+
+  /// No description provided for @maximum.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get maximum;
+
+  /// No description provided for @postNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Now'**
+  String get postNow;
+
+  /// No description provided for @postRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Request'**
+  String get postRequest;
+
+  /// No description provided for @uploadAtLeastOneImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload at least one image'**
+  String get uploadAtLeastOneImage;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @creditsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits: {credits}'**
+  String creditsLeft(String credits);
+
+  /// No description provided for @creditsPerTrade.
+  ///
+  /// In en, this message translates to:
+  /// **'{credits} Credits per trade'**
+  String creditsPerTrade(String credits);
+
+  /// No description provided for @noActiveSubscriptionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have any active subscription or credits to create this post. Please buy or activate a new subscription to continue.'**
+  String get noActiveSubscriptionMessage;
+
+  /// No description provided for @addCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get addCategory;
+
+  /// No description provided for @categoryAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Category added successfully!'**
+  String get categoryAddedSuccessfully;
+
+  /// No description provided for @addCustomCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Custom Category'**
+  String get addCustomCategory;
+
+  /// No description provided for @photoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo required'**
+  String get photoRequired;
+
+  /// No description provided for @max5PhotosReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 5 photos reached'**
+  String get max5PhotosReached;
+
+  /// No description provided for @createGivePost.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Give Post'**
+  String get createGivePost;
+
+  /// No description provided for @createTakePost.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Take Post'**
+  String get createTakePost;
+
+  /// No description provided for @askSomeoneToTake.
+  ///
+  /// In en, this message translates to:
+  /// **'• Ask someone to take something, by creating a post'**
+  String get askSomeoneToTake;
+
+  /// No description provided for @postVisibleToTakers.
+  ///
+  /// In en, this message translates to:
+  /// **'• This post will be visible to the \"takers\" around you'**
+  String get postVisibleToTakers;
+
+  /// No description provided for @inYourSelectedArea.
+  ///
+  /// In en, this message translates to:
+  /// **'• In your selected area i.e >10 mtrs / <5kms'**
+  String get inYourSelectedArea;
+
+  /// No description provided for @newCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newCondition;
+
+  /// No description provided for @likeNewCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Like New'**
+  String get likeNewCondition;
+
+  /// No description provided for @usedCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get usedCondition;
+
+  /// No description provided for @describeYourProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your product here...'**
+  String get describeYourProduct;
+
+  /// No description provided for @priceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get priceLabel;
+
+  /// No description provided for @desiredPriceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Desired Price Range'**
+  String get desiredPriceRange;
+
+  /// No description provided for @minPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Min Price'**
+  String get minPrice;
+
+  /// No description provided for @maxPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Price'**
+  String get maxPrice;
+
+  /// No description provided for @tradeWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade With'**
+  String get tradeWith;
+
+  /// No description provided for @exchangeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange Details'**
+  String get exchangeDetails;
+
+  /// No description provided for @youReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'You Receive'**
+  String get youReceive;
+
+  /// No description provided for @youGive.
+  ///
+  /// In en, this message translates to:
+  /// **'You Give'**
+  String get youGive;
+
+  /// No description provided for @youPay.
+  ///
+  /// In en, this message translates to:
+  /// **'You Pay'**
+  String get youPay;
+
+  /// No description provided for @tradeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade Info'**
+  String get tradeInfo;
+
+  /// No description provided for @dateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date: {date}'**
+  String dateLabel(String date);
+
+  /// No description provided for @statusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status}'**
+  String statusLabel(String status);
+
+  /// No description provided for @meetingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting: {meeting}'**
+  String meetingLabel(String meeting);
+
+  /// No description provided for @tradeNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade Notes'**
+  String get tradeNotes;
+
+  /// No description provided for @noAdditionalNotesProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'No additional notes provided.'**
+  String get noAdditionalNotesProvided;
+
+  /// No description provided for @rejectedReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected Reason: {reason}'**
+  String rejectedReasonLabel(String reason);
+
+  /// No description provided for @chatWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with {name}'**
+  String chatWith(String name);
+
+  /// No description provided for @tradeCancelledSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade cancelled successfully'**
+  String get tradeCancelledSuccessfully;
+
+  /// No description provided for @failedToCancelTrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to cancel trade'**
+  String get failedToCancelTrade;
+
+  /// No description provided for @like.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get like;
+
+  /// No description provided for @dislike.
+  ///
+  /// In en, this message translates to:
+  /// **'Dislike'**
+  String get dislike;
+
+  /// No description provided for @likedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Liked successfully'**
+  String get likedSuccessfully;
+
+  /// No description provided for @dislikedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Disliked successfully'**
+  String get dislikedSuccessfully;
+
+  /// No description provided for @failedToSubmitMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to submit mark'**
+  String get failedToSubmitMark;
+
+  /// No description provided for @givingYouItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Giving you {itemName}'**
+  String givingYouItem(String itemName);
+
+  /// No description provided for @takingYourItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Taking your {itemName}'**
+  String takingYourItem(String itemName);
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @locationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get locationLabel;
+
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddress;
+
+  /// No description provided for @usedForNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for notifications and account recovery'**
+  String get usedForNotifications;
+
+  /// No description provided for @mobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get mobileNumber;
+
+  /// No description provided for @verifiedMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified mobile number'**
+  String get verifiedMobileNumber;
+
+  /// No description provided for @dateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Birth'**
+  String get dateOfBirth;
+
+  /// No description provided for @male.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get male;
+
+  /// No description provided for @female.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get female;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @profileVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Visibility'**
+  String get profileVisibility;
+
+  /// No description provided for @publicAnyoneCanView.
+  ///
+  /// In en, this message translates to:
+  /// **'Public: Anyone can view your profile.'**
+  String get publicAnyoneCanView;
+
+  /// No description provided for @showTradeHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Trade History'**
+  String get showTradeHistory;
+
+  /// No description provided for @tradeHistoryHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trade history is hidden from others.'**
+  String get tradeHistoryHidden;
+
+  /// No description provided for @enterYourBio.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your bio...'**
+  String get enterYourBio;
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed'**
+  String get updateFailed;
 }
 
 class _AppLocalizationsDelegate

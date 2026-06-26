@@ -6,6 +6,7 @@ import 'package:tool_bocs/core/services/storage_service.dart';
 import 'package:tool_bocs/core/constants/app_theme.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class ThemeSelectionBottomSheet extends StatefulWidget {
   const ThemeSelectionBottomSheet({super.key});
@@ -128,7 +129,7 @@ class _ThemeSelectionBottomSheetState extends State<ThemeSelectionBottomSheet> {
           ),
           SizedBox(height: 24.h),
           Text(
-            '— INTRODUCING —',
+            AppLocalizations.of(context)!.introducing,
             style: TextStyle(
               color: _accentColor.withOpacity(0.8),
               fontSize: 12.sp,
@@ -138,7 +139,7 @@ class _ThemeSelectionBottomSheetState extends State<ThemeSelectionBottomSheet> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Dark Mode',
+            AppLocalizations.of(context)!.darkMode,
             style: TextStyle(
               color: _textColor,
               fontSize: 24.sp,
@@ -148,7 +149,7 @@ class _ThemeSelectionBottomSheetState extends State<ThemeSelectionBottomSheet> {
           ),
           SizedBox(height: 12.h),
           Text(
-            'Choose your preferred app theme.\nYou can also change this later from your profile',
+            AppLocalizations.of(context)!.chooseYourPreferredAppThemenyou,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: _subTextColor,
@@ -157,9 +158,9 @@ class _ThemeSelectionBottomSheetState extends State<ThemeSelectionBottomSheet> {
             ),
           ),
           SizedBox(height: 30.h),
-          _buildOption('Light theme', ThemeMode.light),
-          _buildOption('Dark theme', ThemeMode.dark),
-          _buildOption('Use device theme', ThemeMode.system),
+          _buildOption(AppLocalizations.of(context)!.lightTheme, ThemeMode.light),
+          _buildOption(AppLocalizations.of(context)!.darkTheme, ThemeMode.dark),
+          _buildOption(AppLocalizations.of(context)!.useDeviceTheme, ThemeMode.system),
           SizedBox(height: 30.h),
           SizedBox(
             width: double.infinity,
@@ -180,7 +181,7 @@ class _ThemeSelectionBottomSheetState extends State<ThemeSelectionBottomSheet> {
                     : null,
               ),
               child: Text(
-                'Save preference',
+                AppLocalizations.of(context)!.savePreference,
                 style: TextStyle(
                   color: _onAccentColor,
                   fontWeight: FontWeight.bold,

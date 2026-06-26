@@ -65,7 +65,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
               Icon(Icons.arrow_back_ios, color: context.textColor, size: 20.sp),
         ),
         title: Text(
-          'My Posts',
+          AppLocalizations.of(context)!.myPostsTitle,
           style: TextStyle(
             color: context.textColor,
             fontSize: 20.sp,
@@ -95,7 +95,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Manage your posts',
+                        AppLocalizations.of(context)!.manageYourPosts,
                         style: TextStyle(
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
@@ -106,7 +106,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                       ),
                       SizedBox(height: 10.h),
                       Text(
-                        '• See all your active and inactive posts',
+                        AppLocalizations.of(context)!.seeAllActiveInactivePosts,
                         style: TextStyle(
                           color: Colors.grey.shade500,
                           fontSize: 12.sp,
@@ -115,7 +115,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                       ),
                       SizedBox(height: 6.h),
                       Text(
-                        '• View offers and notifications for your items',
+                        AppLocalizations.of(context)!.viewOffersNotifications,
                         style: TextStyle(
                           color: Colors.grey.shade500,
                           fontSize: 12.sp,
@@ -140,7 +140,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                         size: 18.sp, color: context.textColor),
                     SizedBox(width: 8.w),
                     Text(
-                      'Help & Support',
+                      AppLocalizations.of(context)!.helpSupport,
                       style: TextStyle(
                         color: context.textColor,
                         fontSize: 13.sp,
@@ -210,15 +210,15 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          _buildFilterChip('All', controller),
-          _buildFilterChip('Active', controller),
-          _buildFilterChip('Inactive', controller),
+          _buildFilterChip('All', AppLocalizations.of(context)!.allPostsTab, controller),
+          _buildFilterChip('Active', AppLocalizations.of(context)!.activePostsTab, controller),
+          _buildFilterChip('Inactive', AppLocalizations.of(context)!.inactivePostsTab, controller),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, ProfileController controller) {
+  Widget _buildFilterChip(String label, String displayLabel, ProfileController controller) {
     bool isSelected = controller.selectedMyPostsFilter == label;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -247,7 +247,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
           ),
         ),
         child: Text(
-          label,
+          displayLabel,
           style: TextStyle(
             fontSize: 14.sp,
             color: isSelected
@@ -323,7 +323,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
             Icon(Icons.post_add, size: 80.sp, color: Colors.grey),
             SizedBox(height: 16.h),
             Text(
-              'No posts found',
+              AppLocalizations.of(context)!.noPostsFound,
               style: TextStyle(
                 color: context.subTextColor,
                 fontSize: 18.sp,
@@ -332,7 +332,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Try changing the filter or create a new post!',
+              AppLocalizations.of(context)!.tryChangingFilterOrCreatePost,
               style: TextStyle(
                 color: greyColor,
                 fontSize: 14.sp,
@@ -349,7 +349,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                     borderRadius: BorderRadius.circular(8.r)),
               ),
               child: Text(
-                'Create Post',
+                AppLocalizations.of(context)!.createPostLabel,
                 style: TextStyle(
                     color: context.onPrimaryColor, fontWeight: FontWeight.bold),
               ),

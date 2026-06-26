@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
@@ -89,7 +90,6 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                         answer: faq.answer,
                         initiallyExpanded: controller.faqs.indexOf(faq) == 0,
                       )),
-                
                 SizedBox(height: 30.h),
                 _buildFeedbackSection(controller),
               ],
@@ -134,7 +134,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               color: context.primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.help_outline, color: context.primaryColor, size: 18.sp),
+            child: Icon(Icons.help_outline,
+                color: context.primaryColor, size: 18.sp),
           ),
           title: Text(
             question,
@@ -177,11 +178,12 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             color: context.primaryColor.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.chat_bubble_outline, color: context.primaryColor, size: 24.sp),
+          child: Icon(Icons.chat_bubble_outline,
+              color: context.primaryColor, size: 24.sp),
         ),
         SizedBox(height: 15.h),
         Text(
-          "Didn't find what you were looking for ?",
+          AppLocalizations.of(context)!.didNotFindWhatYouWereLookingFor,
           style: TextStyle(
             fontSize: 15.sp,
             fontWeight: FontWeight.w700,
@@ -193,7 +195,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Text(
-            "We're here to help you with any questions or issues you might have with the community",
+            AppLocalizations.of(context)!.wereHereToHelpYouWithAnyQuestions,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12.sp,
@@ -238,7 +240,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             controller: _feedbackController,
             maxLines: 5,
             decoration: InputDecoration(
-              hintText: 'Share Your Feedback',
+              hintText: AppLocalizations.of(context)!.shareYourFeedback,
               hintStyle: TextStyle(
                   color: context.isDarkMode
                       ? Colors.white30
@@ -260,27 +262,31 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: controller.isLoading 
-                ? null 
-                : () async {
-                if (_feedbackController.text.isNotEmpty) {
-                  final response = await controller.submitFeedback(_feedbackController.text);
-                  
-                  if (mounted) {
-                    if (response.success) {
-                      ToastService.showSuccessToast(context, response.message);
-                      setState(() {
-                        _showFeedbackField = false;
-                        _feedbackController.clear();
-                      });
-                    } else {
-                      ToastService.showErrorToast(context, response.message);
-                    }
-                  }
-                } else {
-                  ToastService.showErrorToast(context, 'Please enter some feedback');
-                }
-              },
+              onPressed: controller.isLoading
+                  ? null
+                  : () async {
+                      if (_feedbackController.text.isNotEmpty) {
+                        final response = await controller
+                            .submitFeedback(_feedbackController.text);
+
+                        if (mounted) {
+                          if (response.success) {
+                            ToastService.showSuccessToast(
+                                context, response.message);
+                            setState(() {
+                              _showFeedbackField = false;
+                              _feedbackController.clear();
+                            });
+                          } else {
+                            ToastService.showErrorToast(
+                                context, response.message);
+                          }
+                        }
+                      } else {
+                        ToastService.showErrorToast(
+                            context, 'Please enter some feedback');
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.primaryColor,
                 padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -289,23 +295,23 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 ),
                 elevation: 0,
               ),
-              child: controller.isLoading 
-                ? SizedBox(
-                    height: 20.h,
-                    width: 20.h,
-                    child: CircularProgressIndicator(
-                      color: context.onPrimaryColor,
-                      strokeWidth: 2,
+              child: controller.isLoading
+                  ? SizedBox(
+                      height: 20.h,
+                      width: 20.h,
+                      child: CircularProgressIndicator(
+                        color: context.onPrimaryColor,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      'Submit',
+                      style: TextStyle(
+                        color: context.onPrimaryColor,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  )
-                : Text(
-                    'Submit',
-                    style: TextStyle(
-                      color: context.onPrimaryColor,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
             ),
           ),
         ],

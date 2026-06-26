@@ -221,7 +221,7 @@ class _TakeScreenState extends State<TakeScreen> {
           ),
           const Spacer(),
           Text(
-            '(Showing $count Results)',
+            AppLocalizations.of(context)!.showingResults(count),
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -300,7 +300,7 @@ class _TakeScreenState extends State<TakeScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'See what people are giving around you',
+                            AppLocalizations.of(context)!.seeWhatPeopleAreGiving,
                             style: TextStyle(
                               color: const Color(0xFF111311),
                               fontSize: 14.sp,
@@ -310,7 +310,7 @@ class _TakeScreenState extends State<TakeScreen> {
                           ),
                           SizedBox(height: 10.h),
                           Text(
-                            '• See existing posts by givers around you',
+                            AppLocalizations.of(context)!.seeExistingPostsByGivers,
                             style: TextStyle(
                               color: Colors.grey.shade700,
                               fontSize: 12.sp,
@@ -320,7 +320,7 @@ class _TakeScreenState extends State<TakeScreen> {
                           ),
                           SizedBox(height: 6.h),
                           Text(
-                            '• Respond to posts, Mention what you can offer in return',
+                            AppLocalizations.of(context)!.respondToPostsMentionWhat2,
                             style: TextStyle(
                               color: Colors.grey.shade700,
                               fontSize: 12.sp,
@@ -346,7 +346,7 @@ class _TakeScreenState extends State<TakeScreen> {
                             size: 18.sp, color: context.primaryColor),
                         SizedBox(width: 8.w),
                         Text(
-                          'Help & Support',
+                          AppLocalizations.of(context)!.helpSupport,
                           style: TextStyle(
                             color: context.primaryColor,
                             fontSize: 13.sp,
@@ -465,7 +465,7 @@ class _TakeScreenState extends State<TakeScreen> {
           ),
           SizedBox(width: 6.w),
           Text(
-            "Filter",
+            AppLocalizations.of(context)!.filterLabel,
             style: TextStyle(
               color: context.textColor,
               fontSize: 14.sp,
@@ -506,7 +506,7 @@ class _TakeScreenState extends State<TakeScreen> {
               ),
               SizedBox(width: 6.w),
               Text(
-                'Sort By',
+                AppLocalizations.of(context)!.sortByLabel,
                 style: TextStyle(
                   color: hasCustomSort ? context.onPrimaryColor : context.textColor,
                   fontSize: 14.sp,
@@ -632,7 +632,7 @@ class _TakeScreenState extends State<TakeScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          "${post.userName}'s ${post.postType.toLowerCase() == 'give' ? 'Giving' : 'Taking'}",
+                          post.postType.toLowerCase() == 'give' ? AppLocalizations.of(context)!.userIsGiving(post.userName ?? 'User') : AppLocalizations.of(context)!.userIsTaking(post.userName ?? 'User'),
                           style: TextStyle(
                             fontSize: 9.sp,
                             color: context.subTextColor,
@@ -759,11 +759,11 @@ class _TakeScreenState extends State<TakeScreen> {
                   SizedBox(height: 3.h),
                   (() {
                     final actionLabel = isOwner
-                        ? 'Offers'
+                        ? AppLocalizations.of(context)!.offersLabel
                         : (post.postType.toLowerCase() == 'give' ||
                                 post.postType.toLowerCase() == 'giving'
-                            ? 'Take'
-                            : 'Give');
+                            ? AppLocalizations.of(context)!.takeLabel
+                            : AppLocalizations.of(context)!.giveLabel);
 
                     return InkWell(
                       onTap: () {

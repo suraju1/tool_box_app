@@ -402,7 +402,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 5.h),
               Text(
-                'Distance',
+                AppLocalizations.of(context)!.distanceLabel,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
@@ -413,8 +413,8 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 5.h),
               Text(
                 controller.hasLocation
-                    ? 'Show items near you'
-                    : 'Set your location to enable distance filtering',
+                    ? AppLocalizations.of(context)!.showItemsNearYou
+                    : AppLocalizations.of(context)!.setYourLocationToEnable,
                 style: TextStyle(
                   fontSize: 10.sp,
                   color: controller.hasLocation ? greyColor : Colors.orange,
@@ -440,7 +440,7 @@ class _HomeScreenState extends State<HomeScreen> {
         post.postType.toLowerCase() == 'taking';
     final authController = context.read<AuthController>();
     final isOwner = authController.currentUser?.id == post.userId;
-    final actionLabel = isOwner ? 'Offers' : (isTake ? 'Give' : 'Take');
+    final actionLabel = isOwner ? AppLocalizations.of(context)!.offersLabel : (isTake ? AppLocalizations.of(context)!.giveLabel : AppLocalizations.of(context)!.takeLabel);
 
     // Format exchange details dynamically
     Widget getExchangeInfo() {
@@ -451,14 +451,14 @@ class _HomeScreenState extends State<HomeScreen> {
       final category = post.returnItemCategory ?? '';
 
       if (type == 'exchange' || type == 'item') {
-        String text = 'In exchange for: ';
+        String text = AppLocalizations.of(context)!.inExchangeFor;
         if (name.isNotEmpty) {
           text += name;
           if (category.isNotEmpty) text += ' ($category)';
         } else if (category.isNotEmpty) {
           text += category;
         } else {
-          text += 'Item';
+          text += AppLocalizations.of(context)!.itemLabel;
         }
         return Text(
           text,
@@ -473,7 +473,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       } else if (type == 'free') {
         return Text(
-          'Free',
+          AppLocalizations.of(context)!.freeLabel,
           style: TextStyle(
             color: context.primaryColor,
             fontWeight: FontWeight.bold,
@@ -482,9 +482,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       } else {
-        String text = 'In exchange for: ₹${min?.toStringAsFixed(0) ?? 0} (Money)';
+        String text = '${AppLocalizations.of(context)!.inExchangeFor}₹${min?.toStringAsFixed(0) ?? 0} ${AppLocalizations.of(context)!.moneyLabel}';
         if (min != null && max != null && max != min) {
-          text = 'In exchange for: ₹${min.toStringAsFixed(0)} - ₹${max.toStringAsFixed(0)} (Money)';
+          text = '${AppLocalizations.of(context)!.inExchangeFor}₹${min.toStringAsFixed(0)} - ₹${max.toStringAsFixed(0)} ${AppLocalizations.of(context)!.moneyLabel}';
         }
         return Text(
           text,
@@ -538,7 +538,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "${post.userName}'s ${isTake ? 'Taking' : 'Giving'}",
+                              isTake
+                                  ? AppLocalizations.of(context)!.userIsTaking(post.userName ?? 'User')
+                                  : AppLocalizations.of(context)!.userIsGiving(post.userName ?? 'User'),
                               style: TextStyle(
                                   color: Colors.grey, fontSize: 11.sp),
                               maxLines: 1,
@@ -568,8 +570,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(width: 4.w),
                           Text(
                             post.distanceKm != null
-                                ? '${post.distanceKm!.toStringAsFixed(1)} km away'
-                                : '- km away',
+                                ? AppLocalizations.of(context)!.kmAway(post.distanceKm!.toStringAsFixed(1))
+                                : AppLocalizations.of(context)!.unknownDistanceAway,
                             style:
                                 TextStyle(color: Colors.grey, fontSize: 11.sp),
                           ),
