@@ -3,6 +3,7 @@ import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/model/user_profile_model.dart';
 import 'package:tool_bocs/util/colors.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebAllReviewsScreen extends StatelessWidget {
   final UserProfileModel profile;
@@ -18,20 +19,26 @@ class WebAllReviewsScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 800), // Narrower constraint for reviews list looks better
+          constraints: const BoxConstraints(
+              maxWidth:
+                  800), // Narrower constraint for reviews list looks better
           child: Column(
             children: [
               _buildHeader(context),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                   children: [
-                    _buildRatingSummary(context, averageRating, totalReviews.toString()),
+                    _buildRatingSummary(
+                        context, averageRating, totalReviews.toString()),
                     const SizedBox(height: 32),
                     if (reviews.isEmpty)
                       _buildEmptyState(context)
                     else
-                      ...reviews.map((review) => _buildReviewItem(context, review)).toList(),
+                      ...reviews
+                          .map((review) => _buildReviewItem(context, review))
+                          .toList(),
                   ],
                 ),
               ),
@@ -63,8 +70,8 @@ class WebAllReviewsScreen extends StatelessWidget {
             splashRadius: 24,
           ),
           const SizedBox(width: 16),
-          const Text(
-            'Reviews & Ratings',
+          Text(
+            AppLocalizations.of(context)!.reviewsRatings,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -75,7 +82,8 @@ class WebAllReviewsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRatingSummary(BuildContext context, String averageRating, String totalReviews) {
+  Widget _buildRatingSummary(
+      BuildContext context, String averageRating, String totalReviews) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
@@ -138,7 +146,7 @@ class WebAllReviewsScreen extends StatelessWidget {
           Icon(Icons.star_outline, size: 80, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
-            'No reviews yet',
+            AppLocalizations.of(context)!.noReviewsYet,
             style: TextStyle(
               color: Colors.grey.shade600,
               fontSize: 20,
@@ -172,7 +180,8 @@ class WebAllReviewsScreen extends StatelessWidget {
           InkWell(
             onTap: () {
               if (review.reviewerId != null) {
-                ProfileController.navigateToUserProfile(context, review.reviewerId!);
+                ProfileController.navigateToUserProfile(
+                    context, review.reviewerId!);
               }
             },
             borderRadius: BorderRadius.circular(30),
@@ -203,7 +212,8 @@ class WebAllReviewsScreen extends StatelessWidget {
                 InkWell(
                   onTap: () {
                     if (review.reviewerId != null) {
-                      ProfileController.navigateToUserProfile(context, review.reviewerId!);
+                      ProfileController.navigateToUserProfile(
+                          context, review.reviewerId!);
                     }
                   },
                   child: Text(
@@ -225,8 +235,12 @@ class WebAllReviewsScreen extends StatelessWidget {
                               ? review.rating
                               : int.tryParse(review.rating.toString()) ?? 0;
                           return Icon(
-                            index < ratingValue ? Icons.star : Icons.star_border,
-                            color: index < ratingValue ? Colors.amber : Colors.grey.shade400,
+                            index < ratingValue
+                                ? Icons.star
+                                : Icons.star_border,
+                            color: index < ratingValue
+                                ? Colors.amber
+                                : Colors.grey.shade400,
                             size: 16,
                           );
                         },
@@ -235,7 +249,8 @@ class WebAllReviewsScreen extends StatelessWidget {
                     if (review.feedbackLabel != null) ...[
                       const SizedBox(width: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: context.primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(6),

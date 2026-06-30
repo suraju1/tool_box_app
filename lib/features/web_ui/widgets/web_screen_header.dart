@@ -21,7 +21,14 @@ class WebScreenHeader extends StatelessWidget implements PreferredSizeWidget {
         child: Row(
           children: [
             IconButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  // Fallback to home/dashboard if opened directly via URL
+                  Navigator.pushReplacementNamed(context, '/bottomNavBar');
+                }
+              },
               icon: const Icon(Icons.arrow_back_ios_new, size: 20),
               splashRadius: 24,
             ),

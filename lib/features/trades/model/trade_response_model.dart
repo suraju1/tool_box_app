@@ -48,6 +48,7 @@ class TradeResponseModel {
   final String? returnItemCondition;
   final String? postReturnType;
   final String? paymentAmount;
+  final double? distanceKm;
 
   TradeResponseModel({
     required this.id,
@@ -95,6 +96,7 @@ class TradeResponseModel {
     this.returnItemCondition,
     this.postReturnType,
     this.paymentAmount,
+    this.distanceKm,
   });
 
   factory TradeResponseModel.fromJson(Map<String, dynamic> json) {
@@ -192,6 +194,7 @@ class TradeResponseModel {
       returnItemCondition: json['return_item_condition'],
       postReturnType: json['post_return_type'],
       paymentAmount: json['payment_amount']?.toString(),
+      distanceKm: double.tryParse(json['distance_km']?.toString() ?? json['distance']?.toString() ?? ''),
     );
   }
 
@@ -245,6 +248,7 @@ class TradeResponseModel {
       returnItemCondition: returnItemCondition,
       postReturnType: postReturnType,
       paymentAmount: paymentAmount,
+      distanceKm: distanceKm,
     );
   }
 }

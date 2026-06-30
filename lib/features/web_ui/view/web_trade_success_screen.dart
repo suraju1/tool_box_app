@@ -33,7 +33,8 @@ class _WebTradeSuccessScreenState extends State<WebTradeSuccessScreen> {
 
     final isOwner = authController.currentUser?.id == response.posterUserId;
     final otherUserId = isOwner ? response.responderId : response.posterUserId;
-    final otherUserName = isOwner ? response.responderName : response.posterName;
+    final otherUserName =
+        isOwner ? response.responderName : response.posterName;
 
     if (otherUserId != null) {
       showDialog(
@@ -67,113 +68,129 @@ class _WebTradeSuccessScreenState extends State<WebTradeSuccessScreen> {
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 24),
               padding: const EdgeInsets.all(48),
-            decoration: BoxDecoration(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: context.dividerColor.withOpacity(0.5)),
-              boxShadow: context.isDarkMode
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
-                      )
-                    ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 160,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.check_circle, color: Colors.green, size: 100),
-                ),
-                const SizedBox(height: 48),
-                Text(
-                  'Trade Confirmed!',
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: FontFamily.openSans,
-                    color: context.textColor,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Your trade request has been sent to $posterName. You can now chat with them to coordinate the handover.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: context.subTextColor,
-                    fontWeight: FontWeight.w500,
-                    height: 1.5,
-                  ),
-                ),
-                if (tradeController.lastTradeCompletion != null) ...[
-                  const SizedBox(height: 32),
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: context.scaffoldBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: context.primaryColor.withOpacity(0.3)),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildDetailRow(
-                          'Trade ID',
-                          '#${tradeController.lastTradeCompletion!.tradeId}',
-                          context,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildDetailRow(
-                          'Credit',
-                          '$creditFee Credits',
-                          context,
-                        ),
+              decoration: BoxDecoration(
+                color: context.surfaceColor,
+                borderRadius: BorderRadius.circular(24),
+                border:
+                    Border.all(color: context.dividerColor.withOpacity(0.5)),
+                boxShadow: context.isDarkMode
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        )
                       ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 160,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check_circle,
+                        color: Colors.green, size: 100),
+                  ),
+                  const SizedBox(height: 48),
+                  Text(
+                    AppLocalizations.of(context)!.tradeConfirmed1,
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w800,
+                      fontFamily: FontFamily.openSans,
+                      color: context.textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Your trade request has been sent to $posterName. You can now chat with them to coordinate the handover.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: context.subTextColor,
+                      fontWeight: FontWeight.w500,
+                      height: 1.5,
+                    ),
+                  ),
+                  if (tradeController.lastTradeCompletion != null) ...[
+                    const SizedBox(height: 32),
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: context.scaffoldBg,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: context.primaryColor.withOpacity(0.3)),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildDetailRow(
+                            'Trade ID',
+                            '#${tradeController.lastTradeCompletion!.tradeId}',
+                            context,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildDetailRow(
+                            'Credit',
+                            '$creditFee Credits',
+                            context,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 48),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pushReplacementNamed(
+                          context, AppRoutes.tradeDetails),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                          AppLocalizations.of(context)!.viewTradeDetails,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                          context, AppRoutes.bottomNavBar, (route) => false),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.surfaceColor,
+                        side: BorderSide(color: context.primaryColor, width: 2),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: Text(AppLocalizations.of(context)!.goToHome,
+                          style: TextStyle(
+                              color: context.primaryColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
-                const SizedBox(height: 48),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pushReplacementNamed(context, AppRoutes.tradeDetails),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.primaryColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    child: Text(AppLocalizations.of(context)!.viewTradeDetails, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pushNamedAndRemoveUntil(context, AppRoutes.bottomNavBar, (route) => false),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.surfaceColor,
-                      side: BorderSide(color: context.primaryColor, width: 2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    child: Text(AppLocalizations.of(context)!.goToHome, style: TextStyle(color: context.primaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );

@@ -48,15 +48,17 @@ class _WebSettingScreenState extends State<WebSettingScreen> {
                   _buildSettingItem(
                     context,
                     icon: Icons.person_outline,
-                    label: 'Edit Profile',
-                    onTap: () => Navigator.pushNamed(context, AppRoutes.editProfile),
+                    label: AppLocalizations.of(context)!.editProfile,
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.editProfile),
                   ),
                   _buildDivider(context),
                   _buildSettingItem(
                     context,
                     icon: Icons.help_outline,
-                    label: 'Help & Support',
-                    onTap: () => Navigator.pushNamed(context, AppRoutes.helpSupport),
+                    label: AppLocalizations.of(context)!.helpSupport,
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.helpSupport),
                   ),
                   _buildDivider(context),
                   _buildSettingItem(
@@ -76,26 +78,31 @@ class _WebSettingScreenState extends State<WebSettingScreen> {
                   _buildSettingItem(
                     context,
                     icon: Icons.description_outlined,
-                    label: 'Terms & Conditions',
-                    onTap: () => Navigator.pushNamed(context, AppRoutes.termsConditions),
+                    label: AppLocalizations.of(context)!.termsConditions,
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.termsConditions),
                   ),
                   _buildDivider(context),
                   _buildSettingItem(
                     context,
                     icon: Icons.shield_outlined,
-                    label: 'Privacy Policy',
-                    onTap: () => Navigator.pushNamed(context, AppRoutes.privacyPolicy),
+                    label: AppLocalizations.of(context)!.privacyPolicy,
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.privacyPolicy),
                   ),
                   _buildDivider(context),
                   _buildSettingItem(
                     context,
                     icon: Icons.visibility_outlined,
-                    label: 'Unhide All Posts',
+                    label: AppLocalizations.of(context)!.unhideAllPosts,
                     onTap: () async {
                       await context.read<TradeController>().clearHiddenPosts();
                       if (!context.mounted) return;
-                      ToastService.showSuccessToast(context, 'All hidden posts are now visible');
-                      context.read<TradeController>().fetchHomePosts(); // Refresh feed
+                      ToastService.showSuccessToast(
+                          context, 'All hidden posts are now visible');
+                      context
+                          .read<TradeController>()
+                          .fetchHomePosts(); // Refresh feed
                     },
                   ),
                 ],
@@ -149,7 +156,8 @@ class _WebSettingScreenState extends State<WebSettingScreen> {
         final currentLocale = languageController.locale.languageCode;
 
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
             AppLocalizations.of(context)!.selectLanguage,
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -159,7 +167,7 @@ class _WebSettingScreenState extends State<WebSettingScreen> {
             children: [
               _buildLanguageOption(
                 context,
-                title: 'English',
+                title: AppLocalizations.of(context)!.english,
                 isSelected: currentLocale == 'en',
                 onTap: () {
                   languageController.setLanguage('en');
@@ -168,7 +176,7 @@ class _WebSettingScreenState extends State<WebSettingScreen> {
               ),
               _buildLanguageOption(
                 context,
-                title: 'हिन्दी (Hindi)',
+                title: AppLocalizations.of(context)!.hindi,
                 isSelected: currentLocale == 'hi',
                 onTap: () {
                   languageController.setLanguage('hi');
@@ -177,7 +185,7 @@ class _WebSettingScreenState extends State<WebSettingScreen> {
               ),
               _buildLanguageOption(
                 context,
-                title: 'मराठी (Marathi)',
+                title: AppLocalizations.of(context)!.marathi,
                 isSelected: currentLocale == 'mr',
                 onTap: () {
                   languageController.setLanguage('mr');
@@ -228,9 +236,10 @@ class _WebSettingScreenState extends State<WebSettingScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text(
-                'Appearance',
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              title: Text(
+                AppLocalizations.of(context)!.appearance,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               content: Column(
@@ -238,24 +247,27 @@ class _WebSettingScreenState extends State<WebSettingScreen> {
                 children: [
                   _buildThemeOption(
                     context,
-                    title: 'Light theme',
+                    title: AppLocalizations.of(context)!.lightTheme,
                     mode: ThemeMode.light,
                     currentMode: selectedMode,
-                    onChanged: (mode) => setModalState(() => selectedMode = mode!),
+                    onChanged: (mode) =>
+                        setModalState(() => selectedMode = mode!),
                   ),
                   _buildThemeOption(
                     context,
-                    title: 'Dark theme',
+                    title: AppLocalizations.of(context)!.darkTheme,
                     mode: ThemeMode.dark,
                     currentMode: selectedMode,
-                    onChanged: (mode) => setModalState(() => selectedMode = mode!),
+                    onChanged: (mode) =>
+                        setModalState(() => selectedMode = mode!),
                   ),
                   _buildThemeOption(
                     context,
-                    title: 'Use device theme',
+                    title: AppLocalizations.of(context)!.useDeviceTheme,
                     mode: ThemeMode.system,
                     currentMode: selectedMode,
-                    onChanged: (mode) => setModalState(() => selectedMode = mode!),
+                    onChanged: (mode) =>
+                        setModalState(() => selectedMode = mode!),
                   ),
                 ],
               ),

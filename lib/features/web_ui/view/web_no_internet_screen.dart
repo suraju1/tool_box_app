@@ -13,7 +13,8 @@ class WebNoInternetScreen extends StatefulWidget {
   State<WebNoInternetScreen> createState() => _WebNoInternetScreenState();
 }
 
-class _WebNoInternetScreenState extends State<WebNoInternetScreen> with SingleTickerProviderStateMixin {
+class _WebNoInternetScreenState extends State<WebNoInternetScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   final ConnectivityService _connectivityService = ConnectivityService();
@@ -61,7 +62,8 @@ class _WebNoInternetScreenState extends State<WebNoInternetScreen> with SingleTi
               decoration: BoxDecoration(
                 color: context.surfaceColor,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+                border:
+                    Border.all(color: context.dividerColor.withOpacity(0.5)),
                 boxShadow: context.isDarkMode
                     ? []
                     : [
@@ -80,15 +82,18 @@ class _WebNoInternetScreenState extends State<WebNoInternetScreen> with SingleTi
                     width: 140,
                     height: 140,
                     decoration: BoxDecoration(
-                      color: context.isDarkMode ? Colors.white10 : context.surfaceColor,
+                      color: context.isDarkMode
+                          ? Colors.white10
+                          : context.surfaceColor,
                       shape: BoxShape.circle,
                       border: Border.all(color: context.primaryColor, width: 2),
                     ),
-                    child: Icon(Icons.wifi_off_rounded, size: 70, color: context.primaryColor),
+                    child: Icon(Icons.wifi_off_rounded,
+                        size: 70, color: context.primaryColor),
                   ),
                   const SizedBox(height: 48),
                   Text(
-                    'No Internet Connection',
+                    AppLocalizations.of(context)!.noInternetConnection,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: FontFamily.openSans,
@@ -99,7 +104,8 @@ class _WebNoInternetScreenState extends State<WebNoInternetScreen> with SingleTi
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Please check your internet connection\nand try again.',
+                    AppLocalizations.of(context)!
+                        .pleaseCheckYourInternetConnectionnand,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: FontFamily.openSans,
@@ -123,10 +129,15 @@ class _WebNoInternetScreenState extends State<WebNoInternetScreen> with SingleTi
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: context.primaryColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
-                      child: Text(AppLocalizations.of(context)!.retryConnection, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      child: Text(AppLocalizations.of(context)!.retryConnection,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -138,12 +149,14 @@ class _WebNoInternetScreenState extends State<WebNoInternetScreen> with SingleTi
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(context.primaryColor),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              context.primaryColor),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        'Checking connection automatically...',
+                        AppLocalizations.of(context)!
+                            .checkingConnectionAutomatically,
                         style: TextStyle(
                           fontFamily: FontFamily.openSans,
                           fontSize: 14,

@@ -35,7 +35,7 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
           icon: Icon(Icons.arrow_back, color: context.textColor),
         ),
         title: Text(
-          'Choose Your Plan',
+          AppLocalizations.of(context)!.chooseYourPlan,
           style: TextStyle(
             color: context.textColor,
             fontSize: 24,
@@ -45,7 +45,8 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, color: context.dividerColor.withOpacity(0.5)),
+          child:
+              Divider(height: 1, color: context.dividerColor.withOpacity(0.5)),
         ),
       ),
       body: Consumer<SubscriptionController>(
@@ -69,7 +70,8 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Unlock premium features and scale your productivity with TOOLUCS.',
+                      AppLocalizations.of(context)!
+                          .unlockPremiumFeaturesAndScale,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 20,
@@ -82,8 +84,10 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 50),
                         child: Text(
-                          'No subscription plans available at the moment.',
-                          style: TextStyle(color: context.subTextColor, fontSize: 18),
+                          AppLocalizations.of(context)!
+                              .noSubscriptionPlansAvailableAt,
+                          style: TextStyle(
+                              color: context.subTextColor, fontSize: 18),
                         ),
                       )
                     else
@@ -91,11 +95,14 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
                         spacing: 40,
                         runSpacing: 40,
                         alignment: WrapAlignment.center,
-                        children: plans.map((plan) => _HoverablePlanCard(
-                          plan: plan,
-                          isLoading: controller.isActivating,
-                          onSubscribe: () => _onSubscribe(context, plan.id),
-                        )).toList(),
+                        children: plans
+                            .map((plan) => _HoverablePlanCard(
+                                  plan: plan,
+                                  isLoading: controller.isActivating,
+                                  onSubscribe: () =>
+                                      _onSubscribe(context, plan.id),
+                                ))
+                            .toList(),
                       ),
                     const SizedBox(height: 80),
                   ],
@@ -108,7 +115,8 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, SubscriptionController controller) {
+  Widget _buildErrorState(
+      BuildContext context, SubscriptionController controller) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -118,8 +126,11 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
             const Icon(Icons.error_outline, size: 80, color: Colors.red),
             const SizedBox(height: 24),
             Text(
-              'Oops! Something went wrong',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.textColor),
+              AppLocalizations.of(context)!.oopsSomethingWentWrong,
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: context.textColor),
             ),
             const SizedBox(height: 12),
             Text(
@@ -132,9 +143,11 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
               onPressed: () => controller.fetchAvailablePlans(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
-              child: Text(AppLocalizations.of(context)!.tryAgain, style: TextStyle(color: Colors.white, fontSize: 16)),
+              child: Text(AppLocalizations.of(context)!.tryAgain,
+                  style: TextStyle(color: Colors.white, fontSize: 16)),
             ),
           ],
         ),
@@ -150,7 +163,8 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(controller.successMessage ?? 'Subscription activated!'),
+            content:
+                Text(controller.successMessage ?? 'Subscription activated!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -165,7 +179,6 @@ class _WebChoosePlanScreenState extends State<WebChoosePlanScreen> {
       }
     }
   }
-
 }
 
 class _HoverablePlanCard extends StatefulWidget {
@@ -189,14 +202,15 @@ class _HoverablePlanCardState extends State<_HoverablePlanCard> {
   @override
   Widget build(BuildContext context) {
     final controller = context.read<SubscriptionController>();
-    final isThisPlanLoading = controller.isActivating && controller.activatingPlanId == widget.plan.id;
+    final isThisPlanLoading = controller.isActivating &&
+        controller.activatingPlanId == widget.plan.id;
     final bool isPopular = widget.plan.name.toLowerCase().contains('pro');
-    
+
     List<String> features = widget.plan.description
         .split(RegExp(r'[\n,]'))
         .where((e) => e.trim().isNotEmpty)
         .toList();
-        
+
     if (features.isEmpty && widget.plan.description.isNotEmpty) {
       features = [widget.plan.description];
     }
@@ -213,14 +227,18 @@ class _HoverablePlanCardState extends State<_HoverablePlanCard> {
           color: context.surfaceColor,
           borderRadius: BorderRadius.circular(32),
           border: Border.all(
-            color: isPopular 
-                ? context.primaryColor 
-                : (isHovered ? context.primaryColor.withOpacity(0.5) : context.dividerColor.withOpacity(0.5)),
+            color: isPopular
+                ? context.primaryColor
+                : (isHovered
+                    ? context.primaryColor.withOpacity(0.5)
+                    : context.dividerColor.withOpacity(0.5)),
             width: isPopular ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: isHovered ? context.primaryColor.withOpacity(0.15) : Colors.black.withOpacity(0.05),
+              color: isHovered
+                  ? context.primaryColor.withOpacity(0.15)
+                  : Colors.black.withOpacity(0.05),
               blurRadius: isHovered ? 40 : 20,
               offset: Offset(0, isHovered ? 15 : 10),
             )
@@ -234,27 +252,30 @@ class _HoverablePlanCardState extends State<_HoverablePlanCard> {
                 right: 0,
                 top: 0,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [context.primaryColor, context.primaryColor.withOpacity(0.8)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(30),
-                      bottomLeft: Radius.circular(20),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.primaryColor.withOpacity(0.3),
-                        blurRadius: 10,
-                        offset: const Offset(-2, 4),
-                      )
-                    ]
-                  ),
-                  child: const Text(
-                    'MOST POPULAR',
+                      gradient: LinearGradient(
+                        colors: [
+                          context.primaryColor,
+                          context.primaryColor.withOpacity(0.8)
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(30),
+                        bottomLeft: Radius.circular(20),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.primaryColor.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(-2, 4),
+                        )
+                      ]),
+                  child: Text(
+                    AppLocalizations.of(context)!.mostPopular,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -312,7 +333,8 @@ class _HoverablePlanCardState extends State<_HoverablePlanCard> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.stars_rounded, color: context.primaryColor, size: 28),
+                        Icon(Icons.stars_rounded,
+                            color: context.primaryColor, size: 28),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -340,7 +362,8 @@ class _HoverablePlanCardState extends State<_HoverablePlanCard> {
                                   color: Colors.green.withOpacity(0.1),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.check, color: Colors.green, size: 16),
+                                child: const Icon(Icons.check,
+                                    color: Colors.green, size: 16),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -362,7 +385,8 @@ class _HoverablePlanCardState extends State<_HoverablePlanCard> {
                       padding: const EdgeInsets.only(bottom: 20),
                       child: Text(
                         'Enjoy full access to ${widget.plan.name} features.',
-                        style: TextStyle(color: context.subTextColor, fontSize: 16),
+                        style: TextStyle(
+                            color: context.subTextColor, fontSize: 16),
                       ),
                     ),
                   const SizedBox(height: 40),
@@ -372,13 +396,21 @@ class _HoverablePlanCardState extends State<_HoverablePlanCard> {
                     child: ElevatedButton(
                       onPressed: widget.isLoading ? null : widget.onSubscribe,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isPopular || isHovered ? context.primaryColor : context.scaffoldBg,
-                        foregroundColor: isPopular || isHovered ? Colors.white : context.primaryColor,
+                        backgroundColor: isPopular || isHovered
+                            ? context.primaryColor
+                            : context.scaffoldBg,
+                        foregroundColor: isPopular || isHovered
+                            ? Colors.white
+                            : context.primaryColor,
                         elevation: isHovered ? 8 : 0,
                         shadowColor: context.primaryColor.withOpacity(0.4),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
-                          side: isPopular || isHovered ? BorderSide.none : BorderSide(color: context.primaryColor.withOpacity(0.3), width: 2),
+                          side: isPopular || isHovered
+                              ? BorderSide.none
+                              : BorderSide(
+                                  color: context.primaryColor.withOpacity(0.3),
+                                  width: 2),
                         ),
                       ),
                       child: isThisPlanLoading
@@ -388,12 +420,14 @@ class _HoverablePlanCardState extends State<_HoverablePlanCard> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 3,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  isPopular || isHovered ? Colors.white : context.primaryColor,
+                                  isPopular || isHovered
+                                      ? Colors.white
+                                      : context.primaryColor,
                                 ),
                               ),
                             )
                           : Text(
-                              'Get Started',
+                              AppLocalizations.of(context)!.getStarted,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

@@ -9,6 +9,7 @@ import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/core/controller/location_controller.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebOtpScreen extends StatefulWidget {
   const WebOtpScreen({super.key});
@@ -18,7 +19,8 @@ class WebOtpScreen extends StatefulWidget {
 }
 
 class _WebOtpScreenState extends State<WebOtpScreen> {
-  final List<TextEditingController> _controllers = List.generate(6, (index) => TextEditingController());
+  final List<TextEditingController> _controllers =
+      List.generate(6, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
 
   String? _phoneNumber;
@@ -85,12 +87,14 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
     if (!_validateOtp()) return;
 
     if (_phoneNumber == null) {
-      ToastService.showErrorToast(context, 'Phone number not found. Please try again.');
+      ToastService.showErrorToast(
+          context, 'Phone number not found. Please try again.');
       return;
     }
 
     final authController = context.read<AuthController>();
-    final success = await authController.signInWithOtp(_getOtpCode(), _phoneNumber!);
+    final success =
+        await authController.signInWithOtp(_getOtpCode(), _phoneNumber!);
 
     if (!mounted) return;
 
@@ -104,7 +108,8 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
             );
       }
 
-      final message = authController.successMessage ?? 'OTP verified successfully';
+      final message =
+          authController.successMessage ?? 'OTP verified successfully';
       ToastService.showSuccessToast(context, message);
 
       await Future.delayed(const Duration(milliseconds: 500));
@@ -168,7 +173,9 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
           Expanded(
             flex: 1,
             child: Container(
-              color: context.isDarkMode ? const Color(0xFF151515) : const Color(0xFFE8F0FE),
+              color: context.isDarkMode
+                  ? const Color(0xFF151515)
+                  : const Color(0xFFE8F0FE),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -191,7 +198,7 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                         ),
                         const SizedBox(height: 48),
                         Text(
-                          'Secure Access',
+                          AppLocalizations.of(context)!.secureAccess,
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w800,
@@ -201,7 +208,7 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Your security is our top priority. We use secure\nOTP verification to protect your account.',
+                          AppLocalizations.of(context)!.yourSecurityIsOurTop,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,
@@ -218,7 +225,8 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                     left: 32,
                     child: IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: Icon(Icons.arrow_back, color: context.textColor, size: 28),
+                      icon: Icon(Icons.arrow_back,
+                          color: context.textColor, size: 28),
                       tooltip: 'Back to Login',
                     ),
                   ),
@@ -226,7 +234,7 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
               ),
             ),
           ),
-          
+
           // Right Pane: OTP Form
           Expanded(
             flex: 1,
@@ -241,7 +249,7 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'OTP Verification',
+                        AppLocalizations.of(context)!.otpVerification,
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.w800,
@@ -259,7 +267,9 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                             height: 1.5,
                           ),
                           children: [
-                            const TextSpan(text: 'Enter the 6-digit verification code sent to\n'),
+                            const TextSpan(
+                                text:
+                                    'Enter the 6-digit verification code sent to\n'),
                             TextSpan(
                               text: _phoneNumber ?? 'your phone number',
                               style: TextStyle(
@@ -271,7 +281,7 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                         ),
                       ),
                       const SizedBox(height: 48),
-                      
+
                       // 6 OTP input fields
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -288,15 +298,19 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                                     : context.isDarkMode
                                         ? Colors.white24
                                         : Colors.grey.shade300,
-                                width: _controllers[index].text.isNotEmpty ? 2 : 1,
+                                width:
+                                    _controllers[index].text.isNotEmpty ? 2 : 1,
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: KeyboardListener(
                               focusNode: FocusNode(),
                               onKeyEvent: (event) {
-                                if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.backspace) {
-                                  if (_controllers[index].text.isEmpty && index > 0) {
+                                if (event is KeyDownEvent &&
+                                    event.logicalKey ==
+                                        LogicalKeyboardKey.backspace) {
+                                  if (_controllers[index].text.isEmpty &&
+                                      index > 0) {
                                     _focusNodes[index - 1].requestFocus();
                                   }
                                 }
@@ -327,7 +341,9 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                                 textAlign: TextAlign.center,
                                 textAlignVertical: TextAlignVertical.center,
                                 keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
@@ -344,9 +360,9 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                           );
                         }),
                       ),
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       // Timer and Resend
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -363,7 +379,7 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                           Row(
                             children: [
                               Text(
-                                "Didn't receive code? ",
+                                AppLocalizations.of(context)!.didntReceiveCode,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: context.subTextColor,
@@ -371,14 +387,18 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                                 ),
                               ),
                               MouseRegion(
-                                cursor: _canResend ? SystemMouseCursors.click : SystemMouseCursors.basic,
+                                cursor: _canResend
+                                    ? SystemMouseCursors.click
+                                    : SystemMouseCursors.basic,
                                 child: GestureDetector(
                                   onTap: _canResend ? _handleResendOtp : null,
                                   child: Text(
-                                    'Resend',
+                                    AppLocalizations.of(context)!.resend,
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: _canResend ? context.primaryColor : greyColor,
+                                      color: _canResend
+                                          ? context.primaryColor
+                                          : greyColor,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: FontFamily.openSans,
                                     ),
@@ -389,9 +409,9 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 48),
-                      
+
                       // Action Button
                       Consumer<AuthController>(
                         builder: (context, authController, child) {
@@ -399,7 +419,9 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                             width: double.infinity,
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: authController.isVerifyingOtp ? null : _handleVerifyOtp,
+                              onPressed: authController.isVerifyingOtp
+                                  ? null
+                                  : _handleVerifyOtp,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: context.primaryColor,
                                 foregroundColor: Colors.white,
@@ -407,7 +429,8 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 elevation: 0,
-                                disabledBackgroundColor: context.primaryColor.withOpacity(0.6),
+                                disabledBackgroundColor:
+                                    context.primaryColor.withOpacity(0.6),
                               ),
                               child: authController.isVerifyingOtp
                                   ? const SizedBox(
@@ -415,11 +438,14 @@ class _WebOtpScreenState extends State<WebOtpScreen> {
                                       width: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
                                       ),
                                     )
-                                  : const Text(
-                                      'Verify Account',
+                                  : Text(
+                                      AppLocalizations.of(context)!
+                                          .verifyAccount,
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,

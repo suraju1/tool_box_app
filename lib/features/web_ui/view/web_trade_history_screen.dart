@@ -54,7 +54,8 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const WebScreenHeader(title: 'Trade History'),
+              WebScreenHeader(
+                  title: AppLocalizations.of(context)!.tradeHistory),
               Expanded(
                 child: isLoading
                     ? _buildShimmer(context)
@@ -79,8 +80,6 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
     );
   }
 
-
-
   Widget _buildTradeSummary() {
     final tradeController = context.watch<TradeController>();
     final stats = tradeController.myTradeStats;
@@ -100,14 +99,23 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
         const SizedBox(height: 16),
         Row(
           children: [
-            _buildSummaryCard('${stats?.totalTrades ?? 0}', AppLocalizations.of(context)!.totalTrades,
-                Icons.handshake, Colors.blue),
+            _buildSummaryCard(
+                '${stats?.totalTrades ?? 0}',
+                AppLocalizations.of(context)!.totalTrades,
+                Icons.handshake,
+                Colors.blue),
             const SizedBox(width: 24),
-            _buildSummaryCard('$sentOffers', AppLocalizations.of(context)!.sentOffers,
-                Icons.outbox_outlined, Colors.red),
+            _buildSummaryCard(
+                '$sentOffers',
+                AppLocalizations.of(context)!.sentOffers,
+                Icons.outbox_outlined,
+                Colors.red),
             const SizedBox(width: 24),
-            _buildSummaryCard('$receivedOffers', AppLocalizations.of(context)!.receivedOffers,
-                Icons.move_to_inbox_outlined, Colors.orange),
+            _buildSummaryCard(
+                '$receivedOffers',
+                AppLocalizations.of(context)!.receivedOffers,
+                Icons.move_to_inbox_outlined,
+                Colors.orange),
           ],
         ),
       ],
@@ -170,7 +178,8 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
         const SizedBox(width: 12),
         _buildFilterChip('sent', ' ${AppLocalizations.of(context)!.sentTab} '),
         const SizedBox(width: 12),
-        _buildFilterChip('received', ' ${AppLocalizations.of(context)!.receivedTab} '),
+        _buildFilterChip(
+            'received', ' ${AppLocalizations.of(context)!.receivedTab} '),
       ],
     );
   }
@@ -188,10 +197,13 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? context.primaryColor : Theme.of(context).cardColor,
+          color:
+              isSelected ? context.primaryColor : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-              color: isSelected ? context.primaryColor : greyColor.withOpacity(0.3)),
+              color: isSelected
+                  ? context.primaryColor
+                  : greyColor.withOpacity(0.3)),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -206,7 +218,9 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: isSelected ? Theme.of(context).colorScheme.onPrimary : Colors.grey.shade700,
+            color: isSelected
+                ? Theme.of(context).colorScheme.onPrimary
+                : Colors.grey.shade700,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -226,7 +240,7 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
             Icon(Icons.history_outlined, size: 64, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
-              'No trade history found',
+              AppLocalizations.of(context)!.noTradeHistoryFound,
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey.shade600,
@@ -278,7 +292,18 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
 
   String _getMonth(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return months[month - 1];
   }
@@ -314,7 +339,8 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
               height: 100,
               radius: 12,
               fit: BoxFit.cover,
-              errorWidget: Icon(Icons.image_outlined, color: Colors.grey.shade400, size: 40),
+              errorWidget: Icon(Icons.image_outlined,
+                  color: Colors.grey.shade400, size: 40),
             ),
             const SizedBox(width: 24),
             Expanded(
@@ -337,18 +363,25 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 4),
                         decoration: BoxDecoration(
-                          color: isGive ? Colors.blue.shade50 : Colors.orange.shade50,
+                          color: isGive
+                              ? Colors.blue.shade50
+                              : Colors.orange.shade50,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: isGive ? Colors.blue.shade200 : Colors.orange.shade200),
+                              color: isGive
+                                  ? Colors.blue.shade200
+                                  : Colors.orange.shade200),
                         ),
                         child: Text(
                           isGive ? 'Give' : 'Take',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isGive ? Colors.blue.shade700 : Colors.orange.shade700,
+                            color: isGive
+                                ? Colors.blue.shade700
+                                : Colors.orange.shade700,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -358,11 +391,13 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.person_outline, size: 16, color: Colors.grey.shade600),
+                      Icon(Icons.person_outline,
+                          size: 16, color: Colors.grey.shade600),
                       const SizedBox(width: 8),
                       Text(
                         user,
-                        style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.grey.shade600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -378,7 +413,8 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
                               size: 16, color: Colors.grey.shade600),
                           const SizedBox(width: 8),
                           Text(date,
-                              style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.grey.shade600)),
                         ],
                       ),
                       Row(
@@ -424,7 +460,8 @@ class _WebTradeHistoryScreenState extends State<WebTradeHistoryScreen> {
             (index) => Expanded(
               child: Padding(
                 padding: EdgeInsets.only(right: index < 2 ? 24.0 : 0),
-                child: const ShimmerBox(height: 120, width: double.infinity, radius: 16),
+                child: const ShimmerBox(
+                    height: 120, width: double.infinity, radius: 16),
               ),
             ),
           ),

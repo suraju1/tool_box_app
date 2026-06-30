@@ -11,6 +11,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
 import 'package:tool_bocs/features/notifications/controller/notification_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebHeader extends StatefulWidget {
   const WebHeader({super.key});
@@ -71,7 +72,7 @@ class _WebHeaderState extends State<WebHeader> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 16, right: 16),
                     child: Text(
-                      "“Because everything you need is already nearby.”",
+                      AppLocalizations.of(context)!.becauseEverythingYouNeedIs,
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontStyle: FontStyle.italic,
@@ -92,15 +93,16 @@ class _WebHeaderState extends State<WebHeader> {
                     // Theme Toggle
                     Consumer<ThemeController>(
                       builder: (context, themeController, child) {
-                        final isDark = themeController.themeMode == ThemeMode.dark ||
+                        final isDark = themeController.themeMode ==
+                                ThemeMode.dark ||
                             (themeController.themeMode == ThemeMode.system &&
                                 MediaQuery.platformBrightnessOf(context) ==
                                     Brightness.dark);
 
                         return IconButton(
                           onPressed: () {
-                            themeController
-                                .setTheme(isDark ? ThemeMode.light : ThemeMode.dark);
+                            themeController.setTheme(
+                                isDark ? ThemeMode.light : ThemeMode.dark);
                           },
                           icon: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
@@ -112,13 +114,17 @@ class _WebHeaderState extends State<WebHeader> {
                                         .animate(animation)
                                     : Tween<double>(begin: 0.5, end: 1.0)
                                         .animate(animation),
-                                child: ScaleTransition(scale: animation, child: child),
+                                child: ScaleTransition(
+                                    scale: animation, child: child),
                               );
                             },
                             child: Icon(
-                              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                              isDark
+                                  ? Icons.light_mode_rounded
+                                  : Icons.dark_mode_rounded,
                               key: ValueKey(isDark ? 'light' : 'dark'),
-                              color: isDark ? Colors.amber : Colors.grey.shade700,
+                              color:
+                                  isDark ? Colors.amber : Colors.grey.shade700,
                             ),
                           ),
                         );
@@ -138,7 +144,8 @@ class _WebHeaderState extends State<WebHeader> {
                             child: const Icon(Icons.notifications_outlined),
                           ),
                           onPressed: () {
-                            Navigator.pushNamed(context, AppRoutes.notifications);
+                            Navigator.pushNamed(
+                                context, AppRoutes.notifications);
                           },
                         );
                       },
@@ -153,15 +160,19 @@ class _WebHeaderState extends State<WebHeader> {
                       ),
                     ] else
                       const SizedBox(width: 8),
-                    
+
                     // Profile Menu
                     Flexible(
                       child: Consumer2<AuthController, ProfileController>(
-                        builder: (context, authController, profileController, child) {
+                        builder: (context, authController, profileController,
+                            child) {
                           final authUser = authController.currentUser;
-                          final profileUser = profileController.ownProfile?.userDetails;
-                          final String userName =
-                              (profileUser?.fullName ?? authUser?.fullName ?? "User").trim();
+                          final profileUser =
+                              profileController.ownProfile?.userDetails;
+                          final String userName = (profileUser?.fullName ??
+                                  authUser?.fullName ??
+                                  "User")
+                              .trim();
                           final String? imageUrl = profileUser?.image;
 
                           return Tooltip(
@@ -190,9 +201,10 @@ class _WebHeaderState extends State<WebHeader> {
                                         height: 36,
                                         fit: BoxFit.cover,
                                         radius: 18,
-                                        placeholderBgColor:
-                                            context.primaryColor.withOpacity(0.1),
-                                        placeholderTextColor: context.primaryColor,
+                                        placeholderBgColor: context.primaryColor
+                                            .withOpacity(0.1),
+                                        placeholderTextColor:
+                                            context.primaryColor,
                                       ),
                                     ),
                                     if (!isNarrow) ...[
@@ -306,8 +318,8 @@ class _ProfilePopup extends StatelessWidget {
               const SizedBox(height: 8),
               // Bio
               Text(
-                (user.bio != null && user.bio!.trim().isNotEmpty) 
-                    ? user.bio!.trim() 
+                (user.bio != null && user.bio!.trim().isNotEmpty)
+                    ? user.bio!.trim()
                     : "Passionate about buying & selling new and used products. Exploring the best deals and connecting with trusted sellers on Trylt Marketplace.",
                 style: GoogleFonts.inter(
                   fontSize: 12,
@@ -319,11 +331,12 @@ class _ProfilePopup extends StatelessWidget {
               // Instagram
               Row(
                 children: [
-                  Icon(Icons.mail_outline, size: 16, color: Colors.grey.shade700),
+                  Icon(Icons.mail_outline,
+                      size: 16, color: Colors.grey.shade700),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      "Instagram: @surajubale_1",
+                      AppLocalizations.of(context)!.instagramSurajubale1,
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: Colors.grey.shade600,
@@ -339,7 +352,7 @@ class _ProfilePopup extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    "Credit Balance: ",
+                    AppLocalizations.of(context)!.creditBalance1,
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -363,4 +376,3 @@ class _ProfilePopup extends StatelessWidget {
     );
   }
 }
-

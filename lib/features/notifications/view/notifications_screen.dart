@@ -329,33 +329,42 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     // Format time ago
     final timeAgo = DateUtil.formatTimeAgo(response.createdAt);
 
+    String distanceStr = '';
+    if (response.distanceKm != null) {
+      if (response.distanceKm! < 1.0) {
+        distanceStr = '~ ${(response.distanceKm! * 1000).toInt()} mtrs away';
+      } else {
+        distanceStr = '~ ${response.distanceKm!.toStringAsFixed(1)} km away';
+      }
+    }
+
     if (isIncoming) {
       final postItem = response.postItemName ?? 'item';
       messageSpans = [
         TextSpan(
             text: response.responderName,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        const TextSpan(text: ' is Taking your '),
+        const TextSpan(text: ' is\nTaking your '),
         TextSpan(
             text: postItem,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' ~ $timeAgo'),
       ];
 
       if (response.returnItemName != null &&
-          response.returnItemName!.isNotEmpty) {
-        subText = '⬇️ Giving you ${response.returnItemName} in return';
-      } else if (response.itemName != null && response.itemName!.isNotEmpty && (response.responseType == 'item' || response.responseType == 'Item')) {
-        subText = '⬇️ Giving you ${response.itemName} in return';
+          response.returnItemName!.isNotEmpty &&
+          response.returnItemName != postItem) {
+        subText = 'Giving you ${response.returnItemName} in return';
+      } else if (response.itemName != null && response.itemName!.isNotEmpty && (response.responseType == 'item' || response.responseType == 'Item') && response.itemName != postItem) {
+        subText = 'Giving you ${response.itemName} in return';
       } else if ((response.priceRangeStart ?? 0) > 0 ||
           (response.priceRangeEnd ?? 0) > 0) {
         final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
         final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
         subText = startPrice == endPrice
-            ? '⬇️ Giving you ₹$startPrice in return'
-            : '⬇️ Giving you ₹$startPrice - ₹$endPrice in return';
+            ? 'Giving you ₹$startPrice in return'
+            : 'Giving you ₹$startPrice - ₹$endPrice in return';
       } else {
-        subText = '⬇️ (Category: ${response.itemCategory ?? 'Unknown'} | Condition: ${response.itemCondition ?? 'Unknown'})';
+        subText = '(Category: ${response.itemCategory ?? 'Unknown'} | Condition: ${response.itemCondition ?? 'Unknown'})';
       }
     } else {
       final postItem = response.postItemName ?? 'item';
@@ -363,24 +372,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         TextSpan(
             text: response.posterName ?? 'User',
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        const TextSpan(text: ' is Giving you '),
+        const TextSpan(text: ' is\nGiving you '),
         TextSpan(
             text: postItem,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' ~ $timeAgo'),
       ];
 
-      if (response.itemName != null && response.itemName!.isNotEmpty) {
-        subText = '⬇️ Taking ${response.itemName} in return';
+      if (response.itemName != null && response.itemName!.isNotEmpty && response.itemName != postItem) {
+        subText = 'Taking ${response.itemName} in return';
       } else if ((response.priceRangeStart ?? 0) > 0 ||
           (response.priceRangeEnd ?? 0) > 0) {
         final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
         final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
         subText = startPrice == endPrice
-            ? '⬇️ Taking ₹$startPrice in return'
-            : '⬇️ Taking ₹$startPrice - ₹$endPrice in return';
+            ? 'Taking ₹$startPrice in return'
+            : 'Taking ₹$startPrice - ₹$endPrice in return';
       } else {
-         subText = '⬇️ Taking an offer in return';
+         subText = 'Taking an offer in return';
       }
     }
 
@@ -406,14 +414,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final imageToUse =
         responseImagePath.isNotEmpty ? responseImagePath : postImagePath;
 
+    Widget subMessageWidget = Text(
+      subText,
+      style: TextStyle(
+        fontSize: 12.sp,
+        color: context.subTextColor,
+        fontFamily: FontFamily.openSans,
+      ),
+    );
+
     return _buildNotificationCard(
       context,
       imageUrl: imageToUse,
-      distance: 'Unknown',
+      distance: distanceStr,
       message: messageSpans,
-      subMessage: [
-        TextSpan(text: subText),
-      ],
+      subMessageWidget: subMessageWidget,
       actions: [
         _buildActionButton(actionLabel, actionColor, context.onPrimaryColor,
             () => _onResponseTap(response)),
@@ -422,6 +437,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           _buildActionButton(' Chat ', context.primaryColor,
               context.onPrimaryColor, () => _navigateToChat(response)),
         ],
+        const Spacer(),
+        Text(
+          timeAgo,
+          style: TextStyle(
+            fontSize: 10.sp,
+            color: context.subTextColor,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
       ],
       onTap: () => _onResponseTap(response),
     );
@@ -671,7 +695,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     String? imageUrl,
     required String distance,
     required List<TextSpan> message,
-    required List<TextSpan> subMessage,
+    Widget? subMessageWidget,
     required List<Widget> actions,
     VoidCallback? onTap,
   }) {
@@ -715,27 +739,37 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        color: context.textColor,
-                        fontFamily: FontFamily.openSans,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: context.textColor,
+                              fontFamily: FontFamily.openSans,
+                            ),
+                            children: message,
+                          ),
+                        ),
                       ),
-                      children: message,
-                    ),
+                      if (distance.isNotEmpty && distance != 'Unknown') ...[
+                        SizedBox(width: 8.w),
+                        Text(
+                          distance,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: context.subTextColor,
+                            fontFamily: FontFamily.openSans,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   SizedBox(height: 2.h),
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: context.subTextColor,
-                        fontFamily: FontFamily.openSans,
-                      ),
-                      children: subMessage,
-                    ),
-                  ),
+                  if (subMessageWidget != null) subMessageWidget,
                   SizedBox(height: 8.h),
                   Row(children: actions),
                 ],

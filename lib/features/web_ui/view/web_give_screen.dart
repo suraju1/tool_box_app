@@ -12,7 +12,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/web_ui/view/web_filter_dialog.dart';
-import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
+import 'package:tool_bocs/features/web_ui/view/web_save_to_collection_dialog.dart';
 import 'package:tool_bocs/features/web_ui/view/web_sort_dialog.dart';
 import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 
@@ -83,7 +83,7 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "What do you want to give today?",
+                        AppLocalizations.of(context)!.whatDoYouWantTo,
                         style: TextStyle(
                           fontSize: isNarrow ? 20 : 28,
                           fontWeight: FontWeight.bold,
@@ -91,7 +91,8 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "Search and fulfill requests from people around you.",
+                        AppLocalizations.of(context)!
+                            .searchAndFulfillRequestsFrom,
                         style: TextStyle(
                           fontSize: isNarrow ? 14 : 16,
                           color: Colors.grey.shade600,
@@ -113,8 +114,7 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                           },
                           decoration: const InputDecoration(
                             icon: Icon(Icons.search, color: Colors.grey),
-                            hintText:
-                                "Search requests (e.g. Hammer, Drill)...",
+                            hintText: "Search requests (e.g. Hammer, Drill)...",
                             border: InputBorder.none,
                           ),
                         ),
@@ -127,15 +127,18 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                         children: [
                           ElevatedButton.icon(
                             onPressed: () {
-                              WebFilterDialog.show(context, initialPostType: 'take');
+                              WebFilterDialog.show(context,
+                                  initialPostType: 'take');
                             },
                             icon: const Icon(Icons.filter_alt_outlined),
                             label: Text(AppLocalizations.of(context)!.filter),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).cardColor,
-                              foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                              foregroundColor:
+                                  Theme.of(context).textTheme.bodyLarge?.color,
                               padding: EdgeInsets.symmetric(
-                                  horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                                  horizontal: isNarrow ? 16 : 24,
+                                  vertical: isNarrow ? 12 : 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: BorderSide(color: Colors.grey.shade300),
@@ -144,24 +147,32 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                           ),
                           Consumer<TradeController>(
                             builder: (context, tc, _) {
-                              final hasSort = tc.selectedDistanceSort.isNotEmpty &&
-                                  tc.selectedDistanceSort != 'Nearest First' ||
-                                  tc.selectedDateSort.isNotEmpty;
+                              final hasSort =
+                                  tc.selectedDistanceSort.isNotEmpty &&
+                                          tc.selectedDistanceSort !=
+                                              'Nearest First' ||
+                                      tc.selectedDateSort.isNotEmpty;
                               return ElevatedButton.icon(
                                 onPressed: () {
-                                  WebSortDialog.show(context, initialPostType: 'take');
+                                  WebSortDialog.show(context,
+                                      initialPostType: 'take');
                                 },
                                 icon: const Icon(Icons.sort),
-                                label: Text(AppLocalizations.of(context)!.sortBy),
+                                label:
+                                    Text(AppLocalizations.of(context)!.sortBy),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: hasSort
                                       ? Colors.black
                                       : Theme.of(context).cardColor,
                                   foregroundColor: hasSort
                                       ? Colors.white
-                                      : Theme.of(context).textTheme.bodyLarge?.color,
+                                      : Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.color,
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                                      horizontal: isNarrow ? 16 : 24,
+                                      vertical: isNarrow ? 12 : 16),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     side: BorderSide(
@@ -183,12 +194,14 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                               );
                             },
                             icon: const Icon(Icons.add),
-                            label: Text(AppLocalizations.of(context)!.createPost),
+                            label:
+                                Text(AppLocalizations.of(context)!.createPost),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
                               foregroundColor: Colors.white,
                               padding: EdgeInsets.symmetric(
-                                  horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                                  horizontal: isNarrow ? 16 : 24,
+                                  vertical: isNarrow ? 12 : 16),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12)),
                             ),
@@ -209,7 +222,7 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                   runSpacing: 8,
                   children: [
                     Text(
-                      "Nearby Requests",
+                      AppLocalizations.of(context)!.nearbyRequests,
                       style: TextStyle(
                         fontSize: isNarrow ? 18 : 22,
                         fontWeight: FontWeight.bold,
@@ -226,51 +239,52 @@ class _WebGiveScreenState extends State<WebGiveScreen> {
                 ),
                 const SizedBox(height: 20),
 
-            // PRODUCTS GRID
-            if (controller.isTakeLoading && controller.takePosts.isEmpty)
-              const Center(child: CircularProgressIndicator())
-            else if (controller.takePosts.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(40.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.search_off,
-                          size: 64, color: Colors.grey.shade400),
-                      const SizedBox(height: 16),
-                      Text(
-                        "No requests found matching your criteria.",
-                        style: TextStyle(
-                            color: Colors.grey.shade600, fontSize: 16),
-                      )
-                    ],
+                // PRODUCTS GRID
+                if (controller.isTakeLoading && controller.takePosts.isEmpty)
+                  const Center(child: CircularProgressIndicator())
+                else if (controller.takePosts.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40.0),
+                      child: Column(
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey.shade400),
+                          const SizedBox(height: 16),
+                          Text(
+                            AppLocalizations.of(context)!
+                                .noRequestsFoundMatchingYour,
+                            style: TextStyle(
+                                color: Colors.grey.shade600, fontSize: 16),
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 320,
+                      mainAxisExtent: 420,
+                      crossAxisSpacing: 20,
+                      mainAxisSpacing: 20,
+                    ),
+                    itemCount: controller.takePosts.length,
+                    itemBuilder: (context, index) {
+                      return _WebGiveCard(post: controller.takePosts[index]);
+                    },
                   ),
-                ),
-              )
-            else
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 320,
-                  mainAxisExtent: 420,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                ),
-                itemCount: controller.takePosts.length,
-                itemBuilder: (context, index) {
-                  return _WebGiveCard(post: controller.takePosts[index]);
-                },
-              ),
-          ],
-        ),
-      ),
-    );
+              ],
+            ),
+          ),
+        );
       },
     );
   }
 }
-
 
 class _WebGiveCard extends StatelessWidget {
   final PostModel post;
@@ -302,7 +316,7 @@ class _WebGiveCard extends StatelessWidget {
             );
             break;
           case 'save':
-            SaveToCollectionBottomSheet.show(context, post.userId);
+            WebSaveToCollectionDialog.show(context, post.userId);
             break;
           case 'share':
             Share.share(
@@ -361,7 +375,8 @@ class _WebGiveCard extends StatelessWidget {
           if (!isOwner)
             PopupMenuItem<String>(
               value: 'report',
-              child: Text(AppLocalizations.of(context)!.reportPost, style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.reportPost,
+                  style: TextStyle(color: Colors.red)),
             ),
         ];
       },
@@ -396,7 +411,7 @@ class _WebGiveCard extends StatelessWidget {
       );
     } else if (type == 'free') {
       return Text(
-        'Free',
+        AppLocalizations.of(context)!.freeLabel,
         style: TextStyle(
           color: Theme.of(context).primaryColor,
           fontWeight: FontWeight.bold,

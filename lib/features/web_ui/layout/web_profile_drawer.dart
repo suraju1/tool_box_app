@@ -90,7 +90,7 @@ class WebProfileDrawer extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'Credit Balance : ',
+                          AppLocalizations.of(context)!.creditBalance,
                           style: TextStyle(
                             color: textColor.withOpacity(0.7),
                             fontSize: 14,
@@ -114,12 +114,12 @@ class WebProfileDrawer extends StatelessWidget {
               ),
               Divider(color: dividerColor, height: 1),
               const SizedBox(height: 10),
-              
+
               // Menu
               _buildMenuItem(
                 context: context,
                 icon: Icons.person_outline,
-                label: 'Profile',
+                label: AppLocalizations.of(context)!.profile,
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, AppRoutes.webProfile);
@@ -136,29 +136,36 @@ class WebProfileDrawer extends StatelessWidget {
               _buildMenuItem(
                 context: context,
                 icon: Icons.card_membership_outlined,
-                label: AppLocalizations.of(context)?.mySubscription ?? 'My Subscription',
-                onTap: () => Navigator.pushNamed(context, AppRoutes.mySubscription),
+                label: AppLocalizations.of(context)?.mySubscription ??
+                    'My Subscription',
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.mySubscription),
                 textColor: textColor,
               ),
               _buildMenuItem(
                 context: context,
                 icon: Icons.sync_alt,
-                label: AppLocalizations.of(context)?.transactionHistory ?? 'Transaction History',
-                onTap: () => Navigator.pushNamed(context, AppRoutes.transactionHistory),
+                label: AppLocalizations.of(context)?.transactionHistory ??
+                    'Transaction History',
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.transactionHistory),
                 textColor: textColor,
               ),
               _buildMenuItem(
                 context: context,
                 icon: Icons.bookmark_border,
-                label: AppLocalizations.of(context)?.savedProfiles ?? 'Saved Profiles',
+                label: AppLocalizations.of(context)?.savedProfiles ??
+                    'Saved Profiles',
                 onTap: () => Navigator.pushNamed(context, AppRoutes.savedUsers),
                 textColor: textColor,
               ),
               _buildMenuItem(
                 context: context,
                 icon: Icons.block_outlined,
-                label: AppLocalizations.of(context)?.blockedUsers ?? 'Blocked Users',
-                onTap: () => Navigator.pushNamed(context, AppRoutes.blockedUsers),
+                label: AppLocalizations.of(context)?.blockedUsers ??
+                    'Blocked Users',
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.blockedUsers),
                 textColor: textColor,
               ),
               const SizedBox(height: 10),
@@ -172,7 +179,8 @@ class WebProfileDrawer extends StatelessWidget {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const WebSettingScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const WebSettingScreen()),
                   );
                 },
                 textColor: textColor,

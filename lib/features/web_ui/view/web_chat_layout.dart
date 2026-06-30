@@ -3,6 +3,7 @@ import 'package:tool_bocs/features/web_ui/view/web_chat_list_screen.dart';
 import 'package:tool_bocs/features/web_ui/view/web_chat_screen.dart';
 import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/util/colors.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebChatLayout extends StatefulWidget {
   const WebChatLayout({super.key});
@@ -26,10 +27,12 @@ class _WebChatLayoutState extends State<WebChatLayout> {
         Container(
           width: 350,
           decoration: BoxDecoration(
-            border: Border(right: BorderSide(color: greyColor.withOpacity(0.2))),
+            border:
+                Border(right: BorderSide(color: greyColor.withOpacity(0.2))),
           ),
           child: WebChatListScreen(
-            onChatTap: (chatRoomId, otherUserId, otherUserName, otherUserImage, tradeResponse) {
+            onChatTap: (chatRoomId, otherUserId, otherUserName, otherUserImage,
+                tradeResponse) {
               setState(() {
                 selectedChatRoomId = chatRoomId;
                 selectedOtherUserId = otherUserId;
@@ -40,7 +43,7 @@ class _WebChatLayoutState extends State<WebChatLayout> {
             },
           ),
         ),
-        
+
         // Right Pane: Active Chat Window
         Expanded(
           child: selectedChatRoomId == null
@@ -80,8 +83,8 @@ class _WebChatLayoutState extends State<WebChatLayout> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              "Your Messages",
+            Text(
+              AppLocalizations.of(context)!.yourMessages,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -89,7 +92,7 @@ class _WebChatLayoutState extends State<WebChatLayout> {
             ),
             const SizedBox(height: 8),
             Text(
-              "Select a chat from the left to start messaging.",
+              AppLocalizations.of(context)!.selectAChatFromThe,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey.shade600,

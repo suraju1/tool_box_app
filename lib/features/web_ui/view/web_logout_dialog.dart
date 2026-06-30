@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebLogoutDialog extends StatelessWidget {
   const WebLogoutDialog({super.key});
@@ -38,13 +39,15 @@ class WebLogoutDialog extends StatelessWidget {
             width: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+              border:
+                  Border.all(color: Theme.of(context).primaryColor, width: 2),
             ),
-            child: Icon(Icons.logout, size: 40, color: Theme.of(context).primaryColor),
+            child: Icon(Icons.logout,
+                size: 40, color: Theme.of(context).primaryColor),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Are you sure you want to logout?',
+          Text(
+            AppLocalizations.of(context)!.areYouSureYouWant,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,
@@ -67,7 +70,7 @@ class WebLogoutDialog extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      'Cancel',
+                      AppLocalizations.of(context)!.cancel,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -92,8 +95,8 @@ class WebLogoutDialog extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
-                      'Logout',
+                    child: Text(
+                      AppLocalizations.of(context)!.logout,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

@@ -10,7 +10,7 @@ class WebDashboardWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isNarrow = constraints.maxWidth < 800;
@@ -23,14 +23,14 @@ class WebDashboardWrapper extends StatelessWidget {
             children: [
               // 1. LEFT SIDEBAR (Only visible on wide screens)
               if (!isNarrow) const WebSidebar(),
-              
+
               // 2. MAIN CONTENT AREA (Header + Content)
               Expanded(
                 child: Column(
                   children: [
                     // Top Header AppBar
                     const WebHeader(),
-                    
+
                     // Content Area
                     Expanded(
                       child: child,

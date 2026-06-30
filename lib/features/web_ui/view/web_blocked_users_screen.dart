@@ -39,11 +39,11 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
           child: Column(
             children: [
               WebScreenHeader(
-                title: 'Blocked Users',
+                title: AppLocalizations.of(context)!.blockedUsers,
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.refresh),
-                    tooltip: 'Refresh',
+                    tooltip: AppLocalizations.of(context)!.refresh,
                     onPressed: () =>
                         context.read<ProfileController>().getBlockedUsers(),
                   )
@@ -65,8 +65,6 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
     );
   }
 
-
-
   Widget _buildInfoBanner(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(32.0),
@@ -76,7 +74,8 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
             ? Theme.of(context).primaryColor.withOpacity(0.1)
             : const Color(0xFFE8F1FF),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
+        border:
+            Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -85,7 +84,7 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              'Blocked users will not be able to see your posts or contact you.',
+              AppLocalizations.of(context)!.blockedUsersWillNotBe,
               style: TextStyle(
                 color: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white70
@@ -101,7 +100,8 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
     );
   }
 
-  Widget _buildWebGrid(BuildContext context, List<BlockedUserModel> blockedUsers) {
+  Widget _buildWebGrid(
+      BuildContext context, List<BlockedUserModel> blockedUsers) {
     int crossAxisCount = 2;
     if (MediaQuery.of(context).size.width < 800) {
       crossAxisCount = 1;
@@ -229,7 +229,7 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                 ),
                 child: Text(
-                  'Unblock',
+                  AppLocalizations.of(context)!.unblock,
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontSize: 14,
@@ -284,9 +284,11 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               ),
-              child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(fontSize: 16)),
+              child: Text(AppLocalizations.of(context)!.cancel,
+                  style: TextStyle(fontSize: 16)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -303,13 +305,14 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: Text(
-                'Unblock',
+                AppLocalizations.of(context)!.unblock,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimary,
                   fontSize: 16,
@@ -329,8 +332,8 @@ class _WebBlockedUsersScreenState extends State<WebBlockedUsersScreen> {
       children: [
         Icon(Icons.block, size: 80, color: Colors.grey.shade400),
         const SizedBox(height: 24),
-        const Text(
-          'No blocked users',
+        Text(
+          AppLocalizations.of(context)!.noBlockedUsers,
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,

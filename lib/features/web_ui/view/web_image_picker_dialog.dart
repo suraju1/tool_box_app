@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebImagePickerDialog extends StatelessWidget {
   final bool allowMultiple;
   final int? limit;
-  const WebImagePickerDialog({super.key, this.allowMultiple = false, this.limit});
+  const WebImagePickerDialog(
+      {super.key, this.allowMultiple = false, this.limit});
 
-  static Future<List<XFile>?> show(BuildContext context, {bool allowMultiple = false, int? limit}) async {
+  static Future<List<XFile>?> show(BuildContext context,
+      {bool allowMultiple = false, int? limit}) async {
     return await showDialog<List<XFile>>(
       context: context,
-      builder: (context) => WebImagePickerDialog(allowMultiple: allowMultiple, limit: limit),
+      builder: (context) =>
+          WebImagePickerDialog(allowMultiple: allowMultiple, limit: limit),
     );
   }
 
@@ -28,7 +32,7 @@ class WebImagePickerDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Select Image Source',
+                AppLocalizations.of(context)!.selectImageSource,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -45,7 +49,8 @@ class WebImagePickerDialog extends StatelessWidget {
                     label: 'Camera',
                     onTap: () async {
                       final picker = ImagePicker();
-                      final XFile? image = await picker.pickImage(source: ImageSource.camera);
+                      final XFile? image =
+                          await picker.pickImage(source: ImageSource.camera);
                       if (context.mounted) {
                         Navigator.pop(context, image != null ? [image] : null);
                       }
@@ -59,14 +64,18 @@ class WebImagePickerDialog extends StatelessWidget {
                     onTap: () async {
                       final picker = ImagePicker();
                       if (allowMultiple) {
-                        final List<XFile> images = await picker.pickMultiImage(limit: limit);
+                        final List<XFile> images =
+                            await picker.pickMultiImage(limit: limit);
                         if (context.mounted) {
-                          Navigator.pop(context, images.isNotEmpty ? images : null);
+                          Navigator.pop(
+                              context, images.isNotEmpty ? images : null);
                         }
                       } else {
-                        final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                        final XFile? image =
+                            await picker.pickImage(source: ImageSource.gallery);
                         if (context.mounted) {
-                          Navigator.pop(context, image != null ? [image] : null);
+                          Navigator.pop(
+                              context, image != null ? [image] : null);
                         }
                       }
                     },
@@ -80,7 +89,10 @@ class WebImagePickerDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildOption(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _buildOption(BuildContext context,
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap}) {
     return Expanded(
       child: InkWell(
         onTap: onTap,

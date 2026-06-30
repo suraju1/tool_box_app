@@ -22,12 +22,16 @@ class WebSidebar extends StatelessWidget {
     }
 
     int mappedIndex = 0;
-    if (activeRoute == AppRoutes.home) mappedIndex = 0;
-    else if (activeRoute == AppRoutes.webGive) mappedIndex = 1;
-    else if (activeRoute == AppRoutes.webTake) mappedIndex = 2;
-    else if (activeRoute == AppRoutes.chat) mappedIndex = 3;
+    if (activeRoute == AppRoutes.home)
+      mappedIndex = 0;
+    else if (activeRoute == AppRoutes.webGive)
+      mappedIndex = 1;
+    else if (activeRoute == AppRoutes.webTake)
+      mappedIndex = 2;
+    else if (activeRoute == AppRoutes.chat)
+      mappedIndex = 3;
     else if (activeRoute == AppRoutes.webProfile) mappedIndex = 4;
-    
+
     if (mappedIndex != controller.currentIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.setIndex(mappedIndex);
@@ -38,7 +42,11 @@ class WebSidebar extends StatelessWidget {
       width: 250,
       decoration: BoxDecoration(
         color: theme.cardColor,
-        border: Border(right: BorderSide(color: context.isDarkMode ? Colors.white12 : Colors.grey.shade200)),
+        border: Border(
+            right: BorderSide(
+                color: context.isDarkMode
+                    ? Colors.white12
+                    : Colors.grey.shade200)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +60,6 @@ class WebSidebar extends StatelessWidget {
               color: context.textColor,
             ),
           ),
-          
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -60,7 +67,7 @@ class WebSidebar extends StatelessWidget {
                   _NavItem(
                     icon: Icons.grid_view_outlined,
                     activeIcon: Icons.grid_view,
-                    title: "Home",
+                    title: AppLocalizations.of(context)!.home,
                     isSelected: activeRoute == AppRoutes.home,
                     onTap: () {
                       if (activeRoute != AppRoutes.home) {
@@ -72,31 +79,33 @@ class WebSidebar extends StatelessWidget {
                   _NavItem(
                     icon: Icons.upload_outlined,
                     activeIcon: Icons.upload,
-                    title: "Give",
+                    title: AppLocalizations.of(context)!.giveLabel,
                     isSelected: activeRoute == AppRoutes.webGive,
                     onTap: () {
                       if (activeRoute != AppRoutes.webGive) {
                         controller.setIndex(1);
-                        Navigator.pushReplacementNamed(context, AppRoutes.webGive);
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.webGive);
                       }
                     },
                   ),
                   _NavItem(
                     icon: Icons.download_outlined,
                     activeIcon: Icons.download,
-                    title: "Take",
+                    title: AppLocalizations.of(context)!.takeLabel,
                     isSelected: activeRoute == AppRoutes.webTake,
                     onTap: () {
                       if (activeRoute != AppRoutes.webTake) {
                         controller.setIndex(2);
-                        Navigator.pushReplacementNamed(context, AppRoutes.webTake);
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.webTake);
                       }
                     },
                   ),
                   _NavItem(
                     icon: Icons.chat_bubble_outline,
                     activeIcon: Icons.chat_bubble,
-                    title: "Chat",
+                    title: AppLocalizations.of(context)!.chat,
                     isSelected: activeRoute == AppRoutes.chat,
                     onTap: () {
                       if (activeRoute != AppRoutes.chat) {
@@ -105,100 +114,113 @@ class WebSidebar extends StatelessWidget {
                       }
                     },
                   ),
-                  
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    child: Divider(color: context.isDarkMode ? Colors.white12 : const Color(0xFFEEEEEE), height: 1),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    child: Divider(
+                        color: context.isDarkMode
+                            ? Colors.white12
+                            : const Color(0xFFEEEEEE),
+                        height: 1),
                   ),
-                  
                   _NavItem(
                     icon: Icons.person_outline,
                     activeIcon: Icons.person,
-                    title: "Profile",
+                    title: AppLocalizations.of(context)!.profile,
                     isSelected: activeRoute == AppRoutes.webProfile,
                     onTap: () {
                       if (activeRoute != AppRoutes.webProfile) {
                         controller.setIndex(4);
-                        Navigator.pushReplacementNamed(context, AppRoutes.webProfile);
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.webProfile);
                       }
                     },
                   ),
                   _NavItem(
                     icon: Icons.image_outlined,
                     activeIcon: Icons.image,
-                    title: "My Posts",
+                    title: AppLocalizations.of(context)!.myPostsTitle,
                     isSelected: activeRoute == AppRoutes.myPosts,
                     onTap: () {
                       if (activeRoute != AppRoutes.myPosts) {
-                        Navigator.pushReplacementNamed(context, AppRoutes.myPosts);
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.myPosts);
                       }
                     },
                   ),
                   _NavItem(
                     icon: Icons.stars_outlined,
                     activeIcon: Icons.stars,
-                    title: "My Subscription",
+                    title: AppLocalizations.of(context)!.mySubscription,
                     isSelected: activeRoute == AppRoutes.mySubscription,
                     onTap: () {
                       if (activeRoute != AppRoutes.mySubscription) {
-                        Navigator.pushReplacementNamed(context, AppRoutes.mySubscription);
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.mySubscription);
                       }
                     },
                   ),
                   _NavItem(
                     icon: Icons.sync,
                     activeIcon: Icons.sync,
-                    title: "Transaction History",
+                    title: AppLocalizations.of(context)!.transactionHistory,
                     isSelected: activeRoute == AppRoutes.transactionHistory,
                     onTap: () {
                       if (activeRoute != AppRoutes.transactionHistory) {
-                        Navigator.pushReplacementNamed(context, AppRoutes.transactionHistory);
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.transactionHistory);
                       }
                     },
                   ),
                   _NavItem(
                     icon: Icons.bookmark_border,
                     activeIcon: Icons.bookmark,
-                    title: "Saved Profiles",
+                    title: AppLocalizations.of(context)!.savedProfiles,
                     isSelected: activeRoute == AppRoutes.savedUsers,
                     onTap: () {
                       if (activeRoute != AppRoutes.savedUsers) {
-                        Navigator.pushReplacementNamed(context, AppRoutes.savedUsers);
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.savedUsers);
                       }
                     },
                   ),
                   _NavItem(
                     icon: Icons.block_outlined,
                     activeIcon: Icons.block,
-                    title: "Blocked Users",
+                    title: AppLocalizations.of(context)!.blockedUsers,
                     isSelected: activeRoute == AppRoutes.blockedUsers,
                     onTap: () {
                       if (activeRoute != AppRoutes.blockedUsers) {
-                        Navigator.pushReplacementNamed(context, AppRoutes.blockedUsers);
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.blockedUsers);
                       }
                     },
                   ),
-                  
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    child: Divider(color: context.isDarkMode ? Colors.white12 : const Color(0xFFEEEEEE), height: 1),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    child: Divider(
+                        color: context.isDarkMode
+                            ? Colors.white12
+                            : const Color(0xFFEEEEEE),
+                        height: 1),
                   ),
-                  
                   _NavItem(
                     icon: Icons.settings_outlined,
                     activeIcon: Icons.settings,
-                    title: "Settings",
+                    title: AppLocalizations.of(context)!.settings,
                     isSelected: activeRoute == AppRoutes.settings,
                     onTap: () {
                       if (activeRoute != AppRoutes.settings) {
-                        Navigator.pushReplacementNamed(context, AppRoutes.settings);
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.settings);
                       }
                     },
                   ),
                   _NavItem(
                     icon: Icons.logout_outlined,
                     activeIcon: Icons.logout,
-                    title: "Logout",
+                    title: AppLocalizations.of(context)!.logout,
                     isSelected: false,
                     onTap: () {
                       showDialog(
@@ -256,10 +278,10 @@ class _NavItemState extends State<_NavItem> {
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: widget.isSelected 
-                ? context.textColor.withOpacity(0.08) 
-                : isHovered 
-                    ? Colors.grey.withOpacity(0.05) 
+            color: widget.isSelected
+                ? context.textColor.withOpacity(0.08)
+                : isHovered
+                    ? Colors.grey.withOpacity(0.05)
                     : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
@@ -267,15 +289,20 @@ class _NavItemState extends State<_NavItem> {
             children: [
               Icon(
                 widget.isSelected ? widget.activeIcon : widget.icon,
-                color: widget.isSelected ? context.textColor : (isHovered ? context.textColor : context.subTextColor),
+                color: widget.isSelected
+                    ? context.textColor
+                    : (isHovered ? context.textColor : context.subTextColor),
                 size: 20,
               ),
               const SizedBox(width: 16),
               Text(
                 widget.title,
                 style: GoogleFonts.inter(
-                  color: widget.isSelected ? context.textColor : (isHovered ? context.textColor : context.subTextColor),
-                  fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: widget.isSelected
+                      ? context.textColor
+                      : (isHovered ? context.textColor : context.subTextColor),
+                  fontWeight:
+                      widget.isSelected ? FontWeight.w600 : FontWeight.w500,
                   fontSize: 14,
                 ),
               ),

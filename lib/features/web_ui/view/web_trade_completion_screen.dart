@@ -15,7 +15,8 @@ class WebTradeCompletionScreen extends StatefulWidget {
   const WebTradeCompletionScreen({super.key});
 
   @override
-  State<WebTradeCompletionScreen> createState() => _WebTradeCompletionScreenState();
+  State<WebTradeCompletionScreen> createState() =>
+      _WebTradeCompletionScreenState();
 }
 
 class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
@@ -35,7 +36,8 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
     if (response == null) {
       return Scaffold(
         appBar: _buildAppBar(context),
-        body: Center(child: Text(AppLocalizations.of(context)!.noTradeSelected)),
+        body:
+            Center(child: Text(AppLocalizations.of(context)!.noTradeSelected)),
       );
     }
 
@@ -50,8 +52,7 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                  'As the post owner, you don\'t need to complete this step.',
+              Text('As the post owner, you\'ll need to complete this step.',
                   style: TextStyle(fontSize: 18)),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -69,9 +70,11 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.primaryColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
-                child: Text(AppLocalizations.of(context)!.goToChat, style: TextStyle(color: Colors.white, fontSize: 16)),
+                child: Text(AppLocalizations.of(context)!.goToChat,
+                    style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
             ],
           ),
@@ -119,9 +122,11 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
                   ),
-                  child: Text(AppLocalizations.of(context)!.goBack, style: TextStyle(fontSize: 16)),
+                  child: Text(AppLocalizations.of(context)!.goBack,
+                      style: TextStyle(fontSize: 16)),
                 ),
               ],
             ),
@@ -152,7 +157,8 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
                   decoration: BoxDecoration(
                     color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+                    border: Border.all(
+                        color: context.dividerColor.withOpacity(0.5)),
                     boxShadow: context.isDarkMode
                         ? []
                         : [
@@ -193,7 +199,7 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
       ),
       centerTitle: false,
       title: Text(
-        'Complete the Trade',
+        AppLocalizations.of(context)!.completeTheTrade,
         style: TextStyle(
           color: context.textColor,
           fontSize: 20,
@@ -225,7 +231,9 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
         height: 6,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: isActive ? context.primaryColor : context.dividerColor.withOpacity(0.3),
+          color: isActive
+              ? context.primaryColor
+              : context.dividerColor.withOpacity(0.3),
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -314,23 +322,27 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
             const TextSpan(text: 'Your offer was '),
             TextSpan(
               text: 'ACCEPTED',
-              style: TextStyle(fontWeight: FontWeight.w800, color: Colors.green.shade700),
+              style: TextStyle(
+                  fontWeight: FontWeight.w800, color: Colors.green.shade700),
             ),
             const TextSpan(text: ' -\n'),
             TextSpan(text: 'You are $offeringText\n'),
             const TextSpan(text: 'in exchange for '),
             TextSpan(
               text: post?.itemName ?? 'the product',
-              style: TextStyle(fontWeight: FontWeight.w800, color: context.textColor),
+              style: TextStyle(
+                  fontWeight: FontWeight.w800, color: context.textColor),
             ),
-            const TextSpan(text: '.\nYou will receive the product once completed.'),
+            const TextSpan(
+                text: '.\nYou will receive the product once completed.'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildChatTicketCard(TradeResponseModel response, bool isPaid, TradeController tradeController) {
+  Widget _buildChatTicketCard(TradeResponseModel response, bool isPaid,
+      TradeController tradeController) {
     final post = tradeController.selectedPost;
     final otherUserName = post?.userName ?? 'Owner';
 
@@ -364,13 +376,17 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
                   color: const Color(0xFF1E61CC).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF1E61CC), size: 28),
+                child: const Icon(Icons.chat_bubble_outline,
+                    color: Color(0xFF1E61CC), size: 28),
               ),
               const SizedBox(width: 24),
               Expanded(
                 child: Text(
                   'Chat with $otherUserName',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: context.textColor),
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: context.textColor),
                 ),
               ),
               const Icon(Icons.arrow_forward_ios, size: 20),
@@ -400,14 +416,16 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
               },
         style: ElevatedButton.styleFrom(
           backgroundColor: context.primaryColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
         ),
         child: controller.isLoading
             ? const SizedBox(
                 height: 24,
                 width: 24,
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                child: CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 2),
               )
             : Text(
                 isPaid ? 'View Trade Details' : 'Close Trade & Pay Fee',
@@ -421,7 +439,8 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
     );
   }
 
-  void _showClosureConfirmation(BuildContext context, TradeController controller, String creditFee) {
+  void _showClosureConfirmation(
+      BuildContext context, TradeController controller, String creditFee) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -429,14 +448,18 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
         backgroundColor: context.surfaceColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
-          'Close Trade',
-          style: TextStyle(fontWeight: FontWeight.w800, fontFamily: FontFamily.openSans, fontSize: 24),
+          AppLocalizations.of(context)!.closeTrade,
+          style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontFamily: FontFamily.openSans,
+              fontSize: 24),
         ),
         content: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
             'A fee of $creditFee credits is required to close this trade. Do you wish to proceed?',
-            style: TextStyle(fontSize: 16, color: context.subTextColor, height: 1.5),
+            style: TextStyle(
+                fontSize: 16, color: context.subTextColor, height: 1.5),
           ),
         ),
         actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -444,8 +467,11 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(
-              'Cancel',
-              style: TextStyle(color: context.subTextColor, fontSize: 16, fontWeight: FontWeight.w600),
+              AppLocalizations.of(context)!.cancel,
+              style: TextStyle(
+                  color: context.subTextColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600),
             ),
           ),
           const SizedBox(width: 16),
@@ -457,22 +483,29 @@ class _WebTradeCompletionScreenState extends State<WebTradeCompletionScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: context.primaryColor,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text(AppLocalizations.of(context)!.yesProceed, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(AppLocalizations.of(context)!.yesProceed,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _handlePayment(BuildContext context, TradeController controller) async {
+  Future<void> _handlePayment(
+      BuildContext context, TradeController controller) async {
     final response = controller.selectedResponse;
     if (response == null) return;
 
     final success = await controller.processTradePayment(response.id);
     if (success && mounted) {
-      ToastService.showSuccessToast(context, 'Payment Successful! Chat unlocked.');
+      ToastService.showSuccessToast(
+          context, 'Payment Successful! Chat unlocked.');
       Navigator.pushReplacementNamed(context, AppRoutes.tradeSuccess);
     } else if (mounted) {
       ToastService.showErrorToast(

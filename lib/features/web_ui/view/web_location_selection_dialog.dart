@@ -22,10 +22,12 @@ class WebLocationSelectionDialog extends StatefulWidget {
   }
 
   @override
-  State<WebLocationSelectionDialog> createState() => _WebLocationSelectionDialogState();
+  State<WebLocationSelectionDialog> createState() =>
+      _WebLocationSelectionDialogState();
 }
 
-class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog> {
+class _WebLocationSelectionDialogState
+    extends State<WebLocationSelectionDialog> {
   @override
   void initState() {
     super.initState();
@@ -48,22 +50,26 @@ class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog>
             Flexible(
               child: ListView(
                 shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 children: [
                   _buildUseCurrentLocation(context),
                   _buildDivider(),
                   _buildOptionItem(
                     icon: Icons.add,
-                    title: 'Add new address',
+                    title: AppLocalizations.of(context)!.addNewAddress,
                     onTap: () {
                       Navigator.pop(context);
                       WebMapAddressPickerDialog.show(context);
                     },
                   ),
                   const SizedBox(height: 24),
-                  if (context.watch<AddressController>().addresses.isNotEmpty) ...[
+                  if (context
+                      .watch<AddressController>()
+                      .addresses
+                      .isNotEmpty) ...[
                     Text(
-                      'Saved Addresses',
+                      AppLocalizations.of(context)!.savedAddresses,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -75,10 +81,18 @@ class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog>
                         .watch<AddressController>()
                         .addresses
                         .map((addr) => _buildSavedAddressItem(addr)),
-                  ] else if (context.watch<AuthController>().currentUser?.location != null &&
-                      context.watch<AuthController>().currentUser!.location.isNotEmpty) ...[
+                  ] else if (context
+                              .watch<AuthController>()
+                              .currentUser
+                              ?.location !=
+                          null &&
+                      context
+                          .watch<AuthController>()
+                          .currentUser!
+                          .location
+                          .isNotEmpty) ...[
                     Text(
-                      'Profile Address',
+                      AppLocalizations.of(context)!.profileAddress,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -104,8 +118,8 @@ class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Select delivery location',
+          Text(
+            AppLocalizations.of(context)!.selectDeliveryLocation,
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -147,7 +161,7 @@ class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Use current location',
+                    AppLocalizations.of(context)!.useCurrentLocation,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -262,7 +276,7 @@ class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog>
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            'Default',
+                            AppLocalizations.of(context)!.defaultLabel,
                             style: TextStyle(
                                 fontSize: 12,
                                 color: context.primaryColor,
@@ -294,14 +308,16 @@ class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog>
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.edit_outlined, size: 24, color: Colors.blue),
+              icon:
+                  const Icon(Icons.edit_outlined, size: 24, color: Colors.blue),
               onPressed: () {
                 Navigator.pop(context);
                 WebMapAddressPickerDialog.show(context, editAddress: addr);
               },
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline, size: 24, color: Colors.red),
+              icon:
+                  const Icon(Icons.delete_outline, size: 24, color: Colors.red),
               onPressed: () => _handleDeleteAddress(addr),
             ),
           ],
@@ -324,7 +340,9 @@ class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog>
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              final response = await context.read<AddressController>().deleteAddress(addr.id!);
+              final response = await context
+                  .read<AddressController>()
+                  .deleteAddress(addr.id!);
               if (!context.mounted) return;
               if (response.success) {
                 ToastService.showSuccessToast(context, 'Address deleted');
@@ -357,7 +375,8 @@ class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog>
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
-            const Icon(Icons.person_pin_circle_outlined, color: Colors.grey, size: 28),
+            const Icon(Icons.person_pin_circle_outlined,
+                color: Colors.grey, size: 28),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -365,8 +384,8 @@ class _WebLocationSelectionDialogState extends State<WebLocationSelectionDialog>
                 children: [
                   Row(
                     children: [
-                      const Text(
-                        'Home (from Profile)',
+                      Text(
+                        AppLocalizations.of(context)!.homeFromProfile,
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),

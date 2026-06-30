@@ -3,12 +3,14 @@ import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebTermsConditionsScreen extends StatefulWidget {
   const WebTermsConditionsScreen({super.key});
 
   @override
-  State<WebTermsConditionsScreen> createState() => _WebTermsConditionsScreenState();
+  State<WebTermsConditionsScreen> createState() =>
+      _WebTermsConditionsScreenState();
 }
 
 class _WebTermsConditionsScreenState extends State<WebTermsConditionsScreen> {
@@ -20,7 +22,7 @@ class _WebTermsConditionsScreenState extends State<WebTermsConditionsScreen> {
     super.initState();
     _controller = WebViewController()
       ..loadRequest(Uri.parse(ApiConstants.termsConditionsUrl));
-    
+
     // Web iframe loads almost immediately and manages its own loading state
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
@@ -40,7 +42,8 @@ class _WebTermsConditionsScreenState extends State<WebTermsConditionsScreen> {
           constraints: const BoxConstraints(maxWidth: 1000),
           child: Column(
             children: [
-              const WebScreenHeader(title: 'Terms & Conditions'),
+              WebScreenHeader(
+                  title: AppLocalizations.of(context)!.termsConditions),
               const Divider(height: 1),
               Expanded(
                 child: Stack(
@@ -64,6 +67,4 @@ class _WebTermsConditionsScreenState extends State<WebTermsConditionsScreen> {
       ),
     );
   }
-
-
 }

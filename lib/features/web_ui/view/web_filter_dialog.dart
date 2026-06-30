@@ -65,7 +65,8 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
             Divider(color: context.dividerColor, thickness: 1),
             Flexible(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +150,7 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
 
             if (tradeController.categories.isEmpty) {
               return Text(
-                'No categories available',
+                AppLocalizations.of(context)!.noCategoriesAvailable,
                 style: TextStyle(color: context.subTextColor, fontSize: 14),
               );
             }
@@ -242,8 +243,8 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
             SizedBox(
               width: 70,
               child: Text(
-                distance < 1.0 
-                    ? '${(distance * 1000).round()} m' 
+                distance < 1.0
+                    ? '${(distance * 1000).round()} m'
                     : '${distance == distance.toInt() ? distance.toInt() : distance.toStringAsFixed(1)} km',
                 style: TextStyle(
                   fontSize: 18,
@@ -255,7 +256,7 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
           ],
         ),
         Text(
-          'Show items near you',
+          AppLocalizations.of(context)!.showItemsNearYou,
           style: TextStyle(fontSize: 14, color: context.subTextColor),
         ),
       ],
@@ -267,7 +268,8 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.whatDoTheyWantIn, style: _sectionTitleStyle()),
+        Text(AppLocalizations.of(context)!.whatDoTheyWantIn,
+            style: _sectionTitleStyle()),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
@@ -281,9 +283,8 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? context.primaryColor
-                      : context.surfaceColor,
+                  color:
+                      isSelected ? context.primaryColor : context.surfaceColor,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: isSelected
@@ -299,9 +300,8 @@ class _WebFilterDialogState extends State<WebFilterDialog> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: isSelected
-                        ? context.onPrimaryColor
-                        : context.textColor,
+                    color:
+                        isSelected ? context.onPrimaryColor : context.textColor,
                     fontFamily: FontFamily.openSans,
                   ),
                 ),

@@ -12,12 +12,12 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
-import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
+import 'package:tool_bocs/features/web_ui/view/web_save_to_collection_dialog.dart';
 
 class WebProductCard extends StatelessWidget {
   final PostModel post;
   final double? width;
-  
+
   const WebProductCard({super.key, required this.post, this.width});
 
   Widget _buildExchangeInfo(BuildContext context) {
@@ -48,7 +48,7 @@ class WebProductCard extends StatelessWidget {
       );
     } else if (type == 'free') {
       return Text(
-        'Free',
+        AppLocalizations.of(context)!.freeLabel,
         style: TextStyle(
           color: Theme.of(context).primaryColor,
           fontWeight: FontWeight.bold,
@@ -58,7 +58,8 @@ class WebProductCard extends StatelessWidget {
     } else {
       String text = 'In exchange for: ₹${min?.toStringAsFixed(0) ?? 0} (Money)';
       if (min != null && max != null && max != min) {
-        text = 'In exchange for: ₹${min.toStringAsFixed(0)} - ₹${max.toStringAsFixed(0)} (Money)';
+        text =
+            'In exchange for: ₹${min.toStringAsFixed(0)} - ₹${max.toStringAsFixed(0)} (Money)';
       }
       return Text(
         text,
@@ -96,7 +97,7 @@ class WebProductCard extends StatelessWidget {
             );
             break;
           case 'save':
-            SaveToCollectionBottomSheet.show(context, post.userId);
+            WebSaveToCollectionDialog.show(context, post.userId);
             break;
           case 'share':
             Share.share(
@@ -121,8 +122,7 @@ class WebProductCard extends StatelessWidget {
                   context, 'User blocked successfully');
               context.read<TradeController>().fetchHomePosts(); // Refresh feed
             } else {
-              ToastService.showErrorToast(
-                  context, success.message);
+              ToastService.showErrorToast(context, success.message);
             }
             break;
         }
@@ -155,7 +155,8 @@ class WebProductCard extends StatelessWidget {
           if (!isOwner)
             PopupMenuItem<String>(
               value: 'report',
-              child: Text(AppLocalizations.of(context)!.reportPost, style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.reportPost,
+                  style: TextStyle(color: Colors.red)),
             ),
         ];
       },
@@ -185,8 +186,8 @@ class WebProductCard extends StatelessWidget {
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? Colors.white.withOpacity(0.05) 
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.05)
                 : Colors.grey.shade200,
           ),
           boxShadow: [
@@ -232,11 +233,16 @@ class WebProductCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: post.itemCategory.toLowerCase().contains('goods')
                             ? Colors.blue.shade700
-                            : post.itemCategory.toLowerCase().contains('services')
+                            : post.itemCategory
+                                    .toLowerCase()
+                                    .contains('services')
                                 ? Colors.green.shade700
-                                : post.itemCategory.toLowerCase().contains('money')
+                                : post.itemCategory
+                                        .toLowerCase()
+                                        .contains('money')
                                     ? Colors.orange.shade700
-                                    : Theme.of(context).brightness == Brightness.dark
+                                    : Theme.of(context).brightness ==
+                                            Brightness.dark
                                         ? Colors.white
                                         : Colors.black.withOpacity(0.7),
                         borderRadius: BorderRadius.circular(4),
@@ -244,9 +250,15 @@ class WebProductCard extends StatelessWidget {
                       child: Text(
                         post.itemCategory,
                         style: TextStyle(
-                          color: (post.itemCategory.toLowerCase().contains('goods') ||
-                                  post.itemCategory.toLowerCase().contains('services') ||
-                                  post.itemCategory.toLowerCase().contains('money'))
+                          color: (post.itemCategory
+                                      .toLowerCase()
+                                      .contains('goods') ||
+                                  post.itemCategory
+                                      .toLowerCase()
+                                      .contains('services') ||
+                                  post.itemCategory
+                                      .toLowerCase()
+                                      .contains('money'))
                               ? Colors.white
                               : Theme.of(context).brightness == Brightness.dark
                                   ? Colors.black
@@ -294,7 +306,8 @@ class WebProductCard extends StatelessWidget {
                             post.distanceKm != null
                                 ? '${post.distanceKm!.toStringAsFixed(1)} km away'
                                 : '- km away',
-                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 12),
                           ),
                         ],
                       ),

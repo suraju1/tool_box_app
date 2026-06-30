@@ -185,7 +185,8 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
                   child: IconButton(
-                    icon: Icon(Icons.arrow_back, color: context.textColor, size: 24),
+                    icon: Icon(Icons.arrow_back,
+                        color: context.textColor, size: 24),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -197,8 +198,10 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                     children: [
                       // Main Card
                       Container(
-                        margin: const EdgeInsets.only(top: 80), // Offset for avatar
-                        padding: EdgeInsets.fromLTRB(isDesktop ? 64 : 32, isDesktop ? 64 : 100, isDesktop ? 64 : 32, 48),
+                        margin:
+                            const EdgeInsets.only(top: 80), // Offset for avatar
+                        padding: EdgeInsets.fromLTRB(isDesktop ? 64 : 32,
+                            isDesktop ? 64 : 100, isDesktop ? 64 : 32, 48),
                         decoration: BoxDecoration(
                           color: context.surfaceColor,
                           borderRadius: BorderRadius.circular(24),
@@ -212,7 +215,9 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                                   ),
                                 ],
                         ),
-                        child: isDesktop ? _buildDesktopGrid() : _buildMobileLayout(),
+                        child: isDesktop
+                            ? _buildDesktopGrid()
+                            : _buildMobileLayout(),
                       ),
 
                       // Avatar & Name Overlay
@@ -232,7 +237,9 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    _nameController.text.isNotEmpty ? _nameController.text : (profile?.fullName ?? 'User'),
+                                    _nameController.text.isNotEmpty
+                                        ? _nameController.text
+                                        : (profile?.fullName ?? 'User'),
                                     style: TextStyle(
                                       fontSize: 26,
                                       fontWeight: FontWeight.bold,
@@ -242,7 +249,9 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    _locationController.text.isNotEmpty ? _locationController.text : 'No location set',
+                                    _locationController.text.isNotEmpty
+                                        ? _locationController.text
+                                        : 'No location set',
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: context.subTextColor,
@@ -359,7 +368,11 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.personalInformation, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.personalInformation,
+            style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: context.textColor)),
         const SizedBox(height: 16),
         Divider(color: context.dividerColor, thickness: 1.5),
         const SizedBox(height: 32),
@@ -368,7 +381,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
           children: [
             Expanded(
               child: _buildModernTextField(
-                label: "Full Name",
+                label: AppLocalizations.of(context)!.fullName,
                 controller: _nameController,
                 hintText: "Enter full name",
                 icon: Icons.person_outline,
@@ -377,7 +390,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
             const SizedBox(width: 24),
             Expanded(
               child: _buildModernTextField(
-                label: "Date of Birth",
+                label: AppLocalizations.of(context)!.dateOfBirth,
                 controller: _dobController,
                 hintText: "DD/MM/YYYY",
                 icon: Icons.calendar_today_outlined,
@@ -385,7 +398,8 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                 onTap: () async {
                   DateTime? pickedDate = await showDatePicker(
                     context: context,
-                    initialDate: _selectedDate ?? DateTime.now().subtract(const Duration(days: 6570)),
+                    initialDate: _selectedDate ??
+                        DateTime.now().subtract(const Duration(days: 6570)),
                     firstDate: DateTime(1900),
                     lastDate: DateTime.now(),
                   );
@@ -404,7 +418,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
         ),
         const SizedBox(height: 24),
         _buildModernDropdown(
-          label: "Gender",
+          label: AppLocalizations.of(context)!.gender,
           value: _selectedGender ?? 'Male',
           items: ['Male', 'Female', 'Other'],
           onChanged: (val) {
@@ -416,7 +430,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
         ),
         const SizedBox(height: 24),
         _buildModernTextField(
-          label: "Bio",
+          label: AppLocalizations.of(context)!.bio,
           controller: _bioController,
           hintText: "Tell others about yourself...",
           maxLines: 5,
@@ -429,13 +443,17 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.preferences, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.preferences,
+            style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: context.textColor)),
         const SizedBox(height: 16),
         Divider(color: context.dividerColor, thickness: 1.5),
         const SizedBox(height: 32),
         _buildPreferenceBox(
-          title: "Profile Visibility",
-          subtitle: "Public: Anyone can view your profile.",
+          title: AppLocalizations.of(context)!.profileVisibility,
+          subtitle: AppLocalizations.of(context)!.publicAnyoneCanView,
           value: _profileVisibility,
           onChanged: (val) {
             setState(() {
@@ -445,8 +463,8 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
           },
         ),
         _buildPreferenceBox(
-          title: "Show Trade History",
-          subtitle: "Public: Anyone can view your profile.",
+          title: AppLocalizations.of(context)!.showTradeHistory,
+          subtitle: AppLocalizations.of(context)!.publicAnyoneCanView,
           value: _showTradeHistory,
           onChanged: (val) {
             setState(() {
@@ -456,7 +474,11 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
           },
         ),
         const SizedBox(height: 48),
-        Text(AppLocalizations.of(context)!.contactInformation, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.contactInformation,
+            style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: context.textColor)),
         const SizedBox(height: 16),
         Divider(color: context.dividerColor, thickness: 1.5),
         const SizedBox(height: 32),
@@ -465,7 +487,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
           children: [
             Expanded(
               child: _buildModernTextField(
-                label: "Email Address",
+                label: AppLocalizations.of(context)!.emailAddress,
                 controller: _emailController,
                 hintText: "Email",
                 icon: Icons.email_outlined,
@@ -475,7 +497,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
             const SizedBox(width: 24),
             Expanded(
               child: _buildModernTextField(
-                label: "Mobile Number",
+                label: AppLocalizations.of(context)!.mobileNumber,
                 controller: _mobileController,
                 hintText: "Mobile",
                 icon: Icons.phone_android_outlined,
@@ -487,7 +509,7 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
         ),
         const SizedBox(height: 24),
         _buildModernTextField(
-          label: "Location",
+          label: AppLocalizations.of(context)!.locationLabel,
           controller: _locationController,
           hintText: "Pick your location",
           icon: Icons.location_on_outlined,
@@ -514,7 +536,11 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 13, color: context.subTextColor, fontWeight: FontWeight.w600)),
+        Text(label,
+            style: TextStyle(
+                fontSize: 13,
+                color: context.subTextColor,
+                fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -525,10 +551,13 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(color: context.dividerColor, fontSize: 14),
-            prefixIcon: icon != null ? Icon(icon, color: context.subTextColor, size: 20) : null,
+            prefixIcon: icon != null
+                ? Icon(icon, color: context.subTextColor, size: 20)
+                : null,
             filled: true,
             fillColor: context.surfaceColor,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: context.dividerColor),
@@ -541,7 +570,8 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
         ),
         if (helperText != null) ...[
           const SizedBox(height: 6),
-          Text(helperText, style: TextStyle(fontSize: 11, color: context.subTextColor)),
+          Text(helperText,
+              style: TextStyle(fontSize: 11, color: context.subTextColor)),
         ]
       ],
     );
@@ -556,7 +586,11 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 13, color: context.subTextColor, fontWeight: FontWeight.w600)),
+        Text(label,
+            style: TextStyle(
+                fontSize: 13,
+                color: context.subTextColor,
+                fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: items.contains(value) ? value : items.first,
@@ -566,7 +600,8 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
           decoration: InputDecoration(
             filled: true,
             fillColor: context.surfaceColor,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: context.dividerColor),
@@ -576,7 +611,9 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
               borderSide: BorderSide(color: context.textColor, width: 1.2),
             ),
           ),
-          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          items: items
+              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+              .toList(),
         ),
       ],
     );
@@ -603,9 +640,15 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: context.textColor)),
+                Text(title,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: context.textColor)),
                 const SizedBox(height: 4),
-                Text(subtitle, style: TextStyle(color: context.subTextColor, fontSize: 13)),
+                Text(subtitle,
+                    style:
+                        TextStyle(color: context.subTextColor, fontSize: 13)),
               ],
             ),
           ),
@@ -649,10 +692,11 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                  const Icon(Icons.info_outline,
+                      color: Colors.orange, size: 20),
                   const SizedBox(width: 12),
-                  const Text(
-                    'You have unsaved changes',
+                  Text(
+                    AppLocalizations.of(context)!.youHaveUnsavedChanges,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -661,64 +705,78 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                   ),
                   const Spacer(),
                   TextButton(
-                    onPressed: controller.isLoading ? null : () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: controller.isLoading
+                        ? null
+                        : () {
+                            Navigator.pop(context);
+                          },
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
                     ),
-                    child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: context.textColor)),
+                    child: Text(AppLocalizations.of(context)!.cancel,
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: context.textColor)),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
-                    onPressed: controller.isLoading ? null : () async {
-                      final fullName = _nameController.text.trim();
-                      if (fullName.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(AppLocalizations.of(context)!.fullNameIsRequired)),
-                        );
-                        return;
-                      }
+                    onPressed: controller.isLoading
+                        ? null
+                        : () async {
+                            final fullName = _nameController.text.trim();
+                            if (fullName.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(AppLocalizations.of(context)!
+                                        .fullNameIsRequired)),
+                              );
+                              return;
+                            }
 
-                      final response = await controller.updateProfile(
-                        fullName: fullName,
-                        location: _locationController.text.trim(),
-                        email: _emailController.text.trim(),
-                        mobile: _mobileController.text.trim(),
-                        bio: _bioController.text.trim(),
-                        profileVisibility: _profileVisibility ? 1 : 0,
-                        showTradeHistory: _showTradeHistory ? 1 : 0,
-                        gender: _selectedGender,
-                        dateOfBirth: _selectedDate != null
-                            ? "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}"
-                            : null,
-                        latitude: _selectedLatitude,
-                        longitude: _selectedLongitude,
-                        termsAccepted: true,
-                        profileImage: _selectedWebImage,
-                      );
+                            final response = await controller.updateProfile(
+                              fullName: fullName,
+                              location: _locationController.text.trim(),
+                              email: _emailController.text.trim(),
+                              mobile: _mobileController.text.trim(),
+                              bio: _bioController.text.trim(),
+                              profileVisibility: _profileVisibility ? 1 : 0,
+                              showTradeHistory: _showTradeHistory ? 1 : 0,
+                              gender: _selectedGender,
+                              dateOfBirth: _selectedDate != null
+                                  ? "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}"
+                                  : null,
+                              latitude: _selectedLatitude,
+                              longitude: _selectedLongitude,
+                              termsAccepted: true,
+                              profileImage: _selectedWebImage,
+                            );
 
-                      if (!context.mounted) return;
-                      if (response.success) {
-                        setState(() {
-                          _hasUnsavedChanges = false;
-                        });
-                        AppSuccessDialog.show(
-                          context,
-                          message: response.message,
-                          onButtonPressed: () {
-                            Navigator.pop(context);
+                            if (!context.mounted) return;
+                            if (response.success) {
+                              setState(() {
+                                _hasUnsavedChanges = false;
+                              });
+                              AppSuccessDialog.show(
+                                context,
+                                message: response.message,
+                                onButtonPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(controller.errorMessage ??
+                                          'Update failed')));
+                            }
                           },
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(controller.errorMessage ?? 'Update failed')));
-                      }
-                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.textColor,
                       foregroundColor: context.scaffoldBg,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -728,11 +786,13 @@ class _WebEditProfileScreenState extends State<WebEditProfileScreen> {
                         ? SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: context.scaffoldBg),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: context.scaffoldBg),
                           )
-                        : const Text(
-                            'Save Changes',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                        : Text(
+                            AppLocalizations.of(context)!.saveChanges,
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold),
                           ),
                   ),
                 ],

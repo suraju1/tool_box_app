@@ -41,7 +41,8 @@ class _StickySidebarWrapperState extends State<StickySidebarWrapper> {
     _lastScrollOffset = currentScroll;
 
     final sidebarBox = _key.currentContext?.findRenderObject() as RenderBox?;
-    final rowBox = widget.rowKey.currentContext?.findRenderObject() as RenderBox?;
+    final rowBox =
+        widget.rowKey.currentContext?.findRenderObject() as RenderBox?;
     if (sidebarBox == null || rowBox == null) return;
 
     final sidebarHeight = sidebarBox.size.height;
@@ -49,7 +50,8 @@ class _StickySidebarWrapperState extends State<StickySidebarWrapper> {
     final viewportHeight = MediaQuery.of(context).size.height;
 
     // The maximum offset we can apply without pushing the sidebar outside the bottom of the row
-    final double maxOffsetBoundary = (rowHeight - sidebarHeight).clamp(0.0, double.infinity);
+    final double maxOffsetBoundary =
+        (rowHeight - sidebarHeight).clamp(0.0, double.infinity);
 
     const double topMargin = 120.0; // Estimate for header + breadcrumbs
 
@@ -58,7 +60,7 @@ class _StickySidebarWrapperState extends State<StickySidebarWrapper> {
     // we use a reasonable approximation based on currentScroll.
     // A better way is to find the row's position on screen:
     final rowPositionOnScreen = rowBox.localToGlobal(Offset.zero).dy;
-    
+
     // We want to calculate an offset that keeps the sidebar visible.
     double newOffset = _offset;
 
@@ -73,8 +75,9 @@ class _StickySidebarWrapperState extends State<StickySidebarWrapper> {
     } else {
       // Sidebar is taller than the viewport
       // If scrolling down, let it scroll naturally until the bottom of the sidebar hits the bottom of the viewport
-      final sidebarBottomOnScreen = rowPositionOnScreen + _offset + sidebarHeight;
-      
+      final sidebarBottomOnScreen =
+          rowPositionOnScreen + _offset + sidebarHeight;
+
       if (scrollDelta > 0) {
         // Scrolling down (page moves up)
         if (sidebarBottomOnScreen < viewportHeight - 32) {

@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +15,6 @@ import 'package:tool_bocs/features/trades/model/trade_response_model.dart';
 import 'package:tool_bocs/core/services/chat_listener.dart';
 
 import 'package:tool_bocs/core/widgets/app_cached_image.dart';
-
 
 class WebChatScreen extends StatefulWidget {
   final String? chatRoomId;
@@ -111,8 +109,6 @@ class _WebChatScreenState extends State<WebChatScreen> {
     _messageController.clear();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,7 +122,11 @@ class _WebChatScreenState extends State<WebChatScreen> {
                 ? Column(
                     children: [
                       Expanded(
-                        child: Center(child: Text(AppLocalizations.of(context)!.startAConversation, style: TextStyle(fontSize: 16))),
+                        child: Center(
+                            child: Text(
+                                AppLocalizations.of(context)!
+                                    .startAConversation,
+                                style: TextStyle(fontSize: 16))),
                       ),
                       _buildInput(false),
                     ],
@@ -135,7 +135,9 @@ class _WebChatScreenState extends State<WebChatScreen> {
                     stream: _messagesStream,
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(fontSize: 16)));
+                        return Center(
+                            child: Text('Error: ${snapshot.error}',
+                                style: const TextStyle(fontSize: 16)));
                       }
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -177,7 +179,8 @@ class _WebChatScreenState extends State<WebChatScreen> {
                           Expanded(
                             child: ListView.builder(
                               reverse: true,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 20),
                               itemCount: docs.length,
                               itemBuilder: (_, i) {
                                 final data =
@@ -204,9 +207,10 @@ class _WebChatScreenState extends State<WebChatScreen> {
       automaticallyImplyLeading: widget.showBackButton,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: context.dividerColor.withOpacity(0.5), height: 1),
+        child:
+            Container(color: context.dividerColor.withOpacity(0.5), height: 1),
       ),
-      leading: widget.showBackButton 
+      leading: widget.showBackButton
           ? IconButton(
               icon: Icon(Icons.arrow_back, color: context.textColor, size: 24),
               onPressed: () => Navigator.pop(context),
@@ -265,11 +269,14 @@ class _WebChatScreenState extends State<WebChatScreen> {
 
   Widget _buildAvatar(double size) {
     if (widget.tradeResponse != null) {
-      final isOwner = context.read<AuthController>().currentUser?.id == widget.tradeResponse!.posterUserId;
-      final imageUrl = isOwner 
-          ? (widget.tradeResponse!.responderImage ?? widget.otherUserImage ?? '') 
+      final isOwner = context.read<AuthController>().currentUser?.id ==
+          widget.tradeResponse!.posterUserId;
+      final imageUrl = isOwner
+          ? (widget.tradeResponse!.responderImage ??
+              widget.otherUserImage ??
+              '')
           : (widget.tradeResponse!.posterImage ?? widget.otherUserImage ?? '');
-      
+
       return AppCachedImage(
         imageUrl: imageUrl,
         userName: otherUserName,
@@ -278,7 +285,8 @@ class _WebChatScreenState extends State<WebChatScreen> {
         fit: BoxFit.cover,
         radius: size / 2,
       );
-    } else if (widget.otherUserImage != null && widget.otherUserImage!.isNotEmpty) {
+    } else if (widget.otherUserImage != null &&
+        widget.otherUserImage!.isNotEmpty) {
       return AppCachedImage(
         imageUrl: widget.otherUserImage!,
         userName: otherUserName,
@@ -288,7 +296,7 @@ class _WebChatScreenState extends State<WebChatScreen> {
         radius: size / 2,
       );
     }
-    
+
     return Container(
       width: size,
       height: size,
@@ -298,7 +306,9 @@ class _WebChatScreenState extends State<WebChatScreen> {
       ),
       alignment: Alignment.center,
       child: Text(
-        otherUserName.trim().isNotEmpty ? otherUserName.trim().substring(0, 1).toUpperCase() : '?',
+        otherUserName.trim().isNotEmpty
+            ? otherUserName.trim().substring(0, 1).toUpperCase()
+            : '?',
         style: TextStyle(
           color: context.primaryColor,
           fontSize: size * 0.4,
@@ -309,14 +319,18 @@ class _WebChatScreenState extends State<WebChatScreen> {
   }
 
   Widget _buildPartnerMobile() {
-    if (widget.tradeResponse == null || _currentUserId == null) return const SizedBox.shrink();
-    
+    if (widget.tradeResponse == null || _currentUserId == null)
+      return const SizedBox.shrink();
+
     return Builder(builder: (context) {
       final trade = widget.tradeResponse!;
-      final isOwner = context.read<AuthController>().currentUser?.id == trade.posterUserId;
-      final partnerMobile = isOwner ? trade.responderMobile : trade.posterMobile;
+      final isOwner =
+          context.read<AuthController>().currentUser?.id == trade.posterUserId;
+      final partnerMobile =
+          isOwner ? trade.responderMobile : trade.posterMobile;
 
-      if (partnerMobile == null || partnerMobile.isEmpty) return const SizedBox.shrink();
+      if (partnerMobile == null || partnerMobile.isEmpty)
+        return const SizedBox.shrink();
 
       return Text(
         partnerMobile,
@@ -371,12 +385,17 @@ class _WebChatScreenState extends State<WebChatScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 6, right: 10),
-                    child: Icon(Icons.circle, size: 6, color: context.textColor.withOpacity(0.5)),
+                    child: Icon(Icons.circle,
+                        size: 6, color: context.textColor.withOpacity(0.5)),
                   ),
                   Expanded(
                     child: Text(
                       AppLocalizations.of(context)!.chatInfo1,
-                      style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14, fontFamily: FontFamily.openSans),
+                      style: TextStyle(
+                          color: context.textColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          fontFamily: FontFamily.openSans),
                     ),
                   ),
                 ],
@@ -387,12 +406,17 @@ class _WebChatScreenState extends State<WebChatScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 6, right: 10),
-                    child: Icon(Icons.circle, size: 6, color: context.textColor.withOpacity(0.5)),
+                    child: Icon(Icons.circle,
+                        size: 6, color: context.textColor.withOpacity(0.5)),
                   ),
                   Expanded(
                     child: Text(
                       AppLocalizations.of(context)!.chatInfo2,
-                      style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14, fontFamily: FontFamily.openSans),
+                      style: TextStyle(
+                          color: context.textColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          fontFamily: FontFamily.openSans),
                     ),
                   ),
                 ],
@@ -403,12 +427,17 @@ class _WebChatScreenState extends State<WebChatScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 6, right: 10),
-                    child: Icon(Icons.circle, size: 6, color: context.textColor.withOpacity(0.5)),
+                    child: Icon(Icons.circle,
+                        size: 6, color: context.textColor.withOpacity(0.5)),
                   ),
                   Expanded(
                     child: Text(
                       AppLocalizations.of(context)!.chatInfo3,
-                      style: TextStyle(color: context.textColor, fontWeight: FontWeight.w500, fontSize: 14, fontFamily: FontFamily.openSans),
+                      style: TextStyle(
+                          color: context.textColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          fontFamily: FontFamily.openSans),
                     ),
                   ),
                 ],
@@ -450,12 +479,14 @@ class _WebChatScreenState extends State<WebChatScreen> {
     }
 
     final trade = widget.tradeResponse!;
-    final isOwner = context.read<AuthController>().currentUser?.id == trade.posterUserId;
+    final isOwner =
+        context.read<AuthController>().currentUser?.id == trade.posterUserId;
 
     String givingItem = '';
     String takingItem = '';
 
-    final isGivePost = trade.postType?.toLowerCase() == 'give' || trade.postType?.toLowerCase() == 'giving';
+    final isGivePost = trade.postType?.toLowerCase() == 'give' ||
+        trade.postType?.toLowerCase() == 'giving';
 
     if (isOwner) {
       if (isGivePost) {
@@ -488,27 +519,45 @@ class _WebChatScreenState extends State<WebChatScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: context.isDarkMode ? Colors.white10 : const Color(0xFFF8FAFC),
-        border: Border(bottom: BorderSide(color: context.dividerColor.withOpacity(0.5), width: 1)),
+        border: Border(
+            bottom: BorderSide(
+                color: context.dividerColor.withOpacity(0.5), width: 1)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: context.primaryColor.withOpacity(0.1), shape: BoxShape.circle),
-            child: Icon(Icons.swap_horiz, color: context.primaryColor, size: 24),
+            decoration: BoxDecoration(
+                color: context.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle),
+            child:
+                Icon(Icons.swap_horiz, color: context.primaryColor, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: TextStyle(fontSize: 15, color: context.textColor, fontFamily: FontFamily.openSans, height: 1.5),
-                  children: [
-                    TextSpan(text: AppLocalizations.of(context)!.youChose),
-                    TextSpan(text: AppLocalizations.of(context)!.givingTo(givingItem, otherUserName), style: TextStyle(fontWeight: FontWeight.w700, color: context.primaryColor)),
-                    TextSpan(text: AppLocalizations.of(context)!.andWord),
-                    TextSpan(text: AppLocalizations.of(context)!.taking(takingItem), style: TextStyle(fontWeight: FontWeight.w700, color: context.primaryColor)),
-                    TextSpan(text: AppLocalizations.of(context)!.inReturn),
-                  ],
+                style: TextStyle(
+                    fontSize: 15,
+                    color: context.textColor,
+                    fontFamily: FontFamily.openSans,
+                    height: 1.5),
+                children: [
+                  TextSpan(text: AppLocalizations.of(context)!.youChose),
+                  TextSpan(
+                      text: AppLocalizations.of(context)!
+                          .givingTo(givingItem, otherUserName),
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: context.primaryColor)),
+                  TextSpan(text: AppLocalizations.of(context)!.andWord),
+                  TextSpan(
+                      text: AppLocalizations.of(context)!.taking(takingItem),
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: context.primaryColor)),
+                  TextSpan(text: AppLocalizations.of(context)!.inReturn),
+                ],
               ),
             ),
           ),
@@ -521,7 +570,8 @@ class _WebChatScreenState extends State<WebChatScreen> {
     final String senderId = msg['senderId'].toString();
     final bool isMe = senderId == _currentUserId;
     final Timestamp? timestamp = msg['timestamp'];
-    final String time = timestamp != null ? DateFormat('HH:mm').format(timestamp.toDate()) : '';
+    final String time =
+        timestamp != null ? DateFormat('HH:mm').format(timestamp.toDate()) : '';
     String text = msg['text'] ?? '';
     bool isImage = false;
 
@@ -545,9 +595,14 @@ class _WebChatScreenState extends State<WebChatScreen> {
             bottomRight: Radius.circular(isMe ? 4 : 16),
           ),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4, offset: const Offset(0, 2))
+            BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 4,
+                offset: const Offset(0, 2))
           ],
-          border: isMe ? null : Border.all(color: context.dividerColor.withOpacity(0.5)),
+          border: isMe
+              ? null
+              : Border.all(color: context.dividerColor.withOpacity(0.5)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -561,12 +616,18 @@ class _WebChatScreenState extends State<WebChatScreen> {
                       height: 200,
                       width: 250,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, color: isMe ? Colors.white : context.subTextColor, size: 40),
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.broken_image,
+                          color: isMe ? Colors.white : context.subTextColor,
+                          size: 40),
                     ),
                   )
                 : Text(
                     text,
-                    style: TextStyle(color: isMe ? Colors.white : context.textColor, fontSize: 15, height: 1.4),
+                    style: TextStyle(
+                        color: isMe ? Colors.white : context.textColor,
+                        fontSize: 15,
+                        height: 1.4),
                   ),
             const SizedBox(height: 6),
             Row(
@@ -574,14 +635,20 @@ class _WebChatScreenState extends State<WebChatScreen> {
               children: [
                 Text(
                   time,
-                  style: TextStyle(color: isMe ? Colors.white.withOpacity(0.8) : context.subTextColor, fontSize: 11),
+                  style: TextStyle(
+                      color: isMe
+                          ? Colors.white.withOpacity(0.8)
+                          : context.subTextColor,
+                      fontSize: 11),
                 ),
                 if (isMe) ...[
                   const SizedBox(width: 6),
                   Icon(
                     Icons.done_all,
                     size: 14,
-                    color: (msg['isRead'] ?? false) ? const Color(0xFF4ADE80) : Colors.white.withOpacity(0.8),
+                    color: (msg['isRead'] ?? false)
+                        ? const Color(0xFF4ADE80)
+                        : Colors.white.withOpacity(0.8),
                   ),
                 ],
               ],
@@ -599,14 +666,18 @@ class _WebChatScreenState extends State<WebChatScreen> {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: context.isDarkMode ? Colors.white10 : const Color(0xFFF8FAFC),
-          border: Border(top: BorderSide(color: context.dividerColor.withOpacity(0.5))),
+          border: Border(
+              top: BorderSide(color: context.dividerColor.withOpacity(0.5))),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Chat with ${otherUserName.toLowerCase()} is over',
-              style: TextStyle(color: context.textColor, fontSize: 16, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: context.textColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
             Text(
@@ -622,7 +693,8 @@ class _WebChatScreenState extends State<WebChatScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: context.surfaceColor,
-        border: Border(top: BorderSide(color: context.dividerColor.withOpacity(0.5))),
+        border: Border(
+            top: BorderSide(color: context.dividerColor.withOpacity(0.5))),
       ),
       child: Center(
         child: ConstrainedBox(
@@ -632,9 +704,12 @@ class _WebChatScreenState extends State<WebChatScreen> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: context.isDarkMode ? Colors.white10 : const Color(0xFFF1F5F9),
+                    color: context.isDarkMode
+                        ? Colors.white10
+                        : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+                    border: Border.all(
+                        color: context.dividerColor.withOpacity(0.5)),
                   ),
                   child: TextField(
                     controller: _messageController,
@@ -642,8 +717,10 @@ class _WebChatScreenState extends State<WebChatScreen> {
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context)!.typeAMessage,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
+                      hintStyle:
+                          const TextStyle(color: Colors.grey, fontSize: 15),
                     ),
                   ),
                 ),
@@ -658,10 +735,14 @@ class _WebChatScreenState extends State<WebChatScreen> {
                     color: context.primaryColor,
                     shape: BoxShape.circle,
                     boxShadow: [
-                      BoxShadow(color: context.primaryColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
+                      BoxShadow(
+                          color: context.primaryColor.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4))
                     ],
                   ),
-                  child: const Icon(Icons.send_rounded, color: Colors.white, size: 24),
+                  child: const Icon(Icons.send_rounded,
+                      color: Colors.white, size: 24),
                 ),
               )
             ],

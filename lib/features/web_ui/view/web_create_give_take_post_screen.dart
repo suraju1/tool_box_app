@@ -22,7 +22,8 @@ class WebCreateGivePostScreen extends StatefulWidget {
   const WebCreateGivePostScreen({super.key});
 
   @override
-  State<WebCreateGivePostScreen> createState() => _WebCreateGivePostScreenState();
+  State<WebCreateGivePostScreen> createState() =>
+      _WebCreateGivePostScreenState();
 }
 
 class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
@@ -55,8 +56,10 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
 
   final TextEditingController _itemNameController = TextEditingController();
   final TextEditingController _itemNoteController = TextEditingController();
-  final TextEditingController _returnItemNameController = TextEditingController();
-  final TextEditingController _returnItemDescriptionController = TextEditingController();
+  final TextEditingController _returnItemNameController =
+      TextEditingController();
+  final TextEditingController _returnItemDescriptionController =
+      TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -113,7 +116,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
   }
 
   Future<void> _pickImage(bool isReturnItem) async {
-    final int currentCount = isReturnItem ? _returnItemImages.length : _itemImages.length;
+    final int currentCount =
+        isReturnItem ? _returnItemImages.length : _itemImages.length;
     final int remaining = 5 - currentCount;
 
     if (remaining <= 0) {
@@ -121,7 +125,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
       return;
     }
 
-    final List<XFile>? images = await WebImagePickerDialog.show(context, allowMultiple: true, limit: remaining);
+    final List<XFile>? images = await WebImagePickerDialog.show(context,
+        allowMultiple: true, limit: remaining);
 
     if (images != null && images.isNotEmpty) {
       setState(() {
@@ -129,7 +134,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           if (_returnItemImages.length + images.length > 5) {
             final int toTake = 5 - _returnItemImages.length;
             _returnItemImages.addAll(images.take(toTake));
-            ToastService.showErrorToast(context, 'Only first $toTake images added (Max 5 allowed)');
+            ToastService.showErrorToast(
+                context, 'Only first $toTake images added (Max 5 allowed)');
           } else {
             _returnItemImages.addAll(images);
           }
@@ -137,7 +143,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           if (_itemImages.length + images.length > 5) {
             final int toTake = 5 - _itemImages.length;
             _itemImages.addAll(images.take(toTake));
-            ToastService.showErrorToast(context, 'Only first $toTake images added (Max 5 allowed)');
+            ToastService.showErrorToast(
+                context, 'Only first $toTake images added (Max 5 allowed)');
           } else {
             _itemImages.addAll(images);
           }
@@ -200,7 +207,10 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).primaryColor.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.2), width: 1.5),
+                      border: Border.all(
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.2),
+                          width: 1.5),
                     ),
                     child: _buildReturnSection(),
                   ),
@@ -232,7 +242,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return BoxDecoration(
       color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
+      border:
+          Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.05),
@@ -247,9 +258,12 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Trading Point',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: FontFamily.openSans),
+        Text(
+          AppLocalizations.of(context)!.tradingPoint,
+          style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              fontFamily: FontFamily.openSans),
         ),
         const SizedBox(height: 20),
         Text(AppLocalizations.of(context)!.selectArea, style: _labelStyle()),
@@ -258,7 +272,9 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const MapAddressPickerScreen(isPickOnly: true)),
+              MaterialPageRoute(
+                  builder: (context) =>
+                      const MapAddressPickerScreen(isPickOnly: true)),
             ).then((_) => _updateLocationFromController());
           },
           child: Container(
@@ -270,7 +286,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.location_on_outlined, color: Colors.grey, size: 24),
+                const Icon(Icons.location_on_outlined,
+                    color: Colors.grey, size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -281,8 +298,11 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                   ),
                 ),
                 Text(
-                  'Change',
-                  style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 16),
+                  AppLocalizations.of(context)!.change,
+                  style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
                 ),
               ],
             ),
@@ -292,8 +312,13 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(AppLocalizations.of(context)!.selectAreaDiameter, style: _labelStyle()),
-            Text(_diameter < 1 ? '${(_diameter * 1000).round()} m' : '${_diameter.toStringAsFixed(1)} km', style: _labelStyle()),
+            Text(AppLocalizations.of(context)!.selectAreaDiameter,
+                style: _labelStyle()),
+            Text(
+                _diameter < 1
+                    ? '${(_diameter * 1000).round()} m'
+                    : '${_diameter.toStringAsFixed(1)} km',
+                style: _labelStyle()),
           ],
         ),
         const SizedBox(height: 16),
@@ -309,8 +334,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           },
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Partners within this radius will see your item.',
+        Text(
+          AppLocalizations.of(context)!.partnersWithinRadius,
           style: TextStyle(color: Colors.grey, fontSize: 14),
         ),
       ],
@@ -321,9 +346,11 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.tradeDetails, style: _labelStyle(size: 18)),
+        Text(AppLocalizations.of(context)!.tradeDetails,
+            style: _labelStyle(size: 18)),
         const SizedBox(height: 12),
-        Text(AppLocalizations.of(context)!.tradeType, style: TextStyle(color: Colors.grey, fontSize: 14)),
+        Text(AppLocalizations.of(context)!.tradeType,
+            style: TextStyle(color: Colors.grey, fontSize: 14)),
         const SizedBox(height: 12),
         Container(
           height: 45,
@@ -350,7 +377,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.addPhotos, style: _labelStyle(size: 16)),
+        Text(AppLocalizations.of(context)!.addPhotos,
+            style: _labelStyle(size: 16)),
         const SizedBox(height: 16),
         GestureDetector(
           onTap: _itemImages.length >= 5 ? null : () => _pickImage(false),
@@ -361,17 +389,29 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
               color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: _showImageError ? Colors.red : (_itemImages.length >= 5 ? Colors.grey.withOpacity(0.3) : Theme.of(context).dividerColor),
+                  color: _showImageError
+                      ? Colors.red
+                      : (_itemImages.length >= 5
+                          ? Colors.grey.withOpacity(0.3)
+                          : Theme.of(context).dividerColor),
                   style: BorderStyle.solid),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.camera_alt_outlined, color: _showImageError ? Colors.red : Colors.grey, size: 40),
+                Icon(Icons.camera_alt_outlined,
+                    color: _showImageError ? Colors.red : Colors.grey,
+                    size: 40),
                 const SizedBox(height: 12),
                 Text(
-                  _showImageError ? 'Photo required' : (_itemImages.length >= 5 ? 'Max 5 photos reached' : 'Add up to 5 photos'),
-                  style: TextStyle(color: _showImageError ? Colors.red : Colors.grey, fontSize: 14),
+                  _showImageError
+                      ? 'Photo required'
+                      : (_itemImages.length >= 5
+                          ? 'Max 5 photos reached'
+                          : 'Add up to 5 photos'),
+                  style: TextStyle(
+                      color: _showImageError ? Colors.red : Colors.grey,
+                      fontSize: 14),
                 ),
               ],
             ),
@@ -395,7 +435,10 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         image: DecorationImage(
-                          image: kIsWeb ? NetworkImage(_itemImages[index].path) as ImageProvider : FileImage(File(_itemImages[index].path)),
+                          image: kIsWeb
+                              ? NetworkImage(_itemImages[index].path)
+                                  as ImageProvider
+                              : FileImage(File(_itemImages[index].path)),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -408,7 +451,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                         child: const CircleAvatar(
                           radius: 12,
                           backgroundColor: Colors.red,
-                          child: Icon(Icons.close, size: 14, color: Colors.white),
+                          child:
+                              Icon(Icons.close, size: 14, color: Colors.white),
                         ),
                       ),
                     ),
@@ -425,11 +469,14 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.itemDetails, style: _labelStyle(size: 20)),
+        Text(AppLocalizations.of(context)!.itemDetails,
+            style: _labelStyle(size: 20)),
         const SizedBox(height: 24),
         Text(AppLocalizations.of(context)!.itemName, style: _labelStyle()),
         const SizedBox(height: 12),
-        _buildTextField('Enter item name', controller: _itemNameController, validator: (val) => _validateRequired(val, 'Item Name')),
+        _buildTextField('Enter item name',
+            controller: _itemNameController,
+            validator: (val) => _validateRequired(val, 'Item Name')),
         const SizedBox(height: 24),
         _buildAddPhotosSection(),
         const SizedBox(height: 32),
@@ -439,65 +486,127 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           _selectedCategory,
           (val) => setState(() => _selectedCategory = val),
         ),
-        const SizedBox(height: 24),
-        Text(AppLocalizations.of(context)!.condition, style: _labelStyle()),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            _buildConditionChip('New'),
-            const SizedBox(width: 16),
-            _buildConditionChip('Like New'),
-            const SizedBox(width: 16),
-            _buildConditionChip('Used'),
-          ],
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topCenter,
+          child: _selectedCategory?.name == 'Goods'
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    Text(AppLocalizations.of(context)!.condition,
+                        style: _labelStyle()),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _selectedCondition,
+                      icon: const Icon(Icons.keyboard_arrow_down),
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: Theme.of(context).dividerColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: Theme.of(context).dividerColor),
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context).cardColor,
+                      ),
+                      items: ['New', 'Like New', 'Used'].map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color,
+                                  fontWeight: FontWeight.w500)),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _selectedCondition = newValue;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    Text(AppLocalizations.of(context)!.itemSources,
+                        style: _labelStyle()),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _isHomemade
+                          ? 'Homemade'
+                          : (_isStoreBought ? 'Store bought' : null),
+                      hint: Text(AppLocalizations.of(context)!.selectSource,
+                          style: const TextStyle(fontSize: 14)),
+                      icon: const Icon(Icons.keyboard_arrow_down),
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: Theme.of(context).dividerColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: Theme.of(context).dividerColor),
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context).cardColor,
+                      ),
+                      items: ['Homemade', 'Store bought'].map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color,
+                                  fontWeight: FontWeight.w500)),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _isHomemade = newValue == 'Homemade';
+                            _isStoreBought = newValue == 'Store bought';
+                          });
+                        }
+                      },
+                    ),
+                    if (_showSourceError)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                            AppLocalizations.of(context)!
+                                .pleaseSelectAtLeastOne,
+                            style: const TextStyle(
+                                color: Colors.red, fontSize: 14)),
+                      ),
+                  ],
+                )
+              : const SizedBox.shrink(),
         ),
         const SizedBox(height: 24),
         Text(AppLocalizations.of(context)!.writeANote, style: _labelStyle()),
         const SizedBox(height: 12),
-        _buildTextField('Describe your product here...', maxLines: 4, controller: _itemNoteController, validator: (val) => _validateRequired(val, 'Note')),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Row(
-              children: [
-                Checkbox(
-                  value: _isHomemade,
-                  activeColor: Colors.green,
-                  onChanged: (val) {
-                    setState(() {
-                      _isHomemade = val ?? false;
-                      if (_isHomemade) _isStoreBought = false;
-                    });
-                  },
-                ),
-                const SizedBox(width: 8),
-                Text(AppLocalizations.of(context)!.homemade, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-              ],
-            ),
-            const SizedBox(width: 32),
-            Row(
-              children: [
-                Checkbox(
-                  value: _isStoreBought,
-                  activeColor: Colors.green,
-                  onChanged: (val) {
-                    setState(() {
-                      _isStoreBought = val ?? false;
-                      if (_isStoreBought) _isHomemade = false;
-                    });
-                  },
-                ),
-                const SizedBox(width: 8),
-                Text(AppLocalizations.of(context)!.storeBought, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-              ],
-            ),
-          ],
-        ),
-        if (_showSourceError)
-          Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text(AppLocalizations.of(context)!.pleaseSelectAtLeastOne, style: TextStyle(color: Colors.red, fontSize: 14)),
-          ),
+        _buildTextField('Describe your product here...',
+            maxLines: 4,
+            controller: _itemNoteController,
+            validator: (val) => _validateRequired(val, 'Note')),
       ],
     );
   }
@@ -506,7 +615,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.whatDoYouWantIn, style: _labelStyle(size: 20)),
+        Text(AppLocalizations.of(context)!.whatDoYouWantIn,
+            style: _labelStyle(size: 20)),
         const SizedBox(height: 24),
         Container(
           height: 45,
@@ -550,7 +660,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                       onChanged: (val) => setState(() => _isNegotiable = val),
                     ),
                     const SizedBox(width: 12),
-                    Text(AppLocalizations.of(context)!.negotiable, style: TextStyle(color: Colors.grey, fontSize: 16)),
+                    Text(AppLocalizations.of(context)!.negotiable,
+                        style: TextStyle(color: Colors.grey, fontSize: 16)),
                   ],
                 ),
               ],
@@ -570,15 +681,19 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
         const SizedBox(height: 32),
         Text(AppLocalizations.of(context)!.itemName, style: _labelStyle()),
         const SizedBox(height: 12),
-        _buildTextField('Enter item name', controller: _returnItemNameController, validator: (val) => _validateRequired(val, 'Return Item Name')),
+        _buildTextField('Enter item name',
+            controller: _returnItemNameController,
+            validator: (val) => _validateRequired(val, 'Return Item Name')),
         const SizedBox(height: 32),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppLocalizations.of(context)!.addPhotos, style: _labelStyle(size: 16)),
+            Text(AppLocalizations.of(context)!.addPhotos,
+                style: _labelStyle(size: 16)),
             const SizedBox(height: 16),
             GestureDetector(
-              onTap: _returnItemImages.length >= 5 ? null : () => _pickImage(true),
+              onTap:
+                  _returnItemImages.length >= 5 ? null : () => _pickImage(true),
               child: Container(
                 width: double.infinity,
                 height: 150,
@@ -586,17 +701,30 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: _showReturnImageError ? Colors.red : (_returnItemImages.length >= 5 ? Colors.grey.withOpacity(0.3) : Theme.of(context).dividerColor),
+                      color: _showReturnImageError
+                          ? Colors.red
+                          : (_returnItemImages.length >= 5
+                              ? Colors.grey.withOpacity(0.3)
+                              : Theme.of(context).dividerColor),
                       style: BorderStyle.solid),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.camera_alt_outlined, color: _showReturnImageError ? Colors.red : Colors.grey, size: 40),
+                    Icon(Icons.camera_alt_outlined,
+                        color: _showReturnImageError ? Colors.red : Colors.grey,
+                        size: 40),
                     const SizedBox(height: 12),
                     Text(
-                      _showReturnImageError ? 'Photo required' : (_returnItemImages.length >= 5 ? 'Max 5 photos reached' : 'Add up to 5 photos'),
-                      style: TextStyle(color: _showReturnImageError ? Colors.red : Colors.grey, fontSize: 14),
+                      _showReturnImageError
+                          ? 'Photo required'
+                          : (_returnItemImages.length >= 5
+                              ? 'Max 5 photos reached'
+                              : 'Add up to 5 photos'),
+                      style: TextStyle(
+                          color:
+                              _showReturnImageError ? Colors.red : Colors.grey,
+                          fontSize: 14),
                     ),
                   ],
                 ),
@@ -620,7 +748,11 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             image: DecorationImage(
-                              image: kIsWeb ? NetworkImage(_returnItemImages[index].path) as ImageProvider : FileImage(File(_returnItemImages[index].path)),
+                              image: kIsWeb
+                                  ? NetworkImage(_returnItemImages[index].path)
+                                      as ImageProvider
+                                  : FileImage(
+                                      File(_returnItemImages[index].path)),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -633,7 +765,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                             child: const CircleAvatar(
                               radius: 12,
                               backgroundColor: Colors.red,
-                              child: Icon(Icons.close, size: 14, color: Colors.white),
+                              child: Icon(Icons.close,
+                                  size: 14, color: Colors.white),
                             ),
                           ),
                         ),
@@ -666,7 +799,11 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
         const SizedBox(height: 24),
         Text(AppLocalizations.of(context)!.description, style: _labelStyle()),
         const SizedBox(height: 12),
-        _buildTextField('Describe your product here...', maxLines: 4, controller: _returnItemDescriptionController, validator: (val) => _validateRequired(val, 'Return Item Description')),
+        _buildTextField('Describe your product here...',
+            maxLines: 4,
+            controller: _returnItemDescriptionController,
+            validator: (val) =>
+                _validateRequired(val, 'Return Item Description')),
         const SizedBox(height: 24),
         Row(
           children: [
@@ -683,7 +820,9 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                   },
                 ),
                 const SizedBox(width: 8),
-                Text(AppLocalizations.of(context)!.homemade, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(AppLocalizations.of(context)!.homemade,
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ],
             ),
             const SizedBox(width: 32),
@@ -700,7 +839,9 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                   },
                 ),
                 const SizedBox(width: 8),
-                Text(AppLocalizations.of(context)!.storeBought, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(AppLocalizations.of(context)!.storeBought,
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ],
             ),
           ],
@@ -717,10 +858,22 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
+          color: isSelected
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).dividerColor),
-          boxShadow: isSelected ? [BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))] : null,
+          border: Border.all(
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).dividerColor),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                      color: Theme.of(context).primaryColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4))
+                ]
+              : null,
         ),
         child: Text(
           label,
@@ -746,23 +899,32 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppLocalizations.of(context)!.wallet, style: _labelStyle(size: 18)),
+              Text(AppLocalizations.of(context)!.wallet,
+                  style: _labelStyle(size: 18)),
               const SizedBox(height: 16),
               Consumer<SubscriptionController>(
                 builder: (context, subscriptionController, child) {
                   final subscription = subscriptionController.mySubscription;
-                  final remainingCredit = subscription?.remainingCredit.split('.').first ?? '0';
+                  final remainingCredit =
+                      subscription?.remainingCredit.split('.').first ?? '0';
                   final postPrice = subscription?.postPrice ?? '0';
 
                   return Column(
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.account_balance_wallet_outlined, color: Theme.of(context).primaryColor, size: 24),
+                          Icon(Icons.account_balance_wallet_outlined,
+                              color: Theme.of(context).primaryColor, size: 24),
                           const SizedBox(width: 12),
-                          Text('$postPrice Credits per trade', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                          Text('$postPrice Credits per trade',
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w600)),
                           const Spacer(),
-                          Text('Credits: $remainingCredit', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Theme.of(context).primaryColor)),
+                          Text('Credits: $remainingCredit',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(context).primaryColor)),
                         ],
                       ),
                     ],
@@ -772,7 +934,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
               const SizedBox(height: 16),
               Divider(color: Theme.of(context).dividerColor),
               const SizedBox(height: 16),
-              Text(AppLocalizations.of(context)!.notificationSettings, style: _labelStyle(size: 18)),
+              Text(AppLocalizations.of(context)!.notificationSettings,
+                  style: _labelStyle(size: 18)),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -780,10 +943,12 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(AppLocalizations.of(context)!.notifySavedUsersOnly, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(AppLocalizations.of(context)!.notifySavedUsersOnly,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16)),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Only Partners you\'ve traded with before will receive notifications.',
+                        Text(
+                          'Only partners you\'ve traded with before will receive notifications.',
                           style: TextStyle(color: Colors.grey, fontSize: 14),
                         ),
                       ],
@@ -792,7 +957,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                   Switch(
                     value: _notifyPartnersOnly,
                     activeColor: Colors.green,
-                    onChanged: (val) => setState(() => _notifyPartnersOnly = val),
+                    onChanged: (val) =>
+                        setState(() => _notifyPartnersOnly = val),
                   ),
                 ],
               ),
@@ -813,16 +979,22 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
             onPressed: tradeController.isPostCreating ? null : _onPost,
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
               elevation: 0,
             ),
             child: tradeController.isPostCreating
                 ? const SizedBox(
                     height: 24,
                     width: 24,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2),
                   )
-                : Text(AppLocalizations.of(context)!.postItem, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                : Text(AppLocalizations.of(context)!.postItem,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18)),
           ),
         );
       },
@@ -842,7 +1014,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
     }
 
     if (_selectedCategory == null) {
-      ToastService.showErrorToast(context, 'Please select a category for the item');
+      ToastService.showErrorToast(
+          context, 'Please select a category for the item');
       isValid = false;
     }
 
@@ -858,7 +1031,8 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
 
     if (!_isPriceSelected) {
       if (_selectedReturnCategory == null) {
-        ToastService.showErrorToast(context, 'Please select a category for the return item');
+        ToastService.showErrorToast(
+            context, 'Please select a category for the return item');
         isValid = false;
       }
       if (_returnItemImages.isEmpty) {
@@ -881,15 +1055,17 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
 
     final userId = context.read<AuthController>().currentUser?.id;
     if (userId == null) {
-      ToastService.showErrorToast(context, 'User not found. Please login again.');
+      ToastService.showErrorToast(
+          context, 'User not found. Please login again.');
       return;
     }
 
     String title = "Create Post";
     if (ModalRoute.of(context)!.settings.arguments != null) {
-        title = ModalRoute.of(context)!.settings.arguments as String;
+      title = ModalRoute.of(context)!.settings.arguments as String;
     }
-    final String postType = title.toLowerCase().contains('take') ? 'take' : 'give';
+    final String postType =
+        title.toLowerCase().contains('take') ? 'take' : 'give';
 
     final request = PostRequestModel(
       userId: userId,
@@ -908,18 +1084,39 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
       priceMin: _isPriceSelected ? _priceRange.start : null,
       priceMax: _isPriceSelected ? _priceRange.end : null,
       isNegotiable: _isNegotiable,
-      walletCredits: (double.tryParse(context.read<SubscriptionController>().mySubscription?.postPrice ?? '0') ?? 0).toInt(),
+      walletCredits: (double.tryParse(context
+                      .read<SubscriptionController>()
+                      .mySubscription
+                      ?.postPrice ??
+                  '0') ??
+              0)
+          .toInt(),
       notifyPartnersOnly: _notifyPartnersOnly,
       postType: postType,
       itemImages: _itemImages,
       returnItemImages: _isPriceSelected ? [] : _returnItemImages,
-      returnItemName: (!_isPriceSelected && _returnItemNameController.text.isNotEmpty) ? _returnItemNameController.text : null,
-      returnItemCategory: _isPriceSelected ? null : _selectedReturnCategory?.name,
-      returnItemCategoryId: _isPriceSelected ? null : _selectedReturnCategory?.id,
+      returnItemName:
+          (!_isPriceSelected && _returnItemNameController.text.isNotEmpty)
+              ? _returnItemNameController.text
+              : null,
+      returnItemCategory:
+          _isPriceSelected ? null : _selectedReturnCategory?.name,
+      returnItemCategoryId:
+          _isPriceSelected ? null : _selectedReturnCategory?.id,
       returnItemCondition: _isPriceSelected ? null : _returnSelectedCondition,
-      returnItemNote: (!_isPriceSelected && _returnItemDescriptionController.text.isNotEmpty) ? _returnItemDescriptionController.text : null,
-      returnItemDescription: (!_isPriceSelected && _returnItemDescriptionController.text.isNotEmpty) ? _returnItemDescriptionController.text : null,
-      returnItemSource: _isPriceSelected ? null : (_isReturnHomemade ? 'Homemade' : (_isReturnStoreBought ? 'Store bought' : null)),
+      returnItemNote: (!_isPriceSelected &&
+              _returnItemDescriptionController.text.isNotEmpty)
+          ? _returnItemDescriptionController.text
+          : null,
+      returnItemDescription: (!_isPriceSelected &&
+              _returnItemDescriptionController.text.isNotEmpty)
+          ? _returnItemDescriptionController.text
+          : null,
+      returnItemSource: _isPriceSelected
+          ? null
+          : (_isReturnHomemade
+              ? 'Homemade'
+              : (_isReturnStoreBought ? 'Store bought' : null)),
     );
 
     final success = await context.read<TradeController>().createPost(request);
@@ -931,7 +1128,10 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
       if (context.read<TradeController>().isNoSubscriptionError) {
         _showNoSubscriptionDialog();
       } else {
-        ToastService.showErrorToast(context, context.read<TradeController>().errorMessage ?? "Failed to create post");
+        ToastService.showErrorToast(
+            context,
+            context.read<TradeController>().errorMessage ??
+                "Failed to create post");
       }
     }
   }
@@ -947,22 +1147,29 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
           children: [
             Icon(Icons.stars, color: Theme.of(context).primaryColor, size: 28),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Active Subscription Required',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: FontFamily.openSans),
+                AppLocalizations.of(context)!.activeSubscriptionRequired,
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: FontFamily.openSans),
               ),
             ),
           ],
         ),
-        content: const Text(
-          'You do not have any active subscription or credits to create this post. Please buy or activate a new subscription to continue.',
+        content: Text(
+          AppLocalizations.of(context)!.noActiveSubscriptionMessage,
           style: TextStyle(fontSize: 16, fontFamily: FontFamily.openSans),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600, fontSize: 16)),
+            child: Text(AppLocalizations.of(context)!.cancel,
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -975,17 +1182,26 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            child: Text(AppLocalizations.of(context)!.buySubscription, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            child: Text(AppLocalizations.of(context)!.buySubscription,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTextField(String hint, {IconData? prefixIcon, int maxLines = 1, TextEditingController? controller, String? Function(String?)? validator}) {
+  Widget _buildTextField(String hint,
+      {IconData? prefixIcon,
+      int maxLines = 1,
+      TextEditingController? controller,
+      String? Function(String?)? validator}) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
@@ -995,18 +1211,32 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
         fillColor: Theme.of(context).cardColor,
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Colors.grey, size: 24) : null,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Theme.of(context).dividerColor)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Theme.of(context).dividerColor)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Theme.of(context).primaryColor)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.red)),
-        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.red)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, color: Colors.grey, size: 24)
+            : null,
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Theme.of(context).dividerColor)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Theme.of(context).dividerColor)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+        errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.red)),
+        focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.red)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
     );
   }
 
-  Widget _buildCategoryToggleSelection(CategoryModel? currentValue, Function(CategoryModel) onSelected) {
+  Widget _buildCategoryToggleSelection(
+      CategoryModel? currentValue, Function(CategoryModel) onSelected) {
     return Consumer<TradeController>(
       builder: (context, tradeController, child) {
         Widget buildBtn(String label) {
@@ -1016,7 +1246,14 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
               onTap: () {
                 CategoryModel cat = tradeController.categories.firstWhere(
                   (c) => c.name.toLowerCase() == label.toLowerCase(),
-                  orElse: () => CategoryModel(id: label == 'Goods' ? 12 : (label == 'Services' ? 13 : 14), name: label, subId: 0, imageUrl: '', status: 1),
+                  orElse: () => CategoryModel(
+                      id: label == 'Goods'
+                          ? 12
+                          : (label == 'Services' ? 13 : 14),
+                      name: label,
+                      subId: 0,
+                      imageUrl: '',
+                      status: 1),
                 );
                 onSelected(cat);
               },
@@ -1024,13 +1261,21 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
                 height: 45,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).dividerColor),
+                  border: Border.all(
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).dividerColor),
                 ),
                 child: Text(
                   label,
-                  style: TextStyle(color: isSelected ? Colors.white : Colors.grey, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
                 ),
               ),
             ),
@@ -1056,32 +1301,17 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
         onTap: onTap,
         child: Container(
           alignment: Alignment.center,
-          decoration: BoxDecoration(color: isSelected ? Theme.of(context).primaryColor : Colors.transparent, borderRadius: BorderRadius.circular(10)),
-          child: Text(
-            label,
-            style: TextStyle(color: isSelected ? Colors.white : Colors.grey, fontWeight: FontWeight.w600, fontSize: 16),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildConditionChip(String label) {
-    bool isSelected = _selectedCondition == label;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedCondition = label),
-        child: Container(
-          height: 45,
-          alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).dividerColor),
-          ),
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(10)),
           child: Text(
             label,
-            style: TextStyle(color: isSelected ? Colors.white : Colors.grey, fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+                color: isSelected ? Colors.white : Colors.grey,
+                fontWeight: FontWeight.w600,
+                fontSize: 16),
           ),
         ),
       ),
@@ -1089,7 +1319,10 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
   }
 
   TextStyle _labelStyle({double size = 16}) {
-    return TextStyle(fontWeight: FontWeight.bold, fontSize: size, fontFamily: FontFamily.openSans);
+    return TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: size,
+        fontFamily: FontFamily.openSans);
   }
 
   Widget _buildAppBar() {
@@ -1101,12 +1334,21 @@ class _WebCreateGivePostScreenState extends State<WebCreateGivePostScreen> {
       children: [
         IconButton(
           icon: const Icon(Icons.arrow_back_ios, size: 24),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacementNamed(context, '/bottomNavBar');
+            }
+          },
         ),
         const SizedBox(width: 24),
         Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24, fontFamily: FontFamily.openSans),
+          style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              fontFamily: FontFamily.openSans),
         ),
       ],
     );

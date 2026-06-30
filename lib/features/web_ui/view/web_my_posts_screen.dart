@@ -63,7 +63,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               WebScreenHeader(
-                title: 'My Posts',
+                title: AppLocalizations.of(context)!.myPostsTitle,
                 actions: [
                   PopupMenuButton<void>(
                     offset: const Offset(0, 50),
@@ -84,7 +84,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Manage your posts',
+                                AppLocalizations.of(context)!.manageYourPosts,
                                 style: TextStyle(
                                   color: Theme.of(context).brightness ==
                                           Brightness.dark
@@ -96,7 +96,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                               ),
                               const SizedBox(height: 10),
                               Text(
-                                '• See all your active and inactive posts',
+                                AppLocalizations.of(context)!
+                                    .seeAllActiveInactivePosts,
                                 style: TextStyle(
                                   color: Colors.grey.shade500,
                                   fontSize: 12,
@@ -105,7 +106,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                '• View offers and notifications for your items',
+                                AppLocalizations.of(context)!
+                                    .viewOffersNotifications,
                                 style: TextStyle(
                                   color: Colors.grey.shade500,
                                   fontSize: 12,
@@ -130,7 +132,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                                 size: 18, color: context.primaryColor),
                             const SizedBox(width: 8),
                             Text(
-                              'Help & Support',
+                              AppLocalizations.of(context)!.helpSupport,
                               style: TextStyle(
                                 color: context.primaryColor,
                                 fontSize: 13,
@@ -431,7 +433,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
           Icon(Icons.post_add, size: 80, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
-            'No posts found',
+            AppLocalizations.of(context)!.noPostsFound,
             style: TextStyle(
               color: Colors.grey.shade600,
               fontSize: 20,
@@ -440,7 +442,7 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Try changing the filter or create a new post!',
+            AppLocalizations.of(context)!.tryChangingFilterOrCreatePost,
             style: TextStyle(
               color: Colors.grey.shade500,
               fontSize: 16,
@@ -456,8 +458,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text(
-              'Create Post',
+            child: Text(
+              AppLocalizations.of(context)!.createPostLabel,
               style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -521,19 +523,23 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                             final confirm = await showDialog<bool>(
                               context: context,
                               builder: (context) => AlertDialog(
-                                title: Text(AppLocalizations.of(context)!.deactivatePost),
-                                content: const Text(
-                                    'Are you sure you want to deactivate this post? Deactivating it will permanently delete your post.'),
+                                title: Text(AppLocalizations.of(context)!
+                                    .deactivatePost),
+                                content: Text(AppLocalizations.of(context)!
+                                    .areYouSureYouWant5),
                                 actions: [
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.pop(context, false),
-                                    child: Text(AppLocalizations.of(context)!.cancel),
+                                    child: Text(
+                                        AppLocalizations.of(context)!.cancel),
                                   ),
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.pop(context, true),
-                                    child: Text(AppLocalizations.of(context)!.deactivate,
+                                    child: Text(
+                                        AppLocalizations.of(context)!
+                                            .deactivate,
                                         style: TextStyle(color: Colors.red)),
                                   ),
                                 ],
@@ -687,8 +693,8 @@ class _WebMyPostsScreenState extends State<WebMyPostsScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20)),
                     ),
-                    child: const Text(
-                      'View Offers',
+                    child: Text(
+                      AppLocalizations.of(context)!.viewOffers,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,

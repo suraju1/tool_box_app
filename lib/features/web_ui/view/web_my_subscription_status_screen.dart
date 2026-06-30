@@ -33,7 +33,7 @@ class _WebMySubscriptionStatusScreenState
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       appBar: WebScreenHeader(
-        title: 'My Subscription',
+        title: AppLocalizations.of(context)!.mySubscription,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -88,7 +88,7 @@ class _WebMySubscriptionStatusScreenState
                     ),
                     const SizedBox(height: 48),
                     Text(
-                      'INCLUDED BENEFITS',
+                      AppLocalizations.of(context)!.includedBenefits,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -131,7 +131,7 @@ class _WebMySubscriptionStatusScreenState
                             elevation: 0,
                           ),
                           child: Text(
-                            'Change Plan',
+                            AppLocalizations.of(context)!.changePlan,
                             style: TextStyle(
                                 color: context.reverseTextColor,
                                 fontSize: 16,
@@ -169,7 +169,7 @@ class _WebMySubscriptionStatusScreenState
             ),
             const SizedBox(height: 32),
             Text(
-              'No Active Subscription',
+              AppLocalizations.of(context)!.noActiveSubscription,
               style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
@@ -278,9 +278,12 @@ class _WebMySubscriptionStatusScreenState
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: context.isDarkMode ? Colors.black.withOpacity(0.1) : Colors.black.withOpacity(0.2),
+                  color: context.isDarkMode
+                      ? Colors.black.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -296,7 +299,7 @@ class _WebMySubscriptionStatusScreenState
           ),
           const SizedBox(height: 32),
           Text(
-            'Current Plan',
+            AppLocalizations.of(context)!.currentPlan,
             style: TextStyle(
               fontSize: 16,
               color: context.reverseTextColor.withOpacity(0.7),
@@ -317,7 +320,9 @@ class _WebMySubscriptionStatusScreenState
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: context.isDarkMode ? Colors.black.withOpacity(0.05) : Colors.black.withOpacity(0.15),
+              color: context.isDarkMode
+                  ? Colors.black.withOpacity(0.05)
+                  : Colors.black.withOpacity(0.15),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -336,7 +341,7 @@ class _WebMySubscriptionStatusScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Expiry Date',
+                      AppLocalizations.of(context)!.expiryDate,
                       style: TextStyle(
                         fontSize: 14,
                         color: context.reverseTextColor.withOpacity(0.7),
@@ -397,7 +402,7 @@ class _WebMySubscriptionStatusScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Remaining Credits',
+                    AppLocalizations.of(context)!.remainingCredits,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,

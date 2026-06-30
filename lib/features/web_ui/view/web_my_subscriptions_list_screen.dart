@@ -13,10 +13,12 @@ class WebMySubscriptionsListScreen extends StatefulWidget {
   const WebMySubscriptionsListScreen({super.key});
 
   @override
-  State<WebMySubscriptionsListScreen> createState() => _WebMySubscriptionsListScreenState();
+  State<WebMySubscriptionsListScreen> createState() =>
+      _WebMySubscriptionsListScreenState();
 }
 
-class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScreen> {
+class _WebMySubscriptionsListScreenState
+    extends State<WebMySubscriptionsListScreen> {
   @override
   void initState() {
     super.initState();
@@ -33,7 +35,8 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      appBar: const WebScreenHeader(title: 'Payment History'),
+      appBar:
+          WebScreenHeader(title: AppLocalizations.of(context)!.paymentHistory),
       body: Consumer<SubscriptionController>(
         builder: (context, controller, child) {
           final subscription = controller.mySubscription;
@@ -58,8 +61,10 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
                         : history.isEmpty
                             ? _buildEmptyState(context, controller)
                             : GridView.builder(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
                                   crossAxisSpacing: 24,
                                   mainAxisSpacing: 24,
@@ -81,7 +86,8 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, SubscriptionController controller) {
+  Widget _buildEmptyState(
+      BuildContext context, SubscriptionController controller) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -89,8 +95,11 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
           Icon(Icons.history_outlined, size: 80, color: context.subTextColor),
           const SizedBox(height: 24),
           Text(
-            'No Subscription History',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: context.textColor),
+            AppLocalizations.of(context)!.noSubscriptionHistory,
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: context.textColor),
           ),
           const SizedBox(height: 12),
           Text(
@@ -104,15 +113,17 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
               backgroundColor: context.primaryColor,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             ),
-            child: Text(AppLocalizations.of(context)!.refresh, style: TextStyle(color: Colors.white, fontSize: 16)),
+            child: Text(AppLocalizations.of(context)!.refresh,
+                style: TextStyle(color: Colors.white, fontSize: 16)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActivePlanHeader(BuildContext context, MySubscriptionData subscription) {
-    final expiryDate = subscription.endDate.isNotEmpty 
+  Widget _buildActivePlanHeader(
+      BuildContext context, MySubscriptionData subscription) {
+    final expiryDate = subscription.endDate.isNotEmpty
         ? DateFormat('dd MMM yyyy').format(DateTime.parse(subscription.endDate))
         : 'N/A';
 
@@ -152,8 +163,8 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'CURRENT PLAN',
+                    Text(
+                      AppLocalizations.of(context)!.currentPlan1,
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
@@ -162,7 +173,8 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white24,
                         borderRadius: BorderRadius.circular(12),
@@ -223,7 +235,8 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
     );
   }
 
-  Widget _buildFilterChip(BuildContext context, String label, {required bool isActive, required VoidCallback onTap}) {
+  Widget _buildFilterChip(BuildContext context, String label,
+      {required bool isActive, required VoidCallback onTap}) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -234,7 +247,10 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
           decoration: BoxDecoration(
             color: isActive ? context.primaryColor : context.surfaceColor,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isActive ? context.primaryColor : context.dividerColor.withOpacity(0.5)),
+            border: Border.all(
+                color: isActive
+                    ? context.primaryColor
+                    : context.dividerColor.withOpacity(0.5)),
             boxShadow: isActive
                 ? [
                     BoxShadow(
@@ -258,13 +274,15 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
     );
   }
 
-  Widget _buildInvoiceCard(BuildContext context, {required SubscriptionHistoryItem item}) {
-    final statusColor = item.status.toLowerCase() == 'active' ? Colors.green : Colors.grey;
-    
-    final startDate = item.startDate.isNotEmpty 
+  Widget _buildInvoiceCard(BuildContext context,
+      {required SubscriptionHistoryItem item}) {
+    final statusColor =
+        item.status.toLowerCase() == 'active' ? Colors.green : Colors.grey;
+
+    final startDate = item.startDate.isNotEmpty
         ? DateFormat('dd MMM').format(DateTime.parse(item.startDate))
         : '';
-    final endDate = item.endDate.isNotEmpty 
+    final endDate = item.endDate.isNotEmpty
         ? DateFormat('dd MMM yyyy').format(DateTime.parse(item.endDate))
         : '';
     final period = '$startDate - $endDate';
@@ -297,24 +315,32 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
                       children: [
                         Text(
                           item.name,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: context.textColor),
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: context.textColor),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'ID #${item.id}',
-                          style: TextStyle(fontSize: 14, color: context.subTextColor),
+                          style: TextStyle(
+                              fontSize: 14, color: context.subTextColor),
                         ),
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: statusColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         item.status.toUpperCase(),
-                        style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                            color: statusColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800),
                       ),
                     ),
                   ],
@@ -323,7 +349,9 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
                 Row(
                   children: [
                     Expanded(child: _buildInfoItem(context, 'PERIOD', period)),
-                    Expanded(child: _buildInfoItem(context, 'AMOUNT', '₹${item.totalAmount}')),
+                    Expanded(
+                        child: _buildInfoItem(
+                            context, 'AMOUNT', '₹${item.totalAmount}')),
                   ],
                 ),
               ],
@@ -341,12 +369,18 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
                     const SizedBox(width: 8),
                     Text(
                       item.remainingCredit.split('.').first,
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: context.textColor),
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: context.textColor),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Credits Remaining',
-                      style: TextStyle(fontSize: 14, color: context.primaryColor, fontWeight: FontWeight.w600),
+                      AppLocalizations.of(context)!.creditsRemaining,
+                      style: TextStyle(
+                          fontSize: 14,
+                          color: context.primaryColor,
+                          fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -364,12 +398,19 @@ class _WebMySubscriptionsListScreenState extends State<WebMySubscriptionsListScr
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.subTextColor, letterSpacing: 1),
+          style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: context.subTextColor,
+              letterSpacing: 1),
         ),
         const SizedBox(height: 8),
         Text(
           value,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: context.textColor),
+          style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: context.textColor),
         ),
       ],
     );

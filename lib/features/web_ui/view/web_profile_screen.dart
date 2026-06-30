@@ -20,7 +20,8 @@ class WebProfileScreen extends StatelessWidget {
     final profileUser = profileController.ownProfile?.userDetails;
 
     if (user == null) {
-      return Center(child: Text(AppLocalizations.of(context)!.pleaseLogInToView));
+      return Center(
+          child: Text(AppLocalizations.of(context)!.pleaseLogInToView));
     }
 
     final String fullName = profileUser?.fullName ?? user.fullName;
@@ -40,8 +41,8 @@ class WebProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "My Profile",
+          Text(
+            AppLocalizations.of(context)!.myProfile,
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -62,9 +63,10 @@ class WebProfileScreen extends StatelessWidget {
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildProfileDetails(context, profileUser, fullName, isMobile),
+                      _buildProfileDetails(
+                          context, profileUser, fullName, isMobile),
                       const SizedBox(height: 32),
-                      _buildBioBox(bioText, innerCardBgColor),
+                      _buildBioBox(context, bioText, innerCardBgColor),
                     ],
                   )
                 : Row(
@@ -73,13 +75,14 @@ class WebProfileScreen extends StatelessWidget {
                       // Left profile details
                       Expanded(
                         flex: 5,
-                        child: _buildProfileDetails(context, profileUser, fullName, isMobile),
+                        child: _buildProfileDetails(
+                            context, profileUser, fullName, isMobile),
                       ),
                       const SizedBox(width: 32),
                       // Right Bio box
                       Expanded(
                         flex: 4,
-                        child: _buildBioBox(bioText, innerCardBgColor),
+                        child: _buildBioBox(context, bioText, innerCardBgColor),
                       ),
                     ],
                   ),
@@ -91,9 +94,17 @@ class WebProfileScreen extends StatelessWidget {
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildMarksOfSuraj(context, fullName, innerCardBgColor, cardBgColor, isMobile, profileController.ownProfile?.reviews ?? [], profileUser),
+                    _buildMarksOfSuraj(
+                        context,
+                        fullName,
+                        innerCardBgColor,
+                        cardBgColor,
+                        isMobile,
+                        profileController.ownProfile?.reviews ?? [],
+                        profileUser),
                     SizedBox(height: isMobile ? 16 : 24),
-                    _buildTradeHistory(context, innerCardBgColor, cardBgColor, isMobile, profileController.ownProfile?.tradeStats),
+                    _buildTradeHistory(context, innerCardBgColor, cardBgColor,
+                        isMobile, profileController.ownProfile?.tradeStats),
                   ],
                 )
               : Row(
@@ -101,12 +112,24 @@ class WebProfileScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       flex: 5,
-                      child: _buildMarksOfSuraj(context, fullName, innerCardBgColor, cardBgColor, isMobile, profileController.ownProfile?.reviews ?? [], profileUser),
+                      child: _buildMarksOfSuraj(
+                          context,
+                          fullName,
+                          innerCardBgColor,
+                          cardBgColor,
+                          isMobile,
+                          profileController.ownProfile?.reviews ?? [],
+                          profileUser),
                     ),
                     const SizedBox(width: 24),
                     Expanded(
                       flex: 4,
-                      child: _buildTradeHistory(context, innerCardBgColor, cardBgColor, isMobile, profileController.ownProfile?.tradeStats),
+                      child: _buildTradeHistory(
+                          context,
+                          innerCardBgColor,
+                          cardBgColor,
+                          isMobile,
+                          profileController.ownProfile?.tradeStats),
                     ),
                   ],
                 ),
@@ -116,14 +139,16 @@ class WebProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileDetails(BuildContext context, dynamic profileUser, String fullName, bool isMobile) {
+  Widget _buildProfileDetails(BuildContext context, dynamic profileUser,
+      String fullName, bool isMobile) {
     return isMobile
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildAvatar(profileUser, fullName, isMobile),
               const SizedBox(height: 24),
-              _buildProfileTextAndButtons(context, profileUser, fullName, isMobile),
+              _buildProfileTextAndButtons(
+                  context, profileUser, fullName, isMobile),
             ],
           )
         : Row(
@@ -132,7 +157,8 @@ class WebProfileScreen extends StatelessWidget {
               _buildAvatar(profileUser, fullName, isMobile),
               const SizedBox(width: 32),
               Expanded(
-                child: _buildProfileTextAndButtons(context, profileUser, fullName, isMobile),
+                child: _buildProfileTextAndButtons(
+                    context, profileUser, fullName, isMobile),
               ),
             ],
           );
@@ -160,10 +186,12 @@ class WebProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileTextAndButtons(BuildContext context, dynamic profileUser, String fullName, bool isMobile) {
+  Widget _buildProfileTextAndButtons(BuildContext context, dynamic profileUser,
+      String fullName, bool isMobile) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
-      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      crossAxisAlignment:
+          isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Text(
           fullName,
@@ -220,14 +248,16 @@ class WebProfileScreen extends StatelessWidget {
               height: 54,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                border: Border.all(color: isDark ? Colors.white : Colors.black, width: 1.5),
+                border: Border.all(
+                    color: isDark ? Colors.white : Colors.black, width: 1.5),
                 borderRadius: BorderRadius.circular(30),
                 color: Colors.transparent,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.credit_card, size: 18, color: isDark ? Colors.white : Colors.black),
+                  Icon(Icons.credit_card,
+                      size: 18, color: isDark ? Colors.white : Colors.black),
                   const SizedBox(width: 8),
                   Text(
                     "Credit Balance: ${profileUser?.remainingBalance ?? '50.00'}",
@@ -245,12 +275,13 @@ class WebProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBioBox(String bioText, Color innerCardBgColor) {
+  Widget _buildBioBox(
+      BuildContext context, String bioText, Color innerCardBgColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Bio",
+        Text(
+          AppLocalizations.of(context)!.bio,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -278,7 +309,14 @@ class WebProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMarksOfSuraj(BuildContext context, String fullName, Color innerCardBgColor, Color cardBgColor, bool isMobile, List<Review> reviews, UserDetails? profileUser) {
+  Widget _buildMarksOfSuraj(
+      BuildContext context,
+      String fullName,
+      Color innerCardBgColor,
+      Color cardBgColor,
+      bool isMobile,
+      List<Review> reviews,
+      UserDetails? profileUser) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.all(isMobile ? 16 : 32),
@@ -308,11 +346,15 @@ class WebProfileScreen extends StatelessWidget {
                 children: [
                   const Icon(Icons.thumb_up_alt_outlined, size: 24),
                   const SizedBox(width: 8),
-                  Text("${profileUser?.totalLikes ?? 0}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text("${profileUser?.totalLikes ?? 0}",
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(width: 24),
                   const Icon(Icons.thumb_down_alt_outlined, size: 24),
                   const SizedBox(width: 8),
-                  Text("${profileUser?.totalDislikes ?? 0}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text("${profileUser?.totalDislikes ?? 0}",
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
                 ],
               )
             ],
@@ -321,7 +363,11 @@ class WebProfileScreen extends StatelessWidget {
           if (reviews.isEmpty)
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(AppLocalizations.of(context)!.noReviewsFound, style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 16)),
+              child: Text(AppLocalizations.of(context)!.noReviewsFound,
+                  style: TextStyle(
+                      color:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      fontSize: 16)),
             )
           else
             ListView.separated(
@@ -331,8 +377,14 @@ class WebProfileScreen extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
                 final review = reviews[index];
-                final bool isPositive = (review.userReaction ?? '').toLowerCase() != 'dislike' && (review.rating is int ? review.rating as int : int.tryParse(review.rating.toString()) ?? 0) >= 3;
-                
+                final bool isPositive =
+                    (review.userReaction ?? '').toLowerCase() != 'dislike' &&
+                        (review.rating is int
+                                ? review.rating as int
+                                : int.tryParse(review.rating.toString()) ??
+                                    0) >=
+                            3;
+
                 return Container(
                   padding: EdgeInsets.all(isMobile ? 12 : 20),
                   decoration: BoxDecoration(
@@ -345,10 +397,12 @@ class WebProfileScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isPositive ? const Color(0xFF65B741) : Colors.red,
+                          color:
+                              isPositive ? const Color(0xFF65B741) : Colors.red,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(isPositive ? Icons.check : Icons.close, color: Colors.white, size: 28),
+                        child: Icon(isPositive ? Icons.check : Icons.close,
+                            color: Colors.white, size: 28),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -357,12 +411,19 @@ class WebProfileScreen extends StatelessWidget {
                           children: [
                             Text(
                               review.feedbackLabel ?? "Review",
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              review.comment?.isNotEmpty == true ? "- ${review.comment}" : "- No comments",
-                              style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade500, fontSize: 12),
+                              review.comment?.isNotEmpty == true
+                                  ? "- ${review.comment}"
+                                  : "- No comments",
+                              style: TextStyle(
+                                  color: isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade500,
+                                  fontSize: 12),
                             ),
                             const SizedBox(height: 12),
                             Wrap(
@@ -371,31 +432,65 @@ class WebProfileScreen extends StatelessWidget {
                               children: [
                                 InkWell(
                                   onTap: () {
-                                    context.read<ProfileController>().toggleReviewReaction(review.id, 'like');
+                                    context
+                                        .read<ProfileController>()
+                                        .toggleReviewReaction(
+                                            review.id, 'like');
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: review.userReaction == 'like' ? const Color(0xFF65B741) : (isDark ? Colors.grey.shade800 : Colors.black),
+                                      color: review.userReaction == 'like'
+                                          ? const Color(0xFF65B741)
+                                          : (isDark
+                                              ? Colors.grey.shade800
+                                              : Colors.black),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text("True:${review.likesCount}",
-                                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold)),
                                   ),
                                 ),
                                 InkWell(
                                   onTap: () {
-                                    context.read<ProfileController>().toggleReviewReaction(review.id, 'dislike');
+                                    context
+                                        .read<ProfileController>()
+                                        .toggleReviewReaction(
+                                            review.id, 'dislike');
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: review.userReaction == 'dislike' ? Colors.red : (isDark ? Colors.grey.shade900 : Colors.white),
-                                      border: Border.all(color: review.userReaction == 'dislike' ? Colors.red : (isDark ? Colors.grey.shade700 : Colors.black)),
+                                      color: review.userReaction == 'dislike'
+                                          ? Colors.red
+                                          : (isDark
+                                              ? Colors.grey.shade900
+                                              : Colors.white),
+                                      border: Border.all(
+                                          color:
+                                              review.userReaction == 'dislike'
+                                                  ? Colors.red
+                                                  : (isDark
+                                                      ? Colors.grey.shade700
+                                                      : Colors.black)),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: Text("False: ${review.dislikesCount}",
-                                        style: TextStyle(color: review.userReaction == 'dislike' ? Colors.white : (isDark ? Colors.white : Colors.black), fontSize: 10, fontWeight: FontWeight.bold)),
+                                    child: Text(
+                                        "False: ${review.dislikesCount}",
+                                        style: TextStyle(
+                                            color:
+                                                review.userReaction == 'dislike'
+                                                    ? Colors.white
+                                                    : (isDark
+                                                        ? Colors.white
+                                                        : Colors.black),
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold)),
                                   ),
                                 ),
                               ],
@@ -413,7 +508,8 @@ class WebProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTradeHistory(BuildContext context, Color innerCardBgColor, Color cardBgColor, bool isMobile, TradeStats? tradeStats) {
+  Widget _buildTradeHistory(BuildContext context, Color innerCardBgColor,
+      Color cardBgColor, bool isMobile, TradeStats? tradeStats) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
@@ -426,8 +522,8 @@ class WebProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Trade History",
+          Text(
+            AppLocalizations.of(context)!.tradeHistory,
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -436,20 +532,40 @@ class WebProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
           LayoutBuilder(
             builder: (context, constraints) {
-              final double cardWidth = isMobile ? constraints.maxWidth : (constraints.maxWidth - 32) / 3;
+              final double cardWidth = isMobile
+                  ? constraints.maxWidth
+                  : (constraints.maxWidth - 32) / 3;
               return Wrap(
                 spacing: 16,
                 runSpacing: 16,
                 children: [
                   SizedBox(
                       width: cardWidth,
-                      child: _buildTradeHistoryCard(Icons.handshake, Colors.blue, "${tradeStats?.totalTrades ?? 0}", "Total Trades", innerCardBgColor, isDark)),
+                      child: _buildTradeHistoryCard(
+                          Icons.handshake,
+                          Colors.blue,
+                          "${tradeStats?.totalTrades ?? 0}",
+                          "Total Trades",
+                          innerCardBgColor,
+                          isDark)),
                   SizedBox(
                       width: cardWidth,
-                      child: _buildTradeHistoryCard(Icons.outbox_outlined, Colors.red, "${tradeStats?.sentOffers ?? 0}", "Sent Offers", innerCardBgColor, isDark)),
+                      child: _buildTradeHistoryCard(
+                          Icons.outbox_outlined,
+                          Colors.red,
+                          "${tradeStats?.sentOffers ?? 0}",
+                          "Sent Offers",
+                          innerCardBgColor,
+                          isDark)),
                   SizedBox(
                       width: cardWidth,
-                      child: _buildTradeHistoryCard(Icons.move_to_inbox_outlined, Colors.orange, "${tradeStats?.receivedOffers ?? 0}", "Received Offers", innerCardBgColor, isDark)),
+                      child: _buildTradeHistoryCard(
+                          Icons.move_to_inbox_outlined,
+                          Colors.orange,
+                          "${tradeStats?.receivedOffers ?? 0}",
+                          "Received Offers",
+                          innerCardBgColor,
+                          isDark)),
                 ],
               );
             },
@@ -463,18 +579,20 @@ class WebProfileScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: isDark ? Colors.white : Colors.black,
                 foregroundColor: isDark ? Colors.black : Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                textStyle:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
           const SizedBox(height: 24),
           Center(
             child: Text(
-              "Your profile is saved by 22 users",
+              AppLocalizations.of(context)!.yourProfileIsSavedBy,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
@@ -488,7 +606,8 @@ class WebProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTradeHistoryCard(IconData icon, Color iconColor, String value, String title, Color bgColor, bool isDark) {
+  Widget _buildTradeHistoryCard(IconData icon, Color iconColor, String value,
+      String title, Color bgColor, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 8),
       decoration: BoxDecoration(
@@ -509,7 +628,10 @@ class WebProfileScreen extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.grey.shade400 : Colors.grey.shade800),
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade800),
           ),
         ],
       ),

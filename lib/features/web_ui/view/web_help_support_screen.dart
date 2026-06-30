@@ -55,11 +55,12 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
                               child: Center(child: CircularProgressIndicator()),
                             )
                           else if (controller.faqs.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 40),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 40),
                               child: Text(
-                                'No FAQs available at the moment.',
-                                style: TextStyle(
+                                AppLocalizations.of(context)!
+                                    .noFaqsAvailableAtThe,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontFamily: FontFamily.openSans,
                                   color: Colors.grey,
@@ -100,8 +101,8 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
             splashRadius: 24,
           ),
           const SizedBox(width: 16),
-          const Text(
-            'Help & Support',
+          Text(
+            AppLocalizations.of(context)!.helpSupport,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -304,8 +305,8 @@ class _WebHelpSupportScreenState extends State<WebHelpSupportScreen> {
                         width: 24,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text(
-                        'Submit Feedback',
+                    : Text(
+                        AppLocalizations.of(context)!.submitFeedback,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

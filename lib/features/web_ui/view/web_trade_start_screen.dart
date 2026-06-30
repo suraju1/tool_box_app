@@ -23,7 +23,8 @@ class WebTradeStartScreen extends StatefulWidget {
 class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
   String _selectedMeetingPreference = 'Come to me';
   bool _isAcceptSelected = true;
-  final bool _showMoreDetails = true; // Default to true on web for better visibility
+  final bool _showMoreDetails =
+      true; // Default to true on web for better visibility
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,8 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
       return Scaffold(
         backgroundColor: context.scaffoldBg,
         appBar: _buildAppBar(context),
-        body: Center(child: Text(AppLocalizations.of(context)!.noResponseSelected)),
+        body: Center(
+            child: Text(AppLocalizations.of(context)!.noResponseSelected)),
       );
     }
 
@@ -54,14 +56,15 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
               children: [
                 _buildStepper(),
                 const SizedBox(height: 32),
-                
+
                 // Main Trade Card
                 Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
                     color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+                    border: Border.all(
+                        color: context.dividerColor.withOpacity(0.5)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.04),
@@ -77,13 +80,13 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                       const SizedBox(height: 24),
                       const Divider(),
                       const SizedBox(height: 24),
-                      
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             flex: 3,
-                            child: _buildTradeDetailsText(response, post, isOwner),
+                            child:
+                                _buildTradeDetailsText(response, post, isOwner),
                           ),
                           const SizedBox(width: 32),
                           if (response.responseType != 'price')
@@ -93,15 +96,15 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                             ),
                         ],
                       ),
-                      
-                      if (response.status == 'rejected' && response.rejectedReason != null) ...[
+                      if (response.status == 'rejected' &&
+                          response.rejectedReason != null) ...[
                         const SizedBox(height: 24),
                         _buildRejectionReason(response),
                       ],
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
 
                 // Action Area for Pending trades
@@ -115,19 +118,22 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                         color: context.primaryColor.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Text(
-                        "Waiting for the post owner to review your offer...",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      child: Text(
+                        AppLocalizations.of(context)!.waitingForThePostOwner,
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
                         textAlign: TextAlign.center,
                       ),
                     ),
                 ],
-                
+
                 const SizedBox(height: 40),
 
                 // Bottom Action Button
                 if ((response.status == 'pending' && isOwner) ||
-                    (response.status == 'accepted' || response.status == 'meeting_set' || response.status == 'paid'))
+                    (response.status == 'accepted' ||
+                        response.status == 'meeting_set' ||
+                        response.status == 'paid'))
                   Align(
                     alignment: Alignment.centerRight,
                     child: _buildBottomAction(tradeController),
@@ -149,7 +155,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
         icon: Icon(Icons.arrow_back, color: context.textColor),
       ),
       title: Text(
-        'Trade Request',
+        AppLocalizations.of(context)!.tradeRequest,
         style: TextStyle(
           color: context.textColor,
           fontSize: 20,
@@ -202,7 +208,9 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                   ? 'Trade Accepted'
                   : 'Trade Initiated',
           style: TextStyle(
-            color: response.status == 'rejected' ? Colors.red : context.primaryColor,
+            color: response.status == 'rejected'
+                ? Colors.red
+                : context.primaryColor,
             fontSize: 28,
             fontWeight: FontWeight.w900,
             fontFamily: FontFamily.openSans,
@@ -265,7 +273,8 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
     );
   }
 
-  Widget _buildTradeDetailsText(TradeResponseModel response, dynamic post, bool isOwner) {
+  Widget _buildTradeDetailsText(
+      TradeResponseModel response, dynamic post, bool isOwner) {
     bool isGivePost = post?.postType == 'give';
     String offeringText = '';
 
@@ -300,7 +309,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
       double? ps = response.priceRangeStart;
       double? pe = response.priceRangeEnd;
       String? itm = response.itemName;
-      
+
       if (offeringType == 'price') {
         offeringText = 'Asking for ₹${ps?.toInt()} - ₹${pe?.toInt()}';
       } else if (offeringType == 'item') {
@@ -324,33 +333,41 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
             children: [
               TextSpan(
                 text: isOwner ? '${response.responderName} ' : 'You ',
-                style: TextStyle(fontWeight: FontWeight.w800, color: context.textColor),
+                style: TextStyle(
+                    fontWeight: FontWeight.w800, color: context.textColor),
                 recognizer: isOwner
                     ? (TapGestureRecognizer()
-                      ..onTap = () => ProfileController.navigateToUserProfile(context, response.responderId))
+                      ..onTap = () => ProfileController.navigateToUserProfile(
+                          context, response.responderId))
                     : null,
               ),
-              TextSpan(text: isOwner ? 'responded to your post:\n' : 'responded to '),
+              TextSpan(
+                  text:
+                      isOwner ? 'responded to your post:\n' : 'responded to '),
               if (!isOwner)
                 TextSpan(
                   text: '${response.posterName ?? 'the owner'}\'s post:\n',
-                  style: TextStyle(fontWeight: FontWeight.w800, color: context.textColor),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800, color: context.textColor),
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () => ProfileController.navigateToUserProfile(context, response.posterUserId),
+                    ..onTap = () => ProfileController.navigateToUserProfile(
+                        context, response.posterUserId),
                 ),
               if (isGivePost) ...[
                 TextSpan(text: offeringText),
                 const TextSpan(text: ' — \nTaking '),
                 TextSpan(
                   text: post?.itemName ?? 'your product',
-                  style: TextStyle(fontWeight: FontWeight.w800, color: context.textColor),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800, color: context.textColor),
                 ),
                 const TextSpan(text: ' in return.'),
               ] else ...[
                 const TextSpan(text: 'Providing '),
                 TextSpan(
                   text: post?.itemName ?? 'the product',
-                  style: TextStyle(fontWeight: FontWeight.w800, color: context.textColor),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800, color: context.textColor),
                 ),
                 const TextSpan(text: ' — \n'),
                 TextSpan(text: offeringText),
@@ -381,12 +398,16 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
               borderRadius: BorderRadius.circular(12),
               image: DecorationImage(
                 image: response.itemImages.isNotEmpty
-                    ? NetworkImage(AppCachedImage.getFormattedUrl(response.itemImages.first))
+                    ? NetworkImage(AppCachedImage.getFormattedUrl(
+                        response.itemImages.first))
                     : (response.postItemImages.isNotEmpty)
-                        ? NetworkImage(AppCachedImage.getFormattedUrl(response.postItemImages.first))
+                        ? NetworkImage(AppCachedImage.getFormattedUrl(
+                            response.postItemImages.first))
                         : (post != null && post.itemImages.isNotEmpty)
-                            ? NetworkImage(AppCachedImage.getFormattedUrl(post.itemImages.first))
-                            : const AssetImage('assets/iphone.png') as ImageProvider,
+                            ? NetworkImage(AppCachedImage.getFormattedUrl(
+                                post.itemImages.first))
+                            : const AssetImage('assets/iphone.png')
+                                as ImageProvider,
                 fit: BoxFit.cover,
               ),
             ),
@@ -394,12 +415,19 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
           const SizedBox(height: 16),
           Text(
             response.itemName ?? 'Price Offer',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textColor),
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: context.textColor),
           ),
           const SizedBox(height: 4),
           Text(
-            response.itemCondition ?? (response.responseType == 'price' ? 'Cash Offer' : 'Unknown'),
-            style: TextStyle(fontSize: 14, color: context.primaryColor, fontWeight: FontWeight.w700),
+            response.itemCondition ??
+                (response.responseType == 'price' ? 'Cash Offer' : 'Unknown'),
+            style: TextStyle(
+                fontSize: 14,
+                color: context.primaryColor,
+                fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
           Container(
@@ -438,16 +466,22 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
             children: [
               const Icon(Icons.info_outline, color: Colors.red, size: 20),
               const SizedBox(width: 8),
-              const Text(
-                'Reason for Rejection',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.red),
+              Text(
+                AppLocalizations.of(context)!.reasonForRejection1,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.red),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             response.rejectedReason!,
-            style: TextStyle(fontSize: 15, color: context.textColor.withOpacity(0.8), height: 1.5),
+            style: TextStyle(
+                fontSize: 15,
+                color: context.textColor.withOpacity(0.8),
+                height: 1.5),
           ),
         ],
       ),
@@ -459,7 +493,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Review & Respond',
+          AppLocalizations.of(context)!.reviewRespond,
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
@@ -469,7 +503,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Accept the offer and choose a handover location, or reject it entirely.',
+          AppLocalizations.of(context)!.acceptTheOfferAndChoose1,
           style: TextStyle(fontSize: 16, color: context.subTextColor),
         ),
         const SizedBox(height: 24),
@@ -491,8 +525,11 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Meeting Preference',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.textColor),
+                              AppLocalizations.of(context)!.meetingPreference,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.textColor),
                             ),
                             const SizedBox(height: 12),
                             Wrap(
@@ -515,7 +552,7 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
               child: _buildInteractionCard(
                 isSelected: !_isAcceptSelected,
                 onTap: () => setState(() => _isAcceptSelected = false),
-                title: 'Reject Offer',
+                title: AppLocalizations.of(context)!.rejectOffer,
                 subtitle: 'Decline this proposal permanently',
                 icon: Icons.cancel_outlined,
                 activeColor: Colors.red,
@@ -544,10 +581,14 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: isSelected ? activeColor.withOpacity(0.05) : context.surfaceColor,
+            color: isSelected
+                ? activeColor.withOpacity(0.05)
+                : context.surfaceColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? activeColor : context.dividerColor.withOpacity(0.5),
+              color: isSelected
+                  ? activeColor
+                  : context.dividerColor.withOpacity(0.5),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -556,7 +597,8 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
             children: [
               Row(
                 children: [
-                  Icon(icon, color: isSelected ? activeColor : greyColor, size: 28),
+                  Icon(icon,
+                      color: isSelected ? activeColor : greyColor, size: 28),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -573,7 +615,8 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                         const SizedBox(height: 4),
                         Text(
                           subtitle,
-                          style: TextStyle(fontSize: 13, color: context.subTextColor),
+                          style: TextStyle(
+                              fontSize: 13, color: context.subTextColor),
                         ),
                       ],
                     ),
@@ -583,14 +626,17 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                     height: 24,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: isSelected ? activeColor : greyColor, width: 2),
+                      border: Border.all(
+                          color: isSelected ? activeColor : greyColor,
+                          width: 2),
                     ),
                     child: isSelected
                         ? Center(
                             child: Container(
                               width: 12,
                               height: 12,
-                              decoration: BoxDecoration(shape: BoxShape.circle, color: activeColor),
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle, color: activeColor),
                             ),
                           )
                         : null,
@@ -617,7 +663,9 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
           decoration: BoxDecoration(
             color: isSelected ? context.primaryColor : context.scaffoldBg,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: isSelected ? context.primaryColor : context.dividerColor),
+            border: Border.all(
+                color:
+                    isSelected ? context.primaryColor : context.dividerColor),
           ),
           child: Text(
             label,
@@ -636,27 +684,36 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
     final response = controller.selectedResponse;
     final authController = context.read<AuthController>();
     final isOwner = authController.currentUser?.id == response?.posterUserId;
-    final isAlreadyAccepted = response?.status == 'accepted' || response?.status == 'meeting_set' || response?.status == 'paid';
+    final isAlreadyAccepted = response?.status == 'accepted' ||
+        response?.status == 'meeting_set' ||
+        response?.status == 'paid';
 
     return SizedBox(
       width: 240,
       height: 54,
       child: ElevatedButton(
-        onPressed: controller.isLoading ? null : () => _handleSubmit(context, controller),
+        onPressed: controller.isLoading
+            ? null
+            : () => _handleSubmit(context, controller),
         style: ElevatedButton.styleFrom(
           backgroundColor: context.primaryColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
         ),
         child: controller.isLoading
             ? SizedBox(
                 height: 24,
                 width: 24,
-                child: CircularProgressIndicator(color: context.onPrimaryColor, strokeWidth: 2),
+                child: CircularProgressIndicator(
+                    color: context.onPrimaryColor, strokeWidth: 2),
               )
             : Text(
                 isAlreadyAccepted && isOwner ? 'Go to Chat' : 'Submit Decision',
-                style: TextStyle(color: context.onPrimaryColor, fontWeight: FontWeight.w700, fontSize: 16),
+                style: TextStyle(
+                    color: context.onPrimaryColor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16),
               ),
       ),
     );
@@ -666,7 +723,9 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
     final response = controller.selectedResponse;
     if (response == null) return;
 
-    if (response.status == 'accepted' || response.status == 'meeting_set' || response.status == 'paid') {
+    if (response.status == 'accepted' ||
+        response.status == 'meeting_set' ||
+        response.status == 'paid') {
       final authController = context.read<AuthController>();
       final isOwner = authController.currentUser?.id == response.posterUserId;
 
@@ -683,7 +742,8 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
             ),
           );
         } else {
-          Navigator.pushNamed(context, AppRoutes.tradeDetails, arguments: response.id);
+          Navigator.pushNamed(context, AppRoutes.tradeDetails,
+              arguments: response.id);
         }
       } else {
         Navigator.pushNamed(context, AppRoutes.tradeCompletion);
@@ -698,7 +758,9 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
     }
   }
 
-  Future<void> _updateStatus(BuildContext context, TradeController controller, String status, {String? preference}) async {
+  Future<void> _updateStatus(
+      BuildContext context, TradeController controller, String status,
+      {String? preference}) async {
     final response = controller.selectedResponse;
     if (response == null) return;
 
@@ -732,7 +794,8 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
         Navigator.pop(context);
       }
     } else if (mounted) {
-      ToastService.showErrorToast(context, controller.errorMessage ?? 'Action failed');
+      ToastService.showErrorToast(
+          context, controller.errorMessage ?? 'Action failed');
     }
   }
 
@@ -749,14 +812,17 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), shape: BoxShape.circle),
-              child: const Icon(Icons.check_circle, color: Colors.green, size: 64),
+              decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1), shape: BoxShape.circle),
+              child:
+                  const Icon(Icons.check_circle, color: Colors.green, size: 64),
             ),
             const SizedBox(height: 32),
-            Text(AppLocalizations.of(context)!.tradeAccepted, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(AppLocalizations.of(context)!.tradeAccepted,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            const Text(
-              'The partner will now be notified to pay and start the chat.',
+            Text(
+              AppLocalizations.of(context)!.thePartnerWillNowBe,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16),
             ),
@@ -771,9 +837,12 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.primaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(AppLocalizations.of(context)!.done, style: TextStyle(color: context.onPrimaryColor, fontSize: 16)),
+                child: Text(AppLocalizations.of(context)!.done,
+                    style:
+                        TextStyle(color: context.onPrimaryColor, fontSize: 16)),
               ),
             ),
           ],
@@ -782,7 +851,8 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
     );
   }
 
-  void _showConfirmationDialogWeb(BuildContext context, TradeController controller) {
+  void _showConfirmationDialogWeb(
+      BuildContext context, TradeController controller) {
     final response = controller.selectedResponse;
     showDialog(
       context: context,
@@ -798,7 +868,9 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(AppLocalizations.of(context)!.confirmAcceptance, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text(AppLocalizations.of(context)!.confirmAcceptance,
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: Icon(Icons.close, color: context.textColor),
@@ -808,7 +880,8 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
               const SizedBox(height: 24),
               Text(
                 'Are you sure you want to accept this offer?\nPartner: ${response?.responderName}\nOffer: ${response?.itemName ?? (response?.responseType == 'price' ? 'Cash' : 'Free')}',
-                style: TextStyle(fontSize: 16, height: 1.6, color: context.textColor),
+                style: TextStyle(
+                    fontSize: 16, height: 1.6, color: context.textColor),
               ),
               const SizedBox(height: 40),
               Row(
@@ -817,21 +890,33 @@ class _WebTradeStartScreenState extends State<WebTradeStartScreen> {
                   OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
                       side: BorderSide(color: context.dividerColor),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: context.textColor, fontSize: 15)),
+                    child: Text(AppLocalizations.of(context)!.cancel,
+                        style:
+                            TextStyle(color: context.textColor, fontSize: 15)),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
-                    onPressed: () => _updateStatus(context, controller, 'accepted', preference: _selectedMeetingPreference),
+                    onPressed: () => _updateStatus(
+                        context, controller, 'accepted',
+                        preference: _selectedMeetingPreference),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text(AppLocalizations.of(context)!.confirm, style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                    child: Text(AppLocalizations.of(context)!.confirm,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),

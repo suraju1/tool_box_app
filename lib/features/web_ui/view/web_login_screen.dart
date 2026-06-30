@@ -5,6 +5,7 @@ import 'package:tool_bocs/features/login_and_signup/controller/auth_controller.d
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebLoginScreen extends StatefulWidget {
   const WebLoginScreen({super.key});
@@ -90,7 +91,9 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
           Expanded(
             flex: 1,
             child: Container(
-              color: context.isDarkMode ? const Color(0xFF151515) : const Color(0xFFE8F0FE),
+              color: context.isDarkMode
+                  ? const Color(0xFF151515)
+                  : const Color(0xFFE8F0FE),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -114,7 +117,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                         ),
                         const SizedBox(height: 48),
                         Text(
-                          'Join the Community',
+                          AppLocalizations.of(context)!.joinTheCommunity,
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w800,
@@ -124,7 +127,8 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Access thousands of tools shared by\npeople around you.',
+                          AppLocalizations.of(context)!
+                              .accessThousandsOfToolsShared,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,
@@ -140,7 +144,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
               ),
             ),
           ),
-          
+
           // Right Pane: Login Form
           Expanded(
             flex: 1,
@@ -159,14 +163,25 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                         margin: const EdgeInsets.only(bottom: 32),
                         child: Image.asset(
                           'assets/logo_transperant.png',
-                          color: context.isDarkMode ? Colors.white : Colors.black,
+                          color:
+                              context.isDarkMode ? Colors.white : Colors.black,
                           height: 60,
                           fit: BoxFit.contain,
                         ),
                       ),
+                      Text(
+                        AppLocalizations.of(context)!.login,
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: FontFamily.openSans,
+                          color: context.primaryColor,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       Text(
-                        'Please enter your phone number to sign in or create a new account.',
+                        AppLocalizations.of(context)!
+                            .pleaseEnterYourPhoneNumber1,
                         style: TextStyle(
                           fontSize: 16,
                           fontFamily: FontFamily.openSans,
@@ -174,7 +189,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 48),
-                      
+
                       // Phone Input
                       Container(
                         height: 56,
@@ -193,7 +208,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                           children: [
                             const SizedBox(width: 16),
                             Text(
-                              '+91',
+                              AppLocalizations.of(context)!.text91,
                               style: TextStyle(
                                 fontSize: 16,
                                 color: context.subTextColor,
@@ -215,7 +230,8 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                               child: TextField(
                                 controller: _phoneController,
                                 keyboardType: TextInputType.phone,
-                                style: TextStyle(fontSize: 16, color: context.textColor),
+                                style: TextStyle(
+                                    fontSize: 16, color: context.textColor),
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
                                   LengthLimitingTextInputFormatter(10),
@@ -223,7 +239,8 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                                 onSubmitted: (_) => _handleGetOtp(),
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   hintText: 'Phone Number',
                                   hintStyle: TextStyle(
                                     fontSize: 16,
@@ -255,13 +272,14 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                           ),
                         ),
                       ],
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       // Status Message
                       Consumer<AuthController>(
                         builder: (context, authController, child) {
-                          if (authController.statusMessage != null && authController.statusMessage!.isNotEmpty) {
+                          if (authController.statusMessage != null &&
+                              authController.statusMessage!.isNotEmpty) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 16),
                               child: Text(
@@ -279,7 +297,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                           return const SizedBox.shrink();
                         },
                       ),
-                      
+
                       // Action Button
                       Consumer<AuthController>(
                         builder: (context, authController, child) {
@@ -287,7 +305,9 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                             width: double.infinity,
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: authController.isSendingOtp ? null : _handleGetOtp,
+                              onPressed: authController.isSendingOtp
+                                  ? null
+                                  : _handleGetOtp,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: context.primaryColor,
                                 foregroundColor: Colors.white,
@@ -295,7 +315,8 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 elevation: 0,
-                                disabledBackgroundColor: context.primaryColor.withOpacity(0.6),
+                                disabledBackgroundColor:
+                                    context.primaryColor.withOpacity(0.6),
                               ),
                               child: authController.isSendingOtp
                                   ? const SizedBox(
@@ -303,11 +324,13 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                                       width: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
                                       ),
                                     )
-                                  : const Text(
-                                      'Get OTP',
+                                  : Text(
+                                      AppLocalizations.of(context)!.getOtp,
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,

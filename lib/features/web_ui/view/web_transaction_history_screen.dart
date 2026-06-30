@@ -19,7 +19,8 @@ class WebTransactionHistoryScreen extends StatefulWidget {
       _WebTransactionHistoryScreenState();
 }
 
-class _WebTransactionHistoryScreenState extends State<WebTransactionHistoryScreen> {
+class _WebTransactionHistoryScreenState
+    extends State<WebTransactionHistoryScreen> {
   @override
   void initState() {
     super.initState();
@@ -32,7 +33,8 @@ class _WebTransactionHistoryScreenState extends State<WebTransactionHistoryScree
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      appBar: const WebScreenHeader(title: 'Transaction History'),
+      appBar: WebScreenHeader(
+          title: AppLocalizations.of(context)!.transactionHistory),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
@@ -52,7 +54,8 @@ class _WebTransactionHistoryScreenState extends State<WebTransactionHistoryScree
                         Text(
                           controller.errorMessage!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.red, fontSize: 16),
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 16),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
@@ -68,7 +71,7 @@ class _WebTransactionHistoryScreenState extends State<WebTransactionHistoryScree
               if (controller.walletHistory.isEmpty) {
                 return Center(
                   child: Text(
-                    'No transactions found',
+                    AppLocalizations.of(context)!.noTransactionsFound,
                     style: TextStyle(
                       color: context.textColor.withOpacity(0.5),
                       fontSize: 18,
@@ -80,7 +83,8 @@ class _WebTransactionHistoryScreenState extends State<WebTransactionHistoryScree
               return RefreshIndicator(
                 onRefresh: () => controller.fetchWalletHistory(),
                 child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   itemCount: controller.walletHistory.length,
                   itemBuilder: (context, index) {
                     final transaction = controller.walletHistory[index];
@@ -94,8 +98,6 @@ class _WebTransactionHistoryScreenState extends State<WebTransactionHistoryScree
       ),
     );
   }
-
-
 
   Widget _buildTransactionCard(WalletHistory transaction) {
     final post = transaction.post;

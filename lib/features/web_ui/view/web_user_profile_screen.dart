@@ -12,7 +12,7 @@ import 'package:tool_bocs/routes/app_routes.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
-import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
+import 'package:tool_bocs/features/web_ui/view/web_save_to_collection_dialog.dart';
 
 class WebUserProfileScreen extends StatefulWidget {
   final String? userId;
@@ -87,10 +87,11 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new, color: context.textColor, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new,
+              color: context.textColor, size: 20),
         ),
         title: Text(
-          'Seller Profile',
+          AppLocalizations.of(context)!.sellerProfile,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -104,7 +105,9 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
           child: Divider(height: 1, color: context.dividerColor),
         ),
       ),
-      body: (shimmer.isLoading || _isLocalLoading || (userProfile == null && profileController.errorMessage == null))
+      body: (shimmer.isLoading ||
+              _isLocalLoading ||
+              (userProfile == null && profileController.errorMessage == null))
           ? const Center(child: CircularProgressIndicator())
           : userProfile == null
               ? Center(
@@ -119,7 +122,8 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1200),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 48),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -132,7 +136,8 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                                   _buildProfileHeaderCard(context, userProfile),
                                   const SizedBox(height: 24),
                                   if (userProfile.showTradeHistory != 0) ...[
-                                    _buildTradeHistoryCard(context, userProfile),
+                                    _buildTradeHistoryCard(
+                                        context, userProfile),
                                     const SizedBox(height: 24),
                                   ],
                                   _buildMarksCard(context, userProfile),
@@ -146,7 +151,9 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (userProfile.userDetails.bio != null && userProfile.userDetails.bio!.isNotEmpty) ...[
+                                  if (userProfile.userDetails.bio != null &&
+                                      userProfile
+                                          .userDetails.bio!.isNotEmpty) ...[
                                     _buildBioCard(context, userProfile),
                                     const SizedBox(height: 24),
                                   ],
@@ -163,7 +170,8 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeaderCard(BuildContext context, UserProfileModel profile) {
+  Widget _buildProfileHeaderCard(
+      BuildContext context, UserProfileModel profile) {
     final details = profile.userDetails;
     return Container(
       padding: const EdgeInsets.all(32),
@@ -184,7 +192,8 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: context.primaryColor.withOpacity(0.2), width: 4),
+              border: Border.all(
+                  color: context.primaryColor.withOpacity(0.2), width: 4),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(80),
@@ -214,7 +223,9 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
           const SizedBox(height: 8),
           if (details.giverType != null || details.takerType != null)
             Text(
-              [details.giverType, details.takerType].where((e) => e != null && e!.isNotEmpty).join(' - '),
+              [details.giverType, details.takerType]
+                  .where((e) => e != null && e!.isNotEmpty)
+                  .join(' - '),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey.shade600,
@@ -232,13 +243,20 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _handleSaveUser(profile),
-                  icon: Icon(_isUserSaved ? Icons.bookmark : Icons.bookmark_border),
+                  icon: Icon(
+                      _isUserSaved ? Icons.bookmark : Icons.bookmark_border),
                   label: Text(_isUserSaved ? 'Saved' : 'Save'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: BorderSide(color: _isUserSaved ? context.primaryColor : context.dividerColor, width: 2),
-                    foregroundColor: _isUserSaved ? context.primaryColor : context.textColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    side: BorderSide(
+                        color: _isUserSaved
+                            ? context.primaryColor
+                            : context.dividerColor,
+                        width: 2),
+                    foregroundColor:
+                        _isUserSaved ? context.primaryColor : context.textColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
               ),
@@ -252,7 +270,8 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     side: const BorderSide(color: Colors.redAccent, width: 1.5),
                     foregroundColor: Colors.redAccent,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
               ),
@@ -264,7 +283,7 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
   }
 
   void _handleSaveUser(UserProfileModel profile) async {
-    SaveToCollectionBottomSheet.show(context, profile.userDetails.id);
+    WebSaveToCollectionDialog.show(context, profile.userDetails.id);
   }
 
   void _handleBlockUser(UserProfileModel profile) async {
@@ -272,15 +291,23 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.blockUser),
-        content: Text('Are you sure you want to block ${profile.userDetails.fullName}?'),
+        content: Text(
+            'Are you sure you want to block ${profile.userDetails.fullName}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(AppLocalizations.of(context)!.cancel)),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(AppLocalizations.of(context)!.block, style: TextStyle(color: Colors.red))),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(AppLocalizations.of(context)!.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(AppLocalizations.of(context)!.block,
+                  style: TextStyle(color: Colors.red))),
         ],
       ),
     );
     if (confirm == true) {
-      final response = await context.read<ProfileController>().blockUser(profile.userDetails.id);
+      final response = await context
+          .read<ProfileController>()
+          .blockUser(profile.userDetails.id);
       if (!mounted) return;
       if (response.success) {
         ToastService.showSuccessToast(context, 'User blocked successfully');
@@ -291,7 +318,8 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
     }
   }
 
-  Widget _buildTradeHistoryCard(BuildContext context, UserProfileModel profile) {
+  Widget _buildTradeHistoryCard(
+      BuildContext context, UserProfileModel profile) {
     final stats = profile.tradeStats;
     return Container(
       padding: const EdgeInsets.all(24),
@@ -300,23 +328,32 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.dividerColor.withOpacity(0.5)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 15,
+              offset: const Offset(0, 5)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Trade History',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: context.textColor),
+            AppLocalizations.of(context)!.tradeHistory,
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: context.textColor),
           ),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatItem('Total', stats.totalTrades.toString(), Colors.blue, Icons.handshake),
-              _buildStatItem('Sent', stats.sentOffers.toString(), Colors.red, Icons.outbox_outlined),
-              _buildStatItem('Received', stats.receivedOffers.toString(), Colors.orange, Icons.move_to_inbox_outlined),
+              _buildStatItem('Total', stats.totalTrades.toString(), Colors.blue,
+                  Icons.handshake),
+              _buildStatItem('Sent', stats.sentOffers.toString(), Colors.red,
+                  Icons.outbox_outlined),
+              _buildStatItem('Received', stats.receivedOffers.toString(),
+                  Colors.orange, Icons.move_to_inbox_outlined),
             ],
           ),
         ],
@@ -324,14 +361,23 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color color, IconData icon) {
+  Widget _buildStatItem(
+      String label, String value, Color color, IconData icon) {
     return Column(
       children: [
         Icon(icon, color: color, size: 32),
         const SizedBox(height: 8),
-        Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: context.textColor)),
+        Text(value,
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                color: context.textColor)),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
+        Text(label,
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade600)),
       ],
     );
   }
@@ -344,22 +390,33 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.dividerColor.withOpacity(0.5)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 15,
+              offset: const Offset(0, 5)),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(AppLocalizations.of(context)!.communityMarks, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textColor)),
+          Text(AppLocalizations.of(context)!.communityMarks,
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: context.textColor)),
           Row(
             children: [
               Icon(Icons.thumb_up_alt_outlined, color: Colors.green, size: 20),
               const SizedBox(width: 8),
-              Text(profile.userDetails.totalLikes.toString(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text(profile.userDetails.totalLikes.toString(),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w800)),
               const SizedBox(width: 24),
               Icon(Icons.thumb_down_alt_outlined, color: Colors.red, size: 20),
               const SizedBox(width: 8),
-              Text(profile.userDetails.totalDislikes.toString(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text(profile.userDetails.totalDislikes.toString(),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w800)),
             ],
           ),
         ],
@@ -376,23 +433,30 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.dividerColor.withOpacity(0.5)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 15,
+              offset: const Offset(0, 5)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context)!.bio, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textColor)),
+          Text(AppLocalizations.of(context)!.bio,
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: context.textColor)),
           const SizedBox(height: 16),
           Text(
             profile.userDetails.bio!,
-            style: TextStyle(fontSize: 16, color: Colors.grey.shade700, height: 1.6),
+            style: TextStyle(
+                fontSize: 16, color: Colors.grey.shade700, height: 1.6),
           ),
         ],
       ),
     );
   }
-
 
   Widget _buildReviewsCard(BuildContext context, UserProfileModel profile) {
     final reviews = profile.reviews;
@@ -404,7 +468,10 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.dividerColor.withOpacity(0.5)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 15,
+              offset: const Offset(0, 5)),
         ],
       ),
       child: Column(
@@ -415,7 +482,11 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
             children: [
               Row(
                 children: [
-                  Text(AppLocalizations.of(context)!.reviews, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textColor)),
+                  Text(AppLocalizations.of(context)!.reviews,
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: context.textColor)),
                   if (profile.isRated != true) ...[
                     const SizedBox(width: 16),
                     ElevatedButton.icon(
@@ -433,9 +504,12 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: context.primaryColor,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        textStyle: const TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w700),
                         elevation: 0,
                       ),
                     ),
@@ -446,7 +520,8 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
                 children: [
                   Text(
                     '${profile.userDetails.totalReviews} Reviews',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
@@ -457,7 +532,9 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32),
               child: Center(
-                child: Text(AppLocalizations.of(context)!.noReviewsYet, style: TextStyle(fontSize: 16, color: Colors.grey.shade500)),
+                child: Text(AppLocalizations.of(context)!.noReviewsYet,
+                    style:
+                        TextStyle(fontSize: 16, color: Colors.grey.shade500)),
               ),
             )
           else ...[
@@ -466,21 +543,27 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: reviews.length > 5 ? 5 : reviews.length,
               separatorBuilder: (_, __) => const Divider(height: 32),
-              itemBuilder: (context, index) => _buildWebReviewItem(context, reviews[index]),
+              itemBuilder: (context, index) =>
+                  _buildWebReviewItem(context, reviews[index]),
             ),
             if (reviews.length > 5) ...[
               const SizedBox(height: 24),
               Center(
                 child: TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, AppRoutes.allReviews, arguments: profile);
+                    Navigator.pushNamed(context, AppRoutes.allReviews,
+                        arguments: profile);
                   },
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
                   ),
                   child: Text(
-                    'View All Reviews',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.primaryColor),
+                    AppLocalizations.of(context)!.viewAllReviews,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: context.primaryColor),
                   ),
                 ),
               ),
@@ -526,26 +609,40 @@ class _WebUserProfileScreenState extends State<WebUserProfileScreen> {
               children: [
                 Text(
                   review.reviewerName ?? 'User',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textColor),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: context.textColor),
                 ),
                 const SizedBox(height: 6),
                 if (review.feedbackLabel != null) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: context.primaryColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       review.feedbackLabel!,
-                      style: TextStyle(fontSize: 12, color: context.primaryColor, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: context.primaryColor,
+                          fontWeight: FontWeight.w700),
                     ),
                   ),
                   const SizedBox(height: 12),
                 ],
                 Text(
-                  review.comment?.isNotEmpty == true ? review.comment! : 'No message provided',
-                  style: TextStyle(fontSize: 15, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700, height: 1.5),
+                  review.comment?.isNotEmpty == true
+                      ? review.comment!
+                      : 'No message provided',
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade700,
+                      height: 1.5),
                 ),
               ],
             ),

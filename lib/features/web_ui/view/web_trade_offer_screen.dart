@@ -12,7 +12,8 @@ import 'package:tool_bocs/features/trades/model/trade_response_request_model.dar
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/features/web_ui/widgets/web_price_range_selector.dart';
-import 'package:tool_bocs/features/trade_steps_flow/view/trade_offer_screen2.dart' show ReturnType;
+import 'package:tool_bocs/features/trade_steps_flow/view/trade_offer_screen2.dart'
+    show ReturnType;
 import 'dart:io';
 
 class WebTradeOfferScreen extends StatefulWidget {
@@ -171,11 +172,12 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                   color: Colors.green.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check_circle, color: Colors.green, size: 60),
+                child: const Icon(Icons.check_circle,
+                    color: Colors.green, size: 60),
               ),
               const SizedBox(height: 20),
               Text(
-                'Offer Sent!',
+                AppLocalizations.of(context)!.offerSentTitle,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
@@ -184,7 +186,7 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Your offer has been sent successfully. Please wait for the owner to accept it.',
+                AppLocalizations.of(context)!.offerSentMsg,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: context.subTextColor,
@@ -201,12 +203,16 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
-                    'Done',
-                    style: TextStyle(color: context.onPrimaryColor, fontWeight: FontWeight.bold, fontSize: 16),
+                    AppLocalizations.of(context)!.done,
+                    style: TextStyle(
+                        color: context.onPrimaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
                   ),
                 ),
               ),
@@ -221,7 +227,9 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
     if (_selectedReturnType == ReturnType.existing) {
       return isGivePost ? 'Make Offer (Take It)' : 'Make Offer (Give It)';
     } else if (_selectedReturnType == ReturnType.customItem) {
-      return isGivePost ? 'Make Custom Offer (Take)' : 'Make Custom Offer (Give)';
+      return isGivePost
+          ? 'Make Custom Offer (Take)'
+          : 'Make Custom Offer (Give)';
     } else if (_selectedReturnType == ReturnType.money) {
       return isGivePost ? 'Offer Money' : 'Ask for Money';
     } else {
@@ -264,7 +272,8 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
         builder: (context, controller, child) {
           final post = controller.selectedPost;
           if (post == null) {
-            return Center(child: Text(AppLocalizations.of(context)!.postNotFound));
+            return Center(
+                child: Text(AppLocalizations.of(context)!.postNotFound));
           }
 
           final isGivePost = post.postType.toLowerCase() == 'give';
@@ -274,7 +283,8 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1200),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 48.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32.0, vertical: 48.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -285,8 +295,11 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Offer Summary',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.textColor),
+                              AppLocalizations.of(context)!.offerSummary,
+                              style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: context.textColor),
                             ),
                             const SizedBox(height: 24),
                             _buildRecipientCard(post, isGivePost),
@@ -302,55 +315,78 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                             Container(
                               padding: const EdgeInsets.all(32),
                               decoration: BoxDecoration(
-                            color: context.surfaceColor,
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: context.isDarkMode
-                                ? []
-                                : [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 4))],
-                            border: Border.all(color: context.dividerColor),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Select Your Offer',
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.textColor),
+                                color: context.surfaceColor,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: context.isDarkMode
+                                    ? []
+                                    : [
+                                        BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.05),
+                                            blurRadius: 20,
+                                            offset: const Offset(0, 4))
+                                      ],
+                                border: Border.all(color: context.dividerColor),
                               ),
-                              const SizedBox(height: 24),
-                              _buildReturnOption(
-                                type: ReturnType.existing,
-                                title: isGivePost ? "Give what ${post.userName}'s asking for" : "Take what ${post.userName}'s giving",
-                                child: _buildItemPreviewCard(post),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context)!
+                                        .selectYourOffer,
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: context.textColor),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  _buildReturnOption(
+                                    type: ReturnType.existing,
+                                    title: isGivePost
+                                        ? "Give what ${post.userName}'s asking for"
+                                        : "Take what ${post.userName}'s giving",
+                                    child: _buildItemPreviewCard(post),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _buildReturnOption(
+                                    type: ReturnType.customItem,
+                                    title: isGivePost
+                                        ? "Item You Offer in Return"
+                                        : "Item You Want in Return",
+                                    subtitle: isGivePost
+                                        ? "Fill details of the item you're offering"
+                                        : "Fill item details you want in return",
+                                    child: _buildCustomItemForm(),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _buildReturnOption(
+                                    type: ReturnType.money,
+                                    title: isGivePost
+                                        ? "Money ( Ask for Money )"
+                                        : "Ask for Money",
+                                    subtitle: isGivePost
+                                        ? "Offer a price for the item"
+                                        : "Set a custom price for the item",
+                                    child: _buildMoneyForm(isGivePost),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _buildReturnOption(
+                                    type: ReturnType.free,
+                                    title: isGivePost
+                                        ? "Ask for Free"
+                                        : "Give For Free",
+                                    subtitle: AppLocalizations.of(context)!
+                                        .spreadSomeJoy,
+                                    child: const SizedBox.shrink(),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 16),
-                              _buildReturnOption(
-                                type: ReturnType.customItem,
-                                title: isGivePost ? "Item You Offer in Return" : "Item You Want in Return",
-                                subtitle: isGivePost ? "Fill details of the item you're offering" : "Fill item details you want in return",
-                                child: _buildCustomItemForm(),
-                              ),
-                              const SizedBox(height: 16),
-                              _buildReturnOption(
-                                type: ReturnType.money,
-                                title: isGivePost ? "Money ( Ask for Money )" : "Ask for Money",
-                                subtitle: isGivePost ? "Offer a price for the item" : "Set a custom price for the item",
-                                child: _buildMoneyForm(isGivePost),
-                              ),
-                              const SizedBox(height: 16),
-                              _buildReturnOption(
-                                type: ReturnType.free,
-                                title: isGivePost ? "Ask for Free" : "Give For Free",
-                                subtitle: "Spread some joy in the neighborhood",
-                                child: const SizedBox.shrink(),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 32),
+                            _buildBottomAction(isGivePost, controller),
+                          ],
                         ),
-                        const SizedBox(height: 32),
-                        _buildBottomAction(isGivePost, controller),
-                      ],
-                    ),
-                  ),
+                      ),
                     ],
                   ),
                 ),
@@ -373,7 +409,8 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: context.primaryColor),
           ),
-          child: Icon(Icons.payments_outlined, color: context.primaryColor, size: 60),
+          child: Icon(Icons.payments_outlined,
+              color: context.primaryColor, size: 60),
         );
       }
       return Container(
@@ -384,7 +421,8 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
           border: Border.all(color: context.dividerColor),
           image: DecorationImage(
             image: url != null
-                ? NetworkImage(AppCachedImage.getFormattedUrl(url)) as ImageProvider
+                ? NetworkImage(AppCachedImage.getFormattedUrl(url))
+                    as ImageProvider
                 : const AssetImage('assets/iphone.png'),
             fit: BoxFit.cover,
           ),
@@ -400,7 +438,12 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
         border: Border.all(color: context.dividerColor),
         boxShadow: context.isDarkMode
             ? []
-            : [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 4))],
+            : [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4))
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,8 +454,13 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                 radius: 30,
                 backgroundColor: context.primaryColor.withOpacity(0.1),
                 child: Text(
-                  post?.userName?.isNotEmpty == true ? post.userName![0].toUpperCase() : '?',
-                  style: TextStyle(color: context.primaryColor, fontSize: 24, fontWeight: FontWeight.bold),
+                  post?.userName?.isNotEmpty == true
+                      ? post.userName![0].toUpperCase()
+                      : '?',
+                  style: TextStyle(
+                      color: context.primaryColor,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(width: 16),
@@ -421,12 +469,18 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                 children: [
                   Text(
                     isGivePost ? 'GIVER' : 'TAKER',
-                    style: TextStyle(color: context.primaryColor, fontSize: 14, fontWeight: FontWeight.w800),
+                    style: TextStyle(
+                        color: context.primaryColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     post?.userName ?? '-',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textColor),
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: context.textColor),
                   ),
                 ],
               ),
@@ -435,17 +489,25 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
           const SizedBox(height: 24),
           Text(
             "${post?.userName ?? '-'}'s ${isGivePost ? 'Giving' : 'Taking'}",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.subTextColor),
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: context.subTextColor),
           ),
           const SizedBox(height: 8),
           Text(
             post?.itemName ?? '-',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.textColor),
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: context.textColor),
           ),
           const SizedBox(height: 24),
           Center(
             child: buildImageBox(
-              (post?.itemImages != null && post!.itemImages.isNotEmpty) ? post.itemImages.first : null,
+              (post?.itemImages != null && post!.itemImages.isNotEmpty)
+                  ? post.itemImages.first
+                  : null,
               false,
             ),
           ),
@@ -456,7 +518,8 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
           const SizedBox(height: 12),
           _buildDetailRow('Category', post?.itemCategory ?? '-'),
           const SizedBox(height: 12),
-          _buildDetailRow('Distance', '${post?.distanceKm?.toStringAsFixed(1) ?? '0.4'} km away'),
+          _buildDetailRow('Distance',
+              '${post?.distanceKm?.toStringAsFixed(1) ?? '0.4'} km away'),
         ],
       ),
     );
@@ -466,8 +529,16 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(color: context.subTextColor, fontSize: 14, fontWeight: FontWeight.w500)),
-        Text(value, style: TextStyle(color: context.textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+        Text(label,
+            style: TextStyle(
+                color: context.subTextColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w500)),
+        Text(value,
+            style: TextStyle(
+                color: context.textColor,
+                fontSize: 14,
+                fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -484,7 +555,9 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isSelected ? (context.isDarkMode ? Colors.white10 : const Color(0xFFF8FAFF)) : context.surfaceColor,
+          color: isSelected
+              ? (context.isDarkMode ? Colors.white10 : const Color(0xFFF8FAFF))
+              : context.surfaceColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? context.primaryColor : context.dividerColor,
@@ -502,14 +575,20 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                   margin: const EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: isSelected ? context.primaryColor : context.dividerColor, width: 2),
+                    border: Border.all(
+                        color: isSelected
+                            ? context.primaryColor
+                            : context.dividerColor,
+                        width: 2),
                   ),
                   child: isSelected
                       ? Center(
                           child: Container(
                             width: 12,
                             height: 12,
-                            decoration: BoxDecoration(shape: BoxShape.circle, color: context.primaryColor),
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: context.primaryColor),
                           ),
                         )
                       : null,
@@ -520,11 +599,18 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                     children: [
                       Text(
                         title,
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: context.textColor),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: context.textColor),
                       ),
                       if (subtitle != null) ...[
                         const SizedBox(height: 4),
-                        Text(subtitle, style: TextStyle(fontSize: 14, color: context.subTextColor, fontWeight: FontWeight.w500)),
+                        Text(subtitle,
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: context.subTextColor,
+                                fontWeight: FontWeight.w500)),
                       ],
                     ],
                   ),
@@ -543,14 +629,21 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
 
   Widget _buildItemPreviewCard(dynamic post) {
     final bool isMoney = post?.returnType?.toLowerCase() == 'price';
-    final String? returnImageUrl = (post?.returnItemImages != null && post!.returnItemImages.isNotEmpty) ? post.returnItemImages.first : null;
+    final String? returnImageUrl =
+        (post?.returnItemImages != null && post!.returnItemImages.isNotEmpty)
+            ? post.returnItemImages.first
+            : null;
     final String returnName = isMoney ? 'Money' : (post?.returnItemName ?? '-');
-    final String returnCategory = isMoney ? '₹${post?.priceMin?.toStringAsFixed(0) ?? '0'} - ₹${post?.priceMax?.toStringAsFixed(0) ?? '0'}' : (post?.returnItemCategory ?? '-');
+    final String returnCategory = isMoney
+        ? '₹${post?.priceMin?.toStringAsFixed(0) ?? '0'} - ₹${post?.priceMax?.toStringAsFixed(0) ?? '0'}'
+        : (post?.returnItemCategory ?? '-');
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade50,
+        color: context.isDarkMode
+            ? Colors.white.withOpacity(0.05)
+            : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: context.dividerColor),
       ),
@@ -565,7 +658,8 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                 color: context.primaryColor.withOpacity(0.1),
                 border: Border.all(color: context.primaryColor),
               ),
-              child: Icon(Icons.payments_outlined, color: context.primaryColor, size: 32),
+              child: Icon(Icons.payments_outlined,
+                  color: context.primaryColor, size: 32),
             )
           else
             Container(
@@ -576,19 +670,31 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                 color: context.surfaceColor,
                 border: Border.all(color: context.dividerColor),
                 image: returnImageUrl != null
-                    ? DecorationImage(image: NetworkImage(AppCachedImage.getFormattedUrl(returnImageUrl)), fit: BoxFit.cover)
+                    ? DecorationImage(
+                        image: NetworkImage(
+                            AppCachedImage.getFormattedUrl(returnImageUrl)),
+                        fit: BoxFit.cover)
                     : null,
               ),
-              child: returnImageUrl == null ? Icon(Icons.image_outlined, color: context.subTextColor, size: 24) : null,
+              child: returnImageUrl == null
+                  ? Icon(Icons.image_outlined,
+                      color: context.subTextColor, size: 24)
+                  : null,
             ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(returnName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.textColor)),
+                Text(returnName,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: context.textColor)),
                 const SizedBox(height: 4),
-                Text(returnCategory, style: TextStyle(fontSize: 14, color: context.subTextColor)),
+                Text(returnCategory,
+                    style:
+                        TextStyle(fontSize: 14, color: context.subTextColor)),
               ],
             ),
           ),
@@ -599,7 +705,7 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'See Details',
+                  AppLocalizations.of(context)!.seeDetails,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -607,7 +713,8 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.arrow_forward_ios, color: context.subTextColor, size: 12),
+                Icon(Icons.arrow_forward_ios,
+                    color: context.subTextColor, size: 12),
               ],
             ),
           ),
@@ -645,7 +752,7 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Requested Return Details',
+              AppLocalizations.of(context)!.requestedReturnDetails,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -654,11 +761,14 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
             ),
             const SizedBox(height: 24),
             if (post.returnType.toLowerCase() == 'price') ...[
-              _buildInfoRow('Price Range', '₹${post.priceMin?.toStringAsFixed(2) ?? '0'} - ₹${post.priceMax?.toStringAsFixed(2) ?? '0'}'),
+              _buildInfoRow('Price Range',
+                  '₹${post.priceMin?.toStringAsFixed(2) ?? '0'} - ₹${post.priceMax?.toStringAsFixed(2) ?? '0'}'),
               const SizedBox(height: 16),
-              _buildInfoRow('Negotiable', post.isNegotiable == true ? 'Yes' : 'No'),
+              _buildInfoRow(
+                  'Negotiable', post.isNegotiable == true ? 'Yes' : 'No'),
             ] else ...[
-              if (post.returnItemImages != null && post.returnItemImages.isNotEmpty)
+              if (post.returnItemImages != null &&
+                  post.returnItemImages.isNotEmpty)
                 Center(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
@@ -678,10 +788,11 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
               _buildInfoRow('Condition', post.returnItemCondition ?? 'NA'),
               const SizedBox(height: 16),
               _buildInfoRow('Trade Type', post.tradeType ?? 'NA'),
-              if (post.returnItemDescription != null && post.returnItemDescription.isNotEmpty) ...[
+              if (post.returnItemDescription != null &&
+                  post.returnItemDescription.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 Text(
-                  'Description',
+                  AppLocalizations.of(context)!.description,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -705,10 +816,15 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.primaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: Text(AppLocalizations.of(context)!.close, style: TextStyle(color: context.onPrimaryColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                child: Text(AppLocalizations.of(context)!.close,
+                    style: TextStyle(
+                        color: context.onPrimaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16)),
               ),
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom),
@@ -756,15 +872,24 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTextField('Item Name', 'Enter item name', controller: _itemNameController),
+        _buildTextField('Item Name', 'Enter item name',
+            controller: _itemNameController),
         const SizedBox(height: 20),
         _buildAddPhotosSection(),
         const SizedBox(height: 20),
-        Text(AppLocalizations.of(context)!.category, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.category,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: context.textColor)),
         const SizedBox(height: 8),
         _buildDropdown('Select Category'),
         const SizedBox(height: 20),
-        Text(AppLocalizations.of(context)!.condition, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.condition,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: context.textColor)),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -776,24 +901,42 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
           ],
         ),
         const SizedBox(height: 20),
-        _buildTextField('Description', 'Describe your product here...', maxLines: 4, controller: _descriptionController),
+        _buildTextField('Description', 'Describe your product here...',
+            maxLines: 4, controller: _descriptionController),
         const SizedBox(height: 20),
         Row(
           children: [
-            _buildCheckbox('Homemade', _isHomemade, (val) => setState(() { _isHomemade = val ?? false; if (_isHomemade) _isStoreBought = false; })),
+            _buildCheckbox(
+                'Homemade',
+                _isHomemade,
+                (val) => setState(() {
+                      _isHomemade = val ?? false;
+                      if (_isHomemade) _isStoreBought = false;
+                    })),
             const SizedBox(width: 32),
-            _buildCheckbox('Store bought', _isStoreBought, (val) => setState(() { _isStoreBought = val ?? false; if (_isStoreBought) _isHomemade = false; })),
+            _buildCheckbox(
+                'Store bought',
+                _isStoreBought,
+                (val) => setState(() {
+                      _isStoreBought = val ?? false;
+                      if (_isStoreBought) _isHomemade = false;
+                    })),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildTextField(String label, String hint, {int maxLines = 1, TextEditingController? controller}) {
+  Widget _buildTextField(String label, String hint,
+      {int maxLines = 1, TextEditingController? controller}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
+        Text(label,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: context.textColor)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -802,11 +945,19 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
             filled: true,
             fillColor: context.surfaceColor,
             hintText: hint,
-            hintStyle: TextStyle(color: context.subTextColor.withOpacity(0.5), fontSize: 14),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: context.dividerColor)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: context.dividerColor)),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: context.primaryColor)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            hintStyle: TextStyle(
+                color: context.subTextColor.withOpacity(0.5), fontSize: 14),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: context.dividerColor)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: context.dividerColor)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: context.primaryColor)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
       ],
@@ -817,22 +968,37 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
     return Consumer<TradeController>(
       builder: (context, tradeController, child) {
         if (tradeController.isLoading) {
-          return Center(child: CircularProgressIndicator(color: context.primaryColor));
+          return Center(
+              child: CircularProgressIndicator(color: context.primaryColor));
         }
         return DropdownButtonFormField<CategoryModel>(
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             filled: true,
             fillColor: context.surfaceColor,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: context.dividerColor)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: context.dividerColor)),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: context.primaryColor)),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: context.dividerColor)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: context.dividerColor)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: context.primaryColor)),
           ),
-          hint: Text(hint, style: TextStyle(color: context.subTextColor, fontSize: 14)),
+          hint: Text(hint,
+              style: TextStyle(color: context.subTextColor, fontSize: 14)),
           isExpanded: true,
           value: _selectedCategory,
-          items: tradeController.categories.map((category) => DropdownMenuItem(value: category, child: Text(category.name))).toList(),
-          onChanged: (val) => setState(() { _selectedCategory = val; _selectedCategoryId = val?.id; }),
+          items: tradeController.categories
+              .map((category) =>
+                  DropdownMenuItem(value: category, child: Text(category.name)))
+              .toList(),
+          onChanged: (val) => setState(() {
+            _selectedCategory = val;
+            _selectedCategoryId = val?.id;
+          }),
         );
       },
     );
@@ -842,7 +1008,11 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.addPhotos, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.textColor)),
+        Text(AppLocalizations.of(context)!.addPhotos,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: context.textColor)),
         const SizedBox(height: 12),
         GestureDetector(
           onTap: _pickImage,
@@ -850,16 +1020,20 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
             width: double.infinity,
             height: 150,
             decoration: BoxDecoration(
-              color: context.isDarkMode ? Colors.white10 : const Color(0xFFF8FAFF),
+              color:
+                  context.isDarkMode ? Colors.white10 : const Color(0xFFF8FAFF),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: context.dividerColor),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.camera_alt_outlined, color: context.primaryColor, size: 40),
+                Icon(Icons.camera_alt_outlined,
+                    color: context.primaryColor, size: 40),
                 const SizedBox(height: 12),
-                Text(AppLocalizations.of(context)!.addUpTo5Photos, style: TextStyle(color: context.subTextColor, fontSize: 14)),
+                Text(AppLocalizations.of(context)!.addUpTo5Photos,
+                    style:
+                        TextStyle(color: context.subTextColor, fontSize: 14)),
               ],
             ),
           ),
@@ -882,7 +1056,10 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(
-                          image: kIsWeb ? NetworkImage(_itemImages[index].path) as ImageProvider : FileImage(File(_itemImages[index].path)),
+                          image: kIsWeb
+                              ? NetworkImage(_itemImages[index].path)
+                                  as ImageProvider
+                              : FileImage(File(_itemImages[index].path)),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -892,7 +1069,11 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
                       right: -8,
                       child: GestureDetector(
                         onTap: () => _removeImage(index),
-                        child: CircleAvatar(radius: 12, backgroundColor: Colors.red, child: const Icon(Icons.close, size: 14, color: Colors.white)),
+                        child: CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.red,
+                            child: const Icon(Icons.close,
+                                size: 14, color: Colors.white)),
                       ),
                     ),
                   ],
@@ -914,19 +1095,32 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
         decoration: BoxDecoration(
           color: isSelected ? context.primaryColor : context.surfaceColor,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: isSelected ? context.primaryColor : context.dividerColor),
+          border: Border.all(
+              color: isSelected ? context.primaryColor : context.dividerColor),
         ),
-        child: Text(label, style: TextStyle(color: isSelected ? context.onPrimaryColor : context.subTextColor, fontWeight: FontWeight.bold)),
+        child: Text(label,
+            style: TextStyle(
+                color:
+                    isSelected ? context.onPrimaryColor : context.subTextColor,
+                fontWeight: FontWeight.bold)),
       ),
     );
   }
 
-  Widget _buildCheckbox(String label, bool value, ValueChanged<bool?> onChanged) {
+  Widget _buildCheckbox(
+      String label, bool value, ValueChanged<bool?> onChanged) {
     return Row(
       children: [
-        Checkbox(value: value, activeColor: context.primaryColor, onChanged: onChanged),
+        Checkbox(
+            value: value,
+            activeColor: context.primaryColor,
+            onChanged: onChanged),
         const SizedBox(width: 8),
-        Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.textColor)),
+        Text(label,
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: context.textColor)),
       ],
     );
   }
@@ -943,9 +1137,16 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
         const SizedBox(height: 16),
         Row(
           children: [
-            Switch(value: _isNegotiable, activeColor: context.primaryColor, onChanged: (val) => setState(() => _isNegotiable = val)),
+            Switch(
+                value: _isNegotiable,
+                activeColor: context.primaryColor,
+                onChanged: (val) => setState(() => _isNegotiable = val)),
             const SizedBox(width: 8),
-            Text(AppLocalizations.of(context)!.negotiable, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.subTextColor)),
+            Text(AppLocalizations.of(context)!.negotiable,
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: context.subTextColor)),
           ],
         ),
       ],
@@ -969,9 +1170,11 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
             const Icon(Icons.check_circle, color: Colors.green),
             const SizedBox(width: 12),
             Text(
-              'You have already made an offer for this item.',
+              AppLocalizations.of(context)!.youHaveAlreadyMadeAn,
               style: TextStyle(
-                color: context.isDarkMode ? Colors.green.shade400 : Colors.green.shade800,
+                color: context.isDarkMode
+                    ? Colors.green.shade400
+                    : Colors.green.shade800,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -988,12 +1191,21 @@ class _WebTradeOfferScreenState extends State<WebTradeOfferScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: context.primaryColor,
           padding: const EdgeInsets.symmetric(vertical: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 0,
         ),
         child: controller.isLoading
-            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-            : Text(_getButtonName(isGivePost), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 3))
+            : Text(_getButtonName(isGivePost),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18)),
       ),
     );
   }

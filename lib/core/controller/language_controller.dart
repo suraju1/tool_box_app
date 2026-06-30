@@ -14,14 +14,22 @@ class LanguageController extends ChangeNotifier {
   Future<void> _loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
     final languageCode = prefs.getString(_languageKey) ?? 'en';
-    _locale = Locale(languageCode);
-    notifyListeners();
+    if (_locale.languageCode != languageCode) {
+      _locale = Locale(languageCode);
+      // On Web, SharedPreferences can resolve so fast that this notifyListeners
+      // fires during the initial build phase, causing a crash. 
+      // Delaying it to the next frame avoids the 'markNeedsBuild during build' error.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
+    }
   }
 
   Future<void> setLanguage(String languageCode) async {
+    if (_locale.languageCode == languageCode) return;
     _locale = Locale(languageCode);
+    notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_languageKey, languageCode);
-    notifyListeners();
   }
 }

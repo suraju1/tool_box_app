@@ -8,6 +8,7 @@ import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/bottom_navigation_bar/controller/bottom_navbar_controller.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebSignUpScreen extends StatefulWidget {
   const WebSignUpScreen({super.key});
@@ -131,7 +132,7 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
 
     final authController = context.read<AuthController>();
     final currentUser = authController.currentUser;
-    
+
     if (currentUser == null) {
       ToastService.showErrorToast(
           context, 'User session invalid. Please login again.');
@@ -191,7 +192,9 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
           Expanded(
             flex: 1,
             child: Container(
-              color: context.isDarkMode ? const Color(0xFF151515) : const Color(0xFFE8F0FE),
+              color: context.isDarkMode
+                  ? const Color(0xFF151515)
+                  : const Color(0xFFE8F0FE),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -214,7 +217,7 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                         ),
                         const SizedBox(height: 48),
                         Text(
-                          'Complete Profile',
+                          AppLocalizations.of(context)!.completeProfile,
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w800,
@@ -224,7 +227,7 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Set up your account details to start\nsharing and finding tools.',
+                          AppLocalizations.of(context)!.setUpYourAccountDetails,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,
@@ -240,7 +243,7 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
               ),
             ),
           ),
-          
+
           // Right Pane: Form
           Expanded(
             flex: 1,
@@ -249,7 +252,8 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
               child: Center(
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 450),
-                  padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 24.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 48.0, vertical: 24.0),
                   child: SingleChildScrollView(
                     child: Form(
                       key: _formKey,
@@ -262,16 +266,19 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                             height: 80,
                             alignment: Alignment.centerLeft,
                             margin: const EdgeInsets.only(bottom: 24),
-                            decoration: const BoxDecoration(shape: BoxShape.circle),
+                            decoration:
+                                const BoxDecoration(shape: BoxShape.circle),
                             child: ClipOval(
                               child: Image.asset(
                                 'assets/logo_transperant.png',
-                                color: context.isDarkMode ? Colors.white : Colors.black,
+                                color: context.isDarkMode
+                                    ? Colors.white
+                                    : Colors.black,
                               ),
                             ),
                           ),
                           Text(
-                            'Just a few details',
+                            AppLocalizations.of(context)!.justAFewDetails,
                             style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.w800,
@@ -281,7 +288,8 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Please complete your profile to continue.',
+                            AppLocalizations.of(context)!
+                                .pleaseCompleteYourProfileTo,
                             style: TextStyle(
                               fontSize: 16,
                               fontFamily: FontFamily.openSans,
@@ -289,9 +297,8 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                             ),
                           ),
                           const SizedBox(height: 32),
-                          
                           _buildTextField(
-                            label: 'Full Name',
+                            label: AppLocalizations.of(context)!.fullName,
                             hint: 'Enter Your Name',
                             icon: Icons.person_outline,
                             controller: _nameController,
@@ -310,7 +317,7 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                           ),
                           const SizedBox(height: 16),
                           _buildTextField(
-                            label: 'Email Address',
+                            label: AppLocalizations.of(context)!.emailAddress,
                             hint: 'you@example.com',
                             icon: Icons.email_outlined,
                             controller: _emailController,
@@ -319,7 +326,7 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                           ),
                           const SizedBox(height: 16),
                           _buildTextField(
-                            label: 'Date of Birth',
+                            label: AppLocalizations.of(context)!.dateOfBirth,
                             hint: 'Select your date of birth',
                             icon: Icons.calendar_today_outlined,
                             controller: _dobController,
@@ -328,24 +335,25 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                             onTap: () async {
                               DateTime? pickedDate = await showDatePicker(
                                 context: context,
-                                initialDate: DateTime.now().subtract(const Duration(days: 6570)),
+                                initialDate: DateTime.now()
+                                    .subtract(const Duration(days: 6570)),
                                 firstDate: DateTime(1900),
                                 lastDate: DateTime.now(),
                               );
                               if (pickedDate != null) {
                                 setState(() {
                                   _selectedDate = pickedDate;
-                                  _dobController.text = "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                                  _dobController.text =
+                                      "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                                 });
                               }
                             },
                           ),
                           const SizedBox(height: 16),
-                          
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              'Gender',
+                              AppLocalizations.of(context)!.gender,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -362,7 +370,6 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          
                           Consumer<LocationController>(
                             builder: (context, locationController, child) {
                               return _buildTextField(
@@ -380,7 +387,9 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                                           padding: const EdgeInsets.all(12),
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(context.primaryColor),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    context.primaryColor),
                                           ),
                                         ),
                                       )
@@ -396,7 +405,6 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                             },
                           ),
                           const SizedBox(height: 16),
-                          
                           Row(
                             children: [
                               Checkbox(
@@ -432,14 +440,15 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                             ],
                           ),
                           const SizedBox(height: 24),
-                          
                           Consumer<AuthController>(
                             builder: (context, authController, child) {
                               return SizedBox(
                                 width: double.infinity,
                                 height: 56,
                                 child: ElevatedButton(
-                                  onPressed: authController.isLoading ? null : _handleRegister,
+                                  onPressed: authController.isLoading
+                                      ? null
+                                      : _handleRegister,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: context.primaryColor,
                                     foregroundColor: Colors.white,
@@ -447,7 +456,8 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     elevation: 0,
-                                    disabledBackgroundColor: context.primaryColor.withOpacity(0.6),
+                                    disabledBackgroundColor:
+                                        context.primaryColor.withOpacity(0.6),
                                   ),
                                   child: authController.isLoading
                                       ? const SizedBox(
@@ -455,11 +465,14 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
                                           width: 24,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
                                           ),
                                         )
-                                      : const Text(
-                                          'Create Account',
+                                      : Text(
+                                          AppLocalizations.of(context)!
+                                              .createAccount,
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
@@ -553,7 +566,8 @@ class _WebSignUpScreenState extends State<WebSignUpScreen> {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Colors.red, width: 1.5),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             counterText: '',
           ),
         ),

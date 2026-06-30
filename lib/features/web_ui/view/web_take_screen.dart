@@ -12,7 +12,7 @@ import 'package:tool_bocs/features/profile/controller/profile_controller.dart';
 import 'package:tool_bocs/features/profile/view/user_profile_screen.dart';
 import 'package:tool_bocs/core/services/toast_service.dart';
 import 'package:tool_bocs/features/web_ui/view/web_filter_dialog.dart';
-import 'package:tool_bocs/features/profile/view/save_to_collection_sheet.dart';
+import 'package:tool_bocs/features/web_ui/view/web_save_to_collection_dialog.dart';
 import 'package:tool_bocs/features/web_ui/view/web_sort_dialog.dart';
 import 'package:tool_bocs/features/trades/widgets/report_post_sheet.dart';
 
@@ -83,7 +83,7 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "What do you want to take today?",
+                        AppLocalizations.of(context)!.whatDoYouWantTo1,
                         style: TextStyle(
                           fontSize: isNarrow ? 20 : 28,
                           fontWeight: FontWeight.bold,
@@ -91,7 +91,8 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "Discover amazing tools and items being given away near you.",
+                        AppLocalizations.of(context)!
+                            .discoverAmazingToolsAndItems,
                         style: TextStyle(
                           fontSize: isNarrow ? 14 : 16,
                           color: Colors.grey.shade600,
@@ -113,8 +114,7 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
                           },
                           decoration: const InputDecoration(
                             icon: Icon(Icons.search, color: Colors.grey),
-                            hintText:
-                                "Search items (e.g. Lawn Mower, Tent)...",
+                            hintText: "Search items (e.g. Lawn Mower, Tent)...",
                             border: InputBorder.none,
                           ),
                         ),
@@ -127,15 +127,18 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
                         children: [
                           ElevatedButton.icon(
                             onPressed: () {
-                              WebFilterDialog.show(context, initialPostType: 'give');
+                              WebFilterDialog.show(context,
+                                  initialPostType: 'give');
                             },
                             icon: const Icon(Icons.filter_alt_outlined),
                             label: Text(AppLocalizations.of(context)!.filter),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).cardColor,
-                              foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                              foregroundColor:
+                                  Theme.of(context).textTheme.bodyLarge?.color,
                               padding: EdgeInsets.symmetric(
-                                  horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                                  horizontal: isNarrow ? 16 : 24,
+                                  vertical: isNarrow ? 12 : 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: BorderSide(color: Colors.grey.shade300),
@@ -144,24 +147,32 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
                           ),
                           Consumer<TradeController>(
                             builder: (context, tc, _) {
-                              final hasSort = tc.selectedDistanceSort.isNotEmpty &&
-                                  tc.selectedDistanceSort != 'Nearest First' ||
-                                  tc.selectedDateSort.isNotEmpty;
+                              final hasSort =
+                                  tc.selectedDistanceSort.isNotEmpty &&
+                                          tc.selectedDistanceSort !=
+                                              'Nearest First' ||
+                                      tc.selectedDateSort.isNotEmpty;
                               return ElevatedButton.icon(
                                 onPressed: () {
-                                  WebSortDialog.show(context, initialPostType: 'give');
+                                  WebSortDialog.show(context,
+                                      initialPostType: 'give');
                                 },
                                 icon: const Icon(Icons.sort),
-                                label: Text(AppLocalizations.of(context)!.sortBy),
+                                label:
+                                    Text(AppLocalizations.of(context)!.sortBy),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: hasSort
                                       ? Colors.black
                                       : Theme.of(context).cardColor,
                                   foregroundColor: hasSort
                                       ? Colors.white
-                                      : Theme.of(context).textTheme.bodyLarge?.color,
+                                      : Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.color,
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                                      horizontal: isNarrow ? 16 : 24,
+                                      vertical: isNarrow ? 12 : 16),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     side: BorderSide(
@@ -183,12 +194,14 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
                               );
                             },
                             icon: const Icon(Icons.add),
-                            label: Text(AppLocalizations.of(context)!.requestAnItem),
+                            label: Text(
+                                AppLocalizations.of(context)!.requestAnItem),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
                               foregroundColor: Colors.white,
                               padding: EdgeInsets.symmetric(
-                                  horizontal: isNarrow ? 16 : 24, vertical: isNarrow ? 12 : 16),
+                                  horizontal: isNarrow ? 16 : 24,
+                                  vertical: isNarrow ? 12 : 16),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12)),
                             ),
@@ -209,7 +222,7 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
                   runSpacing: 8,
                   children: [
                     Text(
-                      "Available Items Nearby",
+                      AppLocalizations.of(context)!.availableItemsNearby,
                       style: TextStyle(
                         fontSize: isNarrow ? 18 : 22,
                         fontWeight: FontWeight.bold,
@@ -239,7 +252,8 @@ class _WebTakeScreenState extends State<WebTakeScreen> {
                               size: 64, color: Colors.grey.shade400),
                           const SizedBox(height: 16),
                           Text(
-                            "No items found matching your search.",
+                            AppLocalizations.of(context)!
+                                .noItemsFoundMatchingYour,
                             style: TextStyle(
                                 color: Colors.grey.shade600, fontSize: 16),
                           )
@@ -301,7 +315,7 @@ class _WebTakeCard extends StatelessWidget {
             );
             break;
           case 'save':
-            SaveToCollectionBottomSheet.show(context, post.userId);
+            WebSaveToCollectionDialog.show(context, post.userId);
             break;
           case 'share':
             Share.share(
@@ -360,7 +374,8 @@ class _WebTakeCard extends StatelessWidget {
           if (!isOwner)
             PopupMenuItem<String>(
               value: 'report',
-              child: Text(AppLocalizations.of(context)!.reportPost, style: TextStyle(color: Colors.red)),
+              child: Text(AppLocalizations.of(context)!.reportPost,
+                  style: TextStyle(color: Colors.red)),
             ),
         ];
       },
@@ -395,7 +410,7 @@ class _WebTakeCard extends StatelessWidget {
       );
     } else if (type == 'free') {
       return Text(
-        'Free',
+        AppLocalizations.of(context)!.freeLabel,
         style: TextStyle(
           color: Theme.of(context).primaryColor,
           fontWeight: FontWeight.bold,

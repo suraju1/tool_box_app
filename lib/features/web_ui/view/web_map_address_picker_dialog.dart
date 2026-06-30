@@ -23,7 +23,8 @@ class WebMapAddressPickerDialog extends StatefulWidget {
     this.editAddress,
   });
 
-  static Future<void> show(BuildContext context, {bool isPickOnly = false, AddressModel? editAddress}) {
+  static Future<void> show(BuildContext context,
+      {bool isPickOnly = false, AddressModel? editAddress}) {
     return showDialog(
       context: context,
       builder: (context) => WebMapAddressPickerDialog(
@@ -34,7 +35,8 @@ class WebMapAddressPickerDialog extends StatefulWidget {
   }
 
   @override
-  State<WebMapAddressPickerDialog> createState() => _WebMapAddressPickerDialogState();
+  State<WebMapAddressPickerDialog> createState() =>
+      _WebMapAddressPickerDialogState();
 }
 
 class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
@@ -96,9 +98,11 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
 
   Future<void> _initLocation() async {
     final locationController = context.read<LocationController>();
-    if (locationController.latitude != null && locationController.longitude != null) {
+    if (locationController.latitude != null &&
+        locationController.longitude != null) {
       setState(() {
-        _lastMapPosition = LatLng(locationController.latitude!, locationController.longitude!);
+        _lastMapPosition =
+            LatLng(locationController.latitude!, locationController.longitude!);
         _currentAddress = locationController.address ?? "";
         _areaController.text = _currentAddress;
         _radius = locationController.radius;
@@ -119,12 +123,15 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.locationDisabled, style: TextStyle(fontWeight: FontWeight.bold)),
-            content: Text(AppLocalizations.of(context)!.yourSystemLocationServicesAre),
+            title: Text(AppLocalizations.of(context)!.locationDisabled,
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            content: Text(
+                AppLocalizations.of(context)!.yourSystemLocationServicesAre),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.ok, style: TextStyle(fontSize: 16)),
+                child: Text(AppLocalizations.of(context)!.ok,
+                    style: TextStyle(fontSize: 16)),
               ),
             ],
           ),
@@ -138,7 +145,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
     if (success) {
       final loc = context.read<LocationController>();
       if (loc.latitude != null && loc.longitude != null) {
-        _updateLocalLocation(LatLng(loc.latitude!, loc.longitude!), loc.address ?? "Unknown Address");
+        _updateLocalLocation(LatLng(loc.latitude!, loc.longitude!),
+            loc.address ?? "Unknown Address");
       }
     }
   }
@@ -214,14 +222,15 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
     if (query.isEmpty) return;
 
     setState(() => _isReverseGeocoding = true);
-    
+
     try {
       // 1. Try standard geocoding first (works best on mobile)
       List<geo.Location> locations = await geo.locationFromAddress(query);
       if (locations.isNotEmpty) {
         final loc = locations.first;
         final position = LatLng(loc.latitude, loc.longitude);
-        final address = await LocationService.getAddressFromCoordinates(loc.latitude, loc.longitude);
+        final address = await LocationService.getAddressFromCoordinates(
+            loc.latitude, loc.longitude);
         if (mounted) {
           _updateLocalLocation(position, address ?? query);
           setState(() => _isReverseGeocoding = false);
@@ -231,28 +240,32 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
     } catch (e) {
       debugPrint('Standard geocoding failed, trying fallback: $e');
     }
-    
+
     // 2. Fallback for Web (Geocoding API direct call)
     try {
       const apiKey = 'AIzaSyDcGPon7dpfONgGUw8lBMOXveihNhaepVo';
-      final url = 'https://maps.googleapis.com/maps/api/geocode/json?address=${Uri.encodeComponent(query)}&key=$apiKey';
+      final url =
+          'https://maps.googleapis.com/maps/api/geocode/json?address=${Uri.encodeComponent(query)}&key=$apiKey';
       final response = await http.get(Uri.parse(url));
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['status'] == 'OK' && data['results'] != null && data['results'].isNotEmpty) {
+        if (data['status'] == 'OK' &&
+            data['results'] != null &&
+            data['results'].isNotEmpty) {
           final result = data['results'][0];
           final location = result['geometry']['location'];
           final lat = location['lat'];
           final lng = location['lng'];
           final formattedAddress = result['formatted_address'];
-          
+
           final position = LatLng(lat, lng);
           if (mounted) {
             _updateLocalLocation(position, formattedAddress ?? query);
           }
         } else {
-          if (mounted) ToastService.showErrorToast(context, 'Location not found');
+          if (mounted)
+            ToastService.showErrorToast(context, 'Location not found');
         }
       } else {
         if (mounted) ToastService.showErrorToast(context, 'Location not found');
@@ -289,7 +302,11 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
               decoration: BoxDecoration(
                 color: context.onPrimaryColor,
                 boxShadow: [
-                  BoxShadow(color: context.isDarkMode ? Colors.black45 : Colors.black12, blurRadius: 10, offset: const Offset(0, -5))
+                  BoxShadow(
+                      color:
+                          context.isDarkMode ? Colors.black45 : Colors.black12,
+                      blurRadius: 10,
+                      offset: const Offset(0, -5))
                 ],
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(16),
@@ -316,8 +333,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Add address',
+          Text(
+            AppLocalizations.of(context)!.addAddress,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           IconButton(
@@ -334,7 +351,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
     return Padding(
       padding: EdgeInsets.zero,
       child: GoogleMap(
-        initialCameraPosition: CameraPosition(target: _lastMapPosition, zoom: initialZoom),
+        initialCameraPosition:
+            CameraPosition(target: _lastMapPosition, zoom: initialZoom),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
@@ -362,7 +380,10 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
               LatLng(
                 _lastMapPosition.latitude,
                 _lastMapPosition.longitude +
-                    (_radius / (111.32 * math.cos(_lastMapPosition.latitude * math.pi / 180))),
+                    (_radius /
+                        (111.32 *
+                            math.cos(
+                                _lastMapPosition.latitude * math.pi / 180))),
               ),
             ],
             color: Colors.black,
@@ -374,8 +395,11 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
   }
 
   Widget _buildRadiusText() {
-    final double metersPerPixel = 156543.03392 * math.cos(_lastMapPosition.latitude * math.pi / 180) / math.pow(2, _currentZoom);
-    final double radiusInPixels = ((_radius * 1000) / metersPerPixel).clamp(0.0, 5000.0);
+    final double metersPerPixel = 156543.03392 *
+        math.cos(_lastMapPosition.latitude * math.pi / 180) /
+        math.pow(2, _currentZoom);
+    final double radiusInPixels =
+        ((_radius * 1000) / metersPerPixel).clamp(0.0, 5000.0);
 
     return IgnorePointer(
       child: Padding(
@@ -413,13 +437,16 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Select Radius',
+              Text(
+                AppLocalizations.of(context)!.selectRadius,
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               Text(
                 formattedRadius,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: context.primaryColor),
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: context.primaryColor),
               ),
             ],
           ),
@@ -458,7 +485,9 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           color: context.onPrimaryColor,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: context.isDarkMode ? Colors.black45 : Colors.black12, blurRadius: 10)
+            BoxShadow(
+                color: context.isDarkMode ? Colors.black45 : Colors.black12,
+                blurRadius: 10)
           ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -471,7 +500,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
                 controller: _mapSearchController,
                 decoration: InputDecoration(
                   hintText: 'Search for area, locality...',
-                  hintStyle: TextStyle(color: context.subTextColor, fontSize: 14),
+                  hintStyle:
+                      TextStyle(color: context.subTextColor, fontSize: 14),
                   border: InputBorder.none,
                 ),
                 textInputAction: TextInputAction.search,
@@ -508,7 +538,9 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
             borderRadius: BorderRadius.circular(30),
             border: Border.all(color: context.primaryColor.withOpacity(0.3)),
             boxShadow: [
-              BoxShadow(color: context.isDarkMode ? Colors.black45 : Colors.black12, blurRadius: 4)
+              BoxShadow(
+                  color: context.isDarkMode ? Colors.black45 : Colors.black12,
+                  blurRadius: 4)
             ],
           ),
           child: Row(
@@ -527,7 +559,9 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.all(20),
       child: SingleChildScrollView(
-        child: _showFullForm ? _buildDetailedAddressForm() : _buildConfirmationView(),
+        child: _showFullForm
+            ? _buildDetailedAddressForm()
+            : _buildConfirmationView(),
       ),
     );
   }
@@ -537,7 +571,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.findingProductsFor, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(AppLocalizations.of(context)!.findingProductsFor,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 15),
         Container(
           padding: const EdgeInsets.all(12),
@@ -557,13 +592,15 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
                   children: [
                     Text(
                       _currentAddress.split(',').first,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       _currentAddress,
-                      style: TextStyle(fontSize: 12, color: context.subTextColor),
+                      style:
+                          TextStyle(fontSize: 12, color: context.subTextColor),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -572,7 +609,10 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
               ),
               TextButton(
                 onPressed: () => setState(() => _showFullForm = true),
-                child: Text(AppLocalizations.of(context)!.change, style: TextStyle(color: context.primaryColor, fontWeight: FontWeight.bold)),
+                child: Text(AppLocalizations.of(context)!.change,
+                    style: TextStyle(
+                        color: context.primaryColor,
+                        fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -582,16 +622,25 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           width: double.infinity,
           height: 50,
           child: ElevatedButton(
-            onPressed: widget.isPickOnly ? _onConfirmLocation : () => setState(() => _showFullForm = true),
+            onPressed: widget.isPickOnly
+                ? _onConfirmLocation
+                : () => setState(() => _showFullForm = true),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.primaryColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(widget.isPickOnly ? 'Confirm Location' : 'Enter complete address',
-                    style: TextStyle(color: context.onPrimaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                    widget.isPickOnly
+                        ? 'Confirm Location'
+                        : 'Enter complete address',
+                    style: TextStyle(
+                        color: context.onPrimaryColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -618,7 +667,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(AppLocalizations.of(context)!.enterCompleteAddress, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(AppLocalizations.of(context)!.enterCompleteAddress,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             IconButton(
               onPressed: () => setState(() => _showFullForm = false),
               icon: const Icon(Icons.close),
@@ -626,7 +676,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           ],
         ),
         const SizedBox(height: 15),
-        Text(AppLocalizations.of(context)!.saveAddressAs1, style: TextStyle(fontSize: 14, color: context.subTextColor)),
+        Text(AppLocalizations.of(context)!.saveAddressAs1,
+            style: TextStyle(fontSize: 14, color: context.subTextColor)),
         const SizedBox(height: 10),
         _buildLabelSelector(),
         const SizedBox(height: 20),
@@ -643,7 +694,12 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
 
   Widget _buildLabelSelector() {
     final labels = ['Home', 'Work', 'Hotel', 'Other'];
-    final icons = [Icons.home_outlined, Icons.work_outline, Icons.hotel_outlined, Icons.location_on_outlined];
+    final icons = [
+      Icons.home_outlined,
+      Icons.work_outline,
+      Icons.hotel_outlined,
+      Icons.location_on_outlined
+    ];
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -654,15 +710,26 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: isSelected ? context.primaryColor.withOpacity(0.1) : context.surfaceColor,
-              border: Border.all(color: isSelected ? context.primaryColor : context.dividerColor),
+              color: isSelected
+                  ? context.primaryColor.withOpacity(0.1)
+                  : context.surfaceColor,
+              border: Border.all(
+                  color:
+                      isSelected ? context.primaryColor : context.dividerColor),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                Icon(icons[index], color: isSelected ? context.primaryColor : Colors.grey, size: 20),
+                Icon(icons[index],
+                    color: isSelected ? context.primaryColor : Colors.grey,
+                    size: 20),
                 const SizedBox(width: 6),
-                Text(labels[index], style: TextStyle(fontSize: 14, color: isSelected ? context.primaryColor : context.textColor)),
+                Text(labels[index],
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: isSelected
+                            ? context.primaryColor
+                            : context.textColor)),
               ],
             ),
           ),
@@ -680,7 +747,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           labelText: label,
           labelStyle: TextStyle(fontSize: 14, color: context.subTextColor),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );
@@ -690,7 +758,9 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.white10 : context.dividerColor.withOpacity(0.1),
+        color: context.isDarkMode
+            ? Colors.white10
+            : context.dividerColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: context.dividerColor),
       ),
@@ -700,11 +770,14 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(AppLocalizations.of(context)!.areaSectorLocality, style: TextStyle(fontSize: 12, color: context.subTextColor)),
+                Text(AppLocalizations.of(context)!.areaSectorLocality,
+                    style:
+                        TextStyle(fontSize: 12, color: context.subTextColor)),
                 const SizedBox(height: 4),
                 Text(
                   _currentAddress,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.bold),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -712,8 +785,10 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
             ),
           ),
           TextButton(
-            onPressed: () => setState(() => _showFullForm = false), // Go back to map view
-            child: Text(AppLocalizations.of(context)!.change, style: TextStyle(color: context.primaryColor)),
+            onPressed: () =>
+                setState(() => _showFullForm = false), // Go back to map view
+            child: Text(AppLocalizations.of(context)!.change,
+                style: TextStyle(color: context.primaryColor)),
           ),
         ],
       ),
@@ -722,7 +797,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
 
   Widget _buildDefaultToggle() {
     return SwitchListTile(
-      title: Text(AppLocalizations.of(context)!.setAsDefaultAddress, style: TextStyle(fontSize: 16)),
+      title: Text(AppLocalizations.of(context)!.setAsDefaultAddress,
+          style: TextStyle(fontSize: 16)),
       value: _isDefault,
       activeColor: context.primaryColor,
       onChanged: (val) => setState(() => _isDefault = val),
@@ -740,7 +816,11 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
           backgroundColor: context.primaryColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: Text(AppLocalizations.of(context)!.saveAddress, style: TextStyle(color: context.onPrimaryColor, fontSize: 16, fontWeight: FontWeight.bold)),
+        child: Text(AppLocalizations.of(context)!.saveAddress,
+            style: TextStyle(
+                color: context.onPrimaryColor,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -751,7 +831,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
       return;
     }
 
-    final fullAddress = "${_houseController.text}, ${_floorController.text.isNotEmpty ? "${_floorController.text}, " : ""}$_currentAddress";
+    final fullAddress =
+        "${_houseController.text}, ${_floorController.text.isNotEmpty ? "${_floorController.text}, " : ""}$_currentAddress";
     final addressController = context.read<AddressController>();
 
     if (widget.editAddress != null) {
@@ -764,9 +845,10 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
         isDefault: _isDefault ? 1 : 0,
       );
 
-      final response = await addressController.updateAddress(updatedAddress.id!, updatedAddress);
+      final response = await addressController.updateAddress(
+          updatedAddress.id!, updatedAddress);
       if (!mounted) return;
-      
+
       if (response.success) {
         context.read<LocationController>().setLocation(
               _lastMapPosition.latitude,
@@ -785,7 +867,8 @@ class _WebMapAddressPickerDialogState extends State<WebMapAddressPickerDialog> {
         address: fullAddress,
         latitude: _lastMapPosition.latitude,
         longitude: _lastMapPosition.longitude,
-        isDefault: _isDefault ? 1 : (addressController.addresses.isEmpty ? 1 : 0),
+        isDefault:
+            _isDefault ? 1 : (addressController.addresses.isEmpty ? 1 : 0),
       );
 
       final response = await addressController.saveAddress(newAddress);

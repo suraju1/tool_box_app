@@ -35,7 +35,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           locationController.longitude,
         );
       }
-      
+
       tradeController.fetchHomePosts();
     });
   }
@@ -50,14 +50,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<TradeController>();
     final locationController = context.watch<LocationController>();
-    
+
     // Proactively sync location from LocationController if it exists but is missing in TradeController
     if (locationController.hasLocation && !controller.hasLocation) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<TradeController>().setLocation(
-          locationController.latitude,
-          locationController.longitude,
-        );
+              locationController.latitude,
+              locationController.longitude,
+            );
         context.read<TradeController>().fetchHomePosts(refresh: true);
       });
     }
@@ -70,57 +70,58 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         padding: const EdgeInsets.all(32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: _buildLocationHeader(context)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildDistanceSection(context)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 40),
-
-          // CATEGORY OR SECTION TITLE
-          Text(
-            controller.selectedCategories.isNotEmpty 
-                ? "Catalog: ${controller.selectedCategories.first}"
-                : "Recommended for You",
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // PRODUCTS GRID
-          if (controller.isHomeLoading && controller.homePosts.isEmpty)
-            const Center(child: CircularProgressIndicator())
-          else if (controller.homePosts.isEmpty)
-            Center(child: Text(AppLocalizations.of(context)!.noPostsFoundNearYou))
-          else
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 320,
-                mainAxisExtent: 420,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
+          children: [
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: _buildLocationHeader(context)),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildDistanceSection(context)),
+                ],
               ),
-              itemCount: controller.homePosts.length,
-              itemBuilder: (context, index) {
-                return WebProductCard(post: controller.homePosts[index]);
-              },
             ),
-        ],
+            const SizedBox(height: 40),
+
+            // CATEGORY OR SECTION TITLE
+            Text(
+              controller.selectedCategories.isNotEmpty
+                  ? "Catalog: ${controller.selectedCategories.first}"
+                  : "Recommended for You",
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // PRODUCTS GRID
+            if (controller.isHomeLoading && controller.homePosts.isEmpty)
+              const Center(child: CircularProgressIndicator())
+            else if (controller.homePosts.isEmpty)
+              Center(
+                  child:
+                      Text(AppLocalizations.of(context)!.noPostsFoundNearYou))
+            else
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 320,
+                  mainAxisExtent: 420,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                ),
+                itemCount: controller.homePosts.length,
+                itemBuilder: (context, index) {
+                  return WebProductCard(post: controller.homePosts[index]);
+                },
+              ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildLocationHeader(BuildContext context) {
     return Consumer<LocationController>(
@@ -139,8 +140,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? Colors.grey.shade900 
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade900
                   : const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(12),
             ),
@@ -153,7 +154,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Home',
+                        AppLocalizations.of(context)!.home,
                         style: TextStyle(
                           color: Theme.of(context).textTheme.bodyLarge?.color,
                           fontWeight: FontWeight.w700,
@@ -199,8 +200,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? Colors.grey.shade900 
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey.shade900
                 : const Color(0xFFF5F5F5),
             borderRadius: BorderRadius.circular(12),
           ),
@@ -211,7 +212,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               Row(
                 children: [
                   Text(
-                    'Distance',
+                    AppLocalizations.of(context)!.distanceLabel,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -225,11 +226,16 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         : 'Set your location',
                     style: TextStyle(
                       fontSize: 12,
-                      color: controller.hasLocation ? Colors.grey.shade600 : Colors.orange,
-                      fontWeight: controller.hasLocation ? FontWeight.normal : FontWeight.w600,
+                      color: controller.hasLocation
+                          ? Colors.grey.shade600
+                          : Colors.orange,
+                      fontWeight: controller.hasLocation
+                          ? FontWeight.normal
+                          : FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(width: 61), // 16px gap + 45px width for the distance text
+                  const SizedBox(
+                      width: 61), // 16px gap + 45px width for the distance text
                 ],
               ),
               const SizedBox(height: 8),
@@ -239,16 +245,24 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     child: SliderTheme(
                       data: SliderThemeData(
                         trackHeight: 4,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                        thumbShape:
+                            const RoundSliderThumbShape(enabledThumbRadius: 8),
+                        overlayShape:
+                            const RoundSliderOverlayShape(overlayRadius: 16),
                       ),
                       child: Slider(
                         value: controller.distanceKm.clamp(0.01, 10.0),
                         min: 0.01,
                         max: 10.0,
-                        activeColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+                        activeColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
                         inactiveColor: Colors.grey.shade300,
-                        thumbColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+                        thumbColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
                         onChanged: (val) {
                           controller.setDistance(
                             val,
@@ -281,5 +295,3 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 }
-
-

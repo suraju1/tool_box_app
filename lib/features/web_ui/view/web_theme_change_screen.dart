@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tool_bocs/core/controller/theme_controller.dart';
 import 'package:tool_bocs/util/colors.dart';
 import 'package:tool_bocs/util/font_family.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebThemeChangeScreen extends StatelessWidget {
   const WebThemeChangeScreen({super.key});
@@ -20,7 +21,7 @@ class WebThemeChangeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Appearance Settings',
+                AppLocalizations.of(context)!.appearanceSettings,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 32,
@@ -31,7 +32,7 @@ class WebThemeChangeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Customize the look and feel of the application.',
+                AppLocalizations.of(context)!.customizeTheLookAndFeel,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -43,7 +44,8 @@ class WebThemeChangeScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: context.surfaceColor,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+                  border:
+                      Border.all(color: context.dividerColor.withOpacity(0.5)),
                   boxShadow: context.isDarkMode
                       ? []
                       : [
@@ -67,7 +69,7 @@ class WebThemeChangeScreen extends StatelessWidget {
                     _buildDivider(context),
                     _buildThemeOption(
                       context,
-                      title: 'Dark Mode',
+                      title: AppLocalizations.of(context)!.darkMode,
                       subtitle: 'Easy on the eyes',
                       icon: Icons.dark_mode_outlined,
                       mode: ThemeMode.dark,
@@ -113,12 +115,15 @@ class WebThemeChangeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isSelected ? context.primaryColor.withOpacity(0.1) : context.scaffoldBg,
+                  color: isSelected
+                      ? context.primaryColor.withOpacity(0.1)
+                      : context.scaffoldBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
-                  color: isSelected ? context.primaryColor : context.subTextColor,
+                  color:
+                      isSelected ? context.primaryColor : context.subTextColor,
                   size: 28,
                 ),
               ),
@@ -131,8 +136,11 @@ class WebThemeChangeScreen extends StatelessWidget {
                       title,
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                        color: isSelected ? context.primaryColor : context.textColor,
+                        fontWeight:
+                            isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color: isSelected
+                            ? context.primaryColor
+                            : context.textColor,
                         fontFamily: FontFamily.openSans,
                       ),
                     ),

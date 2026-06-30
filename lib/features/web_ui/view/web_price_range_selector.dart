@@ -33,8 +33,10 @@ class _WebPriceRangeSelectorState extends State<WebPriceRangeSelector> {
   void initState() {
     super.initState();
     _currentRange = widget.initialValues;
-    _minController = TextEditingController(text: _currentRange.start.toInt().toString());
-    _maxController = TextEditingController(text: _currentRange.end.toInt().toString());
+    _minController =
+        TextEditingController(text: _currentRange.start.toInt().toString());
+    _maxController =
+        TextEditingController(text: _currentRange.end.toInt().toString());
   }
 
   @override
@@ -103,22 +105,28 @@ class _WebPriceRangeSelectorState extends State<WebPriceRangeSelector> {
         const SizedBox(height: 16),
         Row(
           children: [
-            Expanded(child: _buildPriceField('Min Price', _minController, _updateFromMinText)),
+            Expanded(
+                child: _buildPriceField(
+                    'Min Price', _minController, _updateFromMinText)),
             const SizedBox(width: 24),
-            Expanded(child: _buildPriceField('Max Price', _maxController, _updateFromMaxText)),
+            Expanded(
+                child: _buildPriceField(
+                    'Max Price', _maxController, _updateFromMaxText)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildPriceField(String label, TextEditingController controller, Function(String) onChanged) {
+  Widget _buildPriceField(String label, TextEditingController controller,
+      Function(String) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.normal),
+          style: const TextStyle(
+              color: Colors.grey, fontSize: 14, fontWeight: FontWeight.normal),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -134,10 +142,16 @@ class _WebPriceRangeSelectorState extends State<WebPriceRangeSelector> {
           decoration: InputDecoration(
             prefixIcon: const Padding(
               padding: EdgeInsets.only(left: 16, right: 8),
-              child: Text('₹', style: TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.bold)),
+              child: Text('₹',
+                  style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
             ),
-            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            prefixIconConstraints:
+                const BoxConstraints(minWidth: 0, minHeight: 0),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             isDense: true,
             filled: true,
             fillColor: const Color(0xFFF3F4F6),

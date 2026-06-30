@@ -230,7 +230,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(40),
                 child: Text(
-                  'No active offers yet',
+                  AppLocalizations.of(context)!.noActiveOffersYet,
                   style: TextStyle(color: context.subTextColor, fontSize: 16),
                 ),
               ),
@@ -262,7 +262,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
     }
 
     final List<Map<String, dynamic>> allMatches = [];
-    
+
     for (var r in incomingResponses) {
       allMatches.add({'response': r, 'isIncoming': true});
     }
@@ -272,8 +272,10 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
 
     allMatches.sort((a, b) {
       try {
-        DateTime dateA = DateTime.parse((a['response'] as TradeResponseModel).createdAt);
-        DateTime dateB = DateTime.parse((b['response'] as TradeResponseModel).createdAt);
+        DateTime dateA =
+            DateTime.parse((a['response'] as TradeResponseModel).createdAt);
+        DateTime dateB =
+            DateTime.parse((b['response'] as TradeResponseModel).createdAt);
         return dateB.compareTo(dateA);
       } catch (e) {
         return 0;
@@ -291,7 +293,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                   size: 64, color: context.subTextColor),
               const SizedBox(height: 16),
               Text(
-                'No matches yet',
+                AppLocalizations.of(context)!.noMatchesYet,
                 style: TextStyle(
                   color: context.subTextColor,
                   fontSize: 16,
@@ -325,33 +327,47 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
 
     final timeAgo = DateUtil.formatTimeAgo(response.createdAt);
 
+    String distanceStr = '';
+    if (response.distanceKm != null) {
+      if (response.distanceKm! < 1.0) {
+        distanceStr = '~ ${(response.distanceKm! * 1000).toInt()} mtrs away';
+      } else {
+        distanceStr = '~ ${response.distanceKm!.toStringAsFixed(1)} km away';
+      }
+    }
+
     if (isIncoming) {
       final postItem = response.postItemName ?? 'item';
       messageSpans = [
         TextSpan(
             text: response.responderName,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        const TextSpan(text: ' is Taking your '),
+        const TextSpan(text: ' is\nTaking your '),
         TextSpan(
             text: postItem,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' ~ $timeAgo'),
       ];
 
       if (response.returnItemName != null &&
-          response.returnItemName!.isNotEmpty) {
-        subText = '⬇️ Giving you ${response.returnItemName} in return';
-      } else if (response.itemName != null && response.itemName!.isNotEmpty && (response.responseType == 'item' || response.responseType == 'Item')) {
-        subText = '⬇️ Giving you ${response.itemName} in return';
+          response.returnItemName!.isNotEmpty &&
+          response.returnItemName != postItem) {
+        subText = 'Giving you ${response.returnItemName} in return';
+      } else if (response.itemName != null &&
+          response.itemName!.isNotEmpty &&
+          (response.responseType == 'item' ||
+              response.responseType == 'Item') &&
+          response.itemName != postItem) {
+        subText = 'Giving you ${response.itemName} in return';
       } else if ((response.priceRangeStart ?? 0) > 0 ||
           (response.priceRangeEnd ?? 0) > 0) {
         final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
         final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
         subText = startPrice == endPrice
-            ? '⬇️ Giving you ₹$startPrice in return'
-            : '⬇️ Giving you ₹$startPrice - ₹$endPrice in return';
+            ? 'Giving you ₹$startPrice in return'
+            : 'Giving you ₹$startPrice - ₹$endPrice in return';
       } else {
-        subText = '⬇️ (Category: ${response.itemCategory ?? 'Unknown'} | Condition: ${response.itemCondition ?? 'Unknown'})';
+        subText =
+            '(Category: ${response.itemCategory ?? 'Unknown'} | Condition: ${response.itemCondition ?? 'Unknown'})';
       }
     } else {
       final postItem = response.postItemName ?? 'item';
@@ -359,24 +375,25 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
         TextSpan(
             text: response.posterName ?? 'User',
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        const TextSpan(text: ' is Giving you '),
+        const TextSpan(text: ' is\nGiving you '),
         TextSpan(
             text: postItem,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextSpan(text: ' ~ $timeAgo'),
       ];
 
-      if (response.itemName != null && response.itemName!.isNotEmpty) {
-        subText = '⬇️ Taking ${response.itemName} in return';
+      if (response.itemName != null &&
+          response.itemName!.isNotEmpty &&
+          response.itemName != postItem) {
+        subText = 'Taking ${response.itemName} in return';
       } else if ((response.priceRangeStart ?? 0) > 0 ||
           (response.priceRangeEnd ?? 0) > 0) {
         final startPrice = (response.priceRangeStart ?? 0).toStringAsFixed(0);
         final endPrice = (response.priceRangeEnd ?? 0).toStringAsFixed(0);
         subText = startPrice == endPrice
-            ? '⬇️ Taking ₹$startPrice in return'
-            : '⬇️ Taking ₹$startPrice - ₹$endPrice in return';
+            ? 'Taking ₹$startPrice in return'
+            : 'Taking ₹$startPrice - ₹$endPrice in return';
       } else {
-         subText = '⬇️ Taking an offer in return';
+        subText = 'Taking an offer in return';
       }
     }
 
@@ -401,14 +418,20 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
     final imageToUse =
         responseImagePath.isNotEmpty ? responseImagePath : postImagePath;
 
+    Widget subMessageWidget = Text(
+      subText,
+      style: GoogleFonts.inter(
+        fontSize: 14,
+        color: context.subTextColor,
+      ),
+    );
+
     return _buildNotificationCard(
       context,
       imageUrl: imageToUse,
-      distance: 'Unknown',
+      distance: distanceStr,
       message: messageSpans,
-      subMessage: [
-        TextSpan(text: subText),
-      ],
+      subMessageWidget: subMessageWidget,
       actions: [
         _buildActionButton(actionLabel, actionColor, context.onPrimaryColor,
             () => _onResponseTap(response)),
@@ -417,6 +440,15 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
           _buildActionButton(' Chat ', context.primaryColor,
               context.onPrimaryColor, () => _navigateToChat(response)),
         ],
+        const Spacer(),
+        Text(
+          timeAgo,
+          style: TextStyle(
+            fontSize: 11,
+            color: context.subTextColor,
+            fontFamily: FontFamily.openSans,
+          ),
+        ),
       ],
       onTap: () => _onResponseTap(response),
     );
@@ -433,7 +465,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'History',
+                AppLocalizations.of(context)!.history,
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -445,7 +477,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                   Icon(Icons.history, size: 18, color: context.textColor),
                   const SizedBox(width: 4),
                   Text(
-                    'Recent',
+                    AppLocalizations.of(context)!.recent,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -470,7 +502,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
       elevation: 0,
       centerTitle: true,
       title: Text(
-        'Match Offers',
+        AppLocalizations.of(context)!.matchOffers,
         style: GoogleFonts.inter(
           color: context.textColor,
           fontSize: 20,
@@ -537,7 +569,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '• Respond to posts, mention what you can offer in return',
+                      AppLocalizations.of(context)!.respondToPostsMentionWhat,
                       style: TextStyle(
                         color: context.subTextColor,
                         fontSize: 14,
@@ -569,7 +601,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Help & Support',
+                    AppLocalizations.of(context)!.helpSupport,
                     style: TextStyle(
                       color: context.primaryColor,
                       fontSize: 14,
@@ -659,7 +691,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
     String? imageUrl,
     required String distance,
     required List<TextSpan> message,
-    required List<TextSpan> subMessage,
+    Widget? subMessageWidget,
     required List<Widget> actions,
     VoidCallback? onTap,
   }) {
@@ -689,25 +721,35 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        color: context.textColor,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              color: context.textColor,
+                            ),
+                            children: message,
+                          ),
+                        ),
                       ),
-                      children: message,
-                    ),
+                      if (distance.isNotEmpty && distance != 'Unknown') ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          distance,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: context.subTextColor,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 4),
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: context.subTextColor,
-                      ),
-                      children: subMessage,
-                    ),
-                  ),
+                  if (subMessageWidget != null) subMessageWidget,
                   const SizedBox(height: 12),
                   Row(children: actions),
                 ],
@@ -768,7 +810,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                 size: 64, color: context.subTextColor),
             const SizedBox(height: 16),
             Text(
-              'No notifications found',
+              AppLocalizations.of(context)!.noNotificationsFound,
               style: TextStyle(
                 color: context.subTextColor,
                 fontSize: 16,
@@ -796,7 +838,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                     icon: Icon(Icons.done_all,
                         size: 20, color: context.primaryColor),
                     label: Text(
-                      'Mark all as read',
+                      AppLocalizations.of(context)!.markAllAsRead,
                       style: TextStyle(
                         fontSize: 14,
                         color: context.primaryColor,
@@ -968,8 +1010,9 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(4),
                                           ),
-                                          child: const Text(
-                                            'NEW',
+                                          child: Text(
+                                            AppLocalizations.of(context)!
+                                                .newText,
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 10,
@@ -1031,7 +1074,7 @@ class _WebNotificationsScreenState extends State<WebNotificationsScreen> {
                           ),
                           if (isUnread)
                             Text(
-                              'Tap to read',
+                              AppLocalizations.of(context)!.tapToRead,
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 color: context.primaryColor,

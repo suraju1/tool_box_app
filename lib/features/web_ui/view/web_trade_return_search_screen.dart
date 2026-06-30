@@ -14,10 +14,12 @@ class WebTradeReturnSearchScreen extends StatefulWidget {
   const WebTradeReturnSearchScreen({super.key});
 
   @override
-  State<WebTradeReturnSearchScreen> createState() => _WebTradeReturnSearchScreenState();
+  State<WebTradeReturnSearchScreen> createState() =>
+      _WebTradeReturnSearchScreenState();
 }
 
-class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen> {
+class _WebTradeReturnSearchScreenState
+    extends State<WebTradeReturnSearchScreen> {
   bool _isPriceSelected = true;
   RangeValues _priceRange = const RangeValues(10, 50000);
   bool _isNegotiable = false;
@@ -33,14 +35,16 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
       return;
     }
 
-    final List<XFile>? images = await AppImagePickerBS.show(context, allowMultiple: true, limit: remaining);
+    final List<XFile>? images = await AppImagePickerBS.show(context,
+        allowMultiple: true, limit: remaining);
 
     if (images != null && images.isNotEmpty) {
       setState(() {
         if (_returnItemImages.length + images.length > 5) {
           final int toTake = 5 - _returnItemImages.length;
           _returnItemImages.addAll(images.take(toTake));
-          ToastService.showErrorToast(context, 'Only first $toTake images added (Max 5 allowed)');
+          ToastService.showErrorToast(
+              context, 'Only first $toTake images added (Max 5 allowed)');
         } else {
           _returnItemImages.addAll(images);
         }
@@ -67,13 +71,15 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 800),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
                   child: Container(
                     padding: const EdgeInsets.all(40),
                     decoration: BoxDecoration(
                       color: context.surfaceColor,
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+                      border: Border.all(
+                          color: context.dividerColor.withOpacity(0.5)),
                       boxShadow: context.isDarkMode
                           ? []
                           : [
@@ -88,7 +94,7 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Step 1 of 4',
+                          AppLocalizations.of(context)!.step1Of4,
                           style: TextStyle(
                             color: context.primaryColor,
                             fontWeight: FontWeight.w700,
@@ -97,7 +103,7 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'What do you want in return?',
+                          AppLocalizations.of(context)!.whatDoYouWantIn1,
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
@@ -109,7 +115,9 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                         Container(
                           height: 56,
                           decoration: BoxDecoration(
-                            color: context.isDarkMode ? Colors.white10 : const Color(0xFFF3F4F6),
+                            color: context.isDarkMode
+                                ? Colors.white10
+                                : const Color(0xFFF3F4F6),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Row(
@@ -152,7 +160,7 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
       ),
       centerTitle: false,
       title: Text(
-        'Take It',
+        AppLocalizations.of(context)!.takeIt,
         style: TextStyle(
           color: context.textColor,
           fontSize: 20,
@@ -193,7 +201,9 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
         height: 6,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: isActive ? context.primaryColor : context.dividerColor.withOpacity(0.3),
+          color: isActive
+              ? context.primaryColor
+              : context.dividerColor.withOpacity(0.3),
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -211,8 +221,8 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Set your acceptable price range',
+          Text(
+            AppLocalizations.of(context)!.setYourAcceptablePriceRange,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 24),
@@ -239,9 +249,13 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(AppLocalizations.of(context)!.negotiable, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                    Text(AppLocalizations.of(context)!.negotiable,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 16)),
                     const SizedBox(height: 4),
-                    Text(AppLocalizations.of(context)!.allowBuyersToMakeCounter, style: TextStyle(color: context.subTextColor, fontSize: 13)),
+                    Text(AppLocalizations.of(context)!.allowBuyersToMakeCounter,
+                        style: TextStyle(
+                            color: context.subTextColor, fontSize: 13)),
                   ],
                 ),
               ],
@@ -266,12 +280,10 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
               const SizedBox(height: 8),
               _buildTextField('Enter item name'),
               const SizedBox(height: 24),
-              
               _buildLabel('Category'),
               const SizedBox(height: 8),
               _buildDropdown('Select Category'),
               const SizedBox(height: 24),
-              
               _buildLabel('Description'),
               const SizedBox(height: 8),
               _buildTextField('Describe your product here...', maxLines: 4),
@@ -297,7 +309,6 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                 ],
               ),
               const SizedBox(height: 32),
-              
               _buildLabel('Type'),
               const SizedBox(height: 12),
               Column(
@@ -314,7 +325,9 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                           });
                         },
                       ),
-                      Text(AppLocalizations.of(context)!.homemade, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                      Text(AppLocalizations.of(context)!.homemade,
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w500)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -330,13 +343,14 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                           });
                         },
                       ),
-                      Text(AppLocalizations.of(context)!.storeBought, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                      Text(AppLocalizations.of(context)!.storeBought,
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w500)),
                     ],
                   ),
                 ],
               ),
               const SizedBox(height: 32),
-              
               _buildLabel('Photos (${_returnItemImages.length}/5)'),
               const SizedBox(height: 12),
               _buildAddPhotosSection(),
@@ -371,7 +385,9 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
           decoration: BoxDecoration(
             color: isSelected ? context.primaryColor : context.surfaceColor,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isSelected ? context.primaryColor : context.dividerColor),
+            border: Border.all(
+                color:
+                    isSelected ? context.primaryColor : context.dividerColor),
           ),
           child: Text(
             label,
@@ -386,13 +402,16 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
     );
   }
 
-  Widget _buildTextField(String hint, {IconData? prefixIcon, int maxLines = 1}) {
+  Widget _buildTextField(String hint,
+      {IconData? prefixIcon, int maxLines = 1}) {
     return TextField(
       maxLines: maxLines,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: context.subTextColor, fontSize: 14),
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: context.subTextColor, size: 20) : null,
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, color: context.subTextColor, size: 20)
+            : null,
         filled: true,
         fillColor: context.scaffoldBg,
         border: OutlineInputBorder(
@@ -407,7 +426,8 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: context.primaryColor, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
     );
   }
@@ -417,17 +437,23 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         MouseRegion(
-          cursor: _returnItemImages.length >= 5 ? SystemMouseCursors.basic : SystemMouseCursors.click,
+          cursor: _returnItemImages.length >= 5
+              ? SystemMouseCursors.basic
+              : SystemMouseCursors.click,
           child: GestureDetector(
             onTap: _returnItemImages.length >= 5 ? null : _pickImage,
             child: Container(
               width: double.infinity,
               height: 120,
               decoration: BoxDecoration(
-                color: context.isDarkMode ? Colors.white10 : context.dividerColor.withOpacity(0.1),
+                color: context.isDarkMode
+                    ? Colors.white10
+                    : context.dividerColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: _returnItemImages.length >= 5 ? Colors.grey.withOpacity(0.3) : context.dividerColor,
+                  color: _returnItemImages.length >= 5
+                      ? Colors.grey.withOpacity(0.3)
+                      : context.dividerColor,
                   style: BorderStyle.solid,
                 ),
               ),
@@ -435,12 +461,20 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.camera_alt_outlined,
-                      color: _returnItemImages.length >= 5 ? Colors.grey : context.subTextColor, size: 32),
+                      color: _returnItemImages.length >= 5
+                          ? Colors.grey
+                          : context.subTextColor,
+                      size: 32),
                   const SizedBox(height: 8),
                   Text(
-                    _returnItemImages.length >= 5 ? 'Max 5 photos reached' : 'Click to add photos',
+                    _returnItemImages.length >= 5
+                        ? 'Max 5 photos reached'
+                        : 'Click to add photos',
                     style: TextStyle(
-                        color: _returnItemImages.length >= 5 ? Colors.grey : context.subTextColor, fontSize: 13),
+                        color: _returnItemImages.length >= 5
+                            ? Colors.grey
+                            : context.subTextColor,
+                        fontSize: 13),
                   ),
                 ],
               ),
@@ -464,11 +498,13 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                       borderRadius: BorderRadius.circular(12),
                       image: DecorationImage(
                         image: kIsWeb
-                            ? NetworkImage(_returnItemImages[index].path) as ImageProvider
+                            ? NetworkImage(_returnItemImages[index].path)
+                                as ImageProvider
                             : FileImage(File(_returnItemImages[index].path)),
                         fit: BoxFit.cover,
                       ),
-                      border: Border.all(color: context.dividerColor.withOpacity(0.5)),
+                      border: Border.all(
+                          color: context.dividerColor.withOpacity(0.5)),
                     ),
                   ),
                   Positioned(
@@ -483,9 +519,12 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
                           decoration: const BoxDecoration(
                             color: Colors.red,
                             shape: BoxShape.circle,
-                            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black26, blurRadius: 4)
+                            ],
                           ),
-                          child: const Icon(Icons.close, size: 14, color: Colors.white),
+                          child: const Icon(Icons.close,
+                              size: 14, color: Colors.white),
                         ),
                       ),
                     ),
@@ -511,13 +550,20 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
               color: isSelected ? context.primaryColor : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               boxShadow: isSelected
-                  ? [BoxShadow(color: context.primaryColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))]
+                  ? [
+                      BoxShadow(
+                          color: context.primaryColor.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2))
+                    ]
                   : [],
             ),
             child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : (context.isDarkMode ? Colors.white54 : Colors.black54),
+                color: isSelected
+                    ? Colors.white
+                    : (context.isDarkMode ? Colors.white54 : Colors.black54),
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),
@@ -538,7 +584,8 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          hint: Text(hint, style: TextStyle(color: context.subTextColor, fontSize: 14)),
+          hint: Text(hint,
+              style: TextStyle(color: context.subTextColor, fontSize: 14)),
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down),
           items: const [],
@@ -560,12 +607,14 @@ class _WebTradeReturnSearchScreenState extends State<WebTradeReturnSearchScreen>
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: context.primaryColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
-          child: const Text(
-            'Continue',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
+          child: Text(
+            AppLocalizations.of(context)!.continueText,
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
           ),
         ),
       ),

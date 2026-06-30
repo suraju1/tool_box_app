@@ -3,6 +3,7 @@ import 'package:tool_bocs/core/api/api_constants.dart';
 import 'package:tool_bocs/util/font_family.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:tool_bocs/features/web_ui/widgets/web_screen_header.dart';
+import 'package:tool_bocs/l10n/generated/app_localizations.dart';
 
 class WebPrivacyPolicyScreen extends StatefulWidget {
   const WebPrivacyPolicyScreen({super.key});
@@ -20,7 +21,7 @@ class _WebPrivacyPolicyScreenState extends State<WebPrivacyPolicyScreen> {
     super.initState();
     _controller = WebViewController()
       ..loadRequest(Uri.parse(ApiConstants.privacyPolicyUrl));
-    
+
     // Web iframe loads almost immediately and manages its own loading state
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
@@ -40,7 +41,8 @@ class _WebPrivacyPolicyScreenState extends State<WebPrivacyPolicyScreen> {
           constraints: const BoxConstraints(maxWidth: 1000),
           child: Column(
             children: [
-              const WebScreenHeader(title: 'Privacy Policy'),
+              WebScreenHeader(
+                  title: AppLocalizations.of(context)!.privacyPolicy),
               const Divider(height: 1),
               Expanded(
                 child: Stack(
@@ -64,6 +66,4 @@ class _WebPrivacyPolicyScreenState extends State<WebPrivacyPolicyScreen> {
       ),
     );
   }
-
-
 }

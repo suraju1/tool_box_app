@@ -106,7 +106,8 @@ class _WebChatListScreenState extends State<WebChatListScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(24.0),
                               child: Text(
-                                'Your chats will appear here once you are logged in.',
+                                AppLocalizations.of(context)!
+                                    .yourChatsWillAppearHere,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: context.subTextColor,
@@ -125,7 +126,8 @@ class _WebChatListScreenState extends State<WebChatListScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(24.0),
                             child: Text(
-                              'Your chats will appear here once you are logged in.',
+                              AppLocalizations.of(context)!
+                                  .yourChatsWillAppearHere,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: context.subTextColor,
@@ -146,7 +148,7 @@ class _WebChatListScreenState extends State<WebChatListScreen> {
                       if (docs.isEmpty) {
                         return Center(
                           child: Text(
-                            'No chats yet',
+                            AppLocalizations.of(context)!.noChatsYet,
                             style: TextStyle(
                               color: context.textColor,
                               fontSize: 16.0,
